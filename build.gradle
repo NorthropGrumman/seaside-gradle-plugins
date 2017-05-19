@@ -1,0 +1,70 @@
+/**
+ * Project level build for the seaside-gradle-parent gradle plugin.
+ */
+subprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'maven'
+
+    group = 'com.ngc.seaside'
+
+    repositories {
+        mavenLocal()
+
+        maven {
+            url nexusConsolidated
+        }
+    }
+
+    //Augment the name of the jar to prepend the group.
+    jar {
+        archiveName = "${project.group}.${project.name}-${project.version}.jar"
+    }
+
+    // Enable the creation of sources JAR which is used when uploading to Nexus.
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+        archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
+    }
+
+    // Enable the creation of a Javadoc JAR which is used when uploading to Nexus.
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+        archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
+    }
+
+    // Disable the annoying doclint capability of Java 8 which causes builds to fail if the JavaDocs aren't right.
+    if (JavaVersion.current().isJava8Compatible()) {
+        allprojects {
+            tasks.withType(Javadoc) {
+                options.addStringOption('Xdoclint:none', '-quiet')
+            }
+        }
+    }
+
+   // Add the additional JAR artifacts, this results in them being included when uploading to Nexus.
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    //define the nexus release repositories
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                // Use the main repo for full releases.
+                repository(url: nexusReleases) {
+                    // Make sure that nexusUsername and nexusPassword are in your
+                    // ${gradle.user.home}/gradle.properties file.
+                    authentication(userName: nexusUsername, password: nexusPassword)
+                }
+                // If the version has SNAPSHOT in the name, use the snapshot repo.
+                snapshotRepository(url: nexusSnapshots) {
+                    authentication(userName: nexusUsername, password: nexusPassword)
+                }
+            }
+        }
+    }
+}

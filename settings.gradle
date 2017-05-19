@@ -1,0 +1,4 @@
+rootProject.name = 'seaside-gradle-parent'
+
+include("gradle.plugin")
+project(':gradle.plugin').name = 'seaside.parent'
