@@ -1,4 +1,4 @@
-package com.ngc.blocs.gradle.plugin.seaside.parent
+package com.ngc.seaside.gradle.plugin.seaside.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
 import org.gradle.api.JavaVersion
@@ -57,6 +57,7 @@ class SeasideParentPlugin implements Plugin<Project> {
              */
             plugins.apply 'java'
             plugins.apply 'maven'
+            plugins.apply 'eclipse'
 
             /**
              * Create a task for generating the source jar. This will also be uploaded to Nexus.

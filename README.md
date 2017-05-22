@@ -41,3 +41,6 @@ subprojects {
 
 }
 ```
+
+# Reference
+[seaside-gradle-parent wiki](http://10.207.42.42:8080/display/SEAS/seaside-gradle-parent+-+A+gradle+plugin+for+Java+and+Seaside+development)
