@@ -46,6 +46,7 @@ subprojects {
 
 # Tasks
 This plugin configures the following tasks:
+
 | Task | Description | Executed by default |
 |------|-------------|---------------------|
 | analyze | Runs Jacoco to compute code coverage and then runs Sonarqube | no | 
