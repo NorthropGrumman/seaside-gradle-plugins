@@ -18,7 +18,7 @@ import org.gradle.api.tasks.bundling.Jar
  *     nexusSnapshots    : url to the snapshots repository
  *     nexusConsolidated : url to the maven public download site
  *                         usually a proxy to maven central and the releases and snapshots
- *
+ *     systemProp.sonar.host.url : url to the Sonarqube server
  * </pre>
  *
  * To use this plugin in your gradle.build :
@@ -34,6 +34,7 @@ import org.gradle.api.tasks.bundling.Jar
  *
  *        dependencies {
  *             classpath 'com.ngc.seaside:seaside.parent:1.0'
+ *             classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
  *        }
  *     }
  *

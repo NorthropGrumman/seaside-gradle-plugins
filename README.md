@@ -13,6 +13,7 @@ and provide the default configuration for deploying these artifacts to Nexus.
 * nexusSnapshots    : url to the snapshots repository
 * nexusConsolidated : url to the maven public download site usually a proxy to maven central and the
 releases and snapshots
+* systemProp.sonar.host.url : url to the Sonarqube server
 
 # Using this plugin
 To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
@@ -30,6 +31,7 @@ buildscript {
 
     dependencies {
         classpath 'com.ngc.seaside:seaside.parent:1.0'
+		classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
     }
 }
 
@@ -41,6 +43,12 @@ subprojects {
 
 }
 ```
+
+# Tasks
+This plugin configures the following tasks:
+| Task | Description | Executed by default |
+|------|-------------|---------------------|
+| analyze | Runs Jacoco to compute code coverage and then runs Sonarqube | no | 
 
 # Reference
 [seaside-gradle-parent wiki](http://10.207.42.42:8080/display/SEAS/seaside-gradle-parent+-+A+gradle+plugin+for+Java+and+Seaside+development)
