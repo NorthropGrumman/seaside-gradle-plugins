@@ -53,11 +53,18 @@ class SeasideParentPlugin implements Plugin<Project> {
         p.configure(p) {
 
             /**
+			 * Add a buildscript dependency for the Sonarqube plugin.
+			 */
+            //buildscript.dependencies.add('classpath', 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5')
+		
+            /**
              * This plugin requires the java and maven plugins
              */
             plugins.apply 'java'
             plugins.apply 'maven'
             plugins.apply 'eclipse'
+            plugins.apply 'org.sonarqube'
+            plugins.apply 'jacoco'
 
             /**
              * Create a task for generating the source jar. This will also be uploaded to Nexus.
@@ -154,14 +161,28 @@ class SeasideParentPlugin implements Plugin<Project> {
                     }
                 }
 
-                /**
+                /*
                  * Ensure we call the 2 new tasks for generating the javadoc and sources artifact jars.
                  */
                 artifacts {
                     archives sourcesJar
                     archives javadocJar
                 }
-
+				
+                /**
+                 * Configure Sonarqube to use the Jacoco code coverage reports.
+                 */
+                sonarqube {
+                    properties {
+                        property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
+                    }
+                }
+				
+                /*
+                 * Configure a tasks that runs the various analyist reports in the correct order.
+                 */
+                task('analyze', dependsOn: ['build', 'jacocoTestReport', 'sonarqube']) {
+                }
             }
 
             defaultTasks = ['build']
