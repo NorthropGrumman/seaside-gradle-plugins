@@ -1,4 +1,5 @@
 rootProject.name = 'seaside-gradle-parent'
 
-include("com.ngc.seaside.gradle.plugin.seaside.parent")
-project(':com.ngc.seaside.gradle.plugin.seaside.parent').name = 'seaside.parent'
+include("com.ngc.seaside.gradle.plugins")
+
+project(':com.ngc.seaside.gradle.plugins').name = 'gradle.plugins'

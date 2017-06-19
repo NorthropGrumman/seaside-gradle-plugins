@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugin.seaside.parent
+package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
 import org.gradle.api.JavaVersion
