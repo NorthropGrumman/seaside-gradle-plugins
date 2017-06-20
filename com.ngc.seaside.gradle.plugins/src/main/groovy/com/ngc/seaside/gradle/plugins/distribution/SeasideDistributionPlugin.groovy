@@ -2,16 +2,14 @@ package com.ngc.seaside.gradle.plugins.distribution
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
-import org.gradle.internal.impldep.org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
 
-/**
- * Created by J55690 on 6/19/2017.
- */
-public class SeasideDistributionPlugin implements Plugin<Project> {
+class SeasideDistributionPlugin implements Plugin<Project> {
 
    @Override
    void apply(Project p) {
+
       p.configure(p) {
 
          extensions.create("seasideDistribution", SeasideDistributionPluginExtension)
@@ -30,12 +28,20 @@ public class SeasideDistributionPlugin implements Plugin<Project> {
                transitive = false
             }
          }
+
+         task('copyResources', type: Copy) {
+            from 'src/main/resources'
+//            filter { line ->
+//               line.replace('${blocs-core.version}', "${seasideDistribution.versions['blocs-core']}")
+//            }
+            into { seasideDistribution.distributionDir }
+         }
          task('zip', type: Zip) {
             from { "${seasideDistribution.distributionDir}" }
          }
 
-         task('build', dependsOn: [/**copyResources,
-                                   copyPlatformBundles,
+         task('build', dependsOn: [copyResources,
+                                   /** copyPlatformBundles,
                                    copyThirdPartyBundles,
                                    copyBlocsBundles,
                                    copyBundles,**/
@@ -49,6 +55,7 @@ public class SeasideDistributionPlugin implements Plugin<Project> {
 
             }
          }
+         defaultTasks = ['build']
       }
 
    }
