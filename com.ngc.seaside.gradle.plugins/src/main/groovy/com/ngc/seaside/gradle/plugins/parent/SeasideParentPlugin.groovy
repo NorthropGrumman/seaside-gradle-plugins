@@ -1,10 +1,12 @@
 package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
+import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.wrapper.GradleUserHomeLookup
 
 /**
  * The seaside parent plugin provides calls to common task, sets up the default dependencies for BLoCS and OSGi along
@@ -52,12 +54,15 @@ class SeasideParentPlugin implements Plugin<Project> {
     @Override
     void apply(Project p) {
         p.configure(p) {
+            // Make sure that all required properties are set.
+            GradleUtil.requireProperties(p.properties,
+                                         'nexusConsolidated',
+                                         'nexusReleases',
+                                         'nexusSnapshots',
+                                         'nexusUsername',
+                                         'nexusPassword')
+            GradleUtil.requireSystemProperties('sonar.host.url')
 
-            /**
-			 * Add a buildscript dependency for the Sonarqube plugin.
-			 */
-            //buildscript.dependencies.add('classpath', 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5')
-		
             /**
              * This plugin requires the java and maven plugins
              */
@@ -169,18 +174,19 @@ class SeasideParentPlugin implements Plugin<Project> {
                     archives sourcesJar
                     archives javadocJar
                 }
-				
+
                 /**
                  * Configure Sonarqube to use the Jacoco code coverage reports.
                  */
                 sonarqube {
                     properties {
                         property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
+                        property 'sonar.projectName', "${bundleName}"
                     }
                 }
-				
+
                 /*
-                 * Configure a tasks that runs the various analyist reports in the correct order.
+                 * Configure a task that runs the various analysis reports in the correct order.
                  */
                 task('analyze', dependsOn: ['build', 'jacocoTestReport', 'sonarqube']) {
                 }
