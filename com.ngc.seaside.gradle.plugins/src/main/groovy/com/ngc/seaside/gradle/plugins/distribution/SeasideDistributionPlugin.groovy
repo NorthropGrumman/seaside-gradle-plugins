@@ -36,15 +36,49 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 //            }
             into { seasideDistribution.distributionDir }
          }
+
+         task('copyPlatformBundles', type: Copy) {
+            from configurations.platform
+            into { "${seasideDistribution.distributionDir}/platform" }
+         }
+
          task('zip', type: Zip) {
             from { "${seasideDistribution.distributionDir}" }
          }
 
+         task('copyThirdPartyBundles', type: Copy) {
+            from configurations.thirdParty
+            into { "${seasideDistribution.distributionDir}/bundles" }
+         }
+
+         task('copyBlocsBundles', type: Copy) {
+            from configurations.blocs {
+               rename { name ->
+                  def artifacts = configurations.blocs.resolvedConfiguration.resolvedArtifacts
+                  def artifact = artifacts.find { it.file.name == name }
+                  "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
+               }
+            }
+            into { "${seasideDistribution.distributionDir}/bundles" }
+         }
+
+         task('copyBundles', type: Copy) {
+            from configurations.bundles {
+               rename { name ->
+                  def artifacts = configurations.bundles.resolvedConfiguration.resolvedArtifacts
+                  def artifact = artifacts.find { it.file.name == name }
+                  "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
+               }
+            }
+
+            into { "${seasideDistribution.distributionDir}/bundles" }
+         }
+
          task('build', dependsOn: [copyResources,
-                                   /** copyPlatformBundles,
+                                   copyPlatformBundles,
                                    copyThirdPartyBundles,
                                    copyBlocsBundles,
-                                   copyBundles,**/
+                                   copyBundles,
                                    zip]) {
          }
 
