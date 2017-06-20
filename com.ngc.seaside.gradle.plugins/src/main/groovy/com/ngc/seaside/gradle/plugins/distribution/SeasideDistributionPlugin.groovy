@@ -29,10 +29,20 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             }
          }
 
-         task('copyResources', type: Copy) {
+         task('copyConfig', type: Copy){
             from 'src/main/resources'
+            include'**/config.ini'
+            expand(p.properties)
+            into { seasideDistribution.distributionDir }
+         }
+
+         task('copyResources', type: Copy, dependsOn: [copyConfig]) {
+
+            from 'src/main/resources'
+            exclude'**/config.ini'
+
 //            filter { line ->
-//               line.replace('${blocs-core.version}', "${seasideDistribution.versions['blocs-core']}")
+//               line.replace('${blocs-core.version}', '${seasideDistribution.versions[\'blocs-core\']}')
 //            }
             into { seasideDistribution.distributionDir }
          }
