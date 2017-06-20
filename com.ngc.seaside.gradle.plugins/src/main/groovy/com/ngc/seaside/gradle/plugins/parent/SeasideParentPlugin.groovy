@@ -60,7 +60,8 @@ class SeasideParentPlugin implements Plugin<Project> {
                                          'nexusSnapshots',
                                          'nexusUsername',
                                          'nexusPassword')
-            GradleUtil.requireSystemProperties('sonar.host.url')
+            GradleUtil.requireSystemProperties(p.properties,
+                                               'sonar.host.url')
 
             /**
              * This plugin requires the java and maven plugins

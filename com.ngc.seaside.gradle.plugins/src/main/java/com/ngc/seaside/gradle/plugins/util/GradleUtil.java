@@ -53,11 +53,12 @@ public class GradleUtil {
    /**
     * Requires that all the given system properties are set, throwing a {@code ProjectConfigurationException} otherwise.
     *
+    * @param properties    the properties set in the project
     * @param propertyName  the name of the property that must be set
     * @param propertyNames additional names of properties that must be set (optional)
     */
-   public static void requireSystemProperties(String propertyName, String... propertyNames) {
-      if (System.getProperties().containsKey(propertyName)) {
+   public static void requireSystemProperties(Map<String, ?> properties, String propertyName, String... propertyNames) {
+      if (properties.containsKey(propertyName)) {
          throw new ProjectConfigurationException(String.format(MISSING_SYSTEM_PROPERTY_ERROR_MESSAGE,
                                                                propertyName,
                                                                propertyName),
@@ -65,7 +66,7 @@ public class GradleUtil {
       }
       if (propertyNames != null) {
          for (String name : propertyNames) {
-            if (!System.getProperties().containsKey(name)) {
+            if (!properties.containsKey(name)) {
                throw new ProjectConfigurationException(String.format(MISSING_SYSTEM_PROPERTY_ERROR_MESSAGE,
                                                                      name,
                                                                      name),
