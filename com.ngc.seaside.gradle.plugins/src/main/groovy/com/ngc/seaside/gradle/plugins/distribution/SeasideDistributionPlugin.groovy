@@ -48,6 +48,8 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             from 'src/main/resources'
             exclude'**/config.ini'
 
+            rename("start.sh","start")
+
 //            filter { line ->
 //               line.replace('${blocs-core.version}', '${seasideDistribution.versions[\'blocs-core\']}')
 //            }
