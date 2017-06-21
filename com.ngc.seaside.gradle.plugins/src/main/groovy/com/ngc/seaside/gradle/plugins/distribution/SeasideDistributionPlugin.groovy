@@ -3,7 +3,7 @@ package com.ngc.seaside.gradle.plugins.distribution
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.bundling.Zip
+import org.gradle.api.tasks.bundling.Tar
 
 class SeasideDistributionPlugin implements Plugin<Project> {
 
@@ -59,7 +59,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             into { "${seasideDistribution.distributionDir}/platform" }
          }
 
-         task('zip', type: Zip) {
+         task('tar', type: Tar) {
             from { "${seasideDistribution.distributionDir}" }
          }
 
@@ -96,12 +96,12 @@ class SeasideDistributionPlugin implements Plugin<Project> {
                                    copyThirdPartyBundles,
                                    copyBlocsBundles,
                                    copyBundles,
-                                   zip]) {
+                                   tar]) {
          }
 
          afterEvaluate {
-            project.tasks.getByName('zip') { zip ->
-               archiveName = "${seasideDistribution.distributionName}.zip"
+            project.tasks.getByName('tar') { tar ->
+               archiveName = "${seasideDistribution.distributionName}.tar"
                destinationDir = file("${seasideDistribution.distributionDestDir}")
 
             }
