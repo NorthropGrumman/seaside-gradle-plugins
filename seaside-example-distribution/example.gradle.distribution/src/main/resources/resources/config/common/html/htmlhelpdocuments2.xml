@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+
+     Northrop Grumman Proprietary
+     ____________________________
+
+      Copyright (C) 2016, Northrop Grumman Systems Corporation
+      All Rights Reserved.
+
+     NOTICE:  All information contained herein is, and remains the property of
+     Northrop Grumman Systems Corporation. The intellectual and technical concepts
+     contained herein are proprietary to Northrop Grumman Systems Corporation and
+     may be covered by U.S. and Foreign Patents or patents in process, and are
+     protected by trade secret or copyright law. Dissemination of this information
+     or reproduction of this material is strictly forbidden unless prior written
+     permission is obtained from Northrop Grumman.
+
+-->
+<h:htmlProviders xmlns:h="http://blocs.ngc.com/xsd/help/html/v1">
+    <h:tableOfContents>
+        <h:section heading="1.0 Introduction"
+                   file="help/toc/intro.xhtml"
+                   tags="all">
+            <h:section heading="1.1 Installation"
+                       file="help/toc/install.xhtml"
+                       tags="all"/>
+            <h:section heading="1.2 Setup"
+                       file="help/toc/setup.xhtml"
+                       tags="all">
+                <h:section heading="1.2.1 Multiple Projects"
+                           file="help/toc/multipleProjects.xhtml"
+                           tags="all"/>
+            </h:section>
+            <h:section heading="1.3 Creating a Sample Project"
+                       file="help/toc/sampleProject.xhtml"
+                       tags="all">
+                <h:section heading="1.3.1 Configuring the Project"
+                           file="help/toc/configureProject.xhtml"
+                           tags="all"/>
+                <h:section heading="1.3.2 Publishing the Project"
+                           file="help/toc/publishingProject.xhtml"
+                           tags="all">
+                    <h:section heading="1.3.2.1 Sharing the Project"
+                               file="help/toc/sharingProject.xhtml"
+                               tags="all"/>
+                </h:section>
+            </h:section>
+        </h:section>
+
+        <h:section heading="2.0 Other Stuff"
+                   file="help/toc/otherStuff.xhtml"
+                   tags="all"/>
+
+        <h:section heading="Example 1"
+                   file="help/toc/example1.xhtml"
+                   tags="all"/>
+
+        <h:section heading="Example 2"
+                   file="help/toc/example2.xhtml"
+                   tags="all"/>
+
+        <h:section heading="Example 3"
+                   file="help/toc/example3.xhtml"
+                   tags="all"/>
+
+        <h:section heading="Example 4"
+                   file="help/toc/example4.xhtml"
+                   tags="all"/>
+
+        <h:section heading="Example 5"
+                   file="help/toc/example5.xhtml"
+                   tags="all"/>
+
+        <h:section heading="Example 6"
+                   file="help/toc/example6.xhtml"
+                   tags="all"/>
+    </h:tableOfContents>
+
+    <h:htmlProvider file="help/test2.xhtml"
+                    tooltips="true"/>
+</h:htmlProviders>
