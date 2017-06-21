@@ -60,7 +60,8 @@ class SeasideDistributionPlugin implements Plugin<Project> {
          }
 
          task('tar', type: Tar) {
-            from { "${seasideDistribution.distributionDir}" }
+            from { "${seasideDistribution.distributionDir}"}
+            compression = org.gradle.api.tasks.bundling.Compression.GZIP //Needs to be explicit otherwise gets typed as 'javax.print.attribute.standard.Compression'
          }
 
          task('copyThirdPartyBundles', type: Copy) {
@@ -101,7 +102,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 
          afterEvaluate {
             project.tasks.getByName('tar') { tar ->
-               archiveName = "${seasideDistribution.distributionName}.tar"
+               archiveName = "${seasideDistribution.distributionName}.tar.gz"
                destinationDir = file("${seasideDistribution.distributionDestDir}")
 
             }
