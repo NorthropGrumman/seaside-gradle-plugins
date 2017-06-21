@@ -1,7 +1,8 @@
-# The seaside parent gradle build plugin.
-The gradle plugin that all seaside projects will use to provide a common build structure.
+# seaside-gradle-plugins
+`com.ngc.seaside.gradle.plugins` contains the core Seaside plugins used by many Gradle builds.  All core plugins are
+contained in a single JAR and versioned together to make them easier to use.
 
-# Features
+# com.ngc.seaside:seaside.parent
 The seaside gradle parent plugin provides a base gradle build for all seaside projects. This plugin will ensure your
 bundles are named correctly, provide an OSGi enabled jar file (bundle), generate javadocs jar, generate sources jar
 and provide the default configuration for deploying these artifacts to Nexus.
@@ -15,7 +16,7 @@ and provide the default configuration for deploying these artifacts to Nexus.
 releases and snapshots
 * systemProp.sonar.host.url : url to the Sonarqube server
 
-# Using this plugin
+## Using this plugin
 To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
 An example is below. Note: a newer version may exist. Check the Nexus repository for the latest version.
 
@@ -30,8 +31,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.ngc.seaside:seaside.parent:1.0'
-		classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
+        classpath 'com.ngc.seaside:gradle.plugins:1.0'
+        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
     }
 }
 
@@ -44,7 +45,7 @@ subprojects {
 }
 ```
 
-# Tasks
+## Tasks
 This plugin configures the following tasks:
 
 | Task | Description | Executed by default |
@@ -52,4 +53,4 @@ This plugin configures the following tasks:
 | analyze | Runs Jacoco to compute code coverage and then runs Sonarqube | no | 
 
 # Reference
-[seaside-gradle-parent wiki](http://10.207.42.42:8080/display/SEAS/seaside-gradle-parent+-+A+gradle+plugin+for+Java+and+Seaside+development)
+[seaside-gradle-plugins wiki](http://10.207.42.42:8080/display/SEAS/seaside-gradle-plugins+-+Core+Gradle+plugins+for+Seaside+development)

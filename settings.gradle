@@ -1,4 +1,4 @@
-rootProject.name = 'seaside-gradle-parent'
+rootProject.name = 'seaside-gradle-plugins'
 
 include("com.ngc.seaside.gradle.plugins")
 
