@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.plugins.distribution
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.bundling.Compression
 import org.gradle.api.tasks.bundling.Tar
 
 class SeasideDistributionPlugin implements Plugin<Project> {
@@ -61,7 +62,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 
          task('tar', type: Tar) {
             from { "${seasideDistribution.distributionDir}"}
-            compression = org.gradle.api.tasks.bundling.Compression.GZIP //Needs to be explicit otherwise gets typed as 'javax.print.attribute.standard.Compression'
+            compression = Compression.GZIP
          }
 
          task('copyThirdPartyBundles', type: Copy) {
