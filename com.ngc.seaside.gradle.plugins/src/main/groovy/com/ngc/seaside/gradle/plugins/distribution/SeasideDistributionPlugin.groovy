@@ -29,6 +29,13 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             }
          }
 
+         task('clean') {
+            doLast {
+               p.getLogger().trace("Removing build distribution directory '${seasideDistribution.buildDir}'.")
+               delete(seasideDistribution.buildDir)
+            }
+         }
+
          task('copyConfig', type: Copy){
             from 'src/main/resources'
             include'**/config.ini'

@@ -7,4 +7,5 @@ class SeasideDistributionPluginExtension {
    String distributionDir
 
    Map<String, String> versions
+
 }
