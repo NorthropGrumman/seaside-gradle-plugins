@@ -17,7 +17,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 
          configurations {
             bundles {
-               transitive = true
+               transitive = false
             }
             blocs {
                transitive = false
