@@ -98,6 +98,15 @@ class SeasideDistributionPlugin implements Plugin<Project> {
                destinationDir = file("${seasideDistribution.distributionDestDir}")
 
             }
+
+            repositories {
+               mavenLocal()
+
+               maven {
+                  url nexusConsolidated
+               }
+            }
+
          }
          defaultTasks = ['build']
       }
