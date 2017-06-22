@@ -1,2 +1,0 @@
-rootProject.name = 'seaside-example-distribution'
-include 'example.gradle.distribution'

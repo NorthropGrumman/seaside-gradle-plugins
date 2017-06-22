@@ -6,6 +6,47 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Compression
 import org.gradle.api.tasks.bundling.Tar
 
+/**
+ * The seaside distribution plugin provides calls to common task, sets up the default dependencies for BLoCS and OSGi along
+ * with providing nexus repository deployment settings.
+ *
+ * The following properties are required in your ~/.gradle/gradle.properties file to use this plugin.
+ * <pre>
+ *     nexusUsername     : the username to use when uploading artifacts to nexus
+ *     nexusPassword     : the password to use when uploading artifacts to nexus
+ *     nexusReleases     : url to the releases repository
+ *     nexusSnapshots    : url to the snapshots repository
+ *     nexusConsolidated : url to the maven public download site
+ *                         usually a proxy to maven central and the releases and snapshots
+ *     systemProp.sonar.host.url : url to the Sonarqube server
+ * </pre>
+ *
+ * To use this plugin in your gradle.build :
+ * <pre>
+ *    buildscript {
+ *       repositories {
+ *           mavenLocal()
+ *
+ *            maven {
+ *              url nexusConsolidated
+ *            }
+ *        }
+ *
+ *        dependencies {
+ *             classpath 'com.ngc.seaside:seaside.parent:1.0'
+ *             classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
+ *        }
+ *     }
+ *
+ *     subprojects {
+ *
+ *        apply plugin: 'seaside.distribution'
+ *
+ *        group = 'com.ngc.seaside'
+ *        version = '1.0-SNAPSHOT'
+ *     }
+ * </pre>
+ */
 class SeasideDistributionPlugin implements Plugin<Project> {
 
    @Override
@@ -48,10 +89,6 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 
             from 'src/main/resources'
             exclude'**/config.ini'
-
-//            filter { line ->
-//               line.replace('${blocs-core.version}', '${seasideDistribution.versions[\'blocs-core\']}')
-//            }
             into { seasideDistribution.distributionDir }
          }
 
