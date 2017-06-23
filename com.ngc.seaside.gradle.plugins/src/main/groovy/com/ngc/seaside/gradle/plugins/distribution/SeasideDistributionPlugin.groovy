@@ -33,7 +33,7 @@ import org.gradle.api.tasks.bundling.Tar
  *        }
  *
  *        dependencies {
- *             classpath 'com.ngc.seaside:seaside.parent:1.0'
+ *             classpath 'com.ngc.seaside:seaside.distribution:1.0'
  *             classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
  *        }
  *     }

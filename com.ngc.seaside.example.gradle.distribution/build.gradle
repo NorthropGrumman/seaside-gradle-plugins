@@ -1,3 +1,17 @@
+buildscript {
+    repositories {
+        mavenLocal()
+
+        maven {
+            url nexusConsolidated
+        }
+    }
+
+    dependencies {
+        classpath 'com.ngc.seaside:gradle.plugins:1.1-SNAPSHOT'
+    }
+}
+
 apply plugin: 'com.ngc.seaside.distribution'
 
 group = 'com.ngc.seaside'
@@ -23,20 +37,6 @@ repositories {
 
     maven {
         url nexusConsolidated
-    }
-}
-
-buildscript {
-    repositories {
-        mavenLocal()
-
-        maven {
-            url nexusConsolidated
-        }
-    }
-
-    dependencies {
-        classpath 'com.ngc.seaside:gradle.plugins:1.1-SNAPSHOT'
     }
 }
 
