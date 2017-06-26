@@ -3,22 +3,14 @@ package com.ngc.seaside.gradle.plugins.distribution
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.bundling.Compression
-import org.gradle.api.tasks.bundling.Tar
-
 /**
  * The seaside distribution plugin provides calls to common task, sets up the default dependencies for BLoCS and OSGi along
  * with providing nexus repository deployment settings.
  *
  * The following properties are required in your ~/.gradle/gradle.properties file to use this plugin.
  * <pre>
- *     nexusUsername     : the username to use when uploading artifacts to nexus
- *     nexusPassword     : the password to use when uploading artifacts to nexus
- *     nexusReleases     : url to the releases repository
- *     nexusSnapshots    : url to the snapshots repository
  *     nexusConsolidated : url to the maven public download site
  *                         usually a proxy to maven central and the releases and snapshots
- *     systemProp.sonar.host.url : url to the Sonarqube server
  * </pre>
  *
  * To use this plugin in your gradle.build :
@@ -33,18 +25,11 @@ import org.gradle.api.tasks.bundling.Tar
  *        }
  *
  *        dependencies {
- *             classpath 'com.ngc.seaside:seaside.distribution:1.0'
- *             classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
+ *             classpath 'com.ngc.seaside:seaside.distribution:1.1-SNAPSHOT'
  *        }
  *     }
  *
- *     subprojects {
- *
- *        apply plugin: 'seaside.distribution'
- *
- *        group = 'com.ngc.seaside'
- *        version = '1.0-SNAPSHOT'
- *     }
+ *      apply plugin: 'com.ngc.seaside.distribution'
  * </pre>
  */
 class SeasideDistributionPlugin implements Plugin<Project> {
@@ -68,6 +53,8 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             }
             platform {
                transitive = false
+            }
+            archives {
             }
          }
 
@@ -118,6 +105,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             into { "${seasideDistribution.distributionDir}/bundles" }
          }
 
+
          task('copyBundles', type: Copy) {
             from configurations.bundles {
                rename { name ->
@@ -142,7 +130,6 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             project.tasks.getByName('tar') { tar ->
                archiveName = "${seasideDistribution.distributionName}.tar.gz"
                destinationDir = file("${seasideDistribution.distributionDestDir}")
-
             }
 
             repositories {
@@ -153,7 +140,11 @@ class SeasideDistributionPlugin implements Plugin<Project> {
                }
             }
 
+            artifacts {
+               archives tar
+            }
          }
+
          defaultTasks = ['build']
       }
 
