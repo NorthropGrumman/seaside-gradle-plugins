@@ -3,6 +3,9 @@ package com.ngc.seaside.gradle.plugins.distribution
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.bundling.Compression
+import org.gradle.api.tasks.bundling.Tar
+
 /**
  * The seaside distribution plugin provides calls to common task, sets up the default dependencies for BLoCS and OSGi along
  * with providing nexus repository deployment settings.
@@ -54,8 +57,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             platform {
                transitive = false
             }
-            archives {
-            }
+            archives
          }
 
          task('clean') {
@@ -85,7 +87,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
          }
 
          task('tar', type: Tar) {
-            from { "${seasideDistribution.distributionDir}"}
+            from { "${seasideDistribution.distributionDir}" }
             compression = Compression.GZIP
          }
 
@@ -104,7 +106,6 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             }
             into { "${seasideDistribution.distributionDir}/bundles" }
          }
-
 
          task('copyBundles', type: Copy) {
             from configurations.bundles {
