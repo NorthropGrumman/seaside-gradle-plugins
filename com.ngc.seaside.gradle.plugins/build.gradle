@@ -8,7 +8,7 @@ apply plugin: 'maven'
 // Dependencies
 dependencies {
     compile gradleApi()
-	compile localGroovy()
+    compile localGroovy()
 
     compile 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.3.0'
 
