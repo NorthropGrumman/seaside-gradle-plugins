@@ -5,7 +5,9 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Zip
 
 /**
- *
+ * The command plugin provides common task for building ICommand projects most notably is the
+ * template task that will zip the contents of src/main/template and add it to the archives to be used
+ * in the maven repository.
  */
 class SeasideCommandPlugin implements Plugin<Project> {
 
@@ -17,13 +19,9 @@ class SeasideCommandPlugin implements Plugin<Project> {
              * This plugin requires the java and maven plugins
              */
             plugins.apply 'java'
-            plugins.apply 'maven'
-            plugins.apply 'eclipse'
-            plugins.apply 'org.sonarqube'
-            plugins.apply 'jacoco'
 
             /**
-             * Create a task for generating the source jar. This will also be uploaded to Nexus.
+             * Create a task for generating the template zip. This will also be uploaded to Nexus.
              */
             task('template', type: Zip, dependsOn: [classes]) {
                 classifier = 'template'
