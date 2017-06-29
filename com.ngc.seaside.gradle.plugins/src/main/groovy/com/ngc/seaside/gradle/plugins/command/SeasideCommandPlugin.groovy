@@ -23,7 +23,7 @@ class SeasideCommandPlugin implements Plugin<Project> {
             /**
              * Create a task for generating the template zip. This will also be uploaded to Nexus.
              */
-            task('template', type: Zip, dependsOn: [classes]) {
+            task('createTemplate', type: Zip, dependsOn: [classes]) {
                 classifier = 'template'
                 from "$projectDir/src/main/template/"
                 include "*"
@@ -34,11 +34,16 @@ class SeasideCommandPlugin implements Plugin<Project> {
 
 
             afterEvaluate {
-                artifacts {
-                    archives template
+                configurations {
+                    commandTemplate
                 }
 
-                build.dependsOn template
+                artifacts {
+                    archives createTemplate
+                    commandTemplate createTemplate
+                }
+
+                build.dependsOn createTemplate
             }
 
             defaultTasks = ['build']
