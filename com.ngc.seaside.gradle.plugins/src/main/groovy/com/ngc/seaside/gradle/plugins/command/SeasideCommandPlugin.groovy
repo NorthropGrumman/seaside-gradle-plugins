@@ -35,17 +35,21 @@ class SeasideCommandPlugin implements Plugin<Project> {
 
 
             afterEvaluate {
+                def file = file("$projectDir/src/main/template/")
+
                 configurations {
                     commandTemplate
                 }
 
-                artifacts {
-                    archives createTemplate
-                    commandTemplate createTemplate
-                }
+                if (file.exists()) {
+                    artifacts {
+                        archives createTemplate
+                        commandTemplate createTemplate
+                    }
 
-                install.dependsOn createTemplate
-                build.dependsOn createTemplate
+                    install.dependsOn createTemplate
+                    build.dependsOn createTemplate
+                }
             }
 
             defaultTasks = ['build']
