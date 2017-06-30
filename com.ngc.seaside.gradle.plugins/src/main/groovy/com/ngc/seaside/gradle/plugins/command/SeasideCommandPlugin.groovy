@@ -19,6 +19,7 @@ class SeasideCommandPlugin implements Plugin<Project> {
              * This plugin requires the java and maven plugins
              */
             plugins.apply 'java'
+            plugins.apply 'maven'
 
             /**
              * Create a task for generating the template zip. This will also be uploaded to Nexus.
@@ -43,6 +44,7 @@ class SeasideCommandPlugin implements Plugin<Project> {
                     commandTemplate createTemplate
                 }
 
+                install.dependsOn createTemplate
                 build.dependsOn createTemplate
             }
 
