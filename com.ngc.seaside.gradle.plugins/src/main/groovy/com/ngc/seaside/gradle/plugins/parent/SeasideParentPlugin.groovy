@@ -2,6 +2,8 @@ package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
+import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
+import com.ngc.seaside.gradle.tasks.dependencies.ExportGradleCacheTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -24,29 +26,19 @@ import org.gradle.api.tasks.bundling.Jar
  *
  * To use this plugin in your gradle.build :
  * <pre>
- *    buildscript {
- *       repositories {
- *           mavenLocal()
+ *    buildscript {*       repositories {*           mavenLocal()
  *
- *            maven {
- *              url nexusConsolidated
- *            }
- *        }
- *
- *        dependencies {
- *             classpath 'com.ngc.seaside:seaside.parent:1.0'
+ *            maven {*              url nexusConsolidated
+ *}*}*
+ *        dependencies {*             classpath 'com.ngc.seaside:seaside.parent:1.0'
  *             classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
- *        }
- *     }
- *
- *     subprojects {
- *
+ *}*}*
+ *     subprojects {*
  *        apply plugin: 'seaside.parent'
  *
  *        group = 'com.ngc.seaside'
  *        version = '1.0-SNAPSHOT'
- *     }
- * </pre>
+ *}* </pre>
  */
 class SeasideParentPlugin implements Plugin<Project> {
 
@@ -192,7 +184,22 @@ class SeasideParentPlugin implements Plugin<Project> {
                 }
             }
 
+            task('exportGradleCache', type: ExportGradleCacheTask, group: 'Upload',
+                 description: 'Copies all gradle downloaded dependencies to a custom local repository specified by -PcustomRepo= using maven2 layout.') {
+                if (project.hasProperty("customRepo")) {
+                    customRepo = project.property("customRepo")
+                }
+            }
+
+            task('downloadDependencies', type: DownloadDependenciesTask, group: 'Upload',
+                 description: 'Downloads all dependencies into a local directory specified by -PcustomRepo= using maven2 layout.') {
+                if (project.hasProperty("customRepo")) {
+                    customRepo = project.property("customRepo")
+                }
+            }
+
             defaultTasks = ['build']
+
         }
     }
 }

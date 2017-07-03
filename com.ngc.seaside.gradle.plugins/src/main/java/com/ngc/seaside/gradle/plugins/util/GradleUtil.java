@@ -10,19 +10,20 @@ import java.util.Map;
 public class GradleUtil {
 
    private final static String MISSING_PROPERTY_ERROR_MESSAGE =
-         "the property '%s' is not set!  Please ensure this property is set.  These type of properties"
-         + " can be set in $GRADLE_USER_HOME/gradle.properties.  Note that $GRADLE_USER_HOME is not necessarily"
-         + " the directory where Gradle is installed.  If $GRADLE_USER_HOME is not set, gradle.properties can"
-         + " usually be found in $USER/.gradle/.  You can check which properties are set by running"
-         + " 'gradle properties'.";
+            "the property '%s' is not set!  Please ensure this property is set.  These type of properties"
+            + " can be set in $GRADLE_USER_HOME/gradle.properties.  Note that $GRADLE_USER_HOME is not necessarily"
+            + " the directory where Gradle is installed.  If $GRADLE_USER_HOME is not set, gradle.properties can"
+            + " usually be found in $USER/.gradle/.  You can check which properties are set by running"
+            + " 'gradle properties'.";
 
-   private final static String MISSING_SYSTEM_PROPERTY_ERROR_MESSAGE =
-         "the system property '%s' is not set!  Please ensure this property is set.  These types of properties can be"
-         + " set in $GRADLE_USER_HOME/gradle.properties.  Prefix the name of the property with 'systemProp.'.  In this"
-         + " case, use 'systemProp.%s'.  Note that $GRADLE_USER_HOME is not necessarily"
-         + " the directory where Gradle is installed.  If $GRADLE_USER_HOME is not set, gradle.properties can"
-         + " usually be found in $USER/.gradle/.  You can check which properties are set by running"
-         + " 'gradle properties'.";
+   private final static String
+            MISSING_SYSTEM_PROPERTY_ERROR_MESSAGE =
+            "the system property '%s' is not set!  Please ensure this property is set.  These types of properties can be"
+            + " set in $GRADLE_USER_HOME/gradle.properties.  Prefix the name of the property with 'systemProp.'.  In this"
+            + " case, use 'systemProp.%s'.  Note that $GRADLE_USER_HOME is not necessarily"
+            + " the directory where Gradle is installed.  If $GRADLE_USER_HOME is not set, gradle.properties can"
+            + " usually be found in $USER/.gradle/.  You can check which properties are set by running"
+            + " 'gradle properties'.";
 
    private GradleUtil() {
    }
