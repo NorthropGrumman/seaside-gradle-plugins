@@ -51,6 +51,8 @@ This plugin configures the following tasks:
 | Task | Description | Executed by default |
 |------|-------------|---------------------|
 | analyze | Runs Jacoco to compute code coverage and then runs Sonarqube | no | 
+| downloadDependencies | Downloads all dependencies into a local directory specified by -PcustomRepo=\<name> using maven2 layout | no | 
+| exportGradleCache | Copies all gradle downloaded dependencies to a custom local repository specified by -PcustomRepo=\<name> using maven2 layout | no | 
 
 # com.ngc.seaside:seaside.distribution
 The seaside gradle distribution plugin provide the directory structure required to run a BLoCS application and all of its bundle dependencies.This plugin will then distribute and compress the bundles of files packaged, including blocs dependencies, jar files, and also resource files. 
