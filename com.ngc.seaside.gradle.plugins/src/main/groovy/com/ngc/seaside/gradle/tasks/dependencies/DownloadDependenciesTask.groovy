@@ -19,21 +19,20 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.tasks.TaskAction
-import org.gradle.internal.impldep.com.googlecode.jatl.Html
 import org.gradle.jvm.JvmLibrary
 import org.gradle.language.base.artifact.SourcesArtifact
 import org.gradle.language.java.artifact.JavadocArtifact
 import org.gradle.maven.MavenModule
 import org.gradle.maven.MavenPomArtifact
-import org.xml.sax.SAXParseException
 import org.unbescape.html.HtmlEscape
+import org.xml.sax.SAXParseException
 
 /**
  * Gradle-Task that downloads all dependencies into a local directory based repository.
  */
 class DownloadDependenciesTask extends DefaultTask {
 
-    String customRepo
+    String customRepo = project.getProjectDir().path + "/build/dependencies"
     File localRepository
 
     @TaskAction
@@ -186,7 +185,7 @@ class DownloadDependenciesTask extends DefaultTask {
             document = parser.parse(pom)
         } catch (final SAXParseException e) {
             // Some POM files like plexus-1.0.4.pom are using undeclared entities. These entities will be replaced by their unicode equivalent.
-            def xml = Html.unescapeHtml(pom.text)
+            def xml = HtmlEscape.unescapeHtml(pom.text)
             document = parser.parseText(xml)
         }
 

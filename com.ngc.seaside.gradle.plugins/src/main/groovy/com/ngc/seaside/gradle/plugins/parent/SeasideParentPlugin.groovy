@@ -3,7 +3,7 @@ package com.ngc.seaside.gradle.plugins.parent
 import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
-import com.ngc.seaside.gradle.tasks.dependencies.ExportGradleCacheTask
+
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -184,19 +184,8 @@ class SeasideParentPlugin implements Plugin<Project> {
                 }
             }
 
-            task('exportGradleCache', type: ExportGradleCacheTask, group: 'Upload',
-                 description: 'Copies all gradle downloaded dependencies to a custom local repository specified by -PcustomRepo= using maven2 layout.') {
-                if (project.hasProperty("customRepo")) {
-                    customRepo = project.property("customRepo")
-                }
-            }
-
             task('downloadDependencies', type: DownloadDependenciesTask, group: 'Upload',
-                 description: 'Downloads all dependencies into a local directory specified by -PcustomRepo= using maven2 layout.') {
-                if (project.hasProperty("customRepo")) {
-                    customRepo = project.property("customRepo")
-                }
-            }
+                 description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.'){}
 
             defaultTasks = ['build']
 
