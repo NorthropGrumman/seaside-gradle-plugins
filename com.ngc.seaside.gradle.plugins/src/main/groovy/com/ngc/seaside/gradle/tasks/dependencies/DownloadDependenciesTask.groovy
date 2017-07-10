@@ -154,8 +154,7 @@ class DownloadDependenciesTask extends DefaultTask {
     }
 
     def copyArtifactFileToRepository(id, source) {
-        String separator = File.separator.concat('.')
-        def artifactPath = id.group.split(separator) + id.module + id.version
+        def artifactPath = id.group.split('\\.') + id.module + id.version
         File destinationDirectory = new File(localRepository, artifactPath.join(File.separator))
         destinationDirectory.mkdirs()
 
