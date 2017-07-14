@@ -32,6 +32,7 @@ public class Versions {
          v = qualifier == null ? digits
                                : String.format("%s.%s", digits, qualifier);
       } else if (twoDigitMatcher.matches()) {
+         // This version must have 2 digits.
          String digits = twoDigitMatcher.group(1);
          String qualifier = twoDigitMatcher.group(3);
          v = qualifier == null ? String.format("%s.0", digits)
