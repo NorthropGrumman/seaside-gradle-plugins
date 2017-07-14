@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.plugins.parent
 import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
+import com.ngc.seaside.gradle.plugins.util.Versions
 
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
@@ -23,22 +24,6 @@ import org.gradle.api.tasks.bundling.Jar
  *                         usually a proxy to maven central and the releases and snapshots
  *     systemProp.sonar.host.url : url to the Sonarqube server
  * </pre>
- *
- * To use this plugin in your gradle.build :
- * <pre>
- *    buildscript {*       repositories {*           mavenLocal()
- *
- *            maven {*              url nexusConsolidated
- *}*}*
- *        dependencies {*             classpath 'com.ngc.seaside:seaside.parent:1.0'
- *             classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
- *}*}*
- *     subprojects {*
- *        apply plugin: 'seaside.parent'
- *
- *        group = 'com.ngc.seaside'
- *        version = '1.0-SNAPSHOT'
- *}* </pre>
  */
 class SeasideParentPlugin implements Plugin<Project> {
 
@@ -135,7 +120,8 @@ class SeasideParentPlugin implements Plugin<Project> {
 
                     manifest {
                         attributes('Bundle-Name': "$bundleName",
-                                   'Bundle-SymbolicName': "$bundleName")
+                                   'Bundle-SymbolicName': "$bundleName",
+                                   'Bundle-Version': Versions.makeOsgiCompliantVersion("${project.version}"))
                     }
                 }
 
