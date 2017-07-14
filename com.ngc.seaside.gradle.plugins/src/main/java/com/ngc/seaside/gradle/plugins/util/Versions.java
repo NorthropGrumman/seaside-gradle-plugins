@@ -3,6 +3,9 @@ package com.ngc.seaside.gradle.plugins.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Contains utilities for dealing with converting versions to different formats.
+ */
 public class Versions {
 
    private final static Pattern THREE_DIGIT_REGEX = Pattern.compile("(\\d+\\.\\d+\\.\\d+)(-(\\w+))?");
@@ -12,6 +15,10 @@ public class Versions {
    private Versions() {
    }
 
+   /**
+    * Transforms a Maven/Gradle like version of the format {@code digit.digit[.optionalDigit][-optionalQualifier]} to
+    * version that is compliant with OSGi, which uses the format {@code digit.digit.digit[.optionalQualifier}.
+    */
    public static String makeOsgiCompliantVersion(String version) {
       String v;
       Matcher threeDigitMatcher = THREE_DIGIT_REGEX.matcher(version);
