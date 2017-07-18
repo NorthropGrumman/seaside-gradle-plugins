@@ -12,6 +12,9 @@ class SeasideApplicationPlugin implements Plugin<Project> {
    void apply(Project p) {
       p.configure(p) {
 
+         plugins.apply 'java'
+         plugins.apply 'application'
+
          extensions.create("seasideApplication", SeasideApplicationPluginExtension)
 
             task('copyResources') {
