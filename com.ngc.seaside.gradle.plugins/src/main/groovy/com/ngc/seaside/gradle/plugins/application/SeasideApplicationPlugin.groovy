@@ -22,14 +22,20 @@ class SeasideApplicationPlugin implements Plugin<Project> {
              * Modify distZip task to include resources
              */
             distZip {
-
+                into(project.name) {
+                    from '.'
+                    include 'resources/*'
+                }
             }
 
             /**
              * Modify distZip task to include resources
              */
             distTar {
-
+                into(project.name) {
+                    from '.'
+                    include 'resources/*'
+                }
             }
 
             /**
