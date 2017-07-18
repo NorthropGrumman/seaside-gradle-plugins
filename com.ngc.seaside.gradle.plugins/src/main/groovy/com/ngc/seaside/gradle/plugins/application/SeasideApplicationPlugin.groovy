@@ -38,27 +38,27 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                 dependsOn copyResources
             }
 
+
+
          /**
           * Modify start scripts task to allow custom start scripts
           */
          startScripts {
-            def scriptString = (String) seasideApplication.startScript
-            println("Start Scripts" + scriptString)
-            if (scriptString != null) {
-               //do special script
-               def startScript = new File(scriptString )
-               def scriptsDirectory = startScript.getParentFile()
-               println(scriptsDirectory.toString())
-               scriptsDirectory.listFiles().each { file ->
-                  if(file.name == startScript.name){ //not going to work for .sh scripts missing the .sh
-                     //change name then copy
-                     println(startScript.name)
-                  } else {
-                     //copy file
+            doLast {
+
+               if (seasideApplication.startScriptWindows != null) {
+                  def windowsFile =  new File(p.getProjectDir().path, (String) seasideApplication.startScriptWindows)
+                  if(windowsFile.exists()){
+                     windowsScript.text = windowsFile.readLines().join('\r\n')
                   }
                }
-            } else {
-               //super.startScripts
+
+               if (seasideApplication.startScriptUnix != null) {
+                  def unixFile =  new File(p.getProjectDir().path, (String) seasideApplication.startScriptUnix)
+                  if(unixFile.exists()) {
+                     unixScript.text = unixFile.readLines().join('\n')
+                  }
+               }
             }
          }
 
