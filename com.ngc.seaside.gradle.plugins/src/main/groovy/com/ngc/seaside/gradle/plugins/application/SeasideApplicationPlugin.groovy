@@ -40,7 +40,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
           */
          startScripts {
             def scriptString = (String) seasideApplication.startScript
-            shell('echo ' + scriptString)
+            println("Start Scripts" + scriptString)
             if (scriptString != null) {
                //do special script
                def startScript = new File(scriptString )
