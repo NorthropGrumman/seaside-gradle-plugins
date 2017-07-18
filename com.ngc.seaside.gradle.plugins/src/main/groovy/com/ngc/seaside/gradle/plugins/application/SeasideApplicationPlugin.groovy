@@ -18,24 +18,26 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             plugins.apply 'java'
             plugins.apply 'application'
 
-            /**
-             * Modify distZip task to include resources
-             */
-            distZip {
-                into(project.name) {
-                    from '.'
-                    include 'resources/*'
+            task('copyResources') {
+                println("PACKAGING2" + project.name)
+                applicationDistribution.from("src/main/resources/") {
+                    into "resources"
                 }
             }
 
             /**
              * Modify distZip task to include resources
              */
+            distZip {
+                dependsOn copyResources
+            }
+
+
+            /**
+             * Modify distZip task to include resources
+             */
             distTar {
-                into(project.name) {
-                    from '.'
-                    include 'resources/*'
-                }
+                dependsOn copyResources
             }
 
             /**
