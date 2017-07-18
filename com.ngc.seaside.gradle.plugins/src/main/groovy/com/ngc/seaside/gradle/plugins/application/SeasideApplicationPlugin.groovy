@@ -8,15 +8,11 @@ import org.gradle.api.Project
  */
 class SeasideApplicationPlugin implements Plugin<Project> {
 
-    @Override
-    void apply(Project p) {
-        p.configure(p) {
+   @Override
+   void apply(Project p) {
+      p.configure(p) {
 
-            /**
-             * This plugin requires the java and maven plugins
-             */
-            plugins.apply 'java'
-            plugins.apply 'application'
+         extensions.create("seasideApplication", SeasideApplicationPluginExtension)
 
             task('copyResources') {
                 applicationDistribution.from("src/main/resources/") {
@@ -39,14 +35,31 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                 dependsOn copyResources
             }
 
-            /**
-             * Modify start scripts task to allow custom start scripts
-             */
-            startScripts {
-
+         /**
+          * Modify start scripts task to allow custom start scripts
+          */
+         startScripts {
+            def scriptString = (String) seasideApplication.startScript
+            shell('echo ' + scriptString)
+            if (scriptString != null) {
+               //do special script
+               def startScript = new File(scriptString )
+               def scriptsDirectory = startScript.getParentFile()
+               println(scriptsDirectory.toString())
+               scriptsDirectory.listFiles().each { file ->
+                  if(file.name == startScript.name){ //not going to work for .sh scripts missing the .sh
+                     //change name then copy
+                     println(startScript.name)
+                  } else {
+                     //copy file
+                  }
+               }
+            } else {
+               //super.startScripts
             }
+         }
 
-            defaultTasks = ['build']
-        }
-    }
+         defaultTasks = ['build']
+      }
+   }
 }
