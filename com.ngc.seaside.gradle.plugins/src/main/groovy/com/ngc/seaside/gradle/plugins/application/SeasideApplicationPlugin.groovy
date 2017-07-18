@@ -19,7 +19,6 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             plugins.apply 'application'
 
             task('copyResources') {
-                println("PACKAGING2" + project.name)
                 applicationDistribution.from("src/main/resources/") {
                     into "resources"
                 }
