@@ -56,9 +56,6 @@ This plugin configures the following tasks:
 # com.ngc.seaside:seaside.distribution
 The seaside gradle distribution plugin provide the directory structure required to run a BLoCS application and all of its bundle dependencies. This plugin will then distribute and compress the bundles of files packaged, including blocs dependencies, jar files, and also resource files. 
 
-# com.ngc.seaside:seaside.application
-The seaside gradle appplication plugin will package the project as an application.  
-
 ## This plugin requires properties in your gradle.properties file (usually ~/.gradle/gradle.properties):
 * nexusConsolidated : url to the maven public download site usually a proxy to maven central and the
 releases and snapshots
@@ -106,6 +103,17 @@ dependencies {
     platform "org.eclipse.equinox:equinox-common:3.6.200.v20130402-1505"
 }
 ```
+# com.ngc.seaside:seaside.application
+The seaside gradle appplication plugin will package the project as an application.  
+
+## This plugin requires properties in your gradle.properties file (usually ~/.gradle/gradle.properties):
+* nexusConsolidated : url to the maven public download site usually a proxy to maven central and the
+releases and snapshots
+
+## Using this plugin
+To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
+An example is below. Note: a newer version may exist. Check the Nexus repository for the latest version.
+
 Below is an example of using the application plugin.
 
 ```java
