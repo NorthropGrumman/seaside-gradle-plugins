@@ -3,11 +3,21 @@ package com.ngc.seaside.gradle.plugins.application
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Compression
+import org.gradle.internal.reflect.Instantiator
+
+import javax.inject.Inject
 
 /**
  * Created by J57467 on 7/18/2017.
  */
 class SeasideApplicationPlugin implements Plugin<Project> {
+
+    final Instantiator instantiator;
+
+    @Inject
+    SeasideApplicationPlugin(Instantiator instantiator) {
+        this.instantiator = instantiator
+    }
 
     @Override
     void apply(Project p) {
@@ -16,7 +26,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             plugins.apply 'java'
             plugins.apply 'application'
 
-            extensions.create("seasideApplication", SeasideApplicationPluginExtension)
+            extensions.create("seasideApplication", SeasideApplicationPluginExtension, instantiator, p)
 
             // Allow user to configure the distribution name
             afterEvaluate {
@@ -91,6 +101,22 @@ class SeasideApplicationPlugin implements Plugin<Project> {
              */
             startScripts {
                 doLast {
+
+                    // Configure appHomeVarName to point to the APP_HOME
+                    if (seasideApplication.windows.appHomeCmd != null) {
+                        windowsScript.text = windowsScript.text.
+                                replaceFirst('(?<=APP_HOME=)(.*)(?=\r\n)',
+                                             String.valueOf(
+                                                     seasideApplication.windows.appHomeCmd))
+                    }
+
+                    // Configure appHomeVarName to point to the APP_HOME
+                    if (seasideApplication.unix.appHomeCmd != null) {
+                        unixScript.text = unixScript.text.
+                                replaceFirst('(?<=APP_HOME=)((\'|\")(.*)(\'|"))(?=\n)',
+                                             '\"`' + String.valueOf(seasideApplication.unix.appHomeCmd) + '`\"')
+                    }
+
                     // Add system properties set by user
                     if (seasideApplication.appSystemProperties != null) {
                         seasideApplication.appSystemProperties.each { key, value ->
@@ -100,7 +126,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                             // Adds system property to start scripts
                             unixScript.text = unixScript.text.
                                     replaceFirst('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
-                                               '\'$3 ' + systemProp + ' \'')
+                                                 '\'$3 ' + systemProp + ' \'')
 
                             windowsScript.text = windowsScript.text.replaceFirst('(?<=DEFAULT_JVM_OPTS=)(.*)(?=\r\n)',
                                                                                  '$1 ' + systemProp + ' ')
@@ -117,7 +143,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                         // Provide the app home directory has a system property.
                         unixScript.text = unixScript.text.
                                 replaceFirst('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
-                                           '\'$3 ' + appNameProp + ' \'')
+                                             '\'$3 ' + appNameProp + ' \'')
 
                         windowsScript.text = windowsScript.text.replaceFirst('(?<=DEFAULT_JVM_OPTS=)(.*)(?=\r\n)',
                                                                              '$1 ' + appNameProp + ' ')
@@ -129,20 +155,21 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                     }
 
                     // Override generated start script with custom windows start script
-                    if (seasideApplication.startScriptWindows != null) {
-                        p.getLogger().info("Overriding Windows start script with " + seasideApplication.startScriptUnix)
+                    if (seasideApplication.windows.startScript != null) {
+                        p.getLogger().
+                                info("Overriding Windows start script with " + seasideApplication.unix.startScript)
                         def windowsCustomScript = new File(p.getProjectDir().path,
-                                                           String.valueOf(seasideApplication.startScriptWindows))
+                                                           String.valueOf(seasideApplication.windows.startScript))
                         if (windowsCustomScript.exists()) {
                             windowsScript.text = windowsCustomScript.readLines().join('\r\n')
                         }
                     }
 
                     // Override generated start script with custom unix start script
-                    if (seasideApplication.startScriptUnix != null) {
-                        p.getLogger().info("Overriding Unix start script with " + seasideApplication.startScriptUnix)
+                    if (seasideApplication.unix.startScript != null) {
+                        p.getLogger().info("Overriding Unix start script with " + seasideApplication.unix.startScript)
                         def unixCustomScript = new File(p.getProjectDir().path,
-                                                        String.valueOf(seasideApplication.startScriptUnix))
+                                                        String.valueOf(seasideApplication.unix.startScript))
                         if (unixCustomScript.exists()) {
                             unixScript.text = unixCustomScript.readLines().join('\n')
                         }
