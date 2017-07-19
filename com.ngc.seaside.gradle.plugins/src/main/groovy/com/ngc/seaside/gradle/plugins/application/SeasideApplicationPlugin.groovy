@@ -20,11 +20,16 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             // Allow user to configure the distribution name
             afterEvaluate {
                 if (seasideApplication.distributionName != null) {
-                    project.tasks.getByName('distTar') { tar ->
+                    project.tasks.getByName('distTar') {
                         archiveName = "${seasideApplication.distributionName}.tar"
                     }
-                    project.tasks.getByName('distZip') { zip ->
+                    project.tasks.getByName('distZip') {
                         archiveName = "${seasideApplication.distributionName}.zip"
+                    }
+                    project.tasks.getByName('installDist') {
+                        if (seasideApplication.installationDir != null) {
+                            destinationDir = file(String.valueOf(seasideApplication.installationDir))
+                        }
                     }
                 }
             }
@@ -54,15 +59,9 @@ class SeasideApplicationPlugin implements Plugin<Project> {
              */
             installDist {
                 dependsOn copyResources
-                doLast {
-                    if (seasideApplication.installationDir != null) {
-                        file("$destinationDir").renameTo(String.valueOf(seasideApplication.installationDir))
-                    }
-                }
             }
             // Perform installDist each build
             assemble.finalizedBy(installDist)
-
 
             /**
              * Modify distZip task to include resources
