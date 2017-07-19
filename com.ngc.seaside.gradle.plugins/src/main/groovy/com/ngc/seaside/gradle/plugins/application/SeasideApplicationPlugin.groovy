@@ -99,7 +99,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
 
                             // Adds system property to start scripts
                             unixScript.text = unixScript.text.
-                                    replaceAll('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
+                                    replaceFirst('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
                                                '\'$3 ' + systemProp + ' \'')
 
                             windowsScript.text = windowsScript.text.replaceFirst('(?<=DEFAULT_JVM_OPTS=)(.*)(?=\r\n)',
@@ -111,19 +111,19 @@ class SeasideApplicationPlugin implements Plugin<Project> {
 
                     // Configure appHomeVarName to point to the APP_HOME
                     if (seasideApplication.appHomeVarName != null) {
-                        p.getLogger().info("Setting " + seasideApplication.appHomeVarName + " to APP_HOME")
+                        p.getLogger().info("Setting " + seasideApplication.appHomeVarName + " to APP_HOME_VAR")
                         String appNameProp = "\"-D" + seasideApplication.appHomeVarName + "=APP_HOME_VAR\""
 
                         // Provide the app home directory has a system property.
                         unixScript.text = unixScript.text.
-                                replaceAll('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
+                                replaceFirst('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
                                            '\'$3 ' + appNameProp + ' \'')
 
                         windowsScript.text = windowsScript.text.replaceFirst('(?<=DEFAULT_JVM_OPTS=)(.*)(?=\r\n)',
                                                                              '$1 ' + appNameProp + ' ')
 
-                        windowsScript.text = windowsScript.text.replaceFirst('APP_HOME_VAR', '%APP_HOME%')
-                        unixScript.text = unixScript.text.replaceFirst('APP_HOME_VAR', '\\$APP_HOME')
+                        windowsScript.text = windowsScript.text.replaceAll('APP_HOME_VAR', '%APP_HOME%')
+                        unixScript.text = unixScript.text.replaceAll('APP_HOME_VAR', '\\$APP_HOME')
                     } else {
                         p.getLogger().debug("seasideApplication.appHomeVarName is not set.")
                     }
