@@ -160,4 +160,4 @@ dependencies {
 ```
 
 # Reference
-[seaside-gradle-plugins wiki](http://10.207.42.42:8080/display/SEAS/seaside-gradle-plugins+-+Core+Gradle+plugins+for+Seaside+development)
+[seaside-gradle-plugins wiki](http://10.207.42.43/confluence/display/SEAS/seaside-gradle-plugins+-+Core+Gradle+plugins+for+Seaside+development)
