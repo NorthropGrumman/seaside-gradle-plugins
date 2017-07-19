@@ -37,7 +37,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             /**
              * Copies files specified in includeDistributionDirs variable
              */
-            task('copyResources') {
+            task('copyApplicationResources') {
                 doLast {
                     List includeDistributionDirs = seasideApplication.includeDistributionDirs
                     if (includeDistributionDirs != null) {
@@ -58,7 +58,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
              * Modify installDist task to include resources and allow user to configure installation directory
              */
             installDist {
-                dependsOn copyResources
+                dependsOn copyApplicationResources
             }
             // Perform installDist each build
             assemble.finalizedBy(installDist)
@@ -67,14 +67,14 @@ class SeasideApplicationPlugin implements Plugin<Project> {
              * Modify distZip task to include resources
              */
             distZip {
-                dependsOn copyResources
+                dependsOn copyApplicationResources
             }
 
             /**
              * Modify distTar task to include resources
              */
             distTar {
-                dependsOn copyResources
+                dependsOn copyApplicationResources
             }
 
             /**
