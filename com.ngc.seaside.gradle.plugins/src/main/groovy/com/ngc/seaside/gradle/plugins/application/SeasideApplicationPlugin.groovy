@@ -17,6 +17,18 @@ class SeasideApplicationPlugin implements Plugin<Project> {
 
             extensions.create("seasideApplication", SeasideApplicationPluginExtension)
 
+            // Allow user to configure the distribution name and directory
+            afterEvaluate {
+                project.tasks.getByName('distTar') { tar ->
+                    archiveName = "${seasideApplication.distributionName}.tar"
+                    destinationDir = file("${seasideApplication.distributionDir}")
+                }
+                project.tasks.getByName('distZip') { zip ->
+                    archiveName = "${seasideApplication.distributionName}.zip"
+                    destinationDir = file("${seasideApplication.distributionDir}")
+                }
+            }
+
             /**
              * Copies files specified in includeDistributionDirs variable
              */
@@ -41,7 +53,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             }
 
             /**
-             * Modify distZip task to include resources
+             * Modify distTar task to include resources
              */
             distTar {
                 dependsOn copyResources
@@ -51,8 +63,24 @@ class SeasideApplicationPlugin implements Plugin<Project> {
              * Modify start scripts task to allow custom start scripts
              */
             startScripts {
-
                 doLast {
+                    // Add system properties set by user
+                    if (seasideApplication.appSystemProperties != null) {
+                        seasideApplication.appSystemProperties.each { key, value ->
+                            String systemProp = "\"-D" + key + "=" + value + "\""
+                            p.getLogger().info("Adding " + systemProp + " to DEFAULT_JVM_OPTS")
+
+                            // Adds system property to start scripts
+                            unixScript.text = unixScript.text.
+                                    replaceAll('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
+                                               '\'$3 ' + systemProp + ' \'')
+
+                            windowsScript.text = windowsScript.text.replaceFirst('(?<=DEFAULT_JVM_OPTS=)(.*)(?=\r\n)',
+                                                                                 '$1 ' + systemProp + ' ')
+                        }
+                    } else {
+                        p.getLogger().debug("seasideApplication.appSystemProperties is not set.")
+                    }
 
                     // Configure appHomeVarName to point to the APP_HOME
                     if (seasideApplication.appHomeVarName != null) {
@@ -73,24 +101,6 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                         p.getLogger().debug("seasideApplication.appHomeVarName is not set.")
                     }
 
-                    // Add system properties set by user
-                    if (seasideApplication.appSystemProperties != null) {
-                        seasideApplication.appSystemProperties.each { key, value ->
-                            String systemProp = "\"-D" + key + "=" + value + "\""
-                            p.getLogger().info("Adding " + systemProp + " to DEFAULT_JVM_OPTS")
-
-                            // Adds system property to start scripts
-                            unixScript.text = unixScript.text.
-                                    replaceAll('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
-                                               '\'$3 ' + systemProp + ' \'')
-
-                            windowsScript.text = windowsScript.text.replaceFirst('(?<=DEFAULT_JVM_OPTS=)(.*)(?=\r\n)',
-                                                                                 '$1 ' + systemProp + ' ')
-                        }
-                    } else {
-                        p.getLogger().debug("seasideApplication.appSystemProperties is not set.")
-                    }
-
                     // Override generated start script with custom windows start script
                     if (seasideApplication.startScriptWindows != null) {
                         p.getLogger().info("Overriding Windows start script with " + seasideApplication.startScriptUnix)
@@ -99,8 +109,6 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                         if (windowsCustomScript.exists()) {
                             windowsScript.text = windowsCustomScript.readLines().join('\r\n')
                         }
-                    } else {
-                        p.getLogger().debug("seasideApplication.startScriptWindows is not set.")
                     }
 
                     // Override generated start script with custom unix start script
@@ -111,8 +119,6 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                         if (unixCustomScript.exists()) {
                             unixScript.text = unixCustomScript.readLines().join('\n')
                         }
-                    } else {
-                        p.getLogger().debug("seasideApplication.startScriptUnix is not set.")
                     }
                 }
             }
