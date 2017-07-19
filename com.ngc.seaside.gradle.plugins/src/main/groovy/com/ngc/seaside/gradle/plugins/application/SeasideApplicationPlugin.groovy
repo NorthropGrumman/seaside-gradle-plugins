@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.application
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.bundling.Compression
 
 /**
  * Created by J57467 on 7/18/2017.
@@ -21,7 +22,8 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             afterEvaluate {
                 if (seasideApplication.distributionName != null) {
                     project.tasks.getByName('distTar') {
-                        archiveName = "${seasideApplication.distributionName}.tar"
+                        compression = Compression.GZIP
+                        archiveName = "${seasideApplication.distributionName}.tar.gz"
                     }
                     project.tasks.getByName('distZip') {
                         archiveName = "${seasideApplication.distributionName}.zip"
