@@ -8,18 +8,28 @@ import org.gradle.api.Project
  */
 class SeasideApplicationPlugin implements Plugin<Project> {
 
-   @Override
-   void apply(Project p) {
-      p.configure(p) {
+    @Override
+    void apply(Project p) {
+        p.configure(p) {
 
-         plugins.apply 'java'
-         plugins.apply 'application'
+            plugins.apply 'java'
+            plugins.apply 'application'
 
-         extensions.create("seasideApplication", SeasideApplicationPluginExtension)
+            extensions.create("seasideApplication", SeasideApplicationPluginExtension)
 
+            /**
+             * Copies files specified in includeDistributionDirs variable
+             */
             task('copyResources') {
-                applicationDistribution.from("src/main/resources/") {
-                    into "resources"
+                doLast {
+                    List includeDistributionDirs = seasideApplication.includeDistributionDirs
+                    if (includeDistributionDirs != null) {
+                        includeDistributionDirs.each {
+                            applicationDistribution.from(it) {
+                                into "resources"
+                            }
+                        }
+                    }
                 }
             }
 
@@ -30,7 +40,6 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                 dependsOn copyResources
             }
 
-
             /**
              * Modify distZip task to include resources
              */
@@ -38,31 +47,77 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                 dependsOn copyResources
             }
 
+            /**
+             * Modify start scripts task to allow custom start scripts
+             */
+            startScripts {
 
+                doLast {
 
-         /**
-          * Modify start scripts task to allow custom start scripts
-          */
-         startScripts {
-            doLast {
+                    // Configure appHomeVarName to point to the APP_HOME
+                    if (seasideApplication.appHomeVarName != null) {
+                        p.getLogger().info("Setting " + seasideApplication.appHomeVarName + " to APP_HOME")
+                        String appNameProp = "\"-D" + seasideApplication.appHomeVarName + "=APP_HOME_VAR\""
 
-               if (seasideApplication.startScriptWindows != null) {
-                  def windowsFile =  new File(p.getProjectDir().path, (String) seasideApplication.startScriptWindows)
-                  if(windowsFile.exists()){
-                     windowsScript.text = windowsFile.readLines().join('\r\n')
-                  }
-               }
+                        // Provide the app home directory has a system property.
+                        unixScript.text = unixScript.text.
+                                replaceAll('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
+                                           '\'$3 ' + appNameProp + ' \'')
 
-               if (seasideApplication.startScriptUnix != null) {
-                  def unixFile =  new File(p.getProjectDir().path, (String) seasideApplication.startScriptUnix)
-                  if(unixFile.exists()) {
-                     unixScript.text = unixFile.readLines().join('\n')
-                  }
-               }
+                        windowsScript.text = windowsScript.text.replaceFirst('(?<=DEFAULT_JVM_OPTS=)(.*)(?=\r\n)',
+                                                                             '$1 ' + appNameProp + ' ')
+
+                        windowsScript.text = windowsScript.text.replaceFirst('APP_HOME_VAR', '%APP_HOME%')
+                        unixScript.text = unixScript.text.replaceFirst('APP_HOME_VAR', '\\$APP_HOME')
+                    } else {
+                        p.getLogger().debug("seasideApplication.appHomeVarName is not set.")
+                    }
+
+                    // Add system properties set by user
+                    if (seasideApplication.appSystemProperties != null) {
+                        seasideApplication.appSystemProperties.each { key, value ->
+                            String systemProp = "\"-D" + key + "=" + value + "\""
+                            p.getLogger().info("Adding " + systemProp + " to DEFAULT_JVM_OPTS")
+
+                            // Adds system property to start scripts
+                            unixScript.text = unixScript.text.
+                                    replaceAll('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
+                                               '\'$3 ' + systemProp + ' \'')
+
+                            windowsScript.text = windowsScript.text.replaceFirst('(?<=DEFAULT_JVM_OPTS=)(.*)(?=\r\n)',
+                                                                                 '$1 ' + systemProp + ' ')
+                        }
+                    } else {
+                        p.getLogger().debug("seasideApplication.appSystemProperties is not set.")
+                    }
+
+                    // Override generated start script with custom windows start script
+                    if (seasideApplication.startScriptWindows != null) {
+                        p.getLogger().info("Overriding Windows start script with " + seasideApplication.startScriptUnix)
+                        def windowsCustomScript = new File(p.getProjectDir().path,
+                                                           String.valueOf(seasideApplication.startScriptWindows))
+                        if (windowsCustomScript.exists()) {
+                            windowsScript.text = windowsCustomScript.readLines().join('\r\n')
+                        }
+                    } else {
+                        p.getLogger().debug("seasideApplication.startScriptWindows is not set.")
+                    }
+
+                    // Override generated start script with custom unix start script
+                    if (seasideApplication.startScriptUnix != null) {
+                        p.getLogger().info("Overriding Unix start script with " + seasideApplication.startScriptUnix)
+                        def unixCustomScript = new File(p.getProjectDir().path,
+                                                        String.valueOf(seasideApplication.startScriptUnix))
+                        if (unixCustomScript.exists()) {
+                            unixScript.text = unixCustomScript.readLines().join('\n')
+                        }
+                    } else {
+                        p.getLogger().debug("seasideApplication.startScriptUnix is not set.")
+                    }
+                }
             }
-         }
 
-         defaultTasks = ['build']
-      }
-   }
+            defaultTasks = ['build']
+        }
+    }
 }
