@@ -20,6 +20,13 @@ class SeasideApplicationPlugin implements Plugin<Project> {
 
             // Allow user to configure the distribution name
             afterEvaluate {
+                // Make sure the user sets the mainClassName
+                if (seasideApplication.mainClassName != null) {
+                    project.tasks.getByName('startScripts') {
+                        mainClassName = seasideApplication.mainClassName
+                    }
+                }
+
                 if (seasideApplication.distributionName != null) {
                     project.tasks.getByName('distTar') {
                         compression = Compression.GZIP

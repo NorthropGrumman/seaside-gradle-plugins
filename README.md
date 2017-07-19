@@ -137,6 +137,7 @@ group = 'com.ngc.seaside'
 version = '1.0-SNAPSHOT'
 
 seasideDistribution {
+   mainClassName = "com.ngc.seaside.service.Main"
    includeDistributionDirs = ['src/main/resources/', 'src/main/output/']
    appHomeVarName = 'myAppHome'
    appSystemProperties = [test: "System Properties Test", NG_FW_HOME: "APP_HOME_VAR", anInt: 600]

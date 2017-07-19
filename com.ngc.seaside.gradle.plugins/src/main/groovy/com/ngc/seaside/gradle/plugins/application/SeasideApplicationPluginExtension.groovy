@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.plugins.application
 
 class SeasideApplicationPluginExtension {
+    String mainClassName
     String appHomeVarName
     String distributionName
     String installationDir
