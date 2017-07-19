@@ -17,7 +17,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
 
             extensions.create("seasideApplication", SeasideApplicationPluginExtension)
 
-            // Allow user to configure the distribution name and directory
+            // Allow user to configure the distribution name
             afterEvaluate {
                 if (seasideApplication.distributionName != null) {
                     project.tasks.getByName('distTar') { tar ->
@@ -25,11 +25,6 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                     }
                     project.tasks.getByName('distZip') { zip ->
                         archiveName = "${seasideApplication.distributionName}.zip"
-                    }
-
-                    project.tasks.getByName('installDist') { zip ->
-                        destinationDir = file("$buildDir/" + project.tasks.getByName('distZip').destinationDir.name +
-                                              "/${seasideApplication.distributionName}")
                     }
                 }
             }
@@ -46,16 +41,28 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                                 into "resources"
                             }
                         }
+                    } else { // Default
+                        applicationDistribution.from("src/main/resources/") {
+                            into "resources"
+                        }
                     }
                 }
             }
 
             /**
-             * Modify installDist task to include resources
+             * Modify installDist task to include resources and allow user to configure installation directory
              */
             installDist {
                 dependsOn copyResources
+                doLast {
+                    if (seasideApplication.installationDir != null) {
+                        file("$destinationDir").renameTo(String.valueOf(seasideApplication.installationDir))
+                    }
+                }
             }
+            // Perform installDist each build
+            assemble.finalizedBy(installDist)
+
 
             /**
              * Modify distZip task to include resources
@@ -134,7 +141,6 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                     }
                 }
             }
-
             defaultTasks = ['build']
         }
     }
