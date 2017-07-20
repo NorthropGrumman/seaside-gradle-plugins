@@ -114,7 +114,13 @@ releases and snapshots
 To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
 An example is below. Note: a newer version may exist. Check the Nexus repository for the latest version.
 
-Below is an example of using the application plugin.
+This plugin will generate a start script that will set the value of the variable `$APP_HOME` as a system property.
+The name of the system property is defined by the `appHomeVarName` property.  The value of `$APP_HOME` is the directory
+that contains the application (the directory that contains bin, libs, resources, etc).  The properties
+`windows.appHomeCmd` and `unix.appHomeCmd` configure how this value is computed when the scripts are executed.
+
+Below is an example of using the application plugin.  The value of the system property `myAppHome` will be the result of
+`%~dp0..` when the Windows script is executed.
 
 ```java
 buildscript {
