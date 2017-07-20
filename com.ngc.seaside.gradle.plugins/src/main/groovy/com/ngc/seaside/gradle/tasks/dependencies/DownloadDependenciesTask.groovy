@@ -60,7 +60,7 @@ class DownloadDependenciesTask extends DefaultTask {
                             }
 
                             if (it.hasProperty('attempted')) {
-                                logger.warn("Unable to save artifacts of ${it.attempted.displayName}")
+                                project.getLogger().warn("Unable to save artifacts of ${it.attempted.displayName}")
                             }
                         }
                 )
@@ -71,7 +71,7 @@ class DownloadDependenciesTask extends DefaultTask {
             }
         }
 
-        logger.info("Dependencies of all configurations: ${componentIds.collect { it.toString() }.join(', ')}")
+        project.getLogger().info("Dependencies of all configurations: ${componentIds.collect { it.toString() }.join(', ')}")
 
         componentIds.each { component ->
             if (component instanceof ModuleComponentIdentifier) {
@@ -118,7 +118,7 @@ class DownloadDependenciesTask extends DefaultTask {
         }
 
         if (libraries.isEmpty()) {
-            logger.warn(
+            project.getLogger().warn(
                     "Library file ${component.module}-${component.version}.jar of dependency ${component.toString()} not found even when considering potential classifiers.")
         }
 
@@ -133,7 +133,7 @@ class DownloadDependenciesTask extends DefaultTask {
     }
 
     def saveArtifacts(artifactsResult, artifactTypes) {
-        logger.debug("Saving artifacts of ${artifactsResult.id.toString()}")
+        project.getLogger().debug("Saving artifacts of ${artifactsResult.id.toString()}")
 
         artifactTypes.each { artifactType ->
             artifactsResult.getArtifacts(artifactType).each { artifact ->
@@ -147,7 +147,7 @@ class DownloadDependenciesTask extends DefaultTask {
                 }
 
                 if (artifact.hasProperty('failure')) {
-                    logger.warn(artifact.failure.message)
+                    project.getLogger().warn(artifact.failure.message)
                 }
             }
         }
@@ -160,11 +160,11 @@ class DownloadDependenciesTask extends DefaultTask {
 
         File destination = new File(destinationDirectory, source.name)
         if (destination.exists()) {
-            logger.debug("${destination.absolutePath} already exists - skipping")
+            project.getLogger().debug("${destination.absolutePath} already exists - skipping")
             return
         }
 
-        logger.info("Saving artifact file ${source.name} of ${id.toString()} to ${destination.absolutePath}")
+        project.getLogger().info("Saving artifact file ${source.name} of ${id.toString()} to ${destination.absolutePath}")
 
         destination.withOutputStream { os ->
             source.withInputStream { is ->
@@ -191,7 +191,7 @@ class DownloadDependenciesTask extends DefaultTask {
         if (!document.parent.isEmpty()) {
             def componentId = new ParentComponentIdentifier(document.parent)
 
-            logger.info("Resolving parent ${componentId.displayName}")
+            project.getLogger().info("Resolving parent ${componentId.displayName}")
             def resolvedParentComponents = project.dependencies.createArtifactResolutionQuery()
                     .forComponents(componentId)
                     .withArtifacts(MavenModule, MavenPomArtifact)
@@ -233,11 +233,11 @@ class DownloadDependenciesTask extends DefaultTask {
                     copyArtifactFileToRepository(id, localPomFile)
                     resolveParents(localPomFile)
 
-                    logger.info("Downloaded ${id.displayName} from ${url}")
+                    project.getLogger().info("Downloaded ${id.displayName} from ${url}")
 
                     return true
                 } catch (FileNotFoundException e) {
-                    logger.debug("${id.displayName} not found at ${url}")
+                    project.getLogger().debug("${id.displayName} not found at ${url}")
                 } finally {
                     project.delete(tempDir)
                 }
@@ -247,7 +247,7 @@ class DownloadDependenciesTask extends DefaultTask {
         }
 
         if (!found) {
-            logger.warn("Unable to find pom file of ${id.displayName}")
+            project.getLogger().warn("Unable to find pom file of ${id.displayName}")
         }
     }
 
