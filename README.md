@@ -146,11 +146,13 @@ seasideApplication {
 
     windows {
         appHomeCmd = "%~dp0.."
-        startScript = 'src/main/output/bin/start.bat'
+        //startScript = 'src/main/output/bin/start.bat'
     }
     unix {
-        appHomeCmd = "pwd -P"
         startScript = 'src/main/output/bin/start'
+        // setting appHomeCmd here does nothing because 
+        // the custom startScript will overwrite the generated start script
+        // appHomeCmd = "pwd -P"
     }
 }
 
