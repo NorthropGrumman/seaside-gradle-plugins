@@ -7,7 +7,7 @@ class SeasideApplicationPluginExtension {
 
     static class OSType {
 
-        String appHomeCmd
+        String appHome
         String startScript
 
         OSType() {

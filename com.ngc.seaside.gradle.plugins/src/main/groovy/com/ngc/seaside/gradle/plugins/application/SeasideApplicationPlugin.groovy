@@ -101,20 +101,17 @@ class SeasideApplicationPlugin implements Plugin<Project> {
              */
             startScripts {
                 doLast {
-
-                    // Configure appHomeVarName to point to the APP_HOME
-                    if (seasideApplication.windows.appHomeCmd != null) {
-                        windowsScript.text = windowsScript.text.
-                                replaceFirst('(?<=APP_HOME=)(.*)(?=\r\n)',
-                                             String.valueOf(
-                                                     seasideApplication.windows.appHomeCmd))
+                    // Configure how APP_HOME variable is created using user command
+                    if (seasideApplication.windows.appHome != null) {
+                        String WINDOWS_APP_HOME_SCRIPT = "for %%? in (\"${seasideApplication.windows.appHome}\") do set APP_HOME=%%~f?"
+                        windowsScript.text = windowsScript.text.replaceFirst(/set APP_HOME=.*/, WINDOWS_APP_HOME_SCRIPT)
                     }
 
-                    // Configure appHomeVarName to point to the APP_HOME
-                    if (seasideApplication.unix.appHomeCmd != null) {
+                    // Configure how APP_HOME variable is created using user command
+                    if (seasideApplication.unix.appHome != null) {
+                        String UNIX_APP_HOME_SCRIPT = "\"`${seasideApplication.unix.appHome}`\""
                         unixScript.text = unixScript.text.
-                                replaceFirst('(?<=APP_HOME=)((\'|\")(.*)(\'|"))(?=\n)',
-                                             '\"`' + String.valueOf(seasideApplication.unix.appHomeCmd) + '`\"')
+                                replaceFirst('(?<=APP_HOME=)((\'|\")(.*)(\'|"))(?=\n)', UNIX_APP_HOME_SCRIPT)
                     }
 
                     // Add system properties set by user
