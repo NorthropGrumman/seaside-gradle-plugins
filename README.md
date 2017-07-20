@@ -136,15 +136,21 @@ apply plugin: 'com.ngc.seaside.application'
 group = 'com.ngc.seaside'
 version = '1.0-SNAPSHOT'
 
-seasideDistribution {
-   mainClassName = "com.ngc.seaside.service.Main"
-   includeDistributionDirs = ['src/main/resources/', 'src/main/output/']
-   appHomeVarName = 'myAppHome'
-   appSystemProperties = [test: "System Properties Test", NG_FW_HOME: "APP_HOME_VAR", anInt: 600]
-   distributionName = "myDist"
-   installationDir = "build/distributions/myInstall"
-   startScriptWindows = 'src/main/output/bin/start.bat'
-   startScriptUnix = 'src/main/output/bin/start'
+seasideApplication {
+    mainClassName = "com.ngc.seaside.service.Main"
+    includeDistributionDirs = ['src/main/resources/', 'src/main/output/']
+    appHomeVarName = 'myAppHome'
+    appSystemProperties = [test: "System Properties Test", NG_FW_HOME: "APP_HOME_VAR", anInt: 600]
+    distributionName = "myAppDist"
+    installationDir = "build/distributions/myAppInstall"
+
+    windows {
+        appHomeCmd = "%~dp0.."
+        //startScript = 'src/main/output/bin/start.bat'
+    }
+    unix {
+        appHomeCmd = "pwd -P"
+        //startScript = 'src/main/output/bin/start'
 }
 
 dependencies {
