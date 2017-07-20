@@ -102,14 +102,14 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             startScripts {
                 doLast {
                     // Configure how APP_HOME variable is created using user command
-                    if (seasideApplication.windows.appHome != null) {
-                        String WINDOWS_APP_HOME_SCRIPT = "for %%? in (\"${seasideApplication.windows.appHome}\") do set APP_HOME=%%~f?"
+                    if (seasideApplication.windows.appHomeCmd != null) {
+                        String WINDOWS_APP_HOME_SCRIPT = "for %%? in (\"${seasideApplication.windows.appHomeCmd}\") do set APP_HOME=%%~f?"
                         windowsScript.text = windowsScript.text.replaceFirst(/set APP_HOME=.*/, WINDOWS_APP_HOME_SCRIPT)
                     }
 
                     // Configure how APP_HOME variable is created using user command
-                    if (seasideApplication.unix.appHome != null) {
-                        String UNIX_APP_HOME_SCRIPT = "\"`${seasideApplication.unix.appHome}`\""
+                    if (seasideApplication.unix.appHomeCmd != null) {
+                        String UNIX_APP_HOME_SCRIPT = "\"`${seasideApplication.unix.appHomeCmd}`\""
                         unixScript.text = unixScript.text.
                                 replaceFirst('(?<=APP_HOME=)((\'|\")(.*)(\'|"))(?=\n)', UNIX_APP_HOME_SCRIPT)
                     }
