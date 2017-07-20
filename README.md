@@ -146,11 +146,12 @@ seasideApplication {
 
     windows {
         appHomeCmd = "%~dp0.."
-        //startScript = 'src/main/output/bin/start.bat'
+        startScript = 'src/main/output/bin/start.bat'
     }
     unix {
         appHomeCmd = "pwd -P"
-        //startScript = 'src/main/output/bin/start'
+        startScript = 'src/main/output/bin/start'
+    }
 }
 
 dependencies {
