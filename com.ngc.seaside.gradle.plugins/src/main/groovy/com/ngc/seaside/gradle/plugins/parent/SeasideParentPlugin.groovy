@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.plugins.parent
 import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
+import com.ngc.seaside.gradle.tasks.dependencies.ListDependenciesTask
 import com.ngc.seaside.gradle.plugins.util.Versions
 
 import org.gradle.api.JavaVersion
@@ -48,6 +49,11 @@ class SeasideParentPlugin implements Plugin<Project> {
             plugins.apply 'eclipse'
             plugins.apply 'org.sonarqube'
             plugins.apply 'jacoco'
+
+            task('listDependencies', type: ListDependenciesTask,
+                 description: 'Lists all project dependencies.'){
+                print("Hello!")
+            }
 
             /**
              * Create a task for generating the source jar. This will also be uploaded to Nexus.
@@ -172,6 +178,13 @@ class SeasideParentPlugin implements Plugin<Project> {
 
             task('downloadDependencies', type: DownloadDependenciesTask, group: 'Upload',
                  description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.'){}
+
+            task('clean') {
+                doLast {
+                    p.getLogger().trace("Removing build distribution directory '${seasideDistribution.buildDir}'.")
+                    delete(seasideDistribution.buildDir)
+                }
+            }
 
             defaultTasks = ['build']
 
