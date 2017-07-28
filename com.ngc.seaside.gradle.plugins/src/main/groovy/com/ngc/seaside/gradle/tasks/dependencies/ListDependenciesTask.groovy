@@ -17,45 +17,51 @@ package com.ngc.seaside.gradle.tasks.dependencies
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.tasks.TaskAction
-import org.gradle.jvm.JvmLibrary
-import org.gradle.language.base.artifact.SourcesArtifact
-import org.gradle.language.java.artifact.JavadocArtifact
-import org.gradle.maven.MavenModule
-import org.gradle.maven.MavenPomArtifact
-import org.unbescape.html.HtmlEscape
-import org.xml.sax.SAXParseException
 
 /**
  * Gradle-Task that downloads all dependencies into a local directory based repository.
  */
 class ListDependenciesTask extends DefaultTask {
 
+    boolean showTransitive = false
     @TaskAction
     def listDependencies() {
 
+         //Properties needs to be fixed/implemented
+//        if(System.properties.hasProperty("showTransitive")){
+//            showTransitive = System.properties.getProperty("showTransitive")
+//        }
+
+        project.configurations.each { configuration ->
+            configuration.setTransitive(showTransitive)
+        }
+
         listDependenciesForProject(project)
+
         project.subprojects.each {
             listDependenciesForProject(it)
         }
     }
 
     void listDependenciesForProject(Project currentProject) {
+        println(currentProject.name)
         def libraryFiles = [:]
         def componentIds = [] as Set
         (currentProject.configurations + currentProject.buildscript.configurations).each { configuration ->
+            println("   "+configuration)
             if (isConfigurationResolvable(configuration)) {
                 componentIds.addAll(
-                        configuration.incoming.resolutionResult.allDependencies.collect {
-                            if (it.hasProperty('selected')) {
-                                return it.selected.id
-                            }
+                      configuration.incoming.resolutionResult.allDependencies.collect {
+                          if (it.hasProperty('selected')) {
+                              println("       " + it.selected.id)
+                              return it.selected.id
+                          }
 
-                            if (it.hasProperty('attempted')) {
-                                project.getLogger().warn("Unable to save artifacts of ${it.attempted.displayName}")
-                            }
-                        }
+                          if (it.hasProperty('attempted')) {
+                              project.getLogger().warn("Unable to save artifacts of ${it.attempted.displayName}")
+                          }
+                      }
                 )
 
                 configuration.incoming.files.each { file ->
@@ -64,7 +70,7 @@ class ListDependenciesTask extends DefaultTask {
             }
         }
 
-         System.out.println("Dependencies of all configurations: ${componentIds.collect { it.toString() }.join(', ')}")
+        println("Dependencies of all configurations: \n ${componentIds.collect { it.toString() }.join('\n')}")
         project.getLogger().info("Dependencies of all configurations: ${componentIds.collect { it.toString() }.join(', ')}")
     }
 
