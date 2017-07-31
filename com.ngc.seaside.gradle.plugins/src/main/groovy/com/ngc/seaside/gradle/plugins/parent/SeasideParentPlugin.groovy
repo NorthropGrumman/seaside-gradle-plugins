@@ -176,7 +176,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             task('downloadDependencies', type: DownloadDependenciesTask, group: 'Upload',
                  description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.'){}
 
-            task('listDependencies', type: ListDependenciesTask, group: 'Upload',
+            task('listDependencies', type: ListDependenciesTask,
                  description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies'){}
 
             defaultTasks = ['build']

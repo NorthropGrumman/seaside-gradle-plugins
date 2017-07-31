@@ -24,71 +24,73 @@ import org.gradle.api.tasks.TaskAction
  */
 class ListDependenciesTask extends DefaultTask {
 
-    boolean showTransitive = false
-    @TaskAction
-    def listDependencies() {
+   boolean showTransitive = false
 
-        if(System.properties.stringPropertyNames().contains('showTransitive')){
-            showTransitive = System.properties.getProperty('showTransitive').toBoolean()
-        }
+   @TaskAction
+   def listDependencies() {
 
-        project.configurations.each { configuration ->
+      def dependencies = [] as Set
+      if (System.properties.stringPropertyNames().contains('showTransitive')) {
+         showTransitive = System.properties.getProperty('showTransitive').toBoolean()
+      }
+
+      project.configurations.each { configuration ->
+         configuration.setTransitive(showTransitive)
+      }
+
+      dependencies.addAll(listDependenciesForProject(project))
+
+      project.subprojects.each {
+
+         it.configurations.each { configuration ->
             configuration.setTransitive(showTransitive)
-        }
+         }
 
-        listDependenciesForProject(project)
+         dependencies.addAll(listDependenciesForProject(it))
+      }
 
-        project.subprojects.each {
+      println("All project dependencies: \n${dependencies.collect { it.toString() }.join('\n')}\n\n")
+   }
 
-            it.configurations.each { configuration ->
-                configuration.setTransitive(showTransitive)
+   Set<String> listDependenciesForProject(Project currentProject) {
+      def libraryFiles = [:]
+      def componentIds = [] as Set
+      (currentProject.configurations + currentProject.buildscript.configurations).each { configuration ->
+         if (isConfigurationResolvable(configuration)) {
+            componentIds.addAll(
+                  configuration.incoming.resolutionResult.allDependencies.collect {
+                     if (it.hasProperty('selected')) {
+                        return it.selected.id
+                     }
+
+                     if (it.hasProperty('attempted')) {
+                        project.getLogger().warn("Unable to save artifacts of ${it.attempted.displayName}")
+                     }
+                  }
+            )
+
+            configuration.incoming.files.each { file ->
+               libraryFiles[file.name] = file
             }
+         }
+      }
 
-            listDependenciesForProject(it)
-        }
-    }
+      project.getLogger().
+            info("Dependencies of all configurations: ${componentIds.collect { it.toString() }.join(', ')}")
+      return componentIds.collect()
+   }
 
-    void listDependenciesForProject(Project currentProject) {
-        println(currentProject.name)
-        def libraryFiles = [:]
-        def componentIds = [] as Set
-        (currentProject.configurations + currentProject.buildscript.configurations).each { configuration ->
-            println("   "+configuration)
-            if (isConfigurationResolvable(configuration)) {
-                componentIds.addAll(
-                      configuration.incoming.resolutionResult.allDependencies.collect {
-                          if (it.hasProperty('selected')) {
-                              println("      " + it.selected.id)
-                              return it.selected.id
-                          }
+   /**
+    * Gradle 3.4 introduced the configuration 'apiElements' that isn't resolvable. So
+    * we have to check before accessing it.
+    */
+   boolean isConfigurationResolvable(configuration) {
+      if (!configuration.metaClass.respondsTo(configuration, 'isCanBeResolved')) {
+         // If the recently introduced method 'isCanBeResolved' is unavailable, we
+         // assume (for now) that the configuration can be resolved.
+         return true
+      }
 
-                          if (it.hasProperty('attempted')) {
-                              project.getLogger().warn("Unable to save artifacts of ${it.attempted.displayName}")
-                          }
-                      }
-                )
-
-                configuration.incoming.files.each { file ->
-                    libraryFiles[file.name] = file
-                }
-            }
-        }
-
-        println("\n\nDependencies of all configurations: \n${componentIds.collect { it.toString() }.join('\n')}")
-        project.getLogger().info("Dependencies of all configurations: ${componentIds.collect { it.toString() }.join(', ')}")
-    }
-
-    /**
-     * Gradle 3.4 introduced the configuration 'apiElements' that isn't resolvable. So
-     * we have to check before accessing it.
-     */
-    boolean isConfigurationResolvable(configuration) {
-        if (!configuration.metaClass.respondsTo(configuration, 'isCanBeResolved')) {
-            // If the recently introduced method 'isCanBeResolved' is unavailable, we
-            // assume (for now) that the configuration can be resolved.
-            return true
-        }
-
-        return configuration.isCanBeResolved()
-    }
+      return configuration.isCanBeResolved()
+   }
 }
