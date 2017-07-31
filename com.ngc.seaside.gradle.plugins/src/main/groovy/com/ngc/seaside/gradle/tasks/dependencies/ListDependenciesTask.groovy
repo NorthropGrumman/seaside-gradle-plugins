@@ -28,10 +28,9 @@ class ListDependenciesTask extends DefaultTask {
     @TaskAction
     def listDependencies() {
 
-         //Properties needs to be fixed/implemented
-//        if(System.properties.hasProperty("showTransitive")){
-//            showTransitive = System.properties.getProperty("showTransitive")
-//        }
+        if(System.properties.stringPropertyNames().contains('showTransitive')){
+            showTransitive = System.properties.getProperty('showTransitive').toBoolean()
+        }
 
         project.configurations.each { configuration ->
             configuration.setTransitive(showTransitive)
@@ -40,6 +39,11 @@ class ListDependenciesTask extends DefaultTask {
         listDependenciesForProject(project)
 
         project.subprojects.each {
+
+            it.configurations.each { configuration ->
+                configuration.setTransitive(showTransitive)
+            }
+
             listDependenciesForProject(it)
         }
     }
@@ -54,7 +58,7 @@ class ListDependenciesTask extends DefaultTask {
                 componentIds.addAll(
                       configuration.incoming.resolutionResult.allDependencies.collect {
                           if (it.hasProperty('selected')) {
-                              println("       " + it.selected.id)
+                              println("      " + it.selected.id)
                               return it.selected.id
                           }
 
@@ -70,7 +74,7 @@ class ListDependenciesTask extends DefaultTask {
             }
         }
 
-        println("Dependencies of all configurations: \n ${componentIds.collect { it.toString() }.join('\n')}")
+        println("\n\nDependencies of all configurations: \n${componentIds.collect { it.toString() }.join('\n')}")
         project.getLogger().info("Dependencies of all configurations: ${componentIds.collect { it.toString() }.join(', ')}")
     }
 

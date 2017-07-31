@@ -1,5 +1,6 @@
 apply plugin: 'application'
 
 dependencies {
-    compile "com.ngc.blocs:service.api:$blocsVersion"
+    //compile "com.ngc.blocs:service.api:$blocsVersion"
+    testCompile 'junit:junit:4.12'
 }
