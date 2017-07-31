@@ -1,0 +1,7 @@
+package com.ngc.seaside.gradle.task.dependencies
+
+apply plugin: 'application'
+
+dependencies {
+    compile "com.ngc.blocs:service.api:$blocsVersion"
+}
