@@ -1,0 +1,5 @@
+rootProject.name = 'test-project'
+
+include("test")
+
+project(':test').name = 'test'
