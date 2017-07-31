@@ -179,13 +179,6 @@ class SeasideParentPlugin implements Plugin<Project> {
             task('listDependencies', type: ListDependenciesTask, group: 'Upload',
                  description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies'){}
 
-//            task('clean') {
-//                doLast {
-//                    p.getLogger().trace("Removing build distribution directory '${seasideDistribution.buildDir}'.")
-//                    delete(seasideDistribution.buildDir)
-//                }
-//            }
-
             defaultTasks = ['build']
 
         }
