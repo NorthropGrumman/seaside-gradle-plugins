@@ -4,9 +4,7 @@ import aQute.bnd.gradle.BundleTaskConvention
 
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
-import com.ngc.seaside.gradle.tasks.dependencies.ListDependenciesTask
-import com.ngc.seaside.gradle.plugins.util.Versions
-
+import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -121,11 +119,11 @@ class SeasideParentPlugin implements Plugin<Project> {
                         buildBundle()
                     }
 
-                    manifest {
-                        attributes('Bundle-Name': "$bundleName",
-                                   'Bundle-SymbolicName': "$bundleName",
-                                   'Bundle-Version': Versions.makeOsgiCompliantVersion("${project.version}"))
-                    }
+//                    manifest {
+//                        attributes('Bundle-Name': "$bundleName",
+//                                   'Bundle-SymbolicName': "$bundleName",
+//                                   'Bundle-Version': Versions.makeOsgiCompliantVersion("${project.version}"))
+//                    }
                 }
 
                 /**
@@ -176,7 +174,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             task('downloadDependencies', type: DownloadDependenciesTask, group: 'Upload',
                  description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.'){}
 
-            task('listDependencies', type: ListDependenciesTask,
+            task('dependencyReport', type: DependencyReportTask,
                  description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies'){}
 
             defaultTasks = ['build']
