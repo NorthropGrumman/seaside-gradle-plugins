@@ -43,6 +43,12 @@ class DependencyReportTask extends DefaultTask {
 
    void printReport(Project project, TreeNode root) {
 
+      if(!project.getBuildDir().exists()) {
+         if(!project.getBuildDir().mkdir()){
+            project.getLogger().info("Failed to make directory  ${project.getBuildDir()}")
+         }
+      }
+
       def report = new File(project.getBuildDir(), project.name + "_DependencyReport.txt")
 
       report.write("Non-Transitive Dependencies")
