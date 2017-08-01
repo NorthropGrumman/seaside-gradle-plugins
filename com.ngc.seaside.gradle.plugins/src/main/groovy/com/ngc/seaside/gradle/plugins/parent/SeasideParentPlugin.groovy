@@ -5,6 +5,7 @@ import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
+import com.ngc.seaside.gradle.plugins.util.Versions
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -119,11 +120,11 @@ class SeasideParentPlugin implements Plugin<Project> {
                         buildBundle()
                     }
 
-//                    manifest {
-//                        attributes('Bundle-Name': "$bundleName",
-//                                   'Bundle-SymbolicName': "$bundleName",
-//                                   'Bundle-Version': Versions.makeOsgiCompliantVersion("${project.version}"))
-//                    }
+                    manifest {
+                        attributes('Bundle-Name': "$bundleName",
+                                   'Bundle-SymbolicName': "$bundleName",
+                                   'Bundle-Version': Versions.makeOsgiCompliantVersion("${project.version}"))
+                    }
                 }
 
                 /**
