@@ -12,7 +12,7 @@ import com.ngc.seaside.gradle.plugins.util.TreePath
  */
 class DependencyReportTask extends DefaultTask {
 
-   boolean individualSubProjects = true
+   boolean individualSubProjects = false
    protected String projectDescription = "project"
    protected String dependencyDescription = "dependency"
 
