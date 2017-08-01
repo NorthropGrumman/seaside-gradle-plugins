@@ -24,6 +24,11 @@ buildscript {
 
 
 subprojects {
+
+   tasks.withType(com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask) {
+           individualSubProjects = false
+   }
+
     apply plugin: 'com.ngc.seaside.parent'
     group = 'com.ngc.seaside'
     version = '1.0.1-SNAPSHOT'

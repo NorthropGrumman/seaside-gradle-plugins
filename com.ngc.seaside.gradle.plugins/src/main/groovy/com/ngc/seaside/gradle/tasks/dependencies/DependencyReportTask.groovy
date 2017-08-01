@@ -12,6 +12,7 @@ import com.ngc.seaside.gradle.plugins.util.TreePath
  */
 class DependencyReportTask extends DefaultTask {
 
+   boolean individualSubProjects = true
    protected String projectDescription = "project"
    protected String dependencyDescription = "dependency"
 
@@ -26,30 +27,47 @@ class DependencyReportTask extends DefaultTask {
        * is so that each subproject that the task is run against doesn't crawl through the whole project
        * when it is ever only needed once.
        */
-      if (project.getParent().getSubprojects()[0] == project) {
-         TreeNode root = new TreeNode(new TreePath(project.getParent().name), projectDescription,
-                                      new TreeNode.NameComparator())
 
-         project.getParent().getSubprojects().each { subProject ->
-            subProject.configurations.each { configuration ->
-               configuration.setTransitive(true)
+      Project tempProject
+      if (individualSubProjects) {
+         tempProject = project
+      } else {
+         tempProject = project.getParent()
+      }
+
+      TreeNode root = new TreeNode(new TreePath(project.getParent().name), projectDescription,
+                                   new TreeNode.NameComparator())
+
+      if (tempProject.getSubprojects().size() > 0) {
+         if (tempProject.getSubprojects()[0] == project) {
+            tempProject.getSubprojects().each { subProject ->
+               subProject.configurations.each { configuration ->
+                  configuration.setTransitive(true)
+               }
+               if (!root.addChild(buildDependenciesForProject(subProject, root))) {
+                  project.getLogger().info("Failed to add dependencies children to root node ${root}")
+               }
             }
-            root = buildDependenciesForProject(subProject, root)
-         }
 
-         printReport(project.getParent(), root)
+            printReport(tempProject, root, tempProject.getBuildDir())
+         }
+      } else {
+         if (!root.addChild(buildDependenciesForProject(tempProject, root))) {
+            project.getLogger().info("Failed to add dependencies children to root node ${root}")
+         }
+         printReport(tempProject, root, tempProject.getProjectDir())
       }
    }
 
-   void printReport(Project project, TreeNode root) {
+   void printReport(Project project, TreeNode root, File outputDir) {
 
-      if(!project.getBuildDir().exists()) {
-         if(!project.getBuildDir().mkdir()){
-            project.getLogger().info("Failed to make directory  ${project.getBuildDir()}")
+      if (!outputDir.exists()) {
+         if (!outputDir.mkdir()) {
+            project.getLogger().info("Failed to make directory  ${project.outputDir()}")
          }
       }
 
-      def report = new File(project.getBuildDir(), project.name + "_DependencyReport.txt")
+      def report = new File(outputDir, project.name + "_DependencyReport.txt")
 
       report.write("Non-Transitive Dependencies")
       report << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -85,14 +103,11 @@ class DependencyReportTask extends DefaultTask {
    }
 
    String stringifyNode(TreeNode node, String indent) {
-      String str = ""
+      String str = indent
 
       if (node.isRoot()) {
-         str += node.name
-         str += "\n"
          indent += "    "
       } else {
-         str += indent
          if (node.getParent().indexOfChild(node.name) < node.getParent().getChildren().size() - 1) {
             indent += "|   "
          } else {
@@ -100,9 +115,10 @@ class DependencyReportTask extends DefaultTask {
          }
 
          str += "|--"
-         str += node.name
-         str += "\n"
       }
+
+      str += node.name + "\n"
+
       for (TreeNode childNode in node.getChildren()) {
          str += stringifyNode(childNode, indent)
       }
@@ -116,10 +132,14 @@ class DependencyReportTask extends DefaultTask {
     * @param root the current root node of the dependency tree
     * @return
     */
-   TreeNode buildDependenciesForProject(Project currentProject, TreeNode root) {
-      TreeNode subProjectNode = new TreeNode(new TreePath(root.getPath(), currentProject.name), projectDescription,
-                                             new TreeNode.NameComparator())
-      root.addChild(subProjectNode)
+   TreeNode buildDependenciesForProject(Project currentProject, TreeNode parentNode) {
+
+      TreeNode projectNode = new TreeNode(new TreePath(parentNode.getPath(), currentProject.name), projectDescription,
+                                          new TreeNode.NameComparator())
+
+      if (!parentNode.addChild(projectNode)) {
+         project.getLogger().info("Failed to add  ${projectNode} to parent node ${parentNode}")
+      }
 
       (currentProject.configurations + currentProject.buildscript.configurations).each { configuration ->
          if (isConfigurationResolvable(configuration)) {
@@ -129,21 +149,23 @@ class DependencyReportTask extends DefaultTask {
             //this problem should be minor at most.
 
             configuration.incoming.resolutionResult.allDependencies.collect {
-
                if (it.hasProperty("from")) {
+
                   if (it.from.toString().contains("project")) {
                      nodeMap.clear()
 
                      TreeNode nonTransitiveNode = new TreeNode(
-                           new TreePath(subProjectNode.getPath(), it.selected.id.toString()), dependencyDescription,
+                           new TreePath(projectNode.getPath(), it.selected.id.toString()), dependencyDescription,
                            new TreeNode.NameComparator())
-                     if (!subProjectNode.addChild(nonTransitiveNode)) {
-                        project.getLogger().info("Failed to add  ${nonTransitiveNode} to parent node ${subProjectNode}")
+
+                     if (!projectNode.addChild(nonTransitiveNode)) {
+                        project.getLogger().info("Failed to add  ${nonTransitiveNode} to parent node ${projectNode}")
                      }
                      nodeMap.put(it.selected.id.toString(), nonTransitiveNode)
 
                   } else {
                      if (nodeMap.containsKey(it.from.id.toString())) {
+
                         TreeNode transitiveNode = new TreeNode(
                               new TreePath(nodeMap.get(it.from.id.toString()).getPath(), it.selected.id.toString()),
                               dependencyDescription,
@@ -158,14 +180,13 @@ class DependencyReportTask extends DefaultTask {
                      } else {
                         project.getLogger().info("Expected to find ${it.from.id.toString()} in node map, but didn't")
                      }
-
                   }
                }
             }
          }
       }
 
-      return root
+      return projectNode
    }
 
    /**
