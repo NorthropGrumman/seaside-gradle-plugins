@@ -27,6 +27,8 @@ class DependencyReportTask extends DefaultTask {
        * the first subproject is called, and it won't do anything for any subsequent subprojects. This
        * is so that each subproject that the task is run against doesn't crawl through the whole project
        * when it is ever only needed once.
+       *
+       * This may not work in the event that the seaside.parent plugin isn't applied to the first subproject.
        */
 
       Project tempProject
@@ -90,12 +92,10 @@ class DependencyReportTask extends DefaultTask {
       def report = new File(outputDir, project.name + "_DependencyReport.txt")
 
       report.write("Non-Transitive Dependencies")
-      report << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-      report << "\n" + stringifyTransients(root)
+      report << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n${stringifyTransients(root)}"
 
       report << "\n \nHierarchy of Dependencies"
-      report << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-      report << "\n" + stringifyNode(root, "")
+      report << "\n~~~~~~~~~~~~~~~~~~~~~~~~~\n${stringifyNode(root, "")}"
    }
 
    Set gatherTransients(TreeNode node) {
