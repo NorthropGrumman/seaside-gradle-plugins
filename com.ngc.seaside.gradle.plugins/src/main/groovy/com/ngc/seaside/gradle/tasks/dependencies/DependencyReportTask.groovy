@@ -13,6 +13,7 @@ import com.ngc.seaside.gradle.plugins.util.TreePath
 class DependencyReportTask extends DefaultTask {
 
    boolean individualSubProjects = false
+   String reportOutputDir = project.getProjectDir().path.toString()
    protected String projectDescription = "project"
    protected String dependencyDescription = "dependency"
 
@@ -38,24 +39,43 @@ class DependencyReportTask extends DefaultTask {
       TreeNode root = new TreeNode(new TreePath(project.getParent().name), projectDescription,
                                    new TreeNode.NameComparator())
 
+      File outputDir
+      if(reportOutputDir != project.getProjectDir().path){
+         outputDir = new File(reportOutputDir)
+      } else {
+         if (individualSubProjects) {
+            outputDir = tempProject.getProjectDir()
+         } else {
+            outputDir = tempProject.getBuildDir()
+         }
+      }
+
       if (tempProject.getSubprojects().size() > 0) {
          if (tempProject.getSubprojects()[0] == project) {
             tempProject.getSubprojects().each { subProject ->
                subProject.configurations.each { configuration ->
-                  configuration.setTransitive(true)
+                  //Using a try-catch block since there doesn't seem to be a way to determine if the configuration
+                  //was resolved prior to attempting the setTransitive method.
+                  try {
+                     configuration.setTransitive(true)
+                  } catch(Exception e) {
+                     project.getLogger().info("Failed to set configuration transitive property to true. ${configuration}")
+                  }
+
                }
                if (!root.addChild(buildDependenciesForProject(subProject, root))) {
                   project.getLogger().info("Failed to add dependencies children to root node ${root}")
                }
             }
 
-            printReport(tempProject, root, tempProject.getBuildDir())
+            printReport(tempProject, root, outputDir)
          }
       } else {
          if (!root.addChild(buildDependenciesForProject(tempProject, root))) {
             project.getLogger().info("Failed to add dependencies children to root node ${root}")
          }
-         printReport(tempProject, root, tempProject.getProjectDir())
+
+         printReport(tempProject, root, outputDir)
       }
    }
 
