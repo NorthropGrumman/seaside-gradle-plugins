@@ -5,6 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Compression
 import org.gradle.api.tasks.bundling.Tar
+import org.gradle.api.tasks.bundling.Zip
 
 /**
  * The seaside distribution plugin provides calls to common task, sets up the default dependencies for BLoCS and OSGi along
@@ -60,16 +61,16 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             archives
          }
 
-         task('clean') {
+         tasks.getByName('clean') {
             doLast {
                p.getLogger().trace("Removing build distribution directory '${seasideDistribution.buildDir}'.")
                delete(seasideDistribution.buildDir)
             }
          }
 
-         task('copyConfig', type: Copy){
+         task('copyConfig', type: Copy) {
             from 'src/main/resources'
-            include'**/config.ini'
+            include '**/config.ini'
             expand(p.properties)
             into { seasideDistribution.distributionDir }
          }
@@ -77,13 +78,17 @@ class SeasideDistributionPlugin implements Plugin<Project> {
          task('copyResources', type: Copy, dependsOn: [copyConfig]) {
 
             from 'src/main/resources'
-            exclude'**/config.ini'
+            exclude '**/config.ini'
             into { seasideDistribution.distributionDir }
          }
 
          task('copyPlatformBundles', type: Copy) {
             from configurations.platform
             into { "${seasideDistribution.distributionDir}/platform" }
+         }
+
+         task('zip', type: Zip) {
+            from { "${seasideDistribution.distributionDir}" }
          }
 
          task('tar', type: Tar) {
@@ -119,17 +124,25 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             into { "${seasideDistribution.distributionDir}/bundles" }
          }
 
-         task('build', dependsOn: [copyResources,
-                                   copyPlatformBundles,
-                                   copyThirdPartyBundles,
-                                   copyBlocsBundles,
-                                   copyBundles,
-                                   tar]) {
+         task('buildDist', dependsOn: [copyResources,
+                                       copyPlatformBundles,
+                                       copyThirdPartyBundles,
+                                       copyBlocsBundles,
+                                       copyBundles,
+                                       tar,
+                                       zip]) {
          }
+
+         assemble.dependsOn(buildDist)
 
          afterEvaluate {
             project.tasks.getByName('tar') { tar ->
                archiveName = "${seasideDistribution.distributionName}.tar.gz"
+               destinationDir = file("${seasideDistribution.distributionDestDir}")
+            }
+
+            project.tasks.getByName('zip') { zip ->
+               archiveName = "${seasideDistribution.distributionName}.zip"
                destinationDir = file("${seasideDistribution.distributionDestDir}")
             }
 
@@ -146,10 +159,8 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             }
          }
 
-         defaultTasks = ['build']
       }
 
    }
-
 
 }
