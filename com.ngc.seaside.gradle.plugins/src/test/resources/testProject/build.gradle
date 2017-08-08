@@ -1,0 +1,40 @@
+/*This is to test the listDependencies task
+* CD to th test sub-directory and run ../gradlew listDependencies
+*/
+
+/**
+ * jellyfish-cli
+ */
+buildscript {
+    repositories {
+        mavenLocal()
+
+        maven {
+            url nexusConsolidated
+        }
+    }
+
+   dependencies {
+      classpath 'org.xtext:xtext-gradle-plugin:1.0.2'
+      classpath 'com.ngc.seaside:gradle.plugins:1.4.4-SNAPSHOT'
+      classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
+   }
+}
+
+
+
+subprojects {
+
+   tasks.withType(com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask) {
+           individualSubProjects = false
+   }
+
+    apply plugin: 'com.ngc.seaside.parent'
+    group = 'com.ngc.seaside'
+    version = '1.0.1-SNAPSHOT'
+
+    ext {
+        xtextVersion = '2.10.0'
+        blocsVersion = '2.1'
+    }
+}

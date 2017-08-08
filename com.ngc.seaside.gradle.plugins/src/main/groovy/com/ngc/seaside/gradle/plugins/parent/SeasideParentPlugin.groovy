@@ -1,10 +1,11 @@
 package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
+
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
+import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.plugins.util.Versions
-
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -30,6 +31,7 @@ class SeasideParentPlugin implements Plugin<Project> {
     @Override
     void apply(Project p) {
         p.configure(p) {
+
             // Make sure that all required properties are set.
             GradleUtil.requireProperties(p.properties,
                                          'nexusConsolidated',
@@ -172,6 +174,9 @@ class SeasideParentPlugin implements Plugin<Project> {
 
             task('downloadDependencies', type: DownloadDependenciesTask, group: 'Upload',
                  description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.'){}
+
+            task('dependencyReport', type: DependencyReportTask,
+                 description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies'){}
 
             defaultTasks = ['build']
 
