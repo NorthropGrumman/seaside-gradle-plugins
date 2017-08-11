@@ -1,11 +1,10 @@
 package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
-
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
-import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
-import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.plugins.util.Versions
+import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
+import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -173,10 +172,29 @@ class SeasideParentPlugin implements Plugin<Project> {
             }
 
             task('downloadDependencies', type: DownloadDependenciesTask, group: 'Upload',
-                 description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.'){}
+                 description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.') {}
+
+            task('cleanupDependencies', type: DownloadDependenciesTask, group: 'Clean',
+                 description: 'Remove unused dependencies from repository.') {
+                doLast {
+                    ext.actualRepository = p.downloadDependencies.localRepository ?
+                                           p.downloadDependencies.localRepository : project.file(
+                            [p.rootProject.projectDir, 'gradle', 'repository'].join(File.separator))
+
+                    logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to ${actualRepository.absolutePath}.")
+                    project.delete(actualRepository)
+                    project.copy {
+                        from localRepository
+                        into actualRepository
+                    }
+                    project.delete(localRepository)
+                }
+            }
+
 
             task('dependencyReport', type: DependencyReportTask,
-                 description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies'){}
+                 description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies') {
+            }
 
             defaultTasks = ['build']
 
