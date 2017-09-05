@@ -123,6 +123,23 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 
             into { "${seasideDistribution.distributionDir}/bundles" }
          }
+//TODO: Add uploadArchives task
+         uploadArchives {
+            repositories {
+               mavenDeployer {
+                  // Use the main repo for full releases.
+                  repository(url: nexusReleases) {
+                     // Make sure that nexusUsername and nexusPassword are in your
+                     // ${gradle.user.home}/gradle.properties file.
+                     authentication(userName: nexusUsername, password: nexusPassword)
+                  }
+                  // If the version has SNAPSHOT in the name, use the snapshot repo.
+                  snapshotRepository(url: nexusSnapshots) {
+                     authentication(userName: nexusUsername, password: nexusPassword)
+                  }
+               }
+            }
+         }
 
          task('buildDist', dependsOn: [copyResources,
                                        copyPlatformBundles,
