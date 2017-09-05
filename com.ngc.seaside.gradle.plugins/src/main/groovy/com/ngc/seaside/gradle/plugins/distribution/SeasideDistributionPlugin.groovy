@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.distribution
 
+import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
@@ -42,6 +43,16 @@ class SeasideDistributionPlugin implements Plugin<Project> {
    void apply(Project p) {
 
       p.configure(p) {
+
+         plugins.apply 'maven'
+
+         // Make sure that all required properties are set.
+         GradleUtil.requireProperties(p.properties,
+                                      'nexusConsolidated',
+                                      'nexusReleases',
+                                      'nexusSnapshots',
+                                      'nexusUsername',
+                                      'nexusPassword')
 
          extensions.create("seasideDistribution", SeasideDistributionPluginExtension)
 
