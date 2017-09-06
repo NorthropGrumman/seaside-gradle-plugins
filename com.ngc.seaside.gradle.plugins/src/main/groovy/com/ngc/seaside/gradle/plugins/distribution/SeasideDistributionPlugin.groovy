@@ -134,7 +134,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 
             into { "${seasideDistribution.distributionDir}/bundles" }
          }
-//TODO: Add uploadArchives task
+
          uploadArchives {
             repositories {
                mavenDeployer {
