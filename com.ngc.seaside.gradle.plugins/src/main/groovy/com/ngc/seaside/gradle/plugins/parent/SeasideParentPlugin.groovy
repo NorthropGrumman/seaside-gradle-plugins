@@ -198,6 +198,8 @@ class SeasideParentPlugin implements Plugin<Project> {
 
             defaultTasks = ['build']
 
+            //configurations.compile.create("includeTransitiveSources")
+            //configurations.compile.includeTransitiveSources = true
         }
     }
 }
