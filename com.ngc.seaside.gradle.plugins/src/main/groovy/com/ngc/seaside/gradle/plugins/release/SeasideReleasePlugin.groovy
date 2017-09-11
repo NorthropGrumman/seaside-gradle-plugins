@@ -7,8 +7,6 @@ import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 /**
  * Created by J57467 on 9/10/2017.

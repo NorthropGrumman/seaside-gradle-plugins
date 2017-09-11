@@ -176,10 +176,11 @@ class SeasideParentPlugin implements Plugin<Project> {
 
             task('cleanupDependencies', type: DownloadDependenciesTask, group: 'Clean',
                  description: 'Remove unused dependencies from repository.') {
+                customRepo = p.getProjectDir().path + "/build/dependencies-tmp"
                 doLast {
                     ext.actualRepository = p.downloadDependencies.localRepository ?
                                            p.downloadDependencies.localRepository : project.file(
-                            [p.rootProject.projectDir, 'gradle', 'repository'].join(File.separator))
+                            [p.buildDir, 'dependencies'].join(File.separator))
 
                     logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to ${actualRepository.absolutePath}.")
                     project.delete(actualRepository)
@@ -197,9 +198,6 @@ class SeasideParentPlugin implements Plugin<Project> {
             }
 
             defaultTasks = ['build']
-
-            //configurations.compile.create("includeTransitiveSources")
-            //configurations.compile.includeTransitiveSources = true
         }
     }
 }

@@ -51,11 +51,9 @@ class DownloadDependenciesTask extends DefaultTask {
                 )
 
                 configuration.incoming.files.each { file ->
-                    println file
                     libraryFiles[file.name] = file
                 }
             }
-            println configuration.transitive
         }
 
         project.getLogger().info("Dependencies of all configurations: ${componentIds.collect { it.toString() }.join(', ')}")
