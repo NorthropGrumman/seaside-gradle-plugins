@@ -12,7 +12,9 @@ class SeasideReleaseTask extends DefaultTask {
         createReleaseTag(releaseExtension.tagName)
         String nextVersion = getNextVersion(project.version as String, releaseExtension.versionSuffix)
         logger.debug("Updating '$releaseExtension.versionFile' contents to $nextVersion")
-        releaseExtension.versionFile.text = nextVersion
+
+        // TODO: need to only replace the version = <VERSION> text in build.gradle
+        releaseExtension.setVersionOnFile(nextVersion)
         commitVersionFile("Prepare next release v$nextVersion", releaseExtension)
         if (releaseExtension.push) {
             pushChanges(releaseExtension.tagName)
@@ -20,8 +22,8 @@ class SeasideReleaseTask extends DefaultTask {
     }
 
     def commitVersionFile(String msg, SeasideReleaseExtension releaseExtension) {
-        logger.debug("Committing version file: $msg")
-        git 'commit', '-m', msg, releaseExtension.versionFile.name
+        logger.info("Committing version file: $msg")
+        git 'commit', '-m', "\"$msg\"", ':/'+ releaseExtension.versionFile.name
     }
 
     def createReleaseTag(String tagName) {
@@ -44,16 +46,22 @@ class SeasideReleaseTask extends DefaultTask {
     def git(Object[] arguments) {
         logger.debug("git $arguments")
         def output = new ByteArrayOutputStream()
+
+        // TODO: evaluate a better wait to catch git command execution return.
+        // The .assertNormalExitValue will throw an exception when you do gradlew release and a commit is already made..
+        // works fine for gradlew release[Major/Minor]Version...
+        // We need a better way to tell the user what occurred without throwing an except which is what the assert does
         project.exec {
             executable 'git'
             args arguments
             standardOutput output
             ignoreExitValue = true
-        }.assertNormalExitValue()
+        }
+        //.assertNormalExitValue()
+
         String gitOutput = output.toString().trim()
         if (!gitOutput.isEmpty()) {
             logger.debug(gitOutput)
         }
     }
-
 }

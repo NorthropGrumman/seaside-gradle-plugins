@@ -1,11 +1,14 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.SeasideReleaseTask
 import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategy
 import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 /**
  * Created by J57467 on 9/10/2017.
@@ -16,33 +19,38 @@ class SeasideReleasePlugin implements Plugin<Project> {
     public static final String RELEASE_TASK_NAME = 'release'
     public static final String RELEASE_MAJOR_VERSION_TASK_NAME = 'releaseMajorVersion'
     public static final String RELEASE_MINOR_VERSION_TASK_NAME = 'releaseMinorVersion'
+    public static final String RELEASE_EXTENSION_NAME = 'release'
+
     @Override
     void apply(Project p) {
-        p.configure(p) {
 
-            task('release', type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
+        p.configure(p) {
+            def releaseExtension = p.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension, p)
+
+            task(RELEASE_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Creates a tagged non-SNAPSHOT release.') {}
 
-            task('releaseMajorVersion', type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
+            task(RELEASE_MAJOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {}
 
-            task('releaseMinorVersion', type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
+            task(RELEASE_MINOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {}
 
-            def versionFromFile = releaseExtension.versionFile.text.trim()
-            def taskNames = project.gradle.startParameter.taskNames
+            def versionFromFile = releaseExtension.getVersionFromFile()
+            def taskNames = p.gradle.startParameter.taskNames
 
-            VersionUpgradeStrategy upgradeStrategy = resolveVersionUpgradeStrategy(taskNames, releaseExtension.versionSuffix)
+            VersionUpgradeStrategy upgradeStrategy =
+                    resolveVersionUpgradeStrategy(taskNames, releaseExtension.versionSuffix)
             def releaseVersion = upgradeStrategy.getVersion(versionFromFile)
             p.logger.debug("Using release version '$releaseVersion'")
-            if (!project.gradle.startParameter.dryRun && (versionFromFile != releaseVersion)) {
+
+            if (!p.gradle.startParameter.dryRun && (versionFromFile != releaseVersion)) {
                 p.logger.debug("Writing release version '$releaseVersion' to file '$releaseExtension.versionFile'")
-                releaseExtension.versionFile.text = releaseVersion
+                // TODO: need to only replace the version = <VERSION> text in build.gradle
+                releaseExtension.setVersionOnFile(releaseVersion)
             }
             p.logger.debug("Setting project version to release version '$releaseVersion'")
-            project.version = releaseVersion
-
-            defaultTasks = ['build']
+            p.version = releaseVersion
         }
 
     }
