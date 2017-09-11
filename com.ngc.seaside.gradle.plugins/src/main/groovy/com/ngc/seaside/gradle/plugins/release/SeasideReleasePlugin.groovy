@@ -46,7 +46,6 @@ class SeasideReleasePlugin implements Plugin<Project> {
 
             if (!p.gradle.startParameter.dryRun && (versionFromFile != releaseVersion)) {
                 p.logger.debug("Writing release version '$releaseVersion' to file '$releaseExtension.versionFile'")
-                // TODO: need to only replace the version = <VERSION> text in build.gradle
                 releaseExtension.setVersionOnFile(releaseVersion)
             }
             p.logger.debug("Setting project version to release version '$releaseVersion'")

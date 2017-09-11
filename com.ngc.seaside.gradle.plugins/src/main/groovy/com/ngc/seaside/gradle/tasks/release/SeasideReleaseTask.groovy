@@ -13,7 +13,6 @@ class SeasideReleaseTask extends DefaultTask {
         String nextVersion = getNextVersion(project.version as String, releaseExtension.versionSuffix)
         logger.debug("Updating '$releaseExtension.versionFile' contents to $nextVersion")
 
-        // TODO: need to only replace the version = <VERSION> text in build.gradle
         releaseExtension.setVersionOnFile(nextVersion)
         commitVersionFile("Prepare next release v$nextVersion", releaseExtension)
         if (releaseExtension.push) {
