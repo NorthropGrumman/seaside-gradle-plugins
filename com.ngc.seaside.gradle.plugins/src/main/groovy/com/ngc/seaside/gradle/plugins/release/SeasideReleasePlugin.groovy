@@ -26,13 +26,19 @@ class SeasideReleasePlugin implements Plugin<Project> {
             def releaseExtension = p.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension, p)
 
             task(RELEASE_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
-                 description: 'Creates a tagged non-SNAPSHOT release.') {}
+                 description: 'Creates a tagged non-SNAPSHOT release.') {
+
+            }
 
             task(RELEASE_MAJOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
-                 description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {}
+                 description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
+
+            }
 
             task(RELEASE_MINOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
-                 description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {}
+                 description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
+
+            }
 
             def versionFromFile = releaseExtension.getVersionFromFile()
             def taskNames = p.gradle.startParameter.taskNames
