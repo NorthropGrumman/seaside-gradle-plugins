@@ -9,7 +9,9 @@ class SeasideReleaseExtension {
 
     private final DEFAULT_VERSION_FILE = [project.rootProject.projectDir, 'build.gradle'].join(File.separator)
     private static final DEFAULT_DEPENDS_ON = Collections.singletonList('build')
+    // TODO default push needs to be set to true
     private static final DEFAULT_PUSH = false
+
     private static final DEFAULT_TAG_PREFIX = 'v'
     private static final DEFAULT_VERSION_SUFFIX = '-SNAPSHOT'
     private static final Pattern PATTERN = Pattern.
