@@ -4,7 +4,7 @@ import org.gradle.api.GradleException
 
 final class VersionUpgradeStrategyFactory {
 
-    public static VersionInfo parseVersionInfo(String version) {
+    static VersionInfo parseVersionInfo(String version) {
         def (String majorPart, String minorPart, String patchPart) = version.tokenize('.')
 
         if (majorPart == null || minorPart == null || patchPart == null) {
@@ -27,7 +27,7 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
-    public static VersionUpgradeStrategy createMajorVersionUpgradeStrategy(String versionSuffix) {
+    static VersionUpgradeStrategy createMajorVersionUpgradeStrategy(String versionSuffix) {
         return new VersionUpgradeStrategy() {
             @Override
             String getVersion(String currentVersion) {
@@ -37,7 +37,7 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
-    public static VersionUpgradeStrategy createMinorVersionUpgradeStrategy(String versionSuffix) {
+    static VersionUpgradeStrategy createMinorVersionUpgradeStrategy(String versionSuffix) {
         return new VersionUpgradeStrategy() {
             @Override
             String getVersion(String currentVersion) {
@@ -47,7 +47,7 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
-    public static VersionUpgradeStrategy createPatchVersionUpgradeStrategy(String versionSuffix) {
+    static VersionUpgradeStrategy createPatchVersionUpgradeStrategy(String versionSuffix) {
         return new VersionUpgradeStrategy() {
             @Override
             String getVersion(String currentVersion) {
@@ -56,7 +56,7 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
-    public static VersionUpgradeStrategy createSnapshotVersionUpgradeStrategy() {
+    static VersionUpgradeStrategy createSnapshotVersionUpgradeStrategy() {
         return new VersionUpgradeStrategy() {
             @Override
             String getVersion(String currentVersion) {
@@ -65,7 +65,7 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
-    public static final class VersionInfo {
+    static final class VersionInfo {
 
         final int major
         final int minor
