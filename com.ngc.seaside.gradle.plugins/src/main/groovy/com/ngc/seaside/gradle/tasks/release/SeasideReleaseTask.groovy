@@ -17,6 +17,9 @@ class SeasideReleaseTask extends DefaultTask {
         commitVersionFile("Prepare next release v$nextVersion", releaseExtension)
         if (releaseExtension.push) {
             pushChanges(releaseExtension.tagName)
+            // TODO: add nexus functionality here
+            // If nexus system property (-Pnexus) == true
+            // run uploadArchives to upload release to nexus
         }
     }
 
