@@ -43,6 +43,7 @@ class SeasideReleaseExtensionTest {
         Assert.assertEquals('1.2.0-SNAPSHOT', extension.getSemanticVersion("version =   1.2.0-SNAPSHOT"))
         Assert.assertEquals('1.2.7-SNAPSHOT', extension.getSemanticVersion("  version= 1.2.7-SNAPSHOT"))
         Assert.assertEquals('1.5.7-SNAPSHOT', extension.getSemanticVersion("version=1.5.7-SNAPSHOT"))
+        Assert.assertEquals('1.5.7', extension.getSemanticVersion("version=1.5.7"))
         Assert.assertEquals(null, extension.getSemanticVersion("com.foo.bar:foo.bar:1.0.0-SNAPSHOT"))
     }
 }

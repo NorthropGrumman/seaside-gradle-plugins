@@ -24,26 +24,50 @@ class VersionUpgradeStrategyFactoryTest {
 
     @Test
     void doesCreateMajorVersionUpgradeStrategy() {
-        def strategy = VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(SUFFIX);
+        def strategy = VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(SUFFIX)
         Assert.assertEquals("2.0.0", strategy.getVersion("1.2.3-SNAPSHOT"))
     }
 
     @Test
+    void doesCreateMajorVersionUpgradeStrategyWithoutSnapshot() {
+        def strategy = VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(SUFFIX)
+        Assert.assertEquals("2.0.0", strategy.getVersion("1.2.3"))
+    }
+
+    @Test
     void doesCreateMinorVersionUpgradeStrategy() {
-        def strategy = VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(SUFFIX);
+        def strategy = VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(SUFFIX)
         Assert.assertEquals("1.3.0", strategy.getVersion("1.2.3-SNAPSHOT"))
+    }
+
+   @Test
+    void doesCreateMinorVersionUpgradeStrategyWithoutSnapshot() {
+        def strategy = VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(SUFFIX)
+        Assert.assertEquals("1.3.0", strategy.getVersion("1.2.3"))
     }
 
     @Test
     void doesCreatePatchVersionUpgradeStrategy() {
-        def strategy = VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(SUFFIX);
+        def strategy = VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(SUFFIX)
         Assert.assertEquals("1.2.3", strategy.getVersion("1.2.3-SNAPSHOT"))
     }
 
     @Test
+    void doesCreatePatchVersionUpgradeStrategyWithoutSnapshot() {
+        def strategy = VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(SUFFIX)
+        Assert.assertEquals("1.2.3", strategy.getVersion("1.2.3"))
+    }
+
+    @Test
     void doesCreateSnapshotVersionUpgradeStrategy() {
-        def strategy = VersionUpgradeStrategyFactory.createSnapshotVersionUpgradeStrategy();
+        def strategy = VersionUpgradeStrategyFactory.createSnapshotVersionUpgradeStrategy()
         Assert.assertEquals("1.2.3-SNAPSHOT", strategy.getVersion("1.2.3-SNAPSHOT"))
+    }
+
+    @Test
+    void doesCreateSnapshotVersionUpgradeStrategyWithoutSnapshot() {
+        def strategy = VersionUpgradeStrategyFactory.createSnapshotVersionUpgradeStrategy()
+        Assert.assertNotEquals("1.2.3-SNAPSHOT", strategy.getVersion("1.2.3"))
     }
 
 }

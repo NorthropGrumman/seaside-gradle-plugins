@@ -25,33 +25,37 @@ class SeasideReleasePlugin implements Plugin<Project> {
         p.configure(p) {
             def releaseExtension = p.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension, p)
 
+            // Define the tasks
             task(RELEASE_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Creates a tagged non-SNAPSHOT release.') {
-
+                dependsOn 'build'
             }
 
             task(RELEASE_MAJOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
+                dependsOn 'build'
             }
 
             task(RELEASE_MINOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
-
+                dependsOn 'build'
             }
 
+            // Get project release version and prepare build project/file for release
             def versionFromFile = releaseExtension.getVersionFromFile()
             def taskNames = p.gradle.startParameter.taskNames
 
             VersionUpgradeStrategy upgradeStrategy =
                     resolveVersionUpgradeStrategy(taskNames, releaseExtension.versionSuffix)
             def releaseVersion = upgradeStrategy.getVersion(versionFromFile)
-            p.logger.debug("Using release version '$releaseVersion'")
+            p.getLogger().debug("Using release version '$releaseVersion'")
 
             if (!p.gradle.startParameter.dryRun && (versionFromFile != releaseVersion)) {
                 p.logger.debug("Writing release version '$releaseVersion' to file '$releaseExtension.versionFile'")
                 releaseExtension.setVersionOnFile(releaseVersion)
             }
-            p.logger.debug("Setting project version to release version '$releaseVersion'")
+            println "**************************************************"
+            println ("Setting project version to '$releaseVersion'")
             p.version = releaseVersion
         }
 

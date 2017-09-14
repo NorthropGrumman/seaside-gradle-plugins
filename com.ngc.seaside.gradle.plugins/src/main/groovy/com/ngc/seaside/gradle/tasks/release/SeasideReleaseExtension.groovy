@@ -15,7 +15,8 @@ class SeasideReleaseExtension {
     private static final DEFAULT_TAG_PREFIX = 'v'
     private static final DEFAULT_VERSION_SUFFIX = '-SNAPSHOT'
     private static final Pattern PATTERN = Pattern.
-            compile("^\\s*version\\s*=\\s*[\"']?(?!\\.)(\\d+(\\.\\d+)+)([-.][A-Z]+)[\"']?(?![\\d.])\$", Pattern.MULTILINE)
+            compile("^\\s*version\\s*=\\s*[\"']?(?!\\.)(\\d+(\\.\\d+)+)([-.][A-Z]+)?[\"']?(?![\\d.])\$",
+                    Pattern.MULTILINE)
 
     private final Project project
     private final File versionFile
@@ -43,13 +44,24 @@ class SeasideReleaseExtension {
         return getSemanticVersion(versionFile.text.trim())
     }
 
-    static String getSemanticVersion(String input) {
+    String getSemanticVersion(String input) {
         Matcher matcher = PATTERN.matcher(input.trim())
-        if (matcher.find()) {
-            return matcher.group(1) + matcher.group(3)
-        }
+        StringBuilder sb = new StringBuilder()
 
-        return null
+        if (matcher.find()) {
+            String version = matcher.group(1)
+            String suffix = matcher.group(3)
+
+            if (version != null) {
+                sb.append(version)
+                sb.append((suffix != null) ? suffix : "")
+            }
+            return sb
+        } else {
+            project.getLogger().error("\nFailed to extract version information from file contents:" + input)
+            project.getLogger().error("Does the version information follow Semantic Versioning Format?\n")
+            return null
+        }
     }
 
     void setVersionOnFile(String newVersion) {

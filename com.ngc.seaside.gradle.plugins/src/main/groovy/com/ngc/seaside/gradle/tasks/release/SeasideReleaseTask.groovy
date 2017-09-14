@@ -7,47 +7,55 @@ class SeasideReleaseTask extends DefaultTask {
 
     @TaskAction
     def release() {
+        println "**************************************************"
+        println "Beginning the release task for $project.version"
         SeasideReleaseExtension releaseExtension = project.getExtensions().getByType(SeasideReleaseExtension.class)
-        commitVersionFile("Release v$project.version", releaseExtension)
+
+        commitVersionFile("Release of version $project.version", releaseExtension)
         createReleaseTag(releaseExtension.tagName)
+
+        // TODO: add nexus functionality here
+        // If nexus system property (-Pnexus) == true
+        // run uploadArchives to upload release to nexus
+
+        // Prepare next release version's snapshot
         String nextVersion = getNextVersion(project.version as String, releaseExtension.versionSuffix)
-        logger.debug("Updating '$releaseExtension.versionFile' contents to $nextVersion")
+        println("Updating '$releaseExtension.versionFile' version to $nextVersion")
 
         releaseExtension.setVersionOnFile(nextVersion)
-        commitVersionFile("Prepare next release v$nextVersion", releaseExtension)
+        commitVersionFile("Creating new $nextVersion version after release", releaseExtension)
+
+        // Push all those changes we had been making
         if (releaseExtension.push) {
             pushChanges(releaseExtension.tagName)
-            // TODO: add nexus functionality here
-            // If nexus system property (-Pnexus) == true
-            // run uploadArchives to upload release to nexus
-
         }
+        println "**************************************************"
     }
 
     def commitVersionFile(String msg, SeasideReleaseExtension releaseExtension) {
-        logger.info("Committing version file: $msg")
-        git 'commit', '-m', "\"$msg\"", ':/'+ releaseExtension.versionFile.name
+        project.getLogger().info("Committing version file: $msg")
+        git 'commit', '-m', "\"$msg\"", ':/' + releaseExtension.versionFile.name
     }
 
     def createReleaseTag(String tagName) {
-        logger.debug("Creating release tag: $tagName")
+        project.getLogger().debug("Creating release tag: $tagName")
         git 'tag', '-a', tagName, "-m Release $tagName"
     }
 
     def static getNextVersion(String currentVersion, String suffix) {
         def versionInfo = VersionUpgradeStrategyFactory.parseVersionInfo(currentVersion - suffix)
         int nextPatch = versionInfo.patch + 1
-        "$versionInfo.major.$versionInfo.minor.$nextPatch$suffix" as String
+        "${versionInfo.major}.${versionInfo.minor}.${nextPatch}${suffix}" as String
     }
 
     def pushChanges(String tag) {
-        logger.debug('Pushing changes to repository')
+        project.getLogger().debug('Pushing changes to repository')
         git 'push', 'origin', tag
         git 'push', 'origin', 'HEAD'
     }
 
     def git(Object[] arguments) {
-        logger.debug("git $arguments")
+        project.getLogger().debug("git $arguments")
         def output = new ByteArrayOutputStream()
 
         // TODO: evaluate a better wait to catch git command execution return.
@@ -64,7 +72,7 @@ class SeasideReleaseTask extends DefaultTask {
 
         String gitOutput = output.toString().trim()
         if (!gitOutput.isEmpty()) {
-            logger.debug(gitOutput)
+            project.getLogger().debug(gitOutput)
         }
     }
 }
