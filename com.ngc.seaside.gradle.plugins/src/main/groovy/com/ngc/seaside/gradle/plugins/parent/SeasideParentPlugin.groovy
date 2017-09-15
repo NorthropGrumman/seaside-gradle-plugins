@@ -1,10 +1,12 @@
 package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
+import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
+import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -49,6 +51,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             plugins.apply 'eclipse'
             plugins.apply 'org.sonarqube'
             plugins.apply 'jacoco'
+            plugins.apply SeasideReleasePlugin
 
             /**
              * Create a task for generating the source jar. This will also be uploaded to Nexus.
@@ -74,6 +77,11 @@ class SeasideParentPlugin implements Plugin<Project> {
                     tasks.getByName('javadoc') { doc ->
                         options.addStringOption('Xdoclint:none', '-quiet')
                     }
+                }
+
+                project.tasks.getByName('build') {
+                    SeasideReleaseExtension releaseExtension = project.getExtensions().getByType(SeasideReleaseExtension.class)
+                    project.version = releaseExtension.getReleaseVersion()
                 }
 
                 /**

@@ -2,8 +2,16 @@ package com.ngc.seaside.gradle.tasks.release
 
 import org.gradle.api.GradleException
 
+/**
+ * Factory class for semantic version upgrade strategy
+ */
 final class VersionUpgradeStrategyFactory {
 
+    /**
+     * Creates {@link VersionInfo} object from String
+     * @param version version to be create
+     * @return {@link VersionInfo} instance
+     */
     static VersionInfo parseVersionInfo(String version) {
         def (String majorPart, String minorPart, String patchPart) = version.tokenize('.')
 
@@ -18,6 +26,13 @@ final class VersionUpgradeStrategyFactory {
         new VersionInfo(major, minor, patch)
     }
 
+    /**
+     * Converts parts of the semantic version string to integer
+     * @param part defines which part of the version to parse (Major.Minor.Patch)
+     * @param version version to be parsed
+     * @param partName major or minor or patch
+     * @return integer of version part converted
+     */
     private static int parsePart(String part, String version, String partName) {
         try {
             return Integer.parseInt(part)
@@ -27,8 +42,13 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
-    static VersionUpgradeStrategy createMajorVersionUpgradeStrategy(String versionSuffix) {
-        return new VersionUpgradeStrategy() {
+    /**
+     * Strategy that creates a major version upgrade
+     * @param versionSuffix suffix to from extracted from the pre-release version
+     * @return {@link IVersionUpgradeStrategy} instance
+     */
+    static IVersionUpgradeStrategy createMajorVersionUpgradeStrategy(String versionSuffix) {
+        return new IVersionUpgradeStrategy() {
             @Override
             String getVersion(String currentVersion) {
                 VersionInfo info = parseVersionInfo(currentVersion - versionSuffix)
@@ -37,8 +57,13 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
-    static VersionUpgradeStrategy createMinorVersionUpgradeStrategy(String versionSuffix) {
-        return new VersionUpgradeStrategy() {
+    /**
+     * Strategy that creates a minor version upgrade
+     * @param versionSuffix suffix to from extracted from the pre-release version
+     * @return {@link IVersionUpgradeStrategy} instance
+     */
+    static IVersionUpgradeStrategy createMinorVersionUpgradeStrategy(String versionSuffix) {
+        return new IVersionUpgradeStrategy() {
             @Override
             String getVersion(String currentVersion) {
                 VersionInfo info = parseVersionInfo(currentVersion - versionSuffix)
@@ -47,8 +72,13 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
-    static VersionUpgradeStrategy createPatchVersionUpgradeStrategy(String versionSuffix) {
-        return new VersionUpgradeStrategy() {
+    /**
+     * Strategy that creates a patch version upgrade
+     * @param versionSuffix suffix to from extracted from the pre-release version
+     * @return {@link IVersionUpgradeStrategy} instance
+     */
+    static IVersionUpgradeStrategy createPatchVersionUpgradeStrategy(String versionSuffix) {
+        return new IVersionUpgradeStrategy() {
             @Override
             String getVersion(String currentVersion) {
                 currentVersion - versionSuffix
@@ -56,8 +86,13 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
-    static VersionUpgradeStrategy createSnapshotVersionUpgradeStrategy() {
-        return new VersionUpgradeStrategy() {
+    /**
+     * Strategy that creates a snapshot version upgrade
+     * @param versionSuffix suffix to from extracted from the pre-release version
+     * @return {@link IVersionUpgradeStrategy} instance
+     */
+    static IVersionUpgradeStrategy createSnapshotVersionUpgradeStrategy() {
+        return new IVersionUpgradeStrategy() {
             @Override
             String getVersion(String currentVersion) {
                 currentVersion
@@ -65,6 +100,9 @@ final class VersionUpgradeStrategyFactory {
         }
     }
 
+    /**
+     * POJO to store semantic version information
+     */
     static final class VersionInfo {
 
         final int major
