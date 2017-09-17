@@ -1,8 +1,8 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy
 import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.SeasideReleaseTask
-import com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy
 import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -28,12 +28,8 @@ class SeasideReleasePlugin implements Plugin<Project> {
             task(RELEASE_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
-                doLast{
-                    if (uploadArtifacts == "true") {
-                        println("TEST")
-                        // TODO: add nexus functionality here
-                        // If nexus system property (-PuploadArtifacts) == "true"
-                        // run uploadArchives to upload release to nexus
+                if (uploadArtifacts == "true") {
+                    finalizedBy {
                         uploadArchives
                     }
                 }
@@ -42,13 +38,9 @@ class SeasideReleasePlugin implements Plugin<Project> {
             task(RELEASE_MAJOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
-                doLast{
-                    if (uploadArtifacts == "true") {
-                        println("TEST")
-                        // TODO: add nexus functionality here
-                        // If nexus system property (-PuploadArtifacts) == "true"
-                        // run uploadArchives to upload release to nexus
-
+                if (uploadArtifacts == "true") {
+                    finalizedBy {
+                        uploadArchives
                     }
                 }
             }
@@ -56,13 +48,9 @@ class SeasideReleasePlugin implements Plugin<Project> {
             task(RELEASE_MINOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
-
-                doLast{
-                    if (uploadArtifacts == "true") {
-
-                        // TODO: add nexus functionality here
-                        // If nexus system property (-PuploadArtifacts) == "true"
-                        // run uploadArchives to upload release to nexus
+                if (uploadArtifacts == "true") {
+                    finalizedBy {
+                        uploadArchives
                     }
                 }
             }
@@ -92,13 +80,12 @@ class SeasideReleasePlugin implements Plugin<Project> {
             p.version = p.rootProject.releaseVersion
         }
     }
-
-    /**
-     * Resolves Semantic versioning upgrade strategy based on the release task called by the user
-     * @param taskNames all gradle tasks that are called by the user
-     * @param versionSuffix project version suffix
-     * @return {@link IVersionUpgradeStrategy}
-     */
+/**
+ * Resolves Semantic versioning upgrade strategy based on the release task called by the user
+ * @param taskNames all gradle tasks that are called by the user
+ * @param versionSuffix project version suffix
+ * @return {@link com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy}
+ */
     private static IVersionUpgradeStrategy resolveVersionUpgradeStrategy(List<String> taskNames, String versionSuffix) {
         if (taskNames.contains(RELEASE_MAJOR_VERSION_TASK_NAME)) {
             return VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(versionSuffix)

@@ -121,4 +121,8 @@ class SeasideReleaseExtension {
     File getVersionFile() {
         return versionFile
     }
+
+    def finalizedBy(String task) {
+        this.finalizedBy(task)
+    }
 }
