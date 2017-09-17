@@ -17,6 +17,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
     public static final String RELEASE_MAJOR_VERSION_TASK_NAME = 'releaseMajorVersion'
     public static final String RELEASE_MINOR_VERSION_TASK_NAME = 'releaseMinorVersion'
     public static final String RELEASE_EXTENSION_NAME = 'release'
+    boolean uploadArtifacts = "true"
 
     @Override
     void apply(Project p) {
@@ -27,16 +28,44 @@ class SeasideReleasePlugin implements Plugin<Project> {
             task(RELEASE_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
+                doLast{
+                    if (uploadArtifacts == "true") {
+                        println("TEST")
+                        // TODO: add nexus functionality here
+                        // If nexus system property (-PuploadArtifacts) == "true"
+                        // run uploadArchives to upload release to nexus
+
+                    }
+                }
             }
 
             task(RELEASE_MAJOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
+                doLast{
+                    if (uploadArtifacts == "true") {
+                        println("TEST")
+                        // TODO: add nexus functionality here
+                        // If nexus system property (-PuploadArtifacts) == "true"
+                        // run uploadArchives to upload release to nexus
+
+                    }
+                }
             }
 
             task(RELEASE_MINOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
+
+                doLast{
+                    if (uploadArtifacts == "true") {
+
+                        // TODO: add nexus functionality here
+                        // If nexus system property (-PuploadArtifacts) == "true"
+                        // run uploadArchives to upload release to nexus
+                        println("TEST")
+                    }
+                }
             }
 
             // Get project release version and prepare build project/file for release. Do this once

@@ -18,10 +18,6 @@ class SeasideReleaseTask extends DefaultTask {
             commitVersionFile("Release of version v$project.version", releaseExtension)
             createReleaseTag(releaseExtension.tagName)
 
-            // TODO: add nexus functionality here
-            // If nexus system property (-Pnexus) == true
-            // run uploadArchives to upload release to nexus
-
             // Prepare next release version's snapshot
             String nextVersion = getNextVersion(project.version as String, releaseExtension.versionSuffix)
             println("\nUpdating '$releaseExtension.versionFile' version to $nextVersion")
