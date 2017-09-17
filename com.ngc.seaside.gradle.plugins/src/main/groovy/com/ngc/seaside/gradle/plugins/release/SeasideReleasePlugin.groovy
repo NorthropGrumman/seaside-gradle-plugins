@@ -17,7 +17,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
     public static final String RELEASE_MAJOR_VERSION_TASK_NAME = 'releaseMajorVersion'
     public static final String RELEASE_MINOR_VERSION_TASK_NAME = 'releaseMinorVersion'
     public static final String RELEASE_EXTENSION_NAME = 'release'
-    boolean uploadArtifacts = "true"
+    String uploadArtifacts = "true"
 
     @Override
     void apply(Project p) {
@@ -34,7 +34,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
                         // TODO: add nexus functionality here
                         // If nexus system property (-PuploadArtifacts) == "true"
                         // run uploadArchives to upload release to nexus
-
+                        uploadArchives
                     }
                 }
             }
@@ -63,7 +63,6 @@ class SeasideReleasePlugin implements Plugin<Project> {
                         // TODO: add nexus functionality here
                         // If nexus system property (-PuploadArtifacts) == "true"
                         // run uploadArchives to upload release to nexus
-                        println("TEST")
                     }
                 }
             }
