@@ -57,8 +57,13 @@ This plugin configures the following tasks:
 The seaside gradle distribution plugin provide the directory structure required to run a BLoCS application and all of its bundle dependencies. This plugin will then distribute and compress the bundles of files packaged, including blocs dependencies, jar files, and also resource files. 
 
 ## This plugin requires properties in your gradle.properties file (usually ~/.gradle/gradle.properties):
+* nexusUsername     : the username to use when uploading artifacts to nexus
+* nexusPassword     : the password to use when uploading artifacts to nexus
+* nexusReleases     : url to the releases repository
+* nexusSnapshots    : url to the snapshots repository
 * nexusConsolidated : url to the maven public download site usually a proxy to maven central and the
 releases and snapshots
+* systemProp.sonar.host.url : url to the Sonarqube server
 
 ## Using this plugin
 To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
@@ -173,6 +178,55 @@ dependencies {
     platform "com.ngc.blocs:service.deployment.impl.common.autodeploymentservice:${blocsCoreVersion}"
     platform "org.eclipse.equinox:equinox-common:3.6.200.v20130402-1505"
 }
+```
+
+# com.ngc.seaside:seaside.release
+The release plugin provides a gradle release plugin for my java gradle projects and essentially giving the ability to automate the necessary steps to release code to Nexus. This plugin will Initialize the project.version from a semantic version tag specified in the root build.gradle file of a project, prepare the build.gradle for next SNAPSHOT interation, push changes to Git remote(should work from any branch), and provide the default configuration for deploying these artifacts to Nexus.
+
+The release plugin includes the release, releaseMajorVersion, and releaseMinorVersion task. The release task will create a tagged non-SNAPSHOT release of the current version as specified in the root build.gradle file.The releaseMajorVersion task upgrades to next major version & creates a tagged non-SNAPSHOT release. The releaseMinorVersion task will upgrade to the next minor version & creates a tagged non-SNAPSHOT release.
+
+## This plugin requires properties in your gradle.properties file (usually ~/.gradle/gradle.properties):
+* nexusUsername     : the username to use when uploading artifacts to nexus
+* nexusPassword     : the password to use when uploading artifacts to nexus
+* nexusReleases     : url to the releases repository
+* nexusSnapshots    : url to the snapshots repository
+* nexusConsolidated : url to the maven public download site usually a proxy to maven central and the
+releases and snapshots
+* systemProp.sonar.host.url : url to the Sonarqube server
+
+## Using this plugin
+To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
+An example is below. Note: a newer version may exist. Check the Nexus repository for the latest version.
+
+```java
+buildscript {
+    repositories {
+        mavenLocal()
+
+        maven {
+            url nexusConsolidated
+        }
+    }
+
+    dependencies {
+        classpath 'com.ngc.seaside:gradle.plugins:1.0'
+        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
+    }
+}
+
+subprojects {
+    apply plugin: 'com.ngc.seaside.release'
+
+    group = 'com.ngc.seaside'
+    version = '1.2.3-SNAPSHOT'
+
+    ext {
+         junitVersion = '4.12'
+         slf4jVersion = '1.7.22'
+         log4jVersion = '1.2.17'
+         cucumberVersion = '1.2.5'
+       }
+   }
 ```
 
 # Reference
