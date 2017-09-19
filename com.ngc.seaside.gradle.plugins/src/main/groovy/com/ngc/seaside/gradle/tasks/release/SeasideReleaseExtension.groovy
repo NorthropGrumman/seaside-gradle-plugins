@@ -10,7 +10,7 @@ class SeasideReleaseExtension {
 
     private final DEFAULT_VERSION_FILE = [project.rootProject.projectDir, 'build.gradle'].join(File.separator)
     // TODO default push needs to be set to true after we restore nexus or mock it to false during testing
-    private static final DEFAULT_PUSH = false
+    private static final DEFAULT_PUSH = true
     private static final DEFAULT_TAG_PREFIX = 'v'
     private static final DEFAULT_VERSION_SUFFIX = '-SNAPSHOT'
     private static final Pattern PATTERN = Pattern.
