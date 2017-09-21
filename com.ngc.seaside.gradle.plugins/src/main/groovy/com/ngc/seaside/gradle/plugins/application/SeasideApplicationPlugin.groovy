@@ -26,7 +26,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             plugins.apply 'java'
             plugins.apply 'application'
 
-            extensions.create("seasideApplication", SeasideApplicationPluginExtension, instantiator, p)
+            extensions.create("seasideApplication", SeasideApplicationExtension, instantiator, p)
 
             // Allow user to configure the distribution name
             afterEvaluate {
