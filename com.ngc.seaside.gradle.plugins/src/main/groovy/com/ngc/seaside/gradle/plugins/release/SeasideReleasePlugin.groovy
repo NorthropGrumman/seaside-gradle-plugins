@@ -16,7 +16,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
     public static final String RELEASE_TASK_NAME = 'release'
     public static final String RELEASE_MAJOR_VERSION_TASK_NAME = 'releaseMajorVersion'
     public static final String RELEASE_MINOR_VERSION_TASK_NAME = 'releaseMinorVersion'
-    public static final String RELEASE_EXTENSION_NAME = 'release'
+    public static final String RELEASE_EXTENSION_NAME = 'seasideRelease'
     String uploadArtifacts = "true"
 
     @Override
