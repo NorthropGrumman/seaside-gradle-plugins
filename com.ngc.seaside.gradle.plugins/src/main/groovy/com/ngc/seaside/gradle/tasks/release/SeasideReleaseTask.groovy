@@ -7,53 +7,77 @@ class SeasideReleaseTask extends DefaultTask {
 
     @TaskAction
     def release() {
-        println "**************************************************"
-        println "Beginning the release task for $project.version"
+        // Get extension reference
         SeasideReleaseExtension releaseExtension = project.getExtensions().getByType(SeasideReleaseExtension.class)
 
-        commitVersionFile("Release of version $project.version", releaseExtension)
-        createReleaseTag(releaseExtension.tagName)
+        // Perform release tasks of all projects. Do this only once
+        if (!project.rootProject.hasProperty("publishedProjects")) {
+            println "**************************************************"
+            println "Beginning the release task for v$project.version"
 
-        // TODO: add nexus functionality here
-        // If nexus system property (-Pnexus) == true
-        // run uploadArchives to upload release to nexus
+            commitVersionFile("Release of version v$project.version", releaseExtension)
+            createReleaseTag(releaseExtension.tagName)
 
-        // Prepare next release version's snapshot
-        String nextVersion = getNextVersion(project.version as String, releaseExtension.versionSuffix)
-        println("Updating '$releaseExtension.versionFile' version to $nextVersion")
+            // Prepare next release version's snapshot
+            String nextVersion = getNextVersion(project.version as String, releaseExtension.versionSuffix)
+            println("\nUpdating '$releaseExtension.versionFile' version to $nextVersion")
 
-        releaseExtension.setVersionOnFile(nextVersion)
-        commitVersionFile("Creating new $nextVersion version after release", releaseExtension)
+            releaseExtension.setVersionOnFile(nextVersion)
+            commitVersionFile("Creating new $nextVersion version after release", releaseExtension)
 
-        // Push all those changes we had been making
-        if (releaseExtension.push) {
-            pushChanges(releaseExtension.tagName)
+            // Push all those changes we had been making
+            if (releaseExtension.push) {
+                pushChanges(releaseExtension.tagName)
+            }
+            println "**************************************************"
+            project.rootProject.ext.set("publishedProjects", true)
         }
-        println "**************************************************"
     }
 
+    /**
+     * Commits the version file with changes made during release process.
+     * @param msg the commit message
+     * @param releaseExtension a reference to the release extension
+     */
     def commitVersionFile(String msg, SeasideReleaseExtension releaseExtension) {
         project.getLogger().info("Committing version file: $msg")
         git 'commit', '-m', "\"$msg\"", ':/' + releaseExtension.versionFile.name
     }
 
+    /**
+     * Creates a git tag of the project in preparation for release
+     * @param tagName tag to be created
+     */
     def createReleaseTag(String tagName) {
         project.getLogger().debug("Creating release tag: $tagName")
         git 'tag', '-a', tagName, "-m Release $tagName"
     }
 
+    /**
+     * Updates the projects version to a pre-release version for the next development cycle.
+     * @param currentVersion release version information
+     * @param suffix the pre-release suffix
+     */
     def static getNextVersion(String currentVersion, String suffix) {
         def versionInfo = VersionUpgradeStrategyFactory.parseVersionInfo(currentVersion - suffix)
         int nextPatch = versionInfo.patch + 1
         "${versionInfo.major}.${versionInfo.minor}.${nextPatch}${suffix}" as String
     }
 
+    /**
+     * Pushes commited changes to git
+     * @param tag tag to be pushed to git
+     */
     def pushChanges(String tag) {
         project.getLogger().debug('Pushing changes to repository')
         git 'push', 'origin', tag
         git 'push', 'origin', 'HEAD'
     }
 
+    /**
+     * This acts as a git command runner.
+     * @param arguments arguments to the git command
+     */
     def git(Object[] arguments) {
         project.getLogger().debug("git $arguments")
         def output = new ByteArrayOutputStream()

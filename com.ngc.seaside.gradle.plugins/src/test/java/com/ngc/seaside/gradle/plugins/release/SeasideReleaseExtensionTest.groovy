@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert
@@ -43,7 +44,12 @@ class SeasideReleaseExtensionTest {
         Assert.assertEquals('1.2.0-SNAPSHOT', extension.getSemanticVersion("version =   1.2.0-SNAPSHOT"))
         Assert.assertEquals('1.2.7-SNAPSHOT', extension.getSemanticVersion("  version= 1.2.7-SNAPSHOT"))
         Assert.assertEquals('1.5.7-SNAPSHOT', extension.getSemanticVersion("version=1.5.7-SNAPSHOT"))
-        Assert.assertEquals('1.5.7', extension.getSemanticVersion("version=1.5.7"))
-        Assert.assertEquals(null, extension.getSemanticVersion("com.foo.bar:foo.bar:1.0.0-SNAPSHOT"))
+
+    }
+
+    @Test(expected = GradleException.class)
+    void doesThrowExceptionWhenNoVersionSuffix() {
+        extension.getSemanticVersion("version=1.5.7")
+        extension.getSemanticVersion("com.foo.bar:foo.bar:1.0.0-SNAPSHOT")
     }
 }
