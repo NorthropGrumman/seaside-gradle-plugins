@@ -60,20 +60,4 @@ class SeasideReleasePluginIT {
         extension.setVersionOnFile("1.2.4-SNAPSHOT")
         Assert.assertEquals('1.2.4-SNAPSHOT', extension.getPreReleaseVersionFromFile())
     }
-
-//    @Test
-//    void doesUpgradeSemanticMajorVersionOnFile() {
-//        Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
-//        SeasideReleaseExtension extension = project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
-//        extension.setVersionOnFile("1.2.4-SNAPSHOT")
-//        Assert.assertEquals('1.2.4-SNAPSHOT', extension.getVersionFromFile())
-//    }
-//
-//    @Test
-//    void doesUpgradeSemanticMinorVersionOnFile() {
-//        Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
-//        SeasideReleaseExtension extension = project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
-//        extension.setVersionOnFile("1.2.4-SNAPSHOT")
-//        Assert.assertEquals('1.2.4-SNAPSHOT', extension.getVersionFromFile())
-//    }
 }
