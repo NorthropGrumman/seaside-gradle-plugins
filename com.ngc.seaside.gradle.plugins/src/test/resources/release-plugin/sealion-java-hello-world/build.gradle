@@ -15,7 +15,6 @@ buildscript {
 
 subprojects {
     apply plugin: 'com.ngc.seaside.parent'
-    apply plugin: 'com.ngc.seaside.release'
 
     group = 'com.ngc.seaside'
     version = '1.2.3-SNAPSHOT'
