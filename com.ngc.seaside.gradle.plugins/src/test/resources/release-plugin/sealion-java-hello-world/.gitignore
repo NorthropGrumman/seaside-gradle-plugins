@@ -1,3 +1,6 @@
+
+/bin/
+/build/
 *.class
 
 # Package Files #
@@ -24,7 +27,6 @@ target/
 # Gradle
 .gradle
 build/
-out/
 gradle-app.setting
 .gradletasknamecache
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
