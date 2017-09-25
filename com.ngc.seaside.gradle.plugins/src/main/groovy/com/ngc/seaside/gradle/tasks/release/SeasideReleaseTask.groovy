@@ -13,7 +13,7 @@ class SeasideReleaseTask extends DefaultTask {
         // Perform release tasks of all projects. Do this only once
         if (!project.rootProject.hasProperty("publishedProjects")) {
             println "**************************************************"
-            println "Beginning the release task for v$project.version"
+            println "Beginning the release task for ${releaseExtension.tagPrefix}${project.version}"
 
             commitVersionFile("Release of version v$project.version", releaseExtension)
             createReleaseTag(releaseExtension.tagName)

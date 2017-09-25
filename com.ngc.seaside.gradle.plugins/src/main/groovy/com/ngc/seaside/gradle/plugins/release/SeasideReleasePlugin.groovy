@@ -17,18 +17,25 @@ class SeasideReleasePlugin implements Plugin<Project> {
     public static final String RELEASE_MAJOR_VERSION_TASK_NAME = 'releaseMajorVersion'
     public static final String RELEASE_MINOR_VERSION_TASK_NAME = 'releaseMinorVersion'
     public static final String RELEASE_EXTENSION_NAME = 'seasideRelease'
-    String uploadArtifacts = "true"
+    String uploadArtifacts
+    String push
+    String tagPrefix
+    String versionSuffix
 
     @Override
     void apply(Project p) {
         p.configure(p) {
             def releaseExtension = p.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension, p)
+            releaseExtension.uploadArtifacts = (uploadArtifacts)? Boolean.parseBoolean(uploadArtifacts) : releaseExtension.uploadArtifacts
+            releaseExtension.push = (push)? Boolean.parseBoolean(push) : releaseExtension.uploadArtifacts
+            releaseExtension.tagPrefix = (tagPrefix)? tagPrefix : releaseExtension.tagPrefix
+            releaseExtension.versionSuffix = (versionSuffix)? versionSuffix : releaseExtension.versionSuffix
 
             // Define the tasks
             task(RELEASE_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
-                if (uploadArtifacts == "true") {
+                if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
                         uploadArchives
                     }
@@ -38,7 +45,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
             task(RELEASE_MAJOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
-                if (uploadArtifacts == "true") {
+                if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
                         uploadArchives
                     }
@@ -48,7 +55,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
             task(RELEASE_MINOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
-                if (uploadArtifacts == "true") {
+                if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
                         uploadArchives
                     }

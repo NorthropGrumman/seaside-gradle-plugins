@@ -10,6 +10,7 @@ class SeasideReleaseExtension {
 
     private final DEFAULT_VERSION_FILE = [project.rootProject.projectDir, 'build.gradle'].join(File.separator)
     private static final DEFAULT_PUSH = true
+    private static final DEFAULT_UPLOAD_ARTIFACTS = true
     private static final DEFAULT_TAG_PREFIX = 'v'
     private static final DEFAULT_VERSION_SUFFIX = '-SNAPSHOT'
     private static final Pattern PATTERN = Pattern.
@@ -24,8 +25,11 @@ class SeasideReleaseExtension {
 
     // Configurable extensions
     boolean push = DEFAULT_PUSH
+    boolean uploadArtifacts = DEFAULT_UPLOAD_ARTIFACTS
     String tagPrefix = DEFAULT_TAG_PREFIX
     String versionSuffix = DEFAULT_VERSION_SUFFIX
+
+
 
     SeasideReleaseExtension(Project project) {
         this.project = project
@@ -87,7 +91,6 @@ class SeasideReleaseExtension {
         if (matcher.find()) {
             String version = matcher.group(1)
             String suffix = matcher.group(3)
-
             if (suffix != null && version != null) {
                 sb.append(version).append(suffix)
                 this.preReleaseVersion = sb.toString()
