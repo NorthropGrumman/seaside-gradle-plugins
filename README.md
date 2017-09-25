@@ -245,7 +245,8 @@ subprojects {
     
     seasideRelease {
             dependsOn subprojects*.build
-            push = true// 'false' would e.g. be useful when triggering the release task on a local repository
+            uploadArtifacts = true //'false' would be useful if you don't want to publish release to nexus
+            push = true //'false' would be useful when triggering the release task on a local repository
             versionSuffix = '-SNAPSHOT' // '.DEV' or '' (empty) could be useful alternatives
             tagPrefix = 'v' // 'r' or '' (empty) could be useful alternatives
     }
@@ -259,5 +260,6 @@ subprojects {
    }
 ```
 
+You can also override these properties when you run the gradle command. For example: `gradlew release -PuploadArtifacts=false -Ppush=false -PtagPrefix="test" -PversionSuffix="-TEST"`
 # Reference
 [seaside-gradle-plugins wiki](http://10.207.42.43/confluence/display/SEAS/seaside-gradle-plugins+-+Core+Gradle+plugins+for+Seaside+development)
