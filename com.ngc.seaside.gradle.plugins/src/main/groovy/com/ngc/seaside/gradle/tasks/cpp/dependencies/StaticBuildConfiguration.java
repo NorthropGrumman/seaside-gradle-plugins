@@ -4,6 +4,7 @@ import groovy.lang.Closure;
 
 import org.gradle.api.Project;
 
+import java.util.List;
 
 /**
  *
@@ -37,8 +38,8 @@ public class StaticBuildConfiguration extends AbstractBuildConfiguration {
    }
 
    public static class WithArgs {
-      String before;
-      String after;
+      List<String> before;
+      List<String> after;
 
       WithArgs() {}
 
