@@ -43,14 +43,16 @@ class SeasideReleasePluginFT {
     @Test
     void doesGetSemanticVersionFromFile() {
         Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
-        SeasideReleaseExtension extension = project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
+        SeasideReleaseExtension extension = (SeasideReleaseExtension) project.extensions
+                .findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
         Assert.assertEquals('1.2.3-SNAPSHOT', extension.getPreReleaseVersion())
     }
 
     @Test
     void doesSetSemanticVersionOnFile() {
         Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
-        SeasideReleaseExtension extension = project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
+        SeasideReleaseExtension extension = (SeasideReleaseExtension) project.extensions
+                .findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
         extension.setVersionOnFile("1.2.4-SNAPSHOT")
         Assert.assertEquals('1.2.4-SNAPSHOT', extension.getPreReleaseVersionFromFile())
     }

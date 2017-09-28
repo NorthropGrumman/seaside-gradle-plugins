@@ -4,6 +4,7 @@
 subprojects {
 
     apply plugin: 'java'
+    apply plugin: 'groovy'
     apply plugin: 'maven'
 
     group = 'com.ngc.seaside'
@@ -81,11 +82,13 @@ subprojects {
     sourceSets {
         integTest {
             java.srcDir file('src/integTest/java')
+            groovy.srcDir file('src/integTest/groovy')
             resources.srcDir file('src/integTest/resources')
         }
 
         funcTest {
             java.srcDir file('src/funcTest/java')
+            groovy.srcDir file('src/funcTest/groovy')
             resources.srcDir file('src/funcTest/resources')
         }
     }
