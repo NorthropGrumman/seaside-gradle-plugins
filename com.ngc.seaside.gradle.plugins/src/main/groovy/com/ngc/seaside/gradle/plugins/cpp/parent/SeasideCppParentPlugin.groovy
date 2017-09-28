@@ -1,38 +1,41 @@
 package com.ngc.seaside.gradle.plugins.cpp.parent
 
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.BuildingExtension
-import com.ngc.seaside.gradle.tasks.cpp.dependencies.FamilyExtension
+import com.ngc.seaside.gradle.tasks.cpp.dependencies.SharedBuildConfiguration
+import com.ngc.seaside.gradle.tasks.cpp.dependencies.StaticBuildConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * Created by jprovence on 9/27/2017.
+ *
  */
 class SeasideCppParentPlugin implements Plugin<Project> {
 
 
     @Override
     void apply(Project project) {
-        project.extensions.create("family", FamilyExtension, project)
-        project.family.extensions.create("children", FamilyExtension.Children, project)
-
-        project.task('displayFamily') << {
-            println "\tFather: $project.family.father"
-            println "\tMother: $project.family.mother"
-            println "\tChildren: $project.family.children"
-        }
-
         project.extensions.create("building", BuildingExtension, project)
         project.task('displayBuilding') << {
             println "\tHeaders: $project.building.headers"
-            List< BuildingExtension.Statically> list = project.building.staticList
-            for (BuildingExtension.Statically staticLib : list ) {
-                println "\t$staticLib"
+
+
+            Collection<String> configuredStaticDeps = project.building.storage.getStaticDependencies()
+            println "\tStatic $configuredStaticDeps"
+            for(String dep : configuredStaticDeps) {
+                Collection< StaticBuildConfiguration> configurations = project.building.storage.getStaticBuildConfigurations(dep)
+                for(StaticBuildConfiguration config : configurations) {
+                    println "\t  $config"
+                }
             }
 
-            Collection<String> deps = project.building.storage.getStaticDependencies()
-            println "\tAll Statically Configured Dependencies: $deps"
-
+            Collection<String> configuredSharedDeps = project.building.storage.getSharedDependencies()
+            println "\tShared $configuredSharedDeps"
+            for(String dep : configuredSharedDeps) {
+                Collection<SharedBuildConfiguration> configurations = project.building.storage.getSharedBuildConfigurations(dep)
+                for(SharedBuildConfiguration config : configurations) {
+                    println "\t $config"
+                }
+            }
         }
     }
 }

@@ -2,6 +2,19 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
+//buildscript {
+//    repositories {
+//      mavenLocal()
+//
+//      maven {
+//        url nexusConsolidated
+//      }
+//    }
+//
+//    dependencies {
+//        classpath "com.google.guava:guava:$guavaVersion"
+//    }
+//}
 
 
 // Dependencies
@@ -13,6 +26,7 @@ dependencies {
     compile "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
     compile "org.unbescape:unbescape:$unbescapeVersion"
     compile "commons-io:commons-io:$commonsIOVersion"
+    compile "com.google.guava:guava:$guavaVersion"
 
     testCompile "junit:junit:$junitVersion"
     testCompile "org.mockito:mockito-core:$mockitoVersion"
