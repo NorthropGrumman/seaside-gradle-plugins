@@ -29,6 +29,14 @@ import org.gradle.api.tasks.bundling.Jar
  */
 class SeasideParentPlugin implements Plugin<Project> {
 
+    public static final String PARENT_TASK_GROUP_NAME = 'MainBuild'
+    public static final String PARENT_TASK_NAME = 'Main'
+    public static final String PARENT_SOURCE_JAR_TASK_NAME = 'sourcesJar'
+    public static final String PARENT_JAVADOC_JAR_TASK_NAME = 'javaDocJar'
+    public static final String PARENT_ANALYZE_TASK_NAME = 'analyze'
+    public static final String PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
+    public static final String PARENT_CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
+
     @Override
     void apply(Project p) {
         p.configure(p) {
@@ -43,6 +51,10 @@ class SeasideParentPlugin implements Plugin<Project> {
             GradleUtil.requireSystemProperties(p.properties,
                                                'sonar.host.url')
 
+            println("MEL THIS IS THE PROPERTIES map BEGIN: ")
+            println(System.getenv("GRADLE_USER_HOME"))
+            println("MEL THIS IS THE PROPERTIES map END: ")
+
             /**
              * This plugin requires the java and maven plugins
              */
@@ -56,7 +68,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             /**
              * Create a task for generating the source jar. This will also be uploaded to Nexus.
              */
-            task('sourcesJar', type: Jar, dependsOn: [classes]) {
+            task(PARENT_SOURCE_JAR_TASK_NAME, type: Jar, group: PARENT_TASK_GROUP_NAME, dependsOn: [classes]) {
                 classifier = 'sources'
                 from sourceSets.main.allSource
             }
@@ -64,7 +76,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             /**
              * Create a task for generating the javadoc jar. This will also be uploaded to Nexus.
              */
-            task('javadocJar', type: Jar, dependsOn: [classes, javadoc]) {
+            task(PARENT_JAVADOC_JAR_TASK_NAME, type: Jar,  group: PARENT_TASK_GROUP_NAME, dependsOn: [classes, javadoc]) {
                 classifier = 'javadoc'
                 from javadoc.destinationDir
             }
@@ -107,11 +119,11 @@ class SeasideParentPlugin implements Plugin<Project> {
                 /**
                  * Augment the jar name to be $groupId.$project.name).
                  */
-                tasks.getByName('sourcesJar') { jar ->
+                tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME) { jar ->
                     archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
                 }
 
-                tasks.getByName('javadocJar') { jar ->
+                tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME) { jar ->
                     archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
                 }
 
@@ -158,8 +170,8 @@ class SeasideParentPlugin implements Plugin<Project> {
                  * Ensure we call the 2 new tasks for generating the javadoc and sources artifact jars.
                  */
                 artifacts {
-                    archives sourcesJar
-                    archives javadocJar
+                    archives tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME)
+                    archives tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME)
                 }
 
                 /**
@@ -169,20 +181,22 @@ class SeasideParentPlugin implements Plugin<Project> {
                     properties {
                         property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
                         property 'sonar.projectName', "${bundleName}"
+                        property 'sonar.branch', getBranchName()
                     }
                 }
 
                 /*
                  * Configure a task that runs the various analysis reports in the correct order.
                  */
-                task('analyze', dependsOn: ['build', 'jacocoTestReport', 'sonarqube']) {
+                task(PARENT_ANALYZE_TASK_NAME, group: PARENT_TASK_GROUP_NAME,
+                        dependsOn: ['build', 'jacocoTestReport', 'sonarqube']) {
                 }
             }
 
-            task('downloadDependencies', type: DownloadDependenciesTask, group: 'Upload',
+            task(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask, group: PARENT_TASK_GROUP_NAME,
                  description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.') {}
 
-            task('cleanupDependencies', type: DownloadDependenciesTask, group: 'Clean',
+            task(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask, group: PARENT_TASK_GROUP_NAME,
                  description: 'Remove unused dependencies from repository.') {
                 customRepo = p.getProjectDir().path + "/build/dependencies-tmp"
                 doLast {
@@ -207,5 +221,27 @@ class SeasideParentPlugin implements Plugin<Project> {
 
             defaultTasks = ['build']
         }
+    }
+
+    /**
+    * This will get the current working branch to pass to sonarqube
+    * return: String of the branch name
+    */
+    def static getBranchName(){
+
+        def command = "git branch"
+        def branch = ""
+        def process = command.execute()
+        def spilt = process.text.tokenize(' ')
+        //Make sure we have an actual branch
+        // The git branch command should return "* master" or "* <branch name>"
+        // so the first element in the List is the * second element is usually the
+        // actual branch
+        if(spilt.size() >= 2) {
+            // leave the trim in because there seems to be a return line
+            // as part of the string
+            branch = spilt.get(1).trim()
+        }
+        return branch
     }
 }
