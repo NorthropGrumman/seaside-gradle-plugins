@@ -96,7 +96,7 @@ class SeasideReleaseExtension {
                 this.preReleaseVersion = sb.toString()
                 return sb.toString()
             } else {
-                project.getLogger().error("Missing roject version (${version}${suffix})  suffix: $versionSuffix")
+                project.getLogger().error("Missing project version (${version}${suffix})  suffix: $versionSuffix")
                 throw new GradleException("Missing project version (${version}${suffix}) suffix:$versionSuffix")
             }
         } else {
