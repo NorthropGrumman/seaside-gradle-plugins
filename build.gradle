@@ -77,4 +77,45 @@ subprojects {
             }
         }
     }
+
+    sourceSets {
+        integTest {
+            java.srcDir file('src/integTest/java')
+            resources.srcDir file('src/integTest/resources')
+        }
+
+        funcTest {
+            java.srcDir file('src/funcTest/java')
+            resources.srcDir file('src/funcTest/resources')
+        }
+    }
+
+    // Integration Dependencies
+    dependencies {
+        integTestCompile sourceSets.main.output
+        integTestCompile configurations.testCompile
+        integTestCompile sourceSets.test.output
+        integTestRuntime configurations.testRuntime
+
+        funcTestCompile sourceSets.main.output
+        funcTestCompile configurations.testCompile
+        funcTestCompile sourceSets.test.output
+        funcTestRuntime configurations.testRuntime
+    }
+
+    tasks.getByName("test").group = "test"
+
+    task integTest(type: Test,  group: "test") {
+        testClassesDir = sourceSets.integTest.output.classesDir
+        classpath = sourceSets.integTest.runtimeClasspath
+    }
+
+    task funcTest(type: Test, group: "test") {
+        testClassesDir = sourceSets.funcTest.output.classesDir
+        classpath = sourceSets.funcTest.runtimeClasspath
+    }
+
+    integTest.shouldRunAfter(test)
+    funcTest.shouldRunAfter(integTest)
+    check.dependsOn(integTest, funcTest)
 }

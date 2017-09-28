@@ -10,13 +10,13 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
+
     compile "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
     compile "org.unbescape:unbescape:$unbescapeVersion"
     compile "commons-io:commons-io:$commonsIOVersion"
+    compile "bats:bats:0.4.0"
 
     testCompile "junit:junit:$junitVersion"
     testCompile "org.mockito:mockito-core:$mockitoVersion"
     testCompile "com.ngc.blocs:test.impl.common.testutilities:$blocsVersion"
 }
-
-

@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.plugins.util
 import org.gradle.api.Project
 import org.gradle.api.Task
 
+
 public class TaskResolver {
 
     private Project project

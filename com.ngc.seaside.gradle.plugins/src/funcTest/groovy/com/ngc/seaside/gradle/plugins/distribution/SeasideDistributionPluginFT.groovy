@@ -10,7 +10,7 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class SeasideDistributionPluginIT {
+class SeasideDistributionPluginFT {
 
 
     private File projectDir
@@ -21,7 +21,7 @@ class SeasideDistributionPluginIT {
 
     @Before
     void before() {
-        File source = Paths.get("src/test/resources/distribution/test-gradle-distribution").toFile()
+        File source = Paths.get("src/funcTest/resources/distribution/test-gradle-distribution").toFile()
         projectDir = Files.createDirectories(Paths.get("build/test-distribution/test-gradle-distribution")).toFile()
         FileUtils.copyDirectory(source, projectDir)
 

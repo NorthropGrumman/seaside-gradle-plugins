@@ -10,7 +10,7 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class SeasideReleasePluginIT {
+class SeasideReleasePluginFT {
 
     private static final String TEST_VERSION_NUMBER = " 1.2.3-SNAPSHOT     " // with whitespace
 
@@ -20,7 +20,7 @@ class SeasideReleasePluginIT {
 
     @Before
     void before() {
-        File source = Paths.get("src/test/resources/release/sealion-java-hello-world").toFile()
+        File source = Paths.get("src/funcTest/resources/release/sealion-java-hello-world").toFile()
         projectDir = Files.createDirectories(Paths.get("build/test-release/sealion-java-hello-world")).toFile()
         FileUtils.copyDirectory(source, projectDir)
 
@@ -28,6 +28,7 @@ class SeasideReleasePluginIT {
 
         plugin = new SeasideReleasePlugin()
         plugin.apply(project)
+
     }
 
     @Test
