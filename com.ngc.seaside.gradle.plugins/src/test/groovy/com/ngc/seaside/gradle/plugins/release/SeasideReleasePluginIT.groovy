@@ -1,6 +1,5 @@
 package com.ngc.seaside.gradle.plugins.release
 
-import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -21,20 +20,14 @@ class SeasideReleasePluginIT {
 
     @Before
     void before() {
-        File source = Paths.get("src/test/resources/release-plugin/sealion-java-hello-world").toFile()
-        projectDir = Files.createDirectories(Paths.get("build/test-release-plugin/sealion-java-hello-world")).toFile()
+        File source = Paths.get("src/test/resources/release/sealion-java-hello-world").toFile()
+        projectDir = Files.createDirectories(Paths.get("build/test-release/sealion-java-hello-world")).toFile()
         FileUtils.copyDirectory(source, projectDir)
-
-        def versionFile = new File(projectDir, 'build.gradle')
 
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
 
         plugin = new SeasideReleasePlugin()
         plugin.apply(project)
-    }
-    @Test
-    void doesGetVersionFileName() {
-
     }
 
     @Test

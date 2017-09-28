@@ -6,7 +6,7 @@ import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
-import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -30,17 +30,17 @@ import org.gradle.api.tasks.bundling.Jar
 class SeasideParentPlugin implements Plugin<Project> {
 
     @Override
-    void apply(Project p) {
-        p.configure(p) {
+    void apply(Project project) {
+        project.configure(project) {
 
             // Make sure that all required properties are set.
-            GradleUtil.requireProperties(p.properties,
+            GradleUtil.requireProperties(project.properties,
                                          'nexusConsolidated',
                                          'nexusReleases',
                                          'nexusSnapshots',
                                          'nexusUsername',
                                          'nexusPassword')
-            GradleUtil.requireSystemProperties(p.properties,
+            GradleUtil.requireSystemProperties(project.properties,
                                                'sonar.host.url')
 
             /**
@@ -56,7 +56,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             /**
              * Create a task for generating the source jar. This will also be uploaded to Nexus.
              */
-            task('sourcesJar', type: Jar, dependsOn: [classes]) {
+            project.task('sourcesJar', type: Jar, dependsOn: [project.tasks.getByName("classes")]) {
                 classifier = 'sources'
                 from sourceSets.main.allSource
             }
@@ -184,11 +184,11 @@ class SeasideParentPlugin implements Plugin<Project> {
 
             task('cleanupDependencies', type: DownloadDependenciesTask, group: 'Clean',
                  description: 'Remove unused dependencies from repository.') {
-                customRepo = p.getProjectDir().path + "/build/dependencies-tmp"
+                customRepo = project.getProjectDir().path + "/build/dependencies-tmp"
                 doLast {
-                    ext.actualRepository = p.downloadDependencies.localRepository ?
-                                           p.downloadDependencies.localRepository : project.file(
-                            [p.buildDir, 'dependencies'].join(File.separator))
+                    ext.actualRepository = project.downloadDependencies.localRepository ?
+                                           project.downloadDependencies.localRepository : project.file(
+                            [project.buildDir, 'dependencies'].join(File.separator))
 
                     logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to ${actualRepository.absolutePath}.")
                     project.delete(actualRepository)

@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.plugins.distribution
 
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
+import com.ngc.seaside.gradle.plugins.util.TaskResolver
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
@@ -20,175 +21,184 @@ import org.gradle.api.tasks.bundling.Zip
  *
  * To use this plugin in your gradle.build :
  * <pre>
- *    buildscript {
- *       repositories {
- *           mavenLocal()
+ *    buildscript {*       repositories {*           mavenLocal()
  *
- *            maven {
- *              url nexusConsolidated
- *            }
- *        }
- *
- *        dependencies {
- *             classpath 'com.ngc.seaside:seaside.distribution:1.1-SNAPSHOT'
- *        }
- *     }
- *
+ *            maven {*              url nexusConsolidated
+ *}*}*
+ *        dependencies {*             classpath 'com.ngc.seaside:seaside.distribution:1.1-SNAPSHOT'
+ *}*}*
  *      apply plugin: 'com.ngc.seaside.distribution'
  * </pre>
  */
 class SeasideDistributionPlugin implements Plugin<Project> {
 
-   @Override
-   void apply(Project p) {
+    SeasideDistributionExtension distributionExtension
+    private TaskResolver resolver
 
-      p.configure(p) {
+    @Override
+    void apply(Project project) {
+        this.resolver = new TaskResolver(project)
+        project.configure(project) {
+            project.plugins.apply 'maven'
 
-         plugins.apply 'maven'
+            // Make sure that all required properties are set.
+            doRequireDistributionGradleProperties(project, 'nexusConsolidated',
+                                                  'nexusReleases',
+                                                  'nexusSnapshots',
+                                                  'nexusUsername',
+                                                  'nexusPassword')
 
-         // Make sure that all required properties are set.
-         GradleUtil.requireProperties(p.properties,
-                                      'nexusConsolidated',
-                                      'nexusReleases',
-                                      'nexusSnapshots',
-                                      'nexusUsername',
-                                      'nexusPassword')
+            distributionExtension = project.extensions.create("seasideDistribution", SeasideDistributionExtension)
 
-         extensions.create("seasideDistribution", SeasideDistributionPluginExtension)
+            doConfigureConfigurations(project)
+            doConfigureUploadArchives()
+            doConfigureAfterEvaluate(project)
+            createTasks(project)
+        }
+    }
 
-         configurations {
+    protected void doRequireDistributionGradleProperties(Project project, String propertyName,
+                                                         String... propertyNames) {
+        GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
+    }
+
+    protected void doConfigureUploadArchives() {
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    // Use the main repo for full releases.
+                    repository(url: nexusReleases) {
+                        // Make sure that nexusUsername and nexusPassword are in your
+                        // ${gradle.user.home}/gradle.properties file.
+                        authentication(userName: nexusUsername, password: nexusPassword)
+                    }
+                    // If the version has SNAPSHOT in the name, use the snapshot repo.
+                    snapshotRepository(url: nexusSnapshots) {
+                        authentication(userName: nexusUsername, password: nexusPassword)
+                    }
+                }
+            }
+        }
+    }
+
+    protected doConfigureConfigurations(Project project) {
+        project.configurations {
             bundles {
-               transitive = false
+                transitive = false
             }
             blocs {
-               transitive = false
+                transitive = false
             }
             thirdParty {
-               transitive = true
+                transitive = true
             }
             platform {
-               transitive = false
+                transitive = false
             }
             archives
-         }
+        }
+    }
 
-         tasks.getByName('clean') {
-            doLast {
-               p.getLogger().trace("Removing build distribution directory '${seasideDistribution.buildDir}'.")
-               delete(seasideDistribution.buildDir)
-            }
-         }
+    protected doConfigureAfterEvaluate(Project project) {
 
-         task('copyConfig', type: Copy) {
-            from 'src/main/resources'
-            include '**/config.ini'
-            expand(p.properties)
-            into { seasideDistribution.distributionDir }
-         }
-
-         task('copyResources', type: Copy, dependsOn: [copyConfig]) {
-
-            from 'src/main/resources'
-            exclude '**/config.ini'
-            into { seasideDistribution.distributionDir }
-         }
-
-         task('copyPlatformBundles', type: Copy) {
-            from configurations.platform
-            into { "${seasideDistribution.distributionDir}/platform" }
-         }
-
-         task('zip', type: Zip) {
-            from { "${seasideDistribution.distributionDir}" }
-         }
-
-         task('tar', type: Tar) {
-            from { "${seasideDistribution.distributionDir}" }
-            compression = Compression.GZIP
-         }
-
-         task('copyThirdPartyBundles', type: Copy) {
-            from configurations.thirdParty
-            into { "${seasideDistribution.distributionDir}/bundles" }
-         }
-
-         task('copyBlocsBundles', type: Copy) {
-            from configurations.blocs {
-               rename { name ->
-                  def artifacts = configurations.blocs.resolvedConfiguration.resolvedArtifacts
-                  def artifact = artifacts.find { it.file.name == name }
-                  "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
-               }
-            }
-            into { "${seasideDistribution.distributionDir}/bundles" }
-         }
-
-         task('copyBundles', type: Copy) {
-            from configurations.bundles {
-               rename { name ->
-                  def artifacts = configurations.bundles.resolvedConfiguration.resolvedArtifacts
-                  def artifact = artifacts.find { it.file.name == name }
-                  "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
-               }
+        project.afterEvaluate {
+            resolver.findTask( 'tar') { tar ->
+                archiveName = "${seasideDistribution.distributionName}.tar.gz"
+                destinationDir = file("${seasideDistribution.distributionDestDir}")
             }
 
-            into { "${seasideDistribution.distributionDir}/bundles" }
-         }
-
-         uploadArchives {
-            repositories {
-               mavenDeployer {
-                  // Use the main repo for full releases.
-                  repository(url: nexusReleases) {
-                     // Make sure that nexusUsername and nexusPassword are in your
-                     // ${gradle.user.home}/gradle.properties file.
-                     authentication(userName: nexusUsername, password: nexusPassword)
-                  }
-                  // If the version has SNAPSHOT in the name, use the snapshot repo.
-                  snapshotRepository(url: nexusSnapshots) {
-                     authentication(userName: nexusUsername, password: nexusPassword)
-                  }
-               }
-            }
-         }
-
-         task('buildDist', dependsOn: [copyResources,
-                                       copyPlatformBundles,
-                                       copyThirdPartyBundles,
-                                       copyBlocsBundles,
-                                       copyBundles,
-                                       tar,
-                                       zip]) {
-         }
-
-         assemble.dependsOn(buildDist)
-
-         afterEvaluate {
-            project.tasks.getByName('tar') { tar ->
-               archiveName = "${seasideDistribution.distributionName}.tar.gz"
-               destinationDir = file("${seasideDistribution.distributionDestDir}")
-            }
-
-            project.tasks.getByName('zip') { zip ->
-               archiveName = "${seasideDistribution.distributionName}.zip"
-               destinationDir = file("${seasideDistribution.distributionDestDir}")
+            resolver.findTask('zip') { zip ->
+                archiveName = "${seasideDistribution.distributionName}.zip"
+                destinationDir = file("${seasideDistribution.distributionDestDir}")
             }
 
             repositories {
-               mavenLocal()
+                mavenLocal()
 
-               maven {
-                  url nexusConsolidated
-               }
+                maven {
+                    url nexusConsolidated
+                }
             }
 
             artifacts {
-               archives tar
+                archives tar
             }
-         }
+        }
+    }
 
-      }
+    protected void createTasks(Project project) {
 
-   }
+        resolver.findTask('clean') {
+            doLast {
+                project.getLogger().
+                        trace("Removing build distribution directory '${distributionExtension.buildDir}'.")
 
+                project.delete(distributionExtension.buildDir)
+            }
+        }
+
+        project.task('copyConfig', type: Copy) {
+            from 'src/main/resources'
+            include '**/config.ini'
+            expand(project.properties)
+            into { distributionExtension.distributionDir }
+        }
+
+        project.task('copyResources', type: Copy, dependsOn: [resolver.findTask('copyConfig')]) {
+
+            from 'src/main/resources'
+            exclude '**/config.ini'
+            into { distributionExtension.distributionDir }
+        }
+
+        project.task('copyPlatformBundles', type: Copy) {
+            from project.configurations.getByName("platform")
+            into { "${distributionExtension.distributionDir}/platform" }
+        }
+
+        project.task('zip', type: Zip) {
+            from { "${distributionExtension.distributionDir}" }
+        }
+
+        project.task('tar', type: Tar) {
+            from { "${distributionExtension.distributionDir}" }
+            compression = Compression.GZIP
+        }
+
+        project.task('copyThirdPartyBundles', type: Copy) {
+            from project.configurations.getByName("thirdParty")
+            into { "${distributionExtension.distributionDir}/bundles" }
+        }
+
+        project.task('copyBlocsBundles', type: Copy) {
+            from project.configurations.getByName("blocs") {
+                rename { name ->
+                    def artifacts = project.configurations.blocs.resolvedConfiguration.resolvedArtifacts
+                    def artifact = artifacts.find { it.file.name == name }
+                    "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
+                }
+            }
+            into { "${distributionExtension.distributionDir}/bundles" }
+        }
+
+        project.task('copyBundles', type: Copy) {
+            from project.configurations.getByName("bundles") {
+                rename { name ->
+                    def artifacts = project.configurations.bundles.resolvedConfiguration.resolvedArtifacts
+                    def artifact = artifacts.find { it.file.name == name }
+                    "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
+                }
+            }
+            into { "${distributionExtension.distributionDir}/bundles" }
+        }
+
+        project.task('buildDist', dependsOn: [resolver.findTask("copyResources"),
+                                              resolver.findTask("copyPlatformBundles"),
+                                              resolver.findTask("copyThirdPartyBundles"),
+                                              resolver.findTask("copyBlocsBundles"),
+                                              resolver.findTask("copyBundles"),
+                                              resolver.findTask("tar"),
+                                              resolver.findTask("zip")])
+        resolver.findTask("assemble").dependsOn(resolver.findTask("buildDist"))
+    }
 }
