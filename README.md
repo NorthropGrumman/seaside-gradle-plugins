@@ -318,4 +318,4 @@ subprojects {
 You can also override these properties when you run the gradle command. For example: `gradlew runBats -PresultsFile='build/myresults.out' -PbatsTestsDir='my/bats/tests'`
 
 # Reference
-[seaside-gradle-plugins wiki](http://10.207.42.43/confluence/display/SEAS/seaside-gradle-plugins+-+Core+Gradle+plugins+for+Seaside+development)
+[seaside-gradle-plugins wiki](http://10.207.42.137/confluence/display/SEAS/seaside-gradle-plugins+-+Core+Gradle+plugins+for+Seaside+development)
