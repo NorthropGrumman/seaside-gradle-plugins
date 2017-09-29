@@ -6,7 +6,7 @@ import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
-import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -38,48 +38,20 @@ class SeasideParentPlugin implements Plugin<Project> {
     public static final String PARENT_CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
 
     @Override
-    void apply(Project p) {
-        p.configure(p) {
+    void apply(Project project) {
+
+        project.configure(project) {
 
             // Make sure that all required properties are set.
-            GradleUtil.requireProperties(p.properties,
+            doRequiredGradleProperties(project,
                                          'nexusConsolidated',
                                          'nexusReleases',
                                          'nexusSnapshots',
                                          'nexusUsername',
                                          'nexusPassword')
-            GradleUtil.requireSystemProperties(p.properties,
-                                               'sonar.host.url')
-
-            println("MEL THIS IS THE PROPERTIES map BEGIN: ")
-            println(System.getenv("GRADLE_USER_HOME"))
-            println("MEL THIS IS THE PROPERTIES map END: ")
-
-            /**
-             * This plugin requires the java and maven plugins
-             */
-            plugins.apply 'java'
-            plugins.apply 'maven'
-            plugins.apply 'eclipse'
-            plugins.apply 'org.sonarqube'
-            plugins.apply 'jacoco'
-            plugins.apply SeasideReleasePlugin
-
-            /**
-             * Create a task for generating the source jar. This will also be uploaded to Nexus.
-             */
-            task(PARENT_SOURCE_JAR_TASK_NAME, type: Jar, group: PARENT_TASK_GROUP_NAME, dependsOn: [classes]) {
-                classifier = 'sources'
-                from sourceSets.main.allSource
-            }
-
-            /**
-             * Create a task for generating the javadoc jar. This will also be uploaded to Nexus.
-             */
-            task(PARENT_JAVADOC_JAR_TASK_NAME, type: Jar,  group: PARENT_TASK_GROUP_NAME, dependsOn: [classes, javadoc]) {
-                classifier = 'javadoc'
-                from javadoc.destinationDir
-            }
+            doRequiredSystemProperties(project)
+            applyPlugins(project)
+            createTasks(project)
 
             afterEvaluate {
                 /**
@@ -184,13 +156,6 @@ class SeasideParentPlugin implements Plugin<Project> {
                         property 'sonar.branch', getBranchName()
                     }
                 }
-
-                /*
-                 * Configure a task that runs the various analysis reports in the correct order.
-                 */
-                task(PARENT_ANALYZE_TASK_NAME, group: PARENT_TASK_GROUP_NAME,
-                        dependsOn: ['build', 'jacocoTestReport', 'sonarqube']) {
-                }
             }
 
             task(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask, group: PARENT_TASK_GROUP_NAME,
@@ -198,11 +163,11 @@ class SeasideParentPlugin implements Plugin<Project> {
 
             task(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask, group: PARENT_TASK_GROUP_NAME,
                  description: 'Remove unused dependencies from repository.') {
-                customRepo = p.getProjectDir().path + "/build/dependencies-tmp"
+                customRepo = project.getProjectDir().path + "/build/dependencies-tmp"
                 doLast {
-                    ext.actualRepository = p.downloadDependencies.localRepository ?
-                                           p.downloadDependencies.localRepository : project.file(
-                            [p.buildDir, 'dependencies'].join(File.separator))
+                    ext.actualRepository = project.downloadDependencies.localRepository ?
+                                           project.downloadDependencies.localRepository : project.file(
+                            [project.buildDir, 'dependencies'].join(File.separator))
 
                     logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to ${actualRepository.absolutePath}.")
                     project.delete(actualRepository)
@@ -224,10 +189,11 @@ class SeasideParentPlugin implements Plugin<Project> {
     }
 
     /**
-    * This will get the current working branch to pass to sonarqube
-    * return: String of the branch name
-    */
-    def static getBranchName(){
+     * This will get the current working branch to pass to sonarqube
+     * @return String with of the Git Branch you are on otherwise
+     * an empty string
+     */
+    def static getBranchName() {
 
         def command = "git branch"
         def branch = ""
@@ -243,5 +209,73 @@ class SeasideParentPlugin implements Plugin<Project> {
             branch = spilt.get(1).trim()
         }
         return branch
+    }
+
+    /**
+     *
+     * @param project
+     * @param propertyName
+     * @param propertyNames
+     */
+    protected void doRequiredGradleProperties(Project project, String propertyName, String... propertyNames) {
+        GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
+    }
+
+    /**
+     *
+     * @param project
+     */
+    protected void doRequiredSystemProperties(Project project) {
+        GradleUtil.requireSystemProperties(project.properties,
+                'sonar.host.url')
+
+    }
+
+    /**
+     * This plugin requires the java and maven plugins
+     * @param project
+     */
+    protected void applyPlugins(Project project) {
+        project.getPlugins().apply('java')
+        project.getPlugins().apply('maven')
+        project.getPlugins().apply('eclipse')
+        project.getPlugins().apply( 'jacoco')
+        project.getPlugins().apply('org.sonarqube')
+        project.getPlugins().apply(SeasideReleasePlugin)
+    }
+
+    /**
+     *
+     * @param project
+     */
+    protected void createTasks(Project project){
+
+        /**
+         * Create a task for generating the source jar. This will also be uploaded to Nexus.
+         */
+
+        project.task(PARENT_SOURCE_JAR_TASK_NAME, type: Jar, group: PARENT_TASK_GROUP_NAME,
+                dependsOn: project.tasks.getByName("classes")) {
+            classifier = 'sources'
+            from project.sourceSets.main.allSource
+        }
+
+        /**
+         * Create a task for generating the javadoc jar. This will also be uploaded to Nexus.
+         */
+        def classesTask = project.tasks.getByName("classes")
+        def javadocsTask = project.tasks.getByName("javadoc")
+        project.task(PARENT_JAVADOC_JAR_TASK_NAME, type: Jar,  group: PARENT_TASK_GROUP_NAME,
+                dependsOn: [classesTask, javadocsTask]) {
+            classifier = 'javadoc'
+            from javadocsTask.destinationDir
+        }
+
+        def buildTask = project.tasks.getByName("build")
+        def jacocoTaskReportTask = project.tasks.getByName("jacocoTestReport")
+        def sonarqubeTask = project.tasks.getByName("sonarqube")
+        project.task(PARENT_ANALYZE_TASK_NAME, group: PARENT_TASK_GROUP_NAME,
+                dependsOn: [buildTask, jacocoTaskReportTask, sonarqubeTask]) {
+        }
     }
 }

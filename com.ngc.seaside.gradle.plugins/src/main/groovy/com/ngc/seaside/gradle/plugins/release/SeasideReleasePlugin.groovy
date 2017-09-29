@@ -1,7 +1,6 @@
 package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy
-import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.SeasideReleaseTask
 import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory
 import org.gradle.api.Plugin
@@ -23,9 +22,9 @@ class SeasideReleasePlugin implements Plugin<Project> {
     String versionSuffix
 
     @Override
-    void apply(Project p) {
-        p.configure(p) {
-            def releaseExtension = p.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension, p)
+    void apply(Project project) {
+        project.configure(project) {
+            def releaseExtension = project.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension, project)
             releaseExtension.uploadArtifacts = (uploadArtifacts)? Boolean.parseBoolean(uploadArtifacts) : releaseExtension.uploadArtifacts
             releaseExtension.push = (push)? Boolean.parseBoolean(push) : releaseExtension.uploadArtifacts
             releaseExtension.tagPrefix = (tagPrefix)? tagPrefix : releaseExtension.tagPrefix
@@ -37,7 +36,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 dependsOn subprojects*.build
                 if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
-                        uploadArchives
+                        upload
                     }
                 }
             }
@@ -47,7 +46,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 dependsOn subprojects*.build
                 if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
-                        uploadArchives
+                        upload
                     }
                 }
             }
@@ -57,34 +56,34 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 dependsOn subprojects*.build
                 if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
-                        uploadArchives
+                        upload
                     }
                 }
             }
 
             // Get project release version and prepare build project/file for release. Do this once
-            if (!p.rootProject.hasProperty("releaseVersion")) {
+            if (!project.rootProject.hasProperty("releaseVersion")) {
                 def versionFromFile = releaseExtension.getPreReleaseVersionFromFile()
-                def taskNames = p.gradle.startParameter.taskNames
+                def taskNames = project.gradle.startParameter.taskNames
 
                 IVersionUpgradeStrategy upgradeStrategy =
                         resolveVersionUpgradeStrategy(taskNames, releaseExtension.versionSuffix)
                 def releaseVersion = upgradeStrategy.getVersion(versionFromFile)
-                p.getLogger().debug("Using release version '$releaseVersion'")
+                project.getLogger().debug("Using release version '$releaseVersion'")
 
-                if (!p.gradle.startParameter.dryRun && (versionFromFile != releaseVersion)) {
-                    p.logger.debug(
+                if (!project.gradle.startParameter.dryRun && (versionFromFile != releaseVersion)) {
+                    project.logger.debug(
                             "Writing release version '$releaseVersion' to file '$releaseExtension.versionFile'")
                     releaseExtension.setVersionOnFile(releaseVersion)
                 }
                 println "**************************************************"
                 println("Setting project version to '$releaseVersion'")
-                p.rootProject.ext.set("releaseVersion", releaseVersion)
+                project.rootProject.ext.set("releaseVersion", releaseVersion)
             }
 
             // Set the extension for the subprojects
-            releaseExtension.setReleaseVersion(p.rootProject.releaseVersion)
-            p.version = p.rootProject.releaseVersion
+            releaseExtension.setReleaseVersion(project.rootProject.releaseVersion)
+            project.version = project.rootProject.releaseVersion
         }
     }
 /**

@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.Parent
 
+import com.ngc.seaside.gradle.plugins.distribution.SeasideDistributionPlugin
 import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import org.apache.commons.io.FileUtils
@@ -18,37 +19,53 @@ class SeasideParentPluginIT {
 
     private File projectDir
     private Project project
+    private static boolean didRequireDistributionGradleProperties
+    private static boolean didRequiredSystemProperties
+    private static boolean didApplyPlugins
     private SeasideParentPlugin plugin
 
     @Before
     void before() {
 
-        File source = Paths.get("src/test/resources/parent//sealion-java-hello-world").toFile()
-        projectDir = Files.createDirectories(Paths.get("build/test-release-plugin/sealion-java-hello-world")).toFile()
+        File source = Paths.get("src/test/resources/parent/test-gradle-parent").toFile()
+        projectDir = Files.createDirectories(Paths.get("build/test-gradle/test-gradle-parent")).toFile()
         FileUtils.copyDirectory(source, projectDir)
 
         def versionFile = new File(projectDir, 'build.gradle')
 
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
 
-        project.setProperty('nexusConsolidated', 'http://10.207.42.137/nexus/repository/maven-public')
-        project.setProperty('nexusReleases', 'http://10.207.42.137/nexus/repository/ceacide-releases')
-        project.setProperty('nexusSnapshots', 'http://10.207.42.137/nexus/repository/ceacide-snapshots')
-        project.setProperty('nexusUsername', 'mlacombe')
-        project.setProperty('nexusPassword', '%AnnieLaC06#')
+        plugin = new SeasideParentPlugin() {
 
-        println(System.getenv("GRADLE_USER_HOME"))
 
-        plugin = new SeasideParentPlugin()
+            @Override
+            protected void doRequiredGradleProperties(Project project, String propertyName,
+                                                                 String... propertyNames) {
+                didRequireDistributionGradleProperties = true
+            }
+
+            @Override
+            protected void doRequiredSystemProperties(Project project){
+                didRequiredSystemProperties = true
+            }
+
+            @Override
+            protected void applyPlugins(Project project){
+                didApplyPlugins = true
+            }
+
+        }
+
         plugin.apply(project)
     }
 
     @Test
     void doesApplyPlugin() {
-        Assert.assertEquals(TEST_VERSION_NUMBER.trim(), project.version)
-        Assert.assertNotNull(project.tasks.findByName(SeasideParentPlugin.PARENT_SOURCE_JAR_TASK_NAME))
-        Assert.assertNotNull(project.tasks.findByName(SeasideParentPlugin.PARENT_JAVADOC_JAR_TASK_NAME))
-        Assert.assertNotNull(project.tasks.findByName(SeasideParentPlugin.PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME))
-        Assert.assertNotNull(project.tasks.findByName(SeasideParentPlugin.PARENT_CLEANUP_DEPENDENCIES_TASK_NAME))
+        Assert.assertEquals("Did not require gradle properties", true,
+                didRequireDistributionGradleProperties)
+        Assert.assertEquals("Did not require system properties", true,
+                didRequiredSystemProperties)
+        Assert.assertEquals("Did not apply all plugins", true,
+                didApplyPlugins)
     }
 }

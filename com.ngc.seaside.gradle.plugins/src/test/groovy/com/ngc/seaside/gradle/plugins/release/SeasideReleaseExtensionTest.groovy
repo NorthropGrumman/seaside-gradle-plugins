@@ -1,13 +1,11 @@
 package com.ngc.seaside.gradle.plugins.release
 
-import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 
 class SeasideReleaseExtensionTest {

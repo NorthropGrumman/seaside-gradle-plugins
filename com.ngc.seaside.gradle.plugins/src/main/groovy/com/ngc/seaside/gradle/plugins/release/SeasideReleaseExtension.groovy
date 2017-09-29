@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.tasks.release
+package com.ngc.seaside.gradle.plugins.release
 
 import org.gradle.api.GradleException
 import org.gradle.api.Project
