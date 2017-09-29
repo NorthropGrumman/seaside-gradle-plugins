@@ -1,6 +1,5 @@
 package com.ngc.seaside.gradle.plugins.bats
 
-import com.ngc.seaside.gradle.extensions.bats.SeasideBatsExtension
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -12,19 +11,14 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 class SeasideBatsPluginIT {
-   private SeasideBatsExtension extension
    private SeasideBatsPlugin plugin
    private Project project
-   private File projectDir
 
    @Before
    void before() {
-      File source = Paths.get("src/test/resources/bats-plugin/sealion-java-hello-world").toFile()
-      projectDir = Files.createDirectories(Paths.get("build/test-bats-plugin/sealion-java-hello-world")).toFile()
-      FileUtils.copyDirectory(source, projectDir)
-
-      project = ProjectBuilder.builder().withProjectDir(projectDir).build()
-      extension = new SeasideBatsExtension(project)
+      def testProjectDir = destinationDirectoryForTheTestProject()
+      copyTheTestProjectInto(testProjectDir)
+      project = createTheTestProjectUsing(testProjectDir)
       plugin = new SeasideBatsPlugin()
       plugin.apply(project)
    }
@@ -36,9 +30,38 @@ class SeasideBatsPluginIT {
       Assert.assertNotNull(project.tasks.findByName(SeasideBatsPlugin.RUN_BATS_TASK_NAME))
    }
 
-   @Test
-   void batsIsExtractedToTheCorrectDirectory() {
-      println Paths.get(extension.BATS_PATHS.PATH_TO_THE_DIRECTORY_WITH_BATS_SCRIPTS).toAbsolutePath()
-      Assert.assertNotNull(Paths.get(extension.BATS_PATHS.PATH_TO_THE_DIRECTORY_WITH_BATS_SCRIPTS).toAbsolutePath().toFile())
+   private static File destinationDirectoryForTheTestProject() {
+      return createTheTestProjectDirectory()
+   }
+
+   private static File createTheTestProjectDirectory() {
+      def dir = pathToTheDestinationProjectDirectory()
+      return Files.createDirectories(dir.toPath()).toFile()
+   }
+
+   private static File pathToTheDestinationProjectDirectory() {
+      return turnListIntoPath(
+              "build", "test-bats-plugin",
+              "sealion-java-hello-world"
+      )
+   }
+
+   private static void copyTheTestProjectInto(File dir) {
+      FileUtils.copyDirectory(sourceDirectoryWithTheTestProject(), dir)
+   }
+
+   private static File sourceDirectoryWithTheTestProject() {
+      return turnListIntoPath(
+              "src", "test", "resources",
+              "bats-plugin", "sealion-java-hello-world"
+      )
+   }
+
+   private static Project createTheTestProjectUsing(File dir) {
+      return ProjectBuilder.builder().withProjectDir(dir).build()
+   }
+
+   private static File turnListIntoPath(String... list) {
+      return Paths.get(list.flatten().join(File.separator)).toFile()
    }
 }
