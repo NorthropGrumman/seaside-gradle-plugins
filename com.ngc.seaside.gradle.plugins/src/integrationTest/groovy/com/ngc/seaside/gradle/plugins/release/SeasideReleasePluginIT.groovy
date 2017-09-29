@@ -38,7 +38,7 @@ class SeasideReleasePluginIT {
     void doesApplyPlugin() {
         TaskResolver resolver = new TaskResolver(project)
         Assert.assertEquals(TEST_VERSION_NUMBER.trim(), project.version)
-        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
+        Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME))
