@@ -31,7 +31,8 @@ class SeasideBatsPlugin implements Plugin<Project> {
             EXTRACT_BATS_TASK_NAME,
             type: SeasideExtractBatsTask,
             group: BATS_TASK_GROUP_NAME,
-            description: "Extract the bats release archive")
+            description: "Extract the bats release archive",
+            dependsOn: "build")
 
          task(
             RUN_BATS_TASK_NAME,

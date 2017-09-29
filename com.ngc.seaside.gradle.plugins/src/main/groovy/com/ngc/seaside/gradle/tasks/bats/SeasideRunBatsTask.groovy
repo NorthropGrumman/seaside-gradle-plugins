@@ -30,7 +30,7 @@ class SeasideRunBatsTask extends DefaultTask {
    }
 
    private String pathToTheDirectoryWithBatsTests() {
-      return batsExtension.BATS_PATHS.DIRECTORY_WITH_BATS_TESTS
+      return batsExtension.batsTestsDir
    }
 
    private Set<File> enumerateAllBatsFilesIn(String path) {
@@ -54,6 +54,6 @@ class SeasideRunBatsTask extends DefaultTask {
    }
 
    private String pathToTheBatsResultsFile() {
-      return batsExtension.BATS_PATHS.BATS_TEST_RESULTS_FILE
+      return batsExtension.resultsFile
    }
 }
