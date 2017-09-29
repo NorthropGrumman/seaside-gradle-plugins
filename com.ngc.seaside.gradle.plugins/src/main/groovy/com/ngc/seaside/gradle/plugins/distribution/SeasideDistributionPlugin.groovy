@@ -39,7 +39,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.resolver = new TaskResolver(project)
         project.configure(project) {
-            project.plugins.apply 'maven'
+            project.plugins.apply('maven')
 
             // Make sure that all required properties are set.
             doRequireDistributionGradleProperties(project, 'nexusConsolidated',
@@ -51,34 +51,46 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             distributionExtension = project.extensions.create("seasideDistribution", SeasideDistributionExtension)
 
             doConfigureConfigurations(project)
-            doConfigureUploadArchives()
             doConfigureAfterEvaluate(project)
             createTasks(project)
+
+            // Configure the maven related tasks here because we can't move it into a closure
+            uploadArchives {
+                repositories {
+                    mavenDeployer {
+                        // Use the main repo for full releases.
+                        repository(url: nexusReleases) {
+                            // Make sure that nexusUsername and nexusPassword are in your
+                            // ${gradle.user.home}/gradle.properties file.
+                            authentication(userName: nexusUsername, password: nexusPassword)
+                        }
+                        // If the version has SNAPSHOT in the name, use the snapshot repo.
+                        snapshotRepository(url: nexusSnapshots) {
+                            authentication(userName: nexusUsername, password: nexusPassword)
+                        }
+                    }
+                }
+            }
+
+            afterEvaluate {
+                repositories {
+                    mavenLocal()
+
+                    maven {
+                        url nexusConsolidated
+                    }
+                }
+
+                artifacts {
+                    archives TaskResolver.findTask(project, "tar")
+                }
+            }
         }
     }
 
     protected void doRequireDistributionGradleProperties(Project project, String propertyName,
                                                          String... propertyNames) {
         GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
-    }
-
-    protected void doConfigureUploadArchives() {
-        uploadArchives {
-            repositories {
-                mavenDeployer {
-                    // Use the main repo for full releases.
-                    repository(url: nexusReleases) {
-                        // Make sure that nexusUsername and nexusPassword are in your
-                        // ${gradle.user.home}/gradle.properties file.
-                        authentication(userName: nexusUsername, password: nexusPassword)
-                    }
-                    // If the version has SNAPSHOT in the name, use the snapshot repo.
-                    snapshotRepository(url: nexusSnapshots) {
-                        authentication(userName: nexusUsername, password: nexusPassword)
-                    }
-                }
-            }
-        }
     }
 
     protected doConfigureConfigurations(Project project) {
@@ -100,9 +112,8 @@ class SeasideDistributionPlugin implements Plugin<Project> {
     }
 
     protected doConfigureAfterEvaluate(Project project) {
-
         project.afterEvaluate {
-            resolver.findTask( 'tar') { tar ->
+            resolver.findTask('tar') { tar ->
                 archiveName = "${seasideDistribution.distributionName}.tar.gz"
                 destinationDir = file("${seasideDistribution.distributionDestDir}")
             }
@@ -110,18 +121,6 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             resolver.findTask('zip') { zip ->
                 archiveName = "${seasideDistribution.distributionName}.zip"
                 destinationDir = file("${seasideDistribution.distributionDestDir}")
-            }
-
-            repositories {
-                mavenLocal()
-
-                maven {
-                    url nexusConsolidated
-                }
-            }
-
-            artifacts {
-                archives tar
             }
         }
     }
