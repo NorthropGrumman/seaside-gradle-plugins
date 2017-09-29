@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.Parent
+package com.ngc.seaside.gradle.plugins.parent
 
 import com.ngc.seaside.gradle.plugins.distribution.SeasideDistributionPlugin
 import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
