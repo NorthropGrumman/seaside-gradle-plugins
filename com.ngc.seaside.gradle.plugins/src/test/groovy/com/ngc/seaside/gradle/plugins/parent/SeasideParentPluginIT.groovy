@@ -22,6 +22,7 @@ class SeasideParentPluginIT {
     private static boolean didRequireDistributionGradleProperties
     private static boolean didRequiredSystemProperties
     private static boolean didApplyPlugins
+    private static boolean didCreateTask
     private SeasideParentPlugin plugin
 
     @Before
@@ -54,6 +55,11 @@ class SeasideParentPluginIT {
                 didApplyPlugins = true
             }
 
+            @Override
+            protected void createTasks(Project project){
+                didCreateTask = true
+            }
+
         }
 
         plugin.apply(project)
@@ -67,5 +73,7 @@ class SeasideParentPluginIT {
                 didRequiredSystemProperties)
         Assert.assertEquals("Did not apply all plugins", true,
                 didApplyPlugins)
+        Assert.assertEquals("Did not apply Tasks", true,
+                didCreateTask)
     }
 }

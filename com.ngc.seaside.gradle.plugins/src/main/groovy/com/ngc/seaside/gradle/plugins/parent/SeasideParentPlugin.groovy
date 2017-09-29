@@ -30,10 +30,9 @@ import org.gradle.api.tasks.bundling.Jar
 class SeasideParentPlugin implements Plugin<Project> {
 
     public static final String PARENT_TASK_GROUP_NAME = 'MainBuild'
-    public static final String PARENT_TASK_NAME = 'Main'
     public static final String PARENT_SOURCE_JAR_TASK_NAME = 'sourcesJar'
     public static final String PARENT_JAVADOC_JAR_TASK_NAME = 'javaDocJar'
-    public static final String PARENT_ANALYZE_TASK_NAME = 'analyze'
+    public static final String PARENT_ANALYZE_TASK_NAME = 'analyzeBuild'
     public static final String PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
     public static final String PARENT_CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
 
@@ -254,28 +253,32 @@ class SeasideParentPlugin implements Plugin<Project> {
          * Create a task for generating the source jar. This will also be uploaded to Nexus.
          */
 
-        project.task(PARENT_SOURCE_JAR_TASK_NAME, type: Jar, group: PARENT_TASK_GROUP_NAME,
-                dependsOn: project.tasks.getByName("classes")) {
+        def classesTask = project.tasks.getByName("classes")
+        project.task(PARENT_SOURCE_JAR_TASK_NAME, type: Jar) {
             classifier = 'sources'
             from project.sourceSets.main.allSource
         }
+        project.tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME).dependsOn(classesTask)
 
         /**
          * Create a task for generating the javadoc jar. This will also be uploaded to Nexus.
          */
-        def classesTask = project.tasks.getByName("classes")
         def javadocsTask = project.tasks.getByName("javadoc")
-        project.task(PARENT_JAVADOC_JAR_TASK_NAME, type: Jar,  group: PARENT_TASK_GROUP_NAME,
-                dependsOn: [classesTask, javadocsTask]) {
+        project.task(PARENT_JAVADOC_JAR_TASK_NAME, type: Jar) {
             classifier = 'javadoc'
             from javadocsTask.destinationDir
         }
+        project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).dependsOn( [classesTask, javadocsTask])
 
         def buildTask = project.tasks.getByName("build")
         def jacocoTaskReportTask = project.tasks.getByName("jacocoTestReport")
         def sonarqubeTask = project.tasks.getByName("sonarqube")
-        project.task(PARENT_ANALYZE_TASK_NAME, group: PARENT_TASK_GROUP_NAME,
-                dependsOn: [buildTask, jacocoTaskReportTask, sonarqubeTask]) {
+        project.task(PARENT_ANALYZE_TASK_NAME) {
         }
+        project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).dependsOn([buildTask, jacocoTaskReportTask, sonarqubeTask])
+
     }
 }
