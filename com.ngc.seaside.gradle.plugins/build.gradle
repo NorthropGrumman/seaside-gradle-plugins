@@ -2,8 +2,6 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
-
-
 // Dependencies
 dependencies {
 
@@ -16,6 +14,9 @@ dependencies {
     compile "commons-io:commons-io:$commonsIOVersion"
     compile "bats:bats:0.4.0"
 
+    testRuntime files(createClasspathManifest)
+
+    testCompile gradleTestKit()
     testCompile "junit:junit:$junitVersion"
     testCompile "org.mockito:mockito-core:$mockitoVersion"
     testCompile "com.ngc.blocs:test.impl.common.testutilities:$blocsVersion"

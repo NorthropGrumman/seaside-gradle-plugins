@@ -80,45 +80,57 @@ subprojects {
     }
 
     sourceSets {
-        integTest {
-            java.srcDir file('src/integTest/java')
-            groovy.srcDir file('src/integTest/groovy')
-            resources.srcDir file('src/integTest/resources')
+        integrationTest {
+            java.srcDir file('src/integrationTest/java')
+            groovy.srcDir file('src/integrationTest/groovy')
+            resources.srcDir file('src/integrationTest/resources')
         }
 
-        funcTest {
-            java.srcDir file('src/funcTest/java')
-            groovy.srcDir file('src/funcTest/groovy')
-            resources.srcDir file('src/funcTest/resources')
+        functionalTest {
+            java.srcDir file('src/functionalTest/java')
+            groovy.srcDir file('src/functionalTest/groovy')
+            resources.srcDir file('src/functionalTest/resources')
+        }
+    }
+
+    task createClasspathManifest {
+        def outputDir = file("$buildDir/$name")
+
+        inputs.files sourceSets.main.runtimeClasspath
+        outputs.dir outputDir
+
+        doLast {
+            outputDir.mkdirs()
+            file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
         }
     }
 
     // Integration Dependencies
     dependencies {
-        integTestCompile sourceSets.main.output
-        integTestCompile configurations.testCompile
-        integTestCompile sourceSets.test.output
-        integTestRuntime configurations.testRuntime
+        integrationTestCompile sourceSets.main.output
+        integrationTestCompile configurations.testCompile
+        integrationTestCompile sourceSets.test.output
+        integrationTestRuntime configurations.testRuntime
 
-        funcTestCompile sourceSets.main.output
-        funcTestCompile configurations.testCompile
-        funcTestCompile sourceSets.test.output
-        funcTestRuntime configurations.testRuntime
+        functionalTestCompile sourceSets.main.output
+        functionalTestCompile configurations.testCompile
+        functionalTestCompile sourceSets.test.output
+        functionalTestRuntime configurations.testRuntime
     }
 
     tasks.getByName("test").group = "test"
 
-    task integTest(type: Test,  group: "test") {
-        testClassesDir = sourceSets.integTest.output.classesDir
-        classpath = sourceSets.integTest.runtimeClasspath
+    task integrationTest(type: Test,  group: "test") {
+        testClassesDir = sourceSets.integrationTest.output.classesDir
+        classpath = sourceSets.integrationTest.runtimeClasspath
     }
 
-    task funcTest(type: Test, group: "test") {
-        testClassesDir = sourceSets.funcTest.output.classesDir
-        classpath = sourceSets.funcTest.runtimeClasspath
+    task functionalTest(type: Test, group: "test") {
+        testClassesDir = sourceSets.functionalTest.output.classesDir
+        classpath = sourceSets.functionalTest.runtimeClasspath
     }
 
-    integTest.shouldRunAfter(test)
-    funcTest.shouldRunAfter(integTest)
-    check.dependsOn(integTest, funcTest)
+    integrationTest.shouldRunAfter(test)
+    functionalTest.shouldRunAfter(integrationTest)
+    check.dependsOn(integrationTest, functionalTest)
 }

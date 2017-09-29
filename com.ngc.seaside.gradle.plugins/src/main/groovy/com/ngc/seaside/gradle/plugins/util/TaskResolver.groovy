@@ -12,11 +12,19 @@ public class TaskResolver {
         this.project = project
     }
 
-    public Task findTask(Project project = this.project, String taskName) {
+    public Task findTask(String taskName) {
         return project.tasks.getByName(taskName)
     }
 
-    public Task findTask(Project project = this.project, String taskName, Closure) {
+    public static Task findTask(Project project, String taskName) {
+        return project.tasks.getByName(taskName)
+    }
+
+    public Task findTask(String taskName, Closure) {
+        return project.tasks.getByName(taskName)
+    }
+
+    public static Task findTask(Project project, String taskName, Closure) {
         return project.tasks.getByName(taskName)
     }
 }
