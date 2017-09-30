@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out" />
+        <param name="Threshold" value="TRACE" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c] [%t] %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="RollingFileAppender" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${NG_FW_HOME}/logs/framework.log"/>
+        <param name="Threshold" value="TRACE" />
+        <param name="MaxFileSize" value="100MB" />
+        <param name="MaxBackupIndex" value="100" />
+        <param name="Append" value="false" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c] [%t] %m%n"/>
+        </layout>
+    </appender>
+
+    <!-- Hibernate logging configuration. -->
+    <logger name="org.hibernate">
+        <level value="WARN"/>
+    </logger>
+
+    <logger name="com.ngc.blocs.service.preference.impl.common.PreferenceService">
+        <level value="INFO"/>
+    </logger>
+
+    <logger name="org.jxmapviewer.viewer.TileCache">
+        <level value="WARN"/>
+    </logger>
+
+    <logger name="org.apache.commons.beanutils.converters">
+        <level value="WARN"/>
+    </logger>
+
+    <logger name="java.sql">
+        <level value="WARN"/>
+    </logger>
+
+    <root>
+        <level value="TRACE" />
+        <appender-ref ref="RollingFileAppender" />
+        <appender-ref ref="ConsoleAppender" />
+    </root>
+</log4j:configuration>
