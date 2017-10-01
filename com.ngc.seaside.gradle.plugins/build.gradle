@@ -9,10 +9,11 @@ dependencies {
     compile localGroovy()
 
 
+    compile "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarQube"
+
     compile "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
     compile "org.unbescape:unbescape:$unbescapeVersion"
     compile "commons-io:commons-io:$commonsIOVersion"
-    compile "bats:bats:0.4.0"
 
     testRuntime files(createClasspathManifest)
 

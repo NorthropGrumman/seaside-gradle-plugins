@@ -30,16 +30,7 @@ class SeasideParentPluginIT {
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
 
 
-        plugin = new SeasideParentPlugin() {
-
-
-            @Override
-            protected void doRequiredGradleProperties(Project project, String propertyName,
-                                                                 String... propertyNames) {
-                didRequireDistributionGradleProperties = true
-            }
-
-        }
+        plugin = new SeasideParentPlugin()
 
         setRequiredProjectProperties(project)
         plugin.apply(project)
@@ -48,9 +39,6 @@ class SeasideParentPluginIT {
     @Test
     void doesApplyPlugin() {
         TaskResolver resolver = new TaskResolver(project)
-        Assert.assertEquals("Did not require gradle distribution properties", true,
-                didRequireDistributionGradleProperties)
-
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_SOURCE_JAR_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_JAVADOC_JAR_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_ANALYZE_TASK_NAME))
