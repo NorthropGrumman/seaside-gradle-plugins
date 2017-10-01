@@ -197,10 +197,9 @@ class SeasideCppParentPlugin implements Plugin<Project> {
 
 
         p.task('displayBuilding') << {
-            println "\tHeaders: $project.building.headers"
+            println "Headers" + p.building.storage.getHeaderBuildConfigurations('celix')
 
-
-            Collection<String> configuredStaticDeps = project.building.storage.getStaticDependencies()
+            Collection<String> configuredStaticDeps = p.building.storage.getStaticDependencies()
             println "\tStatic $configuredStaticDeps"
             for(String dep : configuredStaticDeps) {
                 Collection< StaticBuildConfiguration> configurations = project.building.storage.getStaticBuildConfigurations(dep)
@@ -209,10 +208,10 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                 }
             }
 
-            Collection<String> configuredSharedDeps = project.building.storage.getSharedDependencies()
+            Collection<String> configuredSharedDeps = p.building.storage.getSharedDependencies()
             println "\tShared $configuredSharedDeps"
             for(String dep : configuredSharedDeps) {
-                Collection<SharedBuildConfiguration> configurations = project.building.storage.getSharedBuildConfigurations(dep)
+                Collection<SharedBuildConfiguration> configurations = p.building.storage.getSharedBuildConfigurations(dep)
                 for(SharedBuildConfiguration config : configurations) {
                     println "\t $config"
                 }

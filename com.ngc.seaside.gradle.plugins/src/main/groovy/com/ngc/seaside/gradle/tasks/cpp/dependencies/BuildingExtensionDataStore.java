@@ -1,7 +1,6 @@
 package com.ngc.seaside.gradle.tasks.cpp.dependencies;
 
 
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
@@ -20,6 +19,36 @@ public class BuildingExtensionDataStore {
    private static Multimap<String, SharedBuildConfiguration> sharedDependenciesMap = ArrayListMultimap.create();
    private static Multimap<String, HeaderBuildConfiguration> headersByDependencyMap = ArrayListMultimap.create();
    private static List<String> apiDependencies = new ArrayList<>();
+
+   public boolean hasCustomStaticBuildConfiguration(String dependencyName) {
+      if (!staticDependenciesMap.containsKey(dependencyName)) {
+         return false;
+      }
+
+      Collection<StaticBuildConfiguration> configs = staticDependenciesMap.get(dependencyName);
+      for(StaticBuildConfiguration config : configs) {
+         if(config.getLibs() != null && !config.getLibs().isEmpty()) {
+             return true;
+         }
+      }
+
+      return false;
+   }
+
+   public boolean hasCustomSharedBuildConfiguration(String dependencyName) {
+      if (!sharedDependenciesMap.containsKey(dependencyName)) {
+         return false;
+      }
+
+      Collection<SharedBuildConfiguration> configs = sharedDependenciesMap.get(dependencyName);
+      for(SharedBuildConfiguration config : configs) {
+         if(config.getLibs() != null && !config.getLibs().isEmpty()) {
+            return true;
+         }
+      }
+
+      return false;
+   }
 
    public void add(HeaderBuildConfiguration headerBuildConfiguration) {
       headersByDependencyMap.put(headerBuildConfiguration.getDependencyName(), headerBuildConfiguration);
