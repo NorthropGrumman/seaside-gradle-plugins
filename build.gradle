@@ -17,6 +17,7 @@ subprojects {
         unbescapeVersion = '1.1.3.RELEASE'
         mockitoVersion = '2.7.14'
         blocsVersion = '2.1'
+        gradleVersions = '0.15.0'
     }
 
     repositories {
@@ -120,7 +121,7 @@ subprojects {
 
     tasks.getByName("test").group = "test"
 
-    task integrationTest(type: Test,  group: "test") {
+    task integrationTest(type: Test, group: "test") {
         testClassesDir = sourceSets.integrationTest.output.classesDir
         classpath = sourceSets.integrationTest.runtimeClasspath
     }

@@ -51,7 +51,11 @@ class SeasideParentPlugin implements Plugin<Project> {
             plugins.apply 'eclipse'
             plugins.apply 'org.sonarqube'
             plugins.apply 'jacoco'
+            plugins.apply 'com.github.ben-manes.versions'
+            plugins.apply 'com.github.ksoichiro.console.reporter'
             plugins.apply SeasideReleasePlugin
+
+
 
             /**
              * Create a task for generating the source jar. This will also be uploaded to Nexus.
