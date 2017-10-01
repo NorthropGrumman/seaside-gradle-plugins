@@ -29,22 +29,30 @@ class SeasideParentPluginFT {
         }
         pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
 
-        File source = Paths.get("src/functionalTest/resources/parent/com.ngc.example.parent").toFile()
-        Path targetPath = Paths.get("build/functionalTest/resources/parent/com.ngc.example.parent")
+        File source = Paths.get("src/functionalTest/resources/parent/sealion-java-hello-world").toFile()
+        Path targetPath = Paths.get("build/functionalTest/resources/parent/sealion-java-hello-world")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
 
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
     }
 
-
     @Test
-    void doesRunGradleBuildWithSuccess() {
+    void doesGradleRelease() {
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir).withArguments("tasks").build()
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":tasks").getOutcome())
+    }
+
+    /*@Test
+    void doesRunGradleAnalyzeBuildWithSuccess() {
+        def analyzeBuild = SeasideParentPlugin.PARENT_ANALYZE_TASK_NAME
         BuildResult result = GradleRunner.create().withProjectDir(project.projectDir)
                 .withPluginClasspath(pluginClasspath)
-                .withArguments("analyzeBuild --stacktrace")
+                .withArguments(analyzeBuild)
                 .build()
 
-        Assert.assertEquals(TaskOutcome.valueOf( "SUCCESS"), result.task(":analyzeBuild").getOutcome())
-    }
+        analyzeBuild = ":"+analyzeBuild
+        println("MEL THIS IS ANALYZE BUILD STRING: " + analyzeBuild)
+        Assert.assertEquals(TaskOutcome.valueOf( "SUCCESS"), result.task(analyzeBuild).getOutcome())
+    }*/
 }

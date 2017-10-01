@@ -157,28 +157,6 @@ class SeasideParentPlugin implements Plugin<Project> {
                 }
             }
 
-            task(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask, group: PARENT_TASK_GROUP_NAME,
-                 description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.') {}
-
-            task(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask, group: PARENT_TASK_GROUP_NAME,
-                 description: 'Remove unused dependencies from repository.') {
-                customRepo = project.getProjectDir().path + "/build/dependencies-tmp"
-                doLast {
-                    ext.actualRepository = project.downloadDependencies.localRepository ?
-                                           project.downloadDependencies.localRepository : project.file(
-                            [project.buildDir, 'dependencies'].join(File.separator))
-
-                    logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to ${actualRepository.absolutePath}.")
-                    project.delete(actualRepository)
-                    project.copy {
-                        from localRepository
-                        into actualRepository
-                    }
-                    project.delete(localRepository)
-                }
-            }
-
-
             task('dependencyReport', type: DependencyReportTask,
                  description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies') {
             }
@@ -252,7 +230,6 @@ class SeasideParentPlugin implements Plugin<Project> {
         /**
          * Create a task for generating the source jar. This will also be uploaded to Nexus.
          */
-
         def classesTask = project.tasks.getByName("classes")
         project.task(PARENT_SOURCE_JAR_TASK_NAME, type: Jar) {
             classifier = 'sources'
@@ -272,6 +249,9 @@ class SeasideParentPlugin implements Plugin<Project> {
         project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
         project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).dependsOn( [classesTask, javadocsTask])
 
+        /**
+         * analyzeBuild task for sonarqube
+         */
         def buildTask = project.tasks.getByName("build")
         def jacocoTaskReportTask = project.tasks.getByName("jacocoTestReport")
         def sonarqubeTask = project.tasks.getByName("sonarqube")
@@ -280,5 +260,35 @@ class SeasideParentPlugin implements Plugin<Project> {
         project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
         project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).dependsOn([buildTask, jacocoTaskReportTask, sonarqubeTask])
 
+        /**
+         * downloadDependencies task
+         */
+        project.task(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask){}
+        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription(
+                'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.')
+
+        /**
+         * cleanupDependencies task
+         */
+        project.task(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {
+                    customRepo = project.getProjectDir().path + "/build/dependencies-tmp"
+                    doLast {
+                        ext.actualRepository = project.downloadDependencies.localRepository ?
+                                project.downloadDependencies.localRepository : project.file(
+                                [project.buildDir, 'dependencies'].join(File.separator))
+
+                        logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to " +
+                                "${actualRepository.absolutePath}.")
+                        project.delete(actualRepository)
+                        project.copy {
+                            from localRepository
+                            into actualRepository
+                        }
+                        project.delete(localRepository)
+                    }
+                }
+        project.tasks.getByName(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription('Remove unused dependencies from repository.')
     }
 }

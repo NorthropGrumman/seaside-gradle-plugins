@@ -1,0 +1,16 @@
+subprojects {
+    plugins {
+        id 'com.ngc.seaside.parent'
+    }
+
+    group = 'com.ngc.seaside'
+    version = '1.2.3-SNAPSHOT'
+
+    ext {
+        junitVersion = '4.12'
+        slf4jVersion = '1.7.22'
+        log4jVersion = '1.2.17'
+        cucumberVersion = '1.2.5'
+        sonarQube = '2.5'
+    }
+}

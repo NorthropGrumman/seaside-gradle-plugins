@@ -17,7 +17,6 @@ class SeasideParentPluginIT {
     private File projectDir
     private Project project
     private SeasideParentPlugin plugin
-    private static boolean didRequireDistributionGradleProperties
 
     @Before
     void before() {
@@ -42,7 +41,8 @@ class SeasideParentPluginIT {
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_SOURCE_JAR_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_JAVADOC_JAR_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_ANALYZE_TASK_NAME))
-
+        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_CLEANUP_DEPENDENCIES_TASK_NAME))
     }
 
     static void setRequiredProjectProperties(Project project) {
