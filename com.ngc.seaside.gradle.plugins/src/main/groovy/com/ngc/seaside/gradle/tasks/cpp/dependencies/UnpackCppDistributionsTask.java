@@ -373,12 +373,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                               BuildingExtension buildingExtension) {
       System.out.println(String.format("Adding Linker Args ('%s') for '%s'", args, fileName));
 
-      List<String> arguments = new ArrayList<>();
-      arguments.addAll(args.before);
-      arguments.add(fileName);
-      arguments.addAll(args.after);
-
-      buildingExtension.getStorage().addLinkArgs(arguments);
+      buildingExtension.getStorage().addLinkArgs(fileName, args);
 
 //      ModelRegistry projectModel = getServices()
 //               .get(ProjectModelResolver.class)

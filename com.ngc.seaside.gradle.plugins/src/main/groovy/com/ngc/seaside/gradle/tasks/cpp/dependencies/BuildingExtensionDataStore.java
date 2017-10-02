@@ -5,7 +5,9 @@ import com.google.common.collect.Multimap;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -17,14 +19,18 @@ public class BuildingExtensionDataStore {
    private static Multimap<String, HeaderBuildConfiguration> headersByDependencyMap = ArrayListMultimap.create();
    private static List<String> apiDependencies = new ArrayList<>();
 
-   private static List<String> linkerArgs = new ArrayList<>();
+   private static Map<String, StaticBuildConfiguration.WithArgs> librariesWithLinkerArgsMap = new HashMap<>();
 
-   public void addLinkArgs(List<String> args) {
-      linkerArgs.addAll(args);
+   public boolean hasLinkArgs(String libraryName) {
+      return librariesWithLinkerArgsMap.containsKey(libraryName);
    }
 
-   public List<String> getLinkerArgs() {
-      return linkerArgs;
+   public void addLinkArgs(String libraryName, StaticBuildConfiguration.WithArgs args) {
+      librariesWithLinkerArgsMap.put(libraryName, args);
+   }
+
+   public StaticBuildConfiguration.WithArgs getLinkerArgs(String fileName) {
+      return librariesWithLinkerArgsMap.get(fileName);
    }
 
    public void add(HeaderBuildConfiguration headerBuildConfiguration) {

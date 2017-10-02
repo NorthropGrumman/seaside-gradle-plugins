@@ -43,6 +43,22 @@ public class StaticBuildConfiguration extends AbstractBuildConfiguration {
 
       WithArgs() {}
 
+      public List<String> getBefore() {
+         return before;
+      }
+
+      public void setBefore(List<String> before) {
+         this.before = before;
+      }
+
+      public List<String> getAfter() {
+         return after;
+      }
+
+      public void setAfter(List<String> after) {
+         this.after = after;
+      }
+
       @Override
       public String toString() {
          return "before='" + before + '\'' +
