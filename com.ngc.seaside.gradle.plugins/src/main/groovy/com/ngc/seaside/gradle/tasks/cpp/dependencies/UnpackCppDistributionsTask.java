@@ -1,15 +1,12 @@
 package com.ngc.seaside.gradle.tasks.cpp.dependencies;
 
-import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.DomainObjectSet;
 import org.gradle.api.Project;
 import org.gradle.api.internal.resolve.ProjectModelResolver;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.language.cpp.CppSourceSet;
 import org.gradle.model.internal.registry.ModelRegistry;
-import org.gradle.nativeplatform.NativeLibraryBinary;
 import org.gradle.nativeplatform.NativeLibrarySpec;
 import org.gradle.nativeplatform.PrebuiltLibrary;
 import org.gradle.nativeplatform.Repositories;
@@ -17,27 +14,22 @@ import org.gradle.nativeplatform.internal.prebuilt.AbstractPrebuiltLibraryBinary
 import org.gradle.nativeplatform.internal.prebuilt.DefaultPrebuiltLibraries;
 import org.gradle.nativeplatform.internal.prebuilt.DefaultPrebuiltSharedLibraryBinary;
 import org.gradle.nativeplatform.internal.prebuilt.DefaultPrebuiltStaticLibraryBinary;
-import org.gradle.nativeplatform.platform.NativePlatform;
 import org.gradle.nativeplatform.test.googletest.GoogleTestTestSuiteBinarySpec;
-import org.gradle.nativeplatform.toolchain.Gcc;
-import org.gradle.nativeplatform.toolchain.GccPlatformToolChain;
-import org.gradle.nativeplatform.toolchain.NativeToolChain;
-import org.gradle.nativeplatform.toolchain.NativeToolChainRegistry;
 import org.gradle.platform.base.BinaryContainer;
 import org.gradle.platform.base.ComponentSpecContainer;
-import org.gradle.platform.base.ToolChain;
-import org.gradle.platform.base.ToolChainRegistry;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- *  This task unpacks the dependencies and configures the cpp task.
+ * This task unpacks the dependencies and configures the cpp task.
  */
 public class UnpackCppDistributionsTask extends DefaultTask {
 
@@ -131,13 +123,12 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       this.testDependencies = testDependencies;
    }
 
-
    /**
     * Configure the dependency within the cpp plugin. This includes creating the libs under model > repositories
     * and adding the dependency to the components
     *
-    * @param directory       the base directory in which the dependency exists in its unpacked state.
-    * @param dependencyName  the name of the dependency. This is usually the artifact ID.
+    * @param directory      the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName the name of the dependency. This is usually the artifact ID.
     */
    private void configureDependency(File directory, String dependencyName) {
       BuildingExtension buildingExtension = getProject().getExtensions().getByType(BuildingExtension.class);
@@ -159,11 +150,11 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    /**
     * Add the dependency as an API dependency if configured that way.
     *
-    * @param directory          the base directory in which the dependency exists in its unpacked state.
-    * @param dependencyName     the name of the dependency (this is derived from the directory name (minus the version)
-    * @param buildingExtension  the plugins extension (i.e. the 'building' configuration in groovy)
-    * @param libs               the PrebuiltLibraries libs (the object that the dependency gets added to)
-    * @param dependencyHeaders  the headers associated with this dependency
+    * @param directory         the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName    the name of the dependency (this is derived from the directory name (minus the version)
+    * @param buildingExtension the plugins extension (i.e. the 'building' configuration in groovy)
+    * @param libs              the PrebuiltLibraries libs (the object that the dependency gets added to)
+    * @param dependencyHeaders the headers associated with this dependency
     */
    private void addApiDependencies(File directory,
                                    String dependencyName,
@@ -171,10 +162,10 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                                    DefaultPrebuiltLibraries libs,
                                    List<File> dependencyHeaders) {
       List<String> configs = buildingExtension.getStorage().getApiDependencies();
-      if(configs.contains(dependencyName)) {
+      if (configs.contains(dependencyName)) {
          PrebuiltLibrary lib = libs.create(dependencyName);
          lib.getHeaders().setSrcDirs(dependencyHeaders);
-         if(!testDependencies) {
+         if (!testDependencies) {
             addDependencyToComponent(dependencyName, LibraryType.API);
          }
          addDependencyToGoogleTestBinary(dependencyName, LibraryType.API);
@@ -184,20 +175,24 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    /**
     * Add the dependency as a static library if it is configured as such.
     *
-    * @param directory          the base directory in which the dependency exists in its unpacked state.
-    * @param dependencyName     the name of the dependency (this is derived from the directory name (minus the version)
-    * @param buildingExtension  the plugins extension (i.e. the 'building' configuration in groovy)
-    * @param libs               the PrebuiltLibraries libs (the object that the dependency gets added to)
-    * @param dependencyHeaders  the headers associated with this dependency
+    * @param directory         the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName    the name of the dependency (this is derived from the directory name (minus the version)
+    * @param buildingExtension the plugins extension (i.e. the 'building' configuration in groovy)
+    * @param libs              the PrebuiltLibraries libs (the object that the dependency gets added to)
+    * @param dependencyHeaders the headers associated with this dependency
     */
    private void addStaticDependencies(File directory,
                                       String dependencyName,
                                       BuildingExtension buildingExtension,
                                       DefaultPrebuiltLibraries libs,
                                       List<File> dependencyHeaders) {
-      Collection<StaticBuildConfiguration> configs = buildingExtension.getStorage().getStaticBuildConfigurations(dependencyName);
+      Collection<StaticBuildConfiguration>
+               configs =
+               buildingExtension.getStorage().getStaticBuildConfigurations(dependencyName);
+
+      Set<File> deps = new HashSet<>();
       for (StaticBuildConfiguration config : configs) {
-         if(config.getLibs() != null && !config.getLibs().isEmpty()) {
+         if (config.getLibs() != null && !config.getLibs().isEmpty()) {
             for (String library : config.getLibs()) {
                PrebuiltLibrary lib = libs.create(library);
 
@@ -208,14 +203,16 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                for (DefaultPrebuiltStaticLibraryBinary bin :
                         lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
                   File obj = getLibFile(bin, directory, library, LibraryType.STATIC);
-                  if (obj.exists()) {
+
+                  if (!deps.contains(obj) && obj.exists()) {
+                     deps.add(obj);
                      bin.setStaticLibraryFile(obj);
 
-                     if(config.getWithArgs() != null) {
+                     if (config.getWithArgs() != null) {
                         addLinkerArgs(obj.getAbsolutePath(), config.getWithArgs(), buildingExtension);
                      }
 
-                     if(!testDependencies) {
+                     if (!testDependencies) {
                         addDependencyToComponent(library, LibraryType.STATIC);
                      }
                      addDependencyToGoogleTestBinary(library, LibraryType.STATIC);
@@ -232,13 +229,14 @@ public class UnpackCppDistributionsTask extends DefaultTask {
             for (DefaultPrebuiltStaticLibraryBinary bin :
                      lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
                File obj = getLibFile(bin, directory, dependencyName, LibraryType.STATIC);
-               if (obj.exists()) {
+               if (!deps.contains(obj) && obj.exists()) {
+                  deps.add(obj);
                   bin.setStaticLibraryFile(obj);
 
-                  if(config.getWithArgs() != null) {
+                  if (config.getWithArgs() != null) {
                      addLinkerArgs(obj.getAbsolutePath(), config.getWithArgs(), buildingExtension);
                   }
-                  if(!testDependencies) {
+                  if (!testDependencies) {
                      addDependencyToComponent(dependencyName, LibraryType.STATIC);
                   }
                   addDependencyToGoogleTestBinary(dependencyName, LibraryType.STATIC);
@@ -251,11 +249,11 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    /**
     * Add the dependency as a shared library if it is configured as such.
     *
-    * @param directory          the base directory in which the dependency exists in its unpacked state.
-    * @param dependencyName     the name of the dependency (this is derived from the directory name (minus the version)
-    * @param buildingExtension  the plugins extension (i.e. the 'building' configuration in groovy)
-    * @param libs               the PrebuiltLibraries libs (the object that the dependency gets added to)
-    * @param dependencyHeaders  the headers associated with this dependency
+    * @param directory         the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName    the name of the dependency (this is derived from the directory name (minus the version)
+    * @param buildingExtension the plugins extension (i.e. the 'building' configuration in groovy)
+    * @param libs              the PrebuiltLibraries libs (the object that the dependency gets added to)
+    * @param dependencyHeaders the headers associated with this dependency
     */
    private void addSharedDependencies(File directory,
                                       String dependencyName,
@@ -263,9 +261,12 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                                       DefaultPrebuiltLibraries libs,
                                       List<File> dependencyHeaders) {
 
-      Collection<SharedBuildConfiguration> configs = buildingExtension.getStorage().getSharedBuildConfigurations(dependencyName);
+      Collection<SharedBuildConfiguration>
+               configs =
+               buildingExtension.getStorage().getSharedBuildConfigurations(dependencyName);
+      Set<File> deps = new HashSet<>();
       for (SharedBuildConfiguration config : configs) {
-         if(config.getLibs() != null && !config.getLibs().isEmpty()) {
+         if (config.getLibs() != null && !config.getLibs().isEmpty()) {
             for (String library : config.getLibs()) {
                PrebuiltLibrary lib = libs.create(library);
 
@@ -276,13 +277,15 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                for (DefaultPrebuiltSharedLibraryBinary bin :
                         lib.getBinaries().withType(DefaultPrebuiltSharedLibraryBinary.class)) {
                   File obj = getLibFile(bin, directory, library, LibraryType.SHARED);
-                  if (obj.exists()) {
+                  if (!deps.contains(obj) && obj.exists()) {
+                     deps.add(obj);
                      bin.setSharedLibraryFile(obj);
 
-                     if(!testDependencies) {
+                     if (!testDependencies) {
                         addDependencyToComponent(library, LibraryType.SHARED);
                      }
                      addDependencyToGoogleTestBinary(library, LibraryType.SHARED);
+
                   }
                }
             }
@@ -296,10 +299,11 @@ public class UnpackCppDistributionsTask extends DefaultTask {
             for (DefaultPrebuiltSharedLibraryBinary bin :
                      lib.getBinaries().withType(DefaultPrebuiltSharedLibraryBinary.class)) {
                File obj = getLibFile(bin, directory, dependencyName, LibraryType.SHARED);
-               if (obj.exists()) {
+               if (!deps.contains(obj) && obj.exists()) {
+                  deps.add(obj);
                   bin.setSharedLibraryFile(obj);
 
-                  if(!testDependencies) {
+                  if (!testDependencies) {
                      addDependencyToComponent(dependencyName, LibraryType.SHARED);
                   }
                   addDependencyToGoogleTestBinary(dependencyName, LibraryType.SHARED);
@@ -312,15 +316,14 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    /**
     * Add the dependency as a shared library if it is configured as such.
     *
-    * @param directory          the base directory in which the dependency exists in its unpacked state.
-    * @param dependencyName     the name of the dependency (this is derived from the directory name (minus the version)
-    * @param buildingExtension  the plugins extension (i.e. the 'building' configuration in groovy)
-    *
+    * @param directory         the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName    the name of the dependency (this is derived from the directory name (minus the version)
+    * @param buildingExtension the plugins extension (i.e. the 'building' configuration in groovy)
     * @return The list of header files associated with the dependency.
     */
    private List<File> createHeaderFiles(File directory, String dependencyName, BuildingExtension buildingExtension) {
       Collection<HeaderBuildConfiguration>
-            headerConfigurations = buildingExtension.getStorage().getHeaderBuildConfigurations(dependencyName);
+               headerConfigurations = buildingExtension.getStorage().getHeaderBuildConfigurations(dependencyName);
       if (headerConfigurations != null && !headerConfigurations.isEmpty()) {
          List<File> headers = new ArrayList<>();
          for (HeaderBuildConfiguration buildConfiguration : headerConfigurations) {
@@ -337,18 +340,17 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    /**
     * Create the lib file given the prebuilt library configuration.
     *
-    * @param bin        the configuration for different architecture
-    * @param directory  the base directory in which the dependency exists in its unpacked state.
-    * @param libName    the name of the library (dependency)
-    * @param type       the type of library (shared or static only make sense here)
-    *
+    * @param bin       the configuration for different architecture
+    * @param directory the base directory in which the dependency exists in its unpacked state.
+    * @param libName   the name of the library (dependency)
+    * @param type      the type of library (shared or static only make sense here)
     * @return the File associated with the library. This will not turn null, but the file may not exists
     */
    private File getLibFile(AbstractPrebuiltLibraryBinary bin, File directory, String libName, LibraryType type) {
       String arch = bin.getTargetPlatform().getArchitecture().getName().replace('-', '_');
       String os = bin.getTargetPlatform().getOperatingSystem().getName();
       String ext = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "lib" : "a";
-      if(type == LibraryType.SHARED) {
+      if (type == LibraryType.SHARED) {
          ext = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "dll" : "so";
       }
       String prefix = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "" : "lib";
@@ -367,16 +369,16 @@ public class UnpackCppDistributionsTask extends DefaultTask {
     * @param fileName the static library in which to apply the linker args.
     * @param args     the arguments in which to apply.
     */
-   private void addLinkerArgs(String fileName, StaticBuildConfiguration.WithArgs args, BuildingExtension buildingExtension) {
+   private void addLinkerArgs(String fileName, StaticBuildConfiguration.WithArgs args,
+                              BuildingExtension buildingExtension) {
       System.out.println(String.format("Adding Linker Args ('%s') for '%s'", args, fileName));
-
 
       List<String> arguments = new ArrayList<>();
       arguments.addAll(args.before);
       arguments.add(fileName);
       arguments.addAll(args.after);
 
-
+      buildingExtension.getStorage().addLinkArgs(arguments);
 
 //      ModelRegistry projectModel = getServices()
 //               .get(ProjectModelResolver.class)
@@ -397,7 +399,6 @@ public class UnpackCppDistributionsTask extends DefaultTask {
 //            gccPlatformToolChain.getLinker().setExecutable("-Wl,--whole-archive");
 //         }
 //      });
-
 
    }
 
