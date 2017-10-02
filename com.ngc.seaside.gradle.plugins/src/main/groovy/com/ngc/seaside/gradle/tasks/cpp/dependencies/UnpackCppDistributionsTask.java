@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.tasks.cpp.dependencies;
 
+import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.internal.resolve.ProjectModelResolver;
@@ -14,9 +15,16 @@ import org.gradle.nativeplatform.internal.prebuilt.AbstractPrebuiltLibraryBinary
 import org.gradle.nativeplatform.internal.prebuilt.DefaultPrebuiltLibraries;
 import org.gradle.nativeplatform.internal.prebuilt.DefaultPrebuiltSharedLibraryBinary;
 import org.gradle.nativeplatform.internal.prebuilt.DefaultPrebuiltStaticLibraryBinary;
+import org.gradle.nativeplatform.platform.NativePlatform;
 import org.gradle.nativeplatform.test.googletest.GoogleTestTestSuiteBinarySpec;
+import org.gradle.nativeplatform.toolchain.Gcc;
+import org.gradle.nativeplatform.toolchain.GccPlatformToolChain;
+import org.gradle.nativeplatform.toolchain.NativeToolChain;
+import org.gradle.nativeplatform.toolchain.NativeToolChainRegistry;
 import org.gradle.platform.base.BinaryContainer;
 import org.gradle.platform.base.ComponentSpecContainer;
+import org.gradle.platform.base.ToolChain;
+import org.gradle.platform.base.ToolChainRegistry;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -201,6 +209,10 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                   if (obj.exists()) {
                      bin.setStaticLibraryFile(obj);
 
+                     if(config.getWithArgs() != null) {
+                        addLinkerArgs(obj.getAbsolutePath(), config.getWithArgs());
+                     }
+
                      if(!testDependencies) {
                         addDependencyToComponent(library, LibraryType.STATIC);
                      }
@@ -221,6 +233,9 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                if (obj.exists()) {
                   bin.setStaticLibraryFile(obj);
 
+                  if(config.getWithArgs() != null) {
+                     addLinkerArgs(obj.getAbsolutePath(), config.getWithArgs());
+                  }
                   if(!testDependencies) {
                      addDependencyToComponent(dependencyName, LibraryType.STATIC);
                   }
@@ -345,15 +360,57 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    }
 
    /**
+    * Add the linker args to the available native toolchains (gcc, visualCpp, etc....)
+    *
+    * @param fileName the static library in which to apply the linker args.
+    * @param args     the arguments in which to apply.
+    */
+   private void addLinkerArgs(String fileName, StaticBuildConfiguration.WithArgs args) {
+      System.out.println(String.format("Adding Linker Args ('%s') for '%s'", args, fileName));
+
+      ModelRegistry projectModel = getServices()
+               .get(ProjectModelResolver.class)
+               .resolveProjectModel(getProject().getPath());
+
+
+
+      NativeToolChainRegistry registry = projectModel.find("toolChains", NativeToolChainRegistry.class);
+      for(NativeToolChain toolChain : registry) {
+         System.out.println("Toolchain: " + toolChain.getName());
+      }
+
+      Gcc gcc = (Gcc)registry.getByName("gcc");
+
+      gcc.eachPlatform(new Action<GccPlatformToolChain>() {
+         @Override
+         public void execute(GccPlatformToolChain gccPlatformToolChain) {
+            gccPlatformToolChain.getLinker().setExecutable("-Wl,--whole-archiveAABCC");
+         }
+      });
+
+
+
+
+   }
+
+   /**
     * Add the dependency to the components cpp plugin configuration.
     *
     * @param dependencyName the name of the dependency or library
     * @param type           the type being added.
     */
    private void addDependencyToComponent(String dependencyName, LibraryType type) {
-      ModelRegistry projectModel = getServices().get(ProjectModelResolver.class).resolveProjectModel(getProject().getPath());
-      NativeLibrarySpec component = projectModel.find("components", ComponentSpecContainer.class).withType(NativeLibrarySpec.class).get(getComponentName());
-      CppSourceSet cppSourceSet = component.getSources().withType(CppSourceSet.class).get(getComponentSourceSetName());
+      ModelRegistry projectModel = getServices()
+               .get(ProjectModelResolver.class)
+               .resolveProjectModel(getProject().getPath());
+      NativeLibrarySpec component = projectModel
+               .find("components", ComponentSpecContainer.class)
+               .withType(NativeLibrarySpec.class)
+               .get(getComponentName());
+      CppSourceSet cppSourceSet = component
+               .getSources()
+               .withType(CppSourceSet.class)
+               .get(getComponentSourceSetName());
 
       Map<String, String> map = new HashMap<>();
       map.put("library", dependencyName);
@@ -371,8 +428,8 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       ModelRegistry projectModel = getServices()
                .get(ProjectModelResolver.class)
                .resolveProjectModel(getProject().getPath());
-      for (GoogleTestTestSuiteBinarySpec binary : projectModel.find("binaries", BinaryContainer.class)
-                        .withType(GoogleTestTestSuiteBinarySpec.class)) {
+      for (GoogleTestTestSuiteBinarySpec binary :
+               projectModel.find("binaries", BinaryContainer.class).withType(GoogleTestTestSuiteBinarySpec.class)) {
 
          Map<String, String> map = new HashMap<>();
          map.put("library", dependencyName);

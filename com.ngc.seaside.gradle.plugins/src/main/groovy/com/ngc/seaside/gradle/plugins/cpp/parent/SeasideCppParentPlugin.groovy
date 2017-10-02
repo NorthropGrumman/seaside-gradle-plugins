@@ -128,7 +128,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                        visualCpp(VisualCpp) {
                            eachPlatform {
                                linker.withArguments { args ->
-                                   // filterLinkerArgs(p.extensions.linking, args)
+                                    filterLinkerArgs(p.extensions.linking, args)
                                }
                            }
                        }
@@ -139,7 +139,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                        gcc(Gcc) {
                            eachPlatform {
                                linker.withArguments { args ->
-                                   // filterLinkerArgs(p.extensions.linking, args)
+                                    filterLinkerArgs(p.extensions.linking, args)
                                }
                            }
                        }
@@ -219,9 +219,9 @@ class SeasideCppParentPlugin implements Plugin<Project> {
         }
     }
 
-//    private void filterLinkerArgs(BuildingExtension buildingExtension, List<String> linkerArgs) {
-//        Collection<String> artifactsWithArgs = new HashSet<>()
-//
+    private void filterLinkerArgs(BuildingExtension buildingExtension, List<String> linkerArgs) {
+        Collection<String> artifactsWithArgs = new HashSet<>()
+
 //        artifactsWithArgs.addAll(linkingConfig.getPrefixedLinkingArgs().keySet())
 //        artifactsWithArgs.addAll(linkingConfig.getSuffixedLinkingArgs().keySet())
 //
@@ -246,7 +246,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
 //                }
 //            }
 //        }
-//
-//        System.out.println("Filtered args = " + linkerArgs)
-//    }
+
+        System.out.println("Linker args = " + linkerArgs)
+    }
 }
