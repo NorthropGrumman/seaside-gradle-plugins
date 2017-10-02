@@ -8,7 +8,6 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
-
     compile "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
     compile "org.unbescape:unbescape:$unbescapeVersion"
     compile "commons-io:commons-io:$commonsIOVersion"
