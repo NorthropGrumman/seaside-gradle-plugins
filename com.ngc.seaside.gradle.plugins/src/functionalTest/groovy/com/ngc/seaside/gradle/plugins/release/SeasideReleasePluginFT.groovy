@@ -40,8 +40,8 @@ class SeasideReleasePluginFT {
     @Test
     void doesGradleRelease() {
         BuildResult result = GradleRunner.create().withProjectDir(projectDir)
-                .withTestKitDir(new File(projectDir.absolutePath+"/build/"))
                 .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
                 .withArguments("tasks")
                 .build()
 

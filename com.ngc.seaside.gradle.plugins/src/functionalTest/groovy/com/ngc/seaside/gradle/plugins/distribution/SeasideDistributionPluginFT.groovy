@@ -41,9 +41,9 @@ class SeasideDistributionPluginFT {
     @Test
     void doesRunGradleBuildWithSuccess() {
         BuildResult result = GradleRunner.create().withProjectDir(project.projectDir)
-                .withTestKitDir(new File(projectDir.absolutePath+"/build/"))
                 .withPluginClasspath(pluginClasspath)
-                .withArguments("clean", "build")
+                .forwardOutput()
+                .withArguments( "clean","build")
                 .build()
 
         Assert.assertEquals(TaskOutcome.valueOf( "SUCCESS"), result.task(":build").getOutcome())
