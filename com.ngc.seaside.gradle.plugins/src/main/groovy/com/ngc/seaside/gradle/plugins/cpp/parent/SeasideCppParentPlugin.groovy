@@ -132,10 +132,6 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                                }
                            }
                        }
-//                        cygwin(Gcc) {
-//                            path new File("C:/cygwin/bin")
-//                            target("cygwin")
-//                        }
                        gcc(Gcc) {
                            eachPlatform {
                                linker.withArguments { args ->
@@ -143,7 +139,6 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                                }
                            }
                        }
-//                        clang(Clang)
                    }
 
                    components {
@@ -220,7 +215,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
     }
 
     private void filterLinkerArgs(BuildingExtension buildingExtension, List<String> linkerArgs) {
-        Collection<String> artifactsWithArgs = new HashSet<>()
+        linkerArgs.addAll(buildingExtension.storage.getLinkerArgs())
 
 //        artifactsWithArgs.addAll(linkingConfig.getPrefixedLinkingArgs().keySet())
 //        artifactsWithArgs.addAll(linkingConfig.getSuffixedLinkingArgs().keySet())

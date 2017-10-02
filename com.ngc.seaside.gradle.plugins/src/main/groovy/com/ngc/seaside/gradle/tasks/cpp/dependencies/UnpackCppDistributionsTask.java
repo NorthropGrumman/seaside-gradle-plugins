@@ -2,12 +2,14 @@ package com.ngc.seaside.gradle.tasks.cpp.dependencies;
 
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.DomainObjectSet;
 import org.gradle.api.Project;
 import org.gradle.api.internal.resolve.ProjectModelResolver;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.language.cpp.CppSourceSet;
 import org.gradle.model.internal.registry.ModelRegistry;
+import org.gradle.nativeplatform.NativeLibraryBinary;
 import org.gradle.nativeplatform.NativeLibrarySpec;
 import org.gradle.nativeplatform.PrebuiltLibrary;
 import org.gradle.nativeplatform.Repositories;
@@ -210,7 +212,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                      bin.setStaticLibraryFile(obj);
 
                      if(config.getWithArgs() != null) {
-                        addLinkerArgs(obj.getAbsolutePath(), config.getWithArgs());
+                        addLinkerArgs(obj.getAbsolutePath(), config.getWithArgs(), buildingExtension);
                      }
 
                      if(!testDependencies) {
@@ -234,7 +236,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                   bin.setStaticLibraryFile(obj);
 
                   if(config.getWithArgs() != null) {
-                     addLinkerArgs(obj.getAbsolutePath(), config.getWithArgs());
+                     addLinkerArgs(obj.getAbsolutePath(), config.getWithArgs(), buildingExtension);
                   }
                   if(!testDependencies) {
                      addDependencyToComponent(dependencyName, LibraryType.STATIC);
@@ -365,30 +367,36 @@ public class UnpackCppDistributionsTask extends DefaultTask {
     * @param fileName the static library in which to apply the linker args.
     * @param args     the arguments in which to apply.
     */
-   private void addLinkerArgs(String fileName, StaticBuildConfiguration.WithArgs args) {
+   private void addLinkerArgs(String fileName, StaticBuildConfiguration.WithArgs args, BuildingExtension buildingExtension) {
       System.out.println(String.format("Adding Linker Args ('%s') for '%s'", args, fileName));
 
-      ModelRegistry projectModel = getServices()
-               .get(ProjectModelResolver.class)
-               .resolveProjectModel(getProject().getPath());
+
+      List<String> arguments = new ArrayList<>();
+      arguments.addAll(args.before);
+      arguments.add(fileName);
+      arguments.addAll(args.after);
 
 
 
-      NativeToolChainRegistry registry = projectModel.find("toolChains", NativeToolChainRegistry.class);
-      for(NativeToolChain toolChain : registry) {
-         System.out.println("Toolchain: " + toolChain.getName());
-      }
-
-      Gcc gcc = (Gcc)registry.getByName("gcc");
-
-      gcc.eachPlatform(new Action<GccPlatformToolChain>() {
-         @Override
-         public void execute(GccPlatformToolChain gccPlatformToolChain) {
-            gccPlatformToolChain.getLinker().setExecutable("-Wl,--whole-archiveAABCC");
-         }
-      });
-
-
+//      ModelRegistry projectModel = getServices()
+//               .get(ProjectModelResolver.class)
+//               .resolveProjectModel(getProject().getPath());
+//
+//
+//
+//      NativeToolChainRegistry registry = projectModel.find("toolChains", NativeToolChainRegistry.class);
+//      for(NativeToolChain toolChain : registry) {
+//         System.out.println("Toolchain: " + toolChain.getName());
+//      }
+//
+//      Gcc gcc = (Gcc)registry.getByName("gcc");
+//
+//      gcc.eachPlatform(new Action<GccPlatformToolChain>() {
+//         @Override
+//         public void execute(GccPlatformToolChain gccPlatformToolChain) {
+//            gccPlatformToolChain.getLinker().setExecutable("-Wl,--whole-archive");
+//         }
+//      });
 
 
    }
