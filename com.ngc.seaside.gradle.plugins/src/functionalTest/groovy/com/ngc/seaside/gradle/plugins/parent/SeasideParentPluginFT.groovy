@@ -39,14 +39,23 @@ class SeasideParentPluginFT {
     }
 
     @Test
-    void doesGradleRelease() {
-        BuildResult result = GradleRunner.create().withProjectDir(projectDir).withArguments("tasks").build()
-        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":tasks").getOutcome())
+    void doesRunGradleBuildWithSuccess() {
+        File projFile =
+        BuildResult result = GradleRunner.create().withProjectDir(project.projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .withArguments("clean", "build")
+                .build()
+
+        Assert.assertEquals(TaskOutcome.valueOf( "SUCCESS"), result.task(":build").getOutcome())
     }
 
     @Test
     void doesRunGradleAnalyzeBuildWithSuccess() {
-        BuildResult result = GradleRunner.create().withProjectDir(projectDir).withArguments("analyze").build().
-                withPluginClasspath(pluginClasspath)
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .withArguments("analyze")
+                .build()
+
+        Assert.assertEquals(TaskOutcome.valueOf( "SUCCESS"), result.task(":analyze").getOutcome())
     }
 }

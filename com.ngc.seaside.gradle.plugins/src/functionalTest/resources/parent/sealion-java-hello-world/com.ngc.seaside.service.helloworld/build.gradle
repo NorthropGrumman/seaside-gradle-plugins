@@ -1,3 +1,8 @@
+plugins {
+    id 'com.ngc.seaside.parent'
+    id 'com.ngc.seaside.application'
+}
+
 dependencies {
     /* log4j for app message logging */
     compile "log4j:log4j:$log4jVersion"
@@ -12,8 +17,6 @@ jar {
         attributes('Export-Package': 'com.ngc.seaside.service.helloworld.*')
     }
 }
-
-apply plugin: 'com.ngc.seaside.application'
 
 seasideApplication {
     mainClassName = "com.ngc.seaside.service.Main"
