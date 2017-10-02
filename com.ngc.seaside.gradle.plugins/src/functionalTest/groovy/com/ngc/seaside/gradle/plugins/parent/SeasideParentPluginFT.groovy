@@ -35,7 +35,6 @@ class SeasideParentPluginFT {
         FileUtils.copyDirectory(source, projectDir)
 
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
-
     }
 
     @Test
@@ -51,6 +50,8 @@ class SeasideParentPluginFT {
 
     @Test
     void doesRunGradleAnalyzeBuildWithSuccess() {
+//a        project.ext.sonar.branch = "TEST"
+
         BuildResult result = GradleRunner.create().withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()

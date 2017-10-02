@@ -3,17 +3,6 @@ plugins {
     id 'com.ngc.seaside.application'
 }
 
-group = 'com.ngc.seaside'
-version = '1.2.3-SNAPSHOT'
-
-ext {
-    junitVersion = '4.12'
-    slf4jVersion = '1.7.22'
-    log4jVersion = '1.2.17'
-    cucumberVersion = '1.2.5'
-}
-
-
 dependencies {
     /* log4j for app message logging */
     compile "log4j:log4j:$log4jVersion"

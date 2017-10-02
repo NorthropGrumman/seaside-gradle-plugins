@@ -1,12 +1,12 @@
 package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
-import com.ngc.seaside.gradle.plugins.release.SeasideReleaseExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -43,11 +43,11 @@ class SeasideParentPlugin implements Plugin<Project> {
 
             // Make sure that all required properties are set.
             doRequiredGradleProperties(project,
-                                         'nexusConsolidated',
-                                         'nexusReleases',
-                                         'nexusSnapshots',
-                                         'nexusUsername',
-                                         'nexusPassword')
+                                       'nexusConsolidated',
+                                       'nexusReleases',
+                                       'nexusSnapshots',
+                                       'nexusUsername',
+                                       'nexusPassword')
             doRequiredSystemProperties(project)
             applyPlugins(project)
             createTasks(project)
@@ -63,7 +63,8 @@ class SeasideParentPlugin implements Plugin<Project> {
                 }
 
                 project.tasks.getByName('build') {
-                    SeasideReleaseExtension releaseExtension = project.getExtensions().getByType(SeasideReleaseExtension.class)
+                    SeasideReleaseExtension releaseExtension = project.getExtensions().
+                            getByType(SeasideReleaseExtension.class)
                     project.version = releaseExtension.getReleaseVersion()
                 }
 
@@ -170,7 +171,7 @@ class SeasideParentPlugin implements Plugin<Project> {
      * @return String with of the Git Branch you are on otherwise
      * an empty string
      */
-    def static getBranchName() {
+    protected static String getBranchName() {
 
         def command = "git branch"
         def branch = ""
@@ -180,7 +181,7 @@ class SeasideParentPlugin implements Plugin<Project> {
         // The git branch command should return "* master" or "* <branch name>"
         // so the first element in the List is the * second element is usually the
         // actual branch
-        if(spilt.size() >= 2) {
+        if (spilt.size() >= 2) {
             // leave the trim in because there seems to be a return line
             // as part of the string
             branch = spilt.get(1).trim()
@@ -204,7 +205,7 @@ class SeasideParentPlugin implements Plugin<Project> {
      */
     protected void doRequiredSystemProperties(Project project) {
         GradleUtil.requireSystemProperties(project.properties,
-                'sonar.host.url')
+                                           'sonar.host.url')
 
     }
 
@@ -216,7 +217,7 @@ class SeasideParentPlugin implements Plugin<Project> {
         project.getPlugins().apply('java')
         project.getPlugins().apply('maven')
         project.getPlugins().apply('eclipse')
-        project.getPlugins().apply( 'jacoco')
+        project.getPlugins().apply('jacoco')
         project.getPlugins().apply('org.sonarqube')
         project.getPlugins().apply(SeasideReleasePlugin)
     }
@@ -225,7 +226,7 @@ class SeasideParentPlugin implements Plugin<Project> {
      *
      * @param project
      */
-    protected void createTasks(Project project){
+    protected void createTasks(Project project) {
 
         /**
          * Create a task for generating the source jar. This will also be uploaded to Nexus.
@@ -247,7 +248,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             from javadocsTask.destinationDir
         }
         project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
-        project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).dependsOn( [classesTask, javadocsTask])
+        project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).dependsOn([classesTask, javadocsTask])
 
         /**
          * analyzeBuild task for sonarqube
@@ -264,7 +265,7 @@ class SeasideParentPlugin implements Plugin<Project> {
         /**
          * downloadDependencies task
          */
-        project.task(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask){}
+        project.task(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {}
         project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
         project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription(
                 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.')
@@ -273,23 +274,24 @@ class SeasideParentPlugin implements Plugin<Project> {
          * cleanupDependencies task
          */
         project.task(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {
-                    customRepo = project.getProjectDir().path + "/build/dependencies-tmp"
-                    doLast {
-                        ext.actualRepository = project.downloadDependencies.localRepository ?
-                                project.downloadDependencies.localRepository : project.file(
-                                [project.buildDir, 'dependencies'].join(File.separator))
+            customRepo = project.getProjectDir().path + "/build/dependencies-tmp"
+            doLast {
+                ext.actualRepository = project.downloadDependencies.localRepository ?
+                                       project.downloadDependencies.localRepository : project.file(
+                        [project.buildDir, 'dependencies'].join(File.separator))
 
-                        logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to " +
-                                "${actualRepository.absolutePath}.")
-                        project.delete(actualRepository)
-                        project.copy {
-                            from localRepository
-                            into actualRepository
-                        }
-                        project.delete(localRepository)
-                    }
+                logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to " +
+                            "${actualRepository.absolutePath}.")
+                project.delete(actualRepository)
+                project.copy {
+                    from localRepository
+                    into actualRepository
                 }
+                project.delete(localRepository)
+            }
+        }
         project.tasks.getByName(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
-        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription('Remove unused dependencies from repository.')
+        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).
+                setDescription('Remove unused dependencies from repository.')
     }
 }
