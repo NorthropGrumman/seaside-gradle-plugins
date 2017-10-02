@@ -19,13 +19,15 @@ import org.gradle.platform.base.BinaryContainer;
 import org.gradle.platform.base.ComponentSpecContainer;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- *
+ *  This task unpacks the dependencies and configures the cpp task.
  */
 public class UnpackCppDistributionsTask extends DefaultTask {
 
@@ -34,6 +36,28 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    private String componentSourceSetName;
    private boolean testDependencies = false;
 
+   /**
+    * Shared, static or api library types are required for the components configuration
+    */
+   private enum LibraryType {
+      SHARED("shared"),
+      STATIC("static"),
+      API("api");
+
+      private String name;
+
+      LibraryType(String name) {
+         this.name = name;
+      }
+
+      public String getName() {
+         return name;
+      }
+   }
+
+   /**
+    * Unpack all the necessary dependencies and update the cpp plugin's configuration.
+    */
    @TaskAction
    public void unpackDistributions() {
       if (dependenciesDirectory == null) {
@@ -98,62 +122,218 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    }
 
 
+   /**
+    * Configure the dependency within the cpp plugin. This includes creating the libs under model > repositories
+    * and adding the dependency to the components
+    *
+    * @param directory       the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName  the name of the dependency. This is usually the artifact ID.
+    */
    private void configureDependency(File directory, String dependencyName) {
-      addDependencyAsRepository(directory, dependencyName);
-      if (!testDependencies) {
-         addDependencyToComponent(dependencyName);
-      }
-      addDependencyToGoogleTestBinary(dependencyName);
+      BuildingExtension buildingExtension = getProject().getExtensions().getByType(BuildingExtension.class);
+
+      ModelRegistry projectModel = getServices()
+               .get(ProjectModelResolver.class)
+               .resolveProjectModel(getProject().getPath());
+
+      Repositories repositories = projectModel.find("repositories", Repositories.class);
+      DefaultPrebuiltLibraries libs = repositories.withType(DefaultPrebuiltLibraries.class).getByName("libs");
+
+      List<File> dependencyHeaders = createHeaderFiles(directory, dependencyName, buildingExtension);
+
+      addStaticDependencies(directory, dependencyName, buildingExtension, libs, dependencyHeaders);
+      addSharedDependencies(directory, dependencyName, buildingExtension, libs, dependencyHeaders);
+      addApiDependencies(directory, dependencyName, buildingExtension, libs, dependencyHeaders);
    }
 
-   private void addHeaders(File directory, String dependencyName, BuildingExtension buildingExtension, PrebuiltLibrary lib) {
-      Collection<HeaderBuildConfiguration>
-            headerConfigurations = buildingExtension.getStorage().getHeaderBuildConfigurations(dependencyName);
-      if (headerConfigurations != null) {
-         for (HeaderBuildConfiguration buildConfiguration : headerConfigurations) {
-            for (String path : buildConfiguration.getDirs()) {
-               File includeDirectory = new File(directory, path);
-               System.out.println("Adding include " + path);
-               lib.getHeaders().setSrcDirs(Collections.singletonList(includeDirectory));
-            }
+   /**
+    * Add the dependency as an API dependency if configured that way.
+    *
+    * @param directory          the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName     the name of the dependency (this is derived from the directory name (minus the version)
+    * @param buildingExtension  the plugins extension (i.e. the 'building' configuration in groovy)
+    * @param libs               the PrebuiltLibraries libs (the object that the dependency gets added to)
+    * @param dependencyHeaders  the headers associated with this dependency
+    */
+   private void addApiDependencies(File directory,
+                                   String dependencyName,
+                                   BuildingExtension buildingExtension,
+                                   DefaultPrebuiltLibraries libs,
+                                   List<File> dependencyHeaders) {
+      List<String> configs = buildingExtension.getStorage().getApiDependencies();
+      if(configs.contains(dependencyName)) {
+         PrebuiltLibrary lib = libs.create(dependencyName);
+         lib.getHeaders().setSrcDirs(dependencyHeaders);
+         if(!testDependencies) {
+            addDependencyToComponent(dependencyName, LibraryType.API);
          }
-      } else {
-         File includeDirectory = new File(directory, "include");
-         lib.getHeaders().setSrcDirs(Collections.singletonList(includeDirectory));
+         addDependencyToGoogleTestBinary(dependencyName, LibraryType.API);
       }
    }
 
-   private void addCustomStaticDependencies(File directory, String dependencyName,
-                                            BuildingExtension buildingExtension, DefaultPrebuiltLibraries libs) {
+   /**
+    * Add the dependency as a static library if it is configured as such.
+    *
+    * @param directory          the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName     the name of the dependency (this is derived from the directory name (minus the version)
+    * @param buildingExtension  the plugins extension (i.e. the 'building' configuration in groovy)
+    * @param libs               the PrebuiltLibraries libs (the object that the dependency gets added to)
+    * @param dependencyHeaders  the headers associated with this dependency
+    */
+   private void addStaticDependencies(File directory,
+                                      String dependencyName,
+                                      BuildingExtension buildingExtension,
+                                      DefaultPrebuiltLibraries libs,
+                                      List<File> dependencyHeaders) {
       Collection<StaticBuildConfiguration> configs = buildingExtension.getStorage().getStaticBuildConfigurations(dependencyName);
       for (StaticBuildConfiguration config : configs) {
-         for (String library : config.getLibs()) {
-            PrebuiltLibrary lib = libs.create(library);
+         if(config.getLibs() != null && !config.getLibs().isEmpty()) {
+            for (String library : config.getLibs()) {
+               PrebuiltLibrary lib = libs.create(library);
 
-            addHeaders(directory, dependencyName, buildingExtension, lib);
+               lib.getHeaders().setSrcDirs(dependencyHeaders);
 
+               libs.resolveLibrary(lib.getName());
+
+               for (DefaultPrebuiltStaticLibraryBinary bin :
+                        lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
+                  File obj = getLibFile(bin, directory, library, LibraryType.STATIC);
+                  if (obj.exists()) {
+                     bin.setStaticLibraryFile(obj);
+
+                     if(!testDependencies) {
+                        addDependencyToComponent(library, LibraryType.STATIC);
+                     }
+                     addDependencyToGoogleTestBinary(library, LibraryType.STATIC);
+                  }
+               }
+            }
+         } else {
+            /**
+             * Standard configuration uses the dependency name as the lib name.
+             */
+            PrebuiltLibrary lib = libs.create(dependencyName);
+            lib.getHeaders().setSrcDirs(dependencyHeaders);
             libs.resolveLibrary(lib.getName());
-
             for (DefaultPrebuiltStaticLibraryBinary bin :
-                  lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
-               File obj = getFile(bin, directory, library);
-               if(obj.exists()) {
+                     lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
+               File obj = getLibFile(bin, directory, dependencyName, LibraryType.STATIC);
+               if (obj.exists()) {
                   bin.setStaticLibraryFile(obj);
+
+                  if(!testDependencies) {
+                     addDependencyToComponent(dependencyName, LibraryType.STATIC);
+                  }
+                  addDependencyToGoogleTestBinary(dependencyName, LibraryType.STATIC);
                }
             }
          }
       }
    }
 
-   private void addCustomSharedDependencies(File directory, String dependencyName,
-                                            BuildingExtension buildingExtension) {
+   /**
+    * Add the dependency as a shared library if it is configured as such.
+    *
+    * @param directory          the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName     the name of the dependency (this is derived from the directory name (minus the version)
+    * @param buildingExtension  the plugins extension (i.e. the 'building' configuration in groovy)
+    * @param libs               the PrebuiltLibraries libs (the object that the dependency gets added to)
+    * @param dependencyHeaders  the headers associated with this dependency
+    */
+   private void addSharedDependencies(File directory,
+                                      String dependencyName,
+                                      BuildingExtension buildingExtension,
+                                      DefaultPrebuiltLibraries libs,
+                                      List<File> dependencyHeaders) {
 
+      Collection<SharedBuildConfiguration> configs = buildingExtension.getStorage().getSharedBuildConfigurations(dependencyName);
+      for (SharedBuildConfiguration config : configs) {
+         if(config.getLibs() != null && !config.getLibs().isEmpty()) {
+            for (String library : config.getLibs()) {
+               PrebuiltLibrary lib = libs.create(library);
+
+               lib.getHeaders().setSrcDirs(dependencyHeaders);
+
+               libs.resolveLibrary(lib.getName());
+
+               for (DefaultPrebuiltSharedLibraryBinary bin :
+                        lib.getBinaries().withType(DefaultPrebuiltSharedLibraryBinary.class)) {
+                  File obj = getLibFile(bin, directory, library, LibraryType.SHARED);
+                  if (obj.exists()) {
+                     bin.setSharedLibraryFile(obj);
+
+                     if(!testDependencies) {
+                        addDependencyToComponent(library, LibraryType.SHARED);
+                     }
+                     addDependencyToGoogleTestBinary(library, LibraryType.SHARED);
+                  }
+               }
+            }
+         } else {
+            /**
+             * Standard configuration uses the dependency name as the lib name.
+             */
+            PrebuiltLibrary lib = libs.create(dependencyName);
+            lib.getHeaders().setSrcDirs(dependencyHeaders);
+            libs.resolveLibrary(lib.getName());
+            for (DefaultPrebuiltSharedLibraryBinary bin :
+                     lib.getBinaries().withType(DefaultPrebuiltSharedLibraryBinary.class)) {
+               File obj = getLibFile(bin, directory, dependencyName, LibraryType.SHARED);
+               if (obj.exists()) {
+                  bin.setSharedLibraryFile(obj);
+
+                  if(!testDependencies) {
+                     addDependencyToComponent(dependencyName, LibraryType.SHARED);
+                  }
+                  addDependencyToGoogleTestBinary(dependencyName, LibraryType.SHARED);
+               }
+            }
+         }
+      }
    }
 
-   private File getFile(AbstractPrebuiltLibraryBinary bin, File directory,  String libName) {
+   /**
+    * Add the dependency as a shared library if it is configured as such.
+    *
+    * @param directory          the base directory in which the dependency exists in its unpacked state.
+    * @param dependencyName     the name of the dependency (this is derived from the directory name (minus the version)
+    * @param buildingExtension  the plugins extension (i.e. the 'building' configuration in groovy)
+    *
+    * @return The list of header files associated with the dependency.
+    */
+   private List<File> createHeaderFiles(File directory, String dependencyName, BuildingExtension buildingExtension) {
+      Collection<HeaderBuildConfiguration>
+            headerConfigurations = buildingExtension.getStorage().getHeaderBuildConfigurations(dependencyName);
+      if (headerConfigurations != null && !headerConfigurations.isEmpty()) {
+         List<File> headers = new ArrayList<>();
+         for (HeaderBuildConfiguration buildConfiguration : headerConfigurations) {
+            for (String path : buildConfiguration.getDirs()) {
+               headers.add(new File(directory, path));
+            }
+         }
+         return headers;
+      } else {
+         return Collections.singletonList(new File(directory, "include"));
+      }
+   }
+
+   /**
+    * Create the lib file given the prebuilt library configuration.
+    *
+    * @param bin        the configuration for different architecture
+    * @param directory  the base directory in which the dependency exists in its unpacked state.
+    * @param libName    the name of the library (dependency)
+    * @param type       the type of library (shared or static only make sense here)
+    *
+    * @return the File associated with the library. This will not turn null, but the file may not exists
+    */
+   private File getLibFile(AbstractPrebuiltLibraryBinary bin, File directory, String libName, LibraryType type) {
       String arch = bin.getTargetPlatform().getArchitecture().getName().replace('-', '_');
       String os = bin.getTargetPlatform().getOperatingSystem().getName();
       String ext = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "lib" : "a";
+      if(type == LibraryType.SHARED) {
+         ext = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "dll" : "so";
+      }
       String prefix = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "" : "lib";
       String file = String.format("lib/%s_%s/%s%s.%s",
                                   os,
@@ -164,143 +344,49 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       return new File(directory, file);
    }
 
-
-   private void addStandardStaticDependency(
-         File directory, String dependencyName, BuildingExtension buildingExtension, DefaultPrebuiltLibraries libs) {
-      PrebuiltLibrary lib = libs.create(dependencyName);
-
-      Collection<HeaderBuildConfiguration>
-            headerConfigurations = buildingExtension.getStorage().getHeaderBuildConfigurations(dependencyName);
-      if (headerConfigurations != null) {
-         for (HeaderBuildConfiguration buildConfiguration : headerConfigurations) {
-            for (String path : buildConfiguration.getDirs()) {
-               File includeDirectory = new File(directory, path);
-               lib.getHeaders().setSrcDirs(Collections.singletonList(includeDirectory));
-            }
-         }
-      } else {
-         File includeDirectory = new File(directory, "include");
-         lib.getHeaders().setSrcDirs(Collections.singletonList(includeDirectory));
-      }
-
-      libs.resolveLibrary(lib.getName());
-
-      for (DefaultPrebuiltStaticLibraryBinary bin : lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
-         File obj = getFile(bin, directory, dependencyName);
-         if(obj.exists()) {
-            bin.setStaticLibraryFile(obj);
-         }
-      }
-   }
-
-   private void addDependencyAsRepository(File directory, String dependencyName) {
-      BuildingExtension buildingExtension = getProject().getExtensions().getByType(BuildingExtension.class);
-
-      ModelRegistry projectModel = getServices()
-            .get(ProjectModelResolver.class)
-            .resolveProjectModel(getProject().getPath());
-
-      Repositories repositories = projectModel.find("repositories", Repositories.class);
-      DefaultPrebuiltLibraries libs = repositories.withType(DefaultPrebuiltLibraries.class).getByName("libs");
-
-      System.out.println("addDependencyAsRepository " + dependencyName + "(" + directory.getAbsolutePath() +" )");
-
-      if (buildingExtension.getStorage().hasCustomStaticBuildConfiguration(dependencyName)) {
-         System.out.println("Adding custom static dependency " + dependencyName);
-         addCustomStaticDependencies(directory, dependencyName, buildingExtension, libs);
-      } else {
-         System.out.println("Adding standard static dependency " + dependencyName);
-         addStandardStaticDependency(directory, dependencyName, buildingExtension, libs);
-      }
-
-//      PrebuiltLibrary lib = libs.create(dependencyName);
-//
-//      Collection<HeaderBuildConfiguration>
-//            headerConfigurations = buildingExtension.getStorage().getHeaderBuildConfigurations(dependencyName);
-//      if(headerConfigurations != null) {
-//         for(HeaderBuildConfiguration buildConfiguration : headerConfigurations) {
-//            for(String path : buildConfiguration.getDirs()) {
-//               File includeDirectory = new File(directory, path);
-//               lib.getHeaders().setSrcDirs(Collections.singletonList(includeDirectory));
-//            }
-//         }
-//      } else {
-//         File includeDirectory = new File(directory, "include");
-//         lib.getHeaders().setSrcDirs(Collections.singletonList(includeDirectory));
-//      }
-//
-//      libs.resolveLibrary(lib.getName());
-//
-//      for (DefaultPrebuiltStaticLibraryBinary bin : lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
-//         String arch = bin.getTargetPlatform().getArchitecture().getName().replace('-', '_');
-//         String os = bin.getTargetPlatform().getOperatingSystem().getName();
-//         String ext = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "lib" : "a";
-//         String prefix = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "" : "lib";
-//         String file = String.format("lib/%s_%s/%s%s.%s",
-//                                     os,
-//                                     arch,
-//                                     prefix,
-//                                     dependencyName,
-//                                     ext);
-//         File obj = new File(directory, file);
-//         bin.setStaticLibraryFile(obj);
-//      }
-//      for (DefaultPrebuiltSharedLibraryBinary bin : lib.getBinaries()
-//               .withType(DefaultPrebuiltSharedLibraryBinary.class)) {
-//         String arch = bin.getTargetPlatform().getArchitecture().getName().replace('-', '_');
-//         String os = bin.getTargetPlatform().getOperatingSystem().getName();
-//         String ext = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "dll" : "so";
-//         String prefix = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "" : "lib";
-//         String file = String.format("lib/%s_%s/%s%s.%s",
-//                                     os,
-//                                     arch,
-//                                     prefix,
-//                                     dependencyName,
-//                                     ext);
-//         bin.setSharedLibraryFile(new File(directory, file));
-//      }
-   }
-
-   private void addDependencyToComponent(String dependencyName) {
-      ModelRegistry projectModel = getServices()
-            .get(ProjectModelResolver.class)
-            .resolveProjectModel(getProject().getPath());
-      NativeLibrarySpec component = projectModel.find("components", ComponentSpecContainer.class)
-            .withType(NativeLibrarySpec.class)
-            .get(getComponentName());
-      CppSourceSet cppSourceSet = component.getSources()
-            .withType(CppSourceSet.class)
-            .get(getComponentSourceSetName());
+   /**
+    * Add the dependency to the components cpp plugin configuration.
+    *
+    * @param dependencyName the name of the dependency or library
+    * @param type           the type being added.
+    */
+   private void addDependencyToComponent(String dependencyName, LibraryType type) {
+      ModelRegistry projectModel = getServices().get(ProjectModelResolver.class).resolveProjectModel(getProject().getPath());
+      NativeLibrarySpec component = projectModel.find("components", ComponentSpecContainer.class).withType(NativeLibrarySpec.class).get(getComponentName());
+      CppSourceSet cppSourceSet = component.getSources().withType(CppSourceSet.class).get(getComponentSourceSetName());
 
       Map<String, String> map = new HashMap<>();
       map.put("library", dependencyName);
-
-      map.put("linkage", getLinkingType(dependencyName)); // api = header only, other options are shared or static.
+      map.put("linkage", type.getName()); // api = header only, other options are shared or static.
       cppSourceSet.lib(map);
    }
 
-   private String getLinkingType(String dependencyName) {
-//      LinkingConfiguration linkingConfig = getProject().getExtensions().getByType(LinkingConfiguration.class);
-//      String type = linkingConfig.getLinkingType(dependencyName);
-//      return type == null ? "static" : type;
-      return "static";
-   }
-
-   private void addDependencyToGoogleTestBinary(String dependencyName) {
+   /**
+    * Add the dependency to the google test binary.
+    *
+    * @param dependencyName the name of the dependency or library.
+    * @param type           the type being added.
+    */
+   private void addDependencyToGoogleTestBinary(String dependencyName, LibraryType type) {
       ModelRegistry projectModel = getServices()
-            .get(ProjectModelResolver.class)
-            .resolveProjectModel(getProject().getPath());
-      for (GoogleTestTestSuiteBinarySpec binary :
-            projectModel.find("binaries", BinaryContainer.class)
-                  .withType(GoogleTestTestSuiteBinarySpec.class)) {
+               .get(ProjectModelResolver.class)
+               .resolveProjectModel(getProject().getPath());
+      for (GoogleTestTestSuiteBinarySpec binary : projectModel.find("binaries", BinaryContainer.class)
+                        .withType(GoogleTestTestSuiteBinarySpec.class)) {
 
          Map<String, String> map = new HashMap<>();
          map.put("library", dependencyName);
-         map.put("linkage", getLinkingType(dependencyName));
+         map.put("linkage", type.getName());
          binary.lib(map);
       }
    }
 
+   /**
+    * Simple method to get the dependency name from the given file name. This will strip the version from the file.
+    *
+    * @param fileName the name of the file.
+    * @return the dependency name.
+    */
    private static String getDependencyNameFromFileName(String fileName) {
       // Return the name of the artifact/dependency minus the version.
       String name = fileName;
