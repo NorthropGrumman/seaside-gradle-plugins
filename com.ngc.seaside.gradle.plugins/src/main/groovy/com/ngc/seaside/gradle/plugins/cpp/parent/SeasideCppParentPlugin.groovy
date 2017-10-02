@@ -128,7 +128,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                        visualCpp(VisualCpp) {
                            eachPlatform {
                                linker.withArguments { args ->
-                                    filterLinkerArgs(p.extensions.linking, args)
+                                    filterLinkerArgs(p.extensions.building, args)
                                }
                            }
                        }
@@ -139,7 +139,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                        gcc(Gcc) {
                            eachPlatform {
                                linker.withArguments { args ->
-                                    filterLinkerArgs(p.extensions.linking, args)
+                                    filterLinkerArgs(p.extensions.building, args)
                                }
                            }
                        }
