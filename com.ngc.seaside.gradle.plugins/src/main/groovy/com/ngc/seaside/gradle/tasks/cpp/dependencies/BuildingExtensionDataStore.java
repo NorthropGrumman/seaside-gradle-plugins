@@ -14,11 +14,28 @@ public class BuildingExtensionDataStore {
    private static Multimap<String, SharedBuildConfiguration> sharedDependenciesMap = ArrayListMultimap.create();
    private static Multimap<String, HeaderBuildConfiguration> headersByDependencyMap = ArrayListMultimap.create();
    private static List<String> apiDependencies = new ArrayList<>();
-
    private static Map<String, StaticBuildConfiguration.WithArgs> librariesWithLinkerArgsMap = new HashMap<>();
+   private List<String> extraLinkArgs = new ArrayList<>();
+   private List<String> extraCompileArgs = new ArrayList<>();
 
    public boolean hasLinkArgs(String libraryName) {
       return librariesWithLinkerArgsMap.containsKey(libraryName);
+   }
+
+   public void addExtraLinkArgs(List<String> args) {
+      this.extraLinkArgs.addAll(args);
+   }
+
+   public List<String> getExtraLinkArgs() {
+      return extraLinkArgs;
+   }
+
+   public void addExtraComileArgs(List<String> args) {
+      this.extraCompileArgs.addAll(args);
+   }
+
+   public List<String> getExtraCompileArgs() {
+      return extraCompileArgs;
    }
 
    public void addLinkArgs(String libraryName, StaticBuildConfiguration.WithArgs args) {

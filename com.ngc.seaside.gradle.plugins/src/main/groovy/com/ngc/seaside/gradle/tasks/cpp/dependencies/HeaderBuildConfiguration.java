@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.tasks.cpp.dependencies;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ public class HeaderBuildConfiguration {
       return dependencyName;
    }
 
-   public void setDependencyName(String dependencyName) {
+   public void dependency(String dependencyName) {
       this.dependencyName = dependencyName;
    }
 
@@ -29,5 +30,9 @@ public class HeaderBuildConfiguration {
 
    public void setDirs(List<String> dirs) {
       this.dirs = dirs;
+   }
+
+   public void dirs(String... dirs) {
+      Collections.addAll(this.dirs, dirs);
    }
 }

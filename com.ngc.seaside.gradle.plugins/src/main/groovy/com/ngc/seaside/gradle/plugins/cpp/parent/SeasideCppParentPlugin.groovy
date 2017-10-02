@@ -140,17 +140,15 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                         }
                     }
 
-//                    binaries {
-//                        all {
-//                            if(toolChain in Gcc) {
-//
-//
-//                                linker.withArguments { args ->
-//                                    filterLinkerArgs(p.extensions.building, args)
-//                                }
-//                            }
-//                        }
-//                    }
+                    binaries {
+                        all {
+                            if(toolChain in Gcc) {
+                                addExtraLinkArgs(p.extensions.building, linker.args)
+                                addExtraCompilerArgs(p.extensions.building, cppCompiler.args)
+//                                println linker.getArgs()
+                            }
+                        }
+                    }
 
                     components {
                         main(NativeLibrarySpec) {
@@ -204,11 +202,24 @@ class SeasideCppParentPlugin implements Plugin<Project> {
         }
     }
 
+    private void addExtraLinkArgs(BuildingExtension buildingExtension, List<String> args) {
+      List<String> extraArgs = buildingExtension.storage.getExtraLinkArgs();
+      if(extraArgs != null && !extraArgs.isEmpty()) {
+          args.addAll(extraArgs)
+      }
+    }
+
+    private void addExtraCompilerArgs(BuildingExtension buildingExtension, List<String> args) {
+        List<String> extraArgs = buildingExtension.storage.getExtraCompileArgs();
+        if(extraArgs != null && !extraArgs.isEmpty()) {
+            args.addAll(extraArgs)
+        }
+    }
+
     private void filterLinkerArgs(BuildingExtension buildingExtension, List<String> linkerArgs) {
         for(String file : buildingExtension.getStorage().getFilesWithLinkerArgs()) {
             if(linkerArgs.contains(file)) {
                 int index = linkerArgs.indexOf(file)
-                println "Index of $file is $index"
                 StaticBuildConfiguration.WithArgs withArgs = buildingExtension.storage.getLinkerArgs(file)
                 linkerArgs.addAll(index, withArgs.before)
                 linkerArgs.addAll(index + 1 + (withArgs.before.size()), withArgs.after)

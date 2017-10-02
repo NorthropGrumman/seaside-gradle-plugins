@@ -64,6 +64,14 @@ class BuildingExtension {
       storage.add(shared)
    }
 
+   void extraLinkArgs(String... args) {
+     storage.addExtraLinkArgs(Arrays.asList(args))
+   }
+
+   void extraCompilerArgs(String... args) {
+     storage.addExtraComileArgs(Arrays.asList(args))
+   }
+
    /**
     *
     * @param path
