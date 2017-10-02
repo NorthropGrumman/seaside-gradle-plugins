@@ -219,41 +219,14 @@ class SeasideCppParentPlugin implements Plugin<Project> {
     }
 
     private void filterLinkerArgs(BuildingExtension buildingExtension, List<String> linkerArgs) {
-
-        for (int i = 0; i < linkerArgs.size(); i++) {
-            String arg = linkerArgs.get(i)
-            if (buildingExtension.storage.hasLinkArgs(arg)) {
-                StaticBuildConfiguration.WithArgs withArgs = buildingExtension.storage.getLinkerArgs(arg)
-                linkerArgs.addAll(i, withArgs.before)
-                linkerArgs.addAll(i+1, withArgs.after)
+        for(String file : buildingExtension.getStorage().getFilesWithLinkerArgs()) {
+            if(linkerArgs.contains(file)) {
+                linkerArgs.remove(file)
             }
+            StaticBuildConfiguration.WithArgs withArgs = buildingExtension.storage.getLinkerArgs(file)
+            linkerArgs.addAll(withArgs.before)
+            linkerArgs.add(file)
+            linkerArgs.addAll(withArgs.after)
         }
-
-//        artifactsWithArgs.addAll(linkingConfig.getPrefixedLinkingArgs().keySet())
-//        artifactsWithArgs.addAll(linkingConfig.getSuffixedLinkingArgs().keySet())
-//
-//        for (String artifact : linkerArgs) {
-//            boolean foundArg = false
-//
-//            for (int i = 0; i < linkerArgs.size() && !foundArg; i++) {
-//                String arg = linkerArgs.get(i)
-//                if (p.matcher(arg)) {
-//                    foundArg = true
-//
-//                    List<String> preArgs = linkingConfig.getPrefixedLinkingArgs().getOrDefault(
-//                            artifact,
-//                            Collections.emptyList())
-//                    List<String> postArgs = linkingConfig.getSuffixedLinkingArgs().getOrDefault(
-//                            artifact,
-//                            Collections.emptyList())
-//
-//                    linkerArgs.addAll(i, preArgs)
-//                    i += preArgs.size() + 1
-//                    linkerArgs.addAll(i, postArgs)
-//                }
-//            }
-//        }
-
-        System.out.println("Linker args = " + linkerArgs)
     }
 }

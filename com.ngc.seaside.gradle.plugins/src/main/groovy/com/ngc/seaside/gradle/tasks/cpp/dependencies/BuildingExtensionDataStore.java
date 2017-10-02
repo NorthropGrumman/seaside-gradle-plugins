@@ -3,11 +3,7 @@ package com.ngc.seaside.gradle.tasks.cpp.dependencies;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -27,6 +23,10 @@ public class BuildingExtensionDataStore {
 
    public void addLinkArgs(String libraryName, StaticBuildConfiguration.WithArgs args) {
       librariesWithLinkerArgsMap.put(libraryName, args);
+   }
+
+   public Set<String> getFilesWithLinkerArgs() {
+      return librariesWithLinkerArgsMap.keySet();
    }
 
    public StaticBuildConfiguration.WithArgs getLinkerArgs(String fileName) {
