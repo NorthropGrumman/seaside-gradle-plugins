@@ -202,7 +202,8 @@ public class UnpackCppDistributionsTask extends DefaultTask {
 
                for (DefaultPrebuiltStaticLibraryBinary bin :
                         lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
-                  File obj = getLibFile(bin, directory, library, LibraryType.STATIC);
+
+                  File obj = getLibFile(bin, directory, library, LibraryType.STATIC, config.getVersion());
 
                   if (!deps.contains(obj) && obj.exists()) {
                      deps.add(obj);
@@ -228,7 +229,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
             libs.resolveLibrary(lib.getName());
             for (DefaultPrebuiltStaticLibraryBinary bin :
                      lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
-               File obj = getLibFile(bin, directory, dependencyName, LibraryType.STATIC);
+               File obj = getLibFile(bin, directory, dependencyName, LibraryType.STATIC, config.getVersion());
                if (!deps.contains(obj) && obj.exists()) {
                   deps.add(obj);
                   bin.setStaticLibraryFile(obj);
@@ -276,7 +277,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
 
                for (DefaultPrebuiltSharedLibraryBinary bin :
                         lib.getBinaries().withType(DefaultPrebuiltSharedLibraryBinary.class)) {
-                  File obj = getLibFile(bin, directory, library, LibraryType.SHARED);
+                  File obj = getLibFile(bin, directory, library, LibraryType.SHARED, config.getVersion());
                   if (!deps.contains(obj) && obj.exists()) {
                      deps.add(obj);
                      bin.setSharedLibraryFile(obj);
@@ -285,7 +286,6 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                         addDependencyToComponent(library, LibraryType.SHARED);
                      }
                      addDependencyToGoogleTestBinary(library, LibraryType.SHARED);
-
                   }
                }
             }
@@ -298,7 +298,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
             libs.resolveLibrary(lib.getName());
             for (DefaultPrebuiltSharedLibraryBinary bin :
                      lib.getBinaries().withType(DefaultPrebuiltSharedLibraryBinary.class)) {
-               File obj = getLibFile(bin, directory, dependencyName, LibraryType.SHARED);
+               File obj = getLibFile(bin, directory, dependencyName, LibraryType.SHARED, config.getVersion());
                if (!deps.contains(obj) && obj.exists()) {
                   deps.add(obj);
                   bin.setSharedLibraryFile(obj);
@@ -344,9 +344,11 @@ public class UnpackCppDistributionsTask extends DefaultTask {
     * @param directory the base directory in which the dependency exists in its unpacked state.
     * @param libName   the name of the library (dependency)
     * @param type      the type of library (shared or static only make sense here)
+    * @param version   the version of the lib. This is usually empty but on occasion the version of a lib is required
     * @return the File associated with the library. This will not turn null, but the file may not exists
     */
-   private File getLibFile(AbstractPrebuiltLibraryBinary bin, File directory, String libName, LibraryType type) {
+   private File getLibFile(
+            AbstractPrebuiltLibraryBinary bin, File directory, String libName, LibraryType type, String version) {
       String arch = bin.getTargetPlatform().getArchitecture().getName().replace('-', '_');
       String os = bin.getTargetPlatform().getOperatingSystem().getName();
       String ext = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "lib" : "a";
@@ -354,12 +356,19 @@ public class UnpackCppDistributionsTask extends DefaultTask {
          ext = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "dll" : "so";
       }
       String prefix = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "" : "lib";
-      String file = String.format("lib/%s_%s/%s%s.%s",
+
+      String versionString = "";
+      if(version != null && !version.isEmpty()) {
+        versionString = String.format(".%s", version);
+      }
+
+      String file = String.format("lib/%s_%s/%s%s.%s%s",
                                   os,
                                   arch,
                                   prefix,
                                   libName,
-                                  ext);
+                                  ext,
+                                  versionString);
       return new File(directory, file);
    }
 
@@ -393,9 +402,6 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                .withType(CppSourceSet.class)
                .get(getComponentSourceSetName());
 
-      System.out.println(String.format("addDependencyToComponent %s : '%s'", dependencyName, type));
-
-
       Map<String, String> map = new HashMap<>();
       map.put("library", dependencyName);
       map.put("linkage", type.getName()); // api = header only, other options are shared or static.
@@ -412,8 +418,6 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       ModelRegistry projectModel = getServices()
                .get(ProjectModelResolver.class)
                .resolveProjectModel(getProject().getPath());
-
-      System.out.println(String.format("addDependencyToGoogleTestBinary %s : '%s'", dependencyName, type));
 
       for (GoogleTestTestSuiteBinarySpec binary :
                projectModel.find("binaries", BinaryContainer.class).withType(GoogleTestTestSuiteBinarySpec.class)) {

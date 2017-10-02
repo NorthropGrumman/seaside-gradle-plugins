@@ -11,7 +11,8 @@ import java.util.List;
 public abstract class AbstractBuildConfiguration {
    private Project project;
    private String dependency;
-   private List<String> libs = new ArrayList<>();
+   private String version; //optional
+   private List<String> libs = new ArrayList<>(); //optional
 
    protected AbstractBuildConfiguration(Project project) {
       this.project = project;
@@ -33,9 +34,18 @@ public abstract class AbstractBuildConfiguration {
       this.libs = libs;
    }
 
+   public String getVersion() {
+      return version;
+   }
+
+   public void setVersion(String version) {
+      this.version = version;
+   }
+
    @Override
    public String toString() {
-      return ", dependency='" + dependency + '\'' +
+      return "dependency='" + dependency + '\'' +
+             ", version='" + version + '\'' +
              ", libs=" + libs;
    }
 
