@@ -40,7 +40,6 @@ class SeasideParentPluginFT {
 
     @Test
     void doesRunGradleBuildWithSuccess() {
-        File projFile =
         BuildResult result = GradleRunner.create().withProjectDir(project.projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .withArguments("clean", "build")
