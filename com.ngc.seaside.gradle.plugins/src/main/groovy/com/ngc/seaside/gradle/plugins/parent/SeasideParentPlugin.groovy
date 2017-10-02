@@ -32,7 +32,7 @@ class SeasideParentPlugin implements Plugin<Project> {
     public static final String PARENT_TASK_GROUP_NAME = 'MainBuild'
     public static final String PARENT_SOURCE_JAR_TASK_NAME = 'sourcesJar'
     public static final String PARENT_JAVADOC_JAR_TASK_NAME = 'javadocJar'
-    public static final String PARENT_ANALYZE_TASK_NAME = 'analyzeBuild'
+    public static final String PARENT_ANALYZE_TASK_NAME = 'analyze'
     public static final String PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
     public static final String PARENT_CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
 
@@ -185,7 +185,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             // as part of the string
             branch = spilt.get(1).trim()
         }
-        return branch
+        return "MEL_TEST"//branch
     }
 
     /**
@@ -259,6 +259,7 @@ class SeasideParentPlugin implements Plugin<Project> {
         }
         project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
         project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).dependsOn([buildTask, jacocoTaskReportTask, sonarqubeTask])
+        project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).setDescription('Runs jacocoTestReport and sonarqube')
 
         /**
          * downloadDependencies task

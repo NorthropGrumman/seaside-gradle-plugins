@@ -35,6 +35,7 @@ class SeasideParentPluginFT {
         FileUtils.copyDirectory(source, projectDir)
 
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+
     }
 
     @Test
@@ -43,16 +44,9 @@ class SeasideParentPluginFT {
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":tasks").getOutcome())
     }
 
-    /*@Test
+    @Test
     void doesRunGradleAnalyzeBuildWithSuccess() {
-        def analyzeBuild = SeasideParentPlugin.PARENT_ANALYZE_TASK_NAME
-        BuildResult result = GradleRunner.create().withProjectDir(project.projectDir)
-                .withPluginClasspath(pluginClasspath)
-                .withArguments(analyzeBuild)
-                .build()
-
-        analyzeBuild = ":"+analyzeBuild
-        println("MEL THIS IS ANALYZE BUILD STRING: " + analyzeBuild)
-        Assert.assertEquals(TaskOutcome.valueOf( "SUCCESS"), result.task(analyzeBuild).getOutcome())
-    }*/
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir).withArguments("analyze").build().
+                withPluginClasspath(pluginClasspath)
+    }
 }
