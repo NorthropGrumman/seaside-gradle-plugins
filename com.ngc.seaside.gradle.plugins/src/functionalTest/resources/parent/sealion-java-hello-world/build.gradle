@@ -1,6 +1,4 @@
 subprojects {
-    plugins.apply 'com.ngc.seaside.parent'
-
     group = 'com.ngc.seaside'
     version = '1.2.3-SNAPSHOT'
 
