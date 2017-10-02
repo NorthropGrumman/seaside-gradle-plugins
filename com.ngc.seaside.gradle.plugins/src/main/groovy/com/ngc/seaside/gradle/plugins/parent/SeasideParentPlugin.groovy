@@ -185,7 +185,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             // as part of the string
             branch = spilt.get(1).trim()
         }
-        return "MEL_TEST"//branch
+        return branch
     }
 
     /**

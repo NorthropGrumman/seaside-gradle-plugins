@@ -29,8 +29,8 @@ class SeasideParentPluginFT {
         }
         pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
 
-        File source = Paths.get("src/functionalTest/resources/parent/sealion-java-hello-world").toFile()
-        Path targetPath = Paths.get("build/functionalTest/resources/parent/sealion-java-hello-world")
+        File source = Paths.get("src/functionalTest/resources/parent/sealion-java-hello-world/com.ngc.seaside.service.helloworld").toFile()
+        Path targetPath = Paths.get("build/functionalTest/resources/parent/com.ngc.seaside.service.helloworld")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
 
@@ -40,7 +40,8 @@ class SeasideParentPluginFT {
 
     @Test
     void doesRunGradleBuildWithSuccess() {
-        BuildResult result = GradleRunner.create().withProjectDir(project.projectDir)
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+                .withTestKitDir(new File(projectDir.absolutePath+"/build/"))
                 .withPluginClasspath(pluginClasspath)
                 .withArguments("clean", "build")
                 .build()
@@ -51,10 +52,11 @@ class SeasideParentPluginFT {
     @Test
     void doesRunGradleAnalyzeBuildWithSuccess() {
         BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+                .withTestKitDir(new File(projectDir.absolutePath+"/build/"))
                 .withPluginClasspath(pluginClasspath)
                 .withArguments("analyze")
                 .build()
 
-        Assert.assertEquals(TaskOutcome.valueOf( "SUCCESS"), result.task(":analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf( "SUCCESS"), result.task(":sonarqube").getOutcome())
     }
 }

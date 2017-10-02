@@ -1,8 +1,4 @@
 subprojects {
-    plugins {
-        id 'com.ngc.seaside.release'
-    }
-
     group = 'com.ngc.seaside'
     version = '1.2.3-SNAPSHOT'
 

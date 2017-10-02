@@ -18,8 +18,6 @@ class SeasideDistributionPluginIT {
     private File projectDir
     private Project project
     private SeasideDistributionPlugin plugin
-    private static boolean didRequireDistributionGradleProperties
-
 
     @Before
     void before() {
@@ -31,15 +29,7 @@ class SeasideDistributionPluginIT {
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
 
 
-        plugin = new SeasideDistributionPlugin() {
-
-            @Override
-            protected void doRequireDistributionGradleProperties(Project project, String propertyName,
-                                                                 String... propertyNames) {
-                didRequireDistributionGradleProperties = true
-                Assert.assertNotNull("Project properties cannot be null", properties)
-            }
-        }
+        plugin = new SeasideDistributionPlugin()
 
         setRequiredProjectProperties(project)
         plugin.apply(project)
@@ -48,8 +38,6 @@ class SeasideDistributionPluginIT {
     @Test
     void doesApplyPlugin() {
         TaskResolver resolver = new TaskResolver(project)
-        Assert.assertEquals("Did not require gradle distribution properties", true,
-                            didRequireDistributionGradleProperties)
 
         Assert.assertNotNull(resolver.findTask("copyResources"))
         Assert.assertNotNull(resolver.findTask("copyPlatformBundles"))

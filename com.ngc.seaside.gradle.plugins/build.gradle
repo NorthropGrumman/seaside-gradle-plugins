@@ -8,12 +8,12 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
-
-    compile "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarQube"
-
+    compile "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarQubeVersion"
     compile "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
     compile "org.unbescape:unbescape:$unbescapeVersion"
     compile "commons-io:commons-io:$commonsIOVersion"
+    compile "com.github.ben-manes:gradle-versions-plugin:$dependencyUpdatesVersion"
+    compile "com.github.ksoichiro:gradle-console-reporter:$consoleReporterVersion"
 
     testRuntime files(createClasspathManifest)
 
