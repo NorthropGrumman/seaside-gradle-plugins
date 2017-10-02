@@ -371,30 +371,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
     */
    private void addLinkerArgs(String fileName, StaticBuildConfiguration.WithArgs args,
                               BuildingExtension buildingExtension) {
-      System.out.println(String.format("Adding Linker Args ('%s') for '%s'", args, fileName));
-
       buildingExtension.getStorage().addLinkArgs(fileName, args);
-
-//      ModelRegistry projectModel = getServices()
-//               .get(ProjectModelResolver.class)
-//               .resolveProjectModel(getProject().getPath());
-//
-//
-//
-//      NativeToolChainRegistry registry = projectModel.find("toolChains", NativeToolChainRegistry.class);
-//      for(NativeToolChain toolChain : registry) {
-//         System.out.println("Toolchain: " + toolChain.getName());
-//      }
-//
-//      Gcc gcc = (Gcc)registry.getByName("gcc");
-//
-//      gcc.eachPlatform(new Action<GccPlatformToolChain>() {
-//         @Override
-//         public void execute(GccPlatformToolChain gccPlatformToolChain) {
-//            gccPlatformToolChain.getLinker().setExecutable("-Wl,--whole-archive");
-//         }
-//      });
-
    }
 
    /**
@@ -416,6 +393,9 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                .withType(CppSourceSet.class)
                .get(getComponentSourceSetName());
 
+      System.out.println(String.format("addDependencyToComponent %s : '%s'", dependencyName, type));
+
+
       Map<String, String> map = new HashMap<>();
       map.put("library", dependencyName);
       map.put("linkage", type.getName()); // api = header only, other options are shared or static.
@@ -432,6 +412,9 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       ModelRegistry projectModel = getServices()
                .get(ProjectModelResolver.class)
                .resolveProjectModel(getProject().getPath());
+
+      System.out.println(String.format("addDependencyToGoogleTestBinary %s : '%s'", dependencyName, type));
+
       for (GoogleTestTestSuiteBinarySpec binary :
                projectModel.find("binaries", BinaryContainer.class).withType(GoogleTestTestSuiteBinarySpec.class)) {
 

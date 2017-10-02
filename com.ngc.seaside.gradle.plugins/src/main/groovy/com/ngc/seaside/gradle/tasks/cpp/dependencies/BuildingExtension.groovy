@@ -64,4 +64,14 @@ class BuildingExtension {
       storage.add(shared)
    }
 
+   /**
+    *
+    * @param path
+    * @return
+    */
+   String project(String path) {
+      String p = path.startsWith(":") ? path.substring(1) : path;
+      return project.getGroup().toString() + "." + p
+   }
+
 }

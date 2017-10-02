@@ -140,6 +140,18 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                         }
                     }
 
+//                    binaries {
+//                        all {
+//                            if(toolChain in Gcc) {
+//
+//
+//                                linker.withArguments { args ->
+//                                    filterLinkerArgs(p.extensions.building, args)
+//                                }
+//                            }
+//                        }
+//                    }
+
                     components {
                         main(NativeLibrarySpec) {
                             baseName = "${project.name}"
@@ -190,43 +202,17 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                 tasks.getByName('copyStaticLib').dependsOn(binaries)
             }
         }
-
-
-
-        p.task('displayBuilding') << {
-            println "Headers" + p.building.storage.getHeaderBuildConfigurations('celix')
-
-            Collection<String> configuredStaticDeps = p.building.storage.getStaticDependencies()
-            println "\tStatic $configuredStaticDeps"
-            for (String dep : configuredStaticDeps) {
-                Collection<StaticBuildConfiguration> configurations = project.building.storage.
-                        getStaticBuildConfigurations(dep)
-                for (StaticBuildConfiguration config : configurations) {
-                    println "\t  $config"
-                }
-            }
-
-            Collection<String> configuredSharedDeps = p.building.storage.getSharedDependencies()
-            println "\tShared $configuredSharedDeps"
-            for (String dep : configuredSharedDeps) {
-                Collection<SharedBuildConfiguration> configurations = p.building.storage.
-                        getSharedBuildConfigurations(dep)
-                for (SharedBuildConfiguration config : configurations) {
-                    println "\t $config"
-                }
-            }
-        }
     }
 
     private void filterLinkerArgs(BuildingExtension buildingExtension, List<String> linkerArgs) {
         for(String file : buildingExtension.getStorage().getFilesWithLinkerArgs()) {
             if(linkerArgs.contains(file)) {
-                linkerArgs.remove(file)
+                int index = linkerArgs.indexOf(file)
+                println "Index of $file is $index"
+                StaticBuildConfiguration.WithArgs withArgs = buildingExtension.storage.getLinkerArgs(file)
+                linkerArgs.addAll(index, withArgs.before)
+                linkerArgs.addAll(index + 1 + (withArgs.before.size()), withArgs.after)
             }
-            StaticBuildConfiguration.WithArgs withArgs = buildingExtension.storage.getLinkerArgs(file)
-            linkerArgs.addAll(withArgs.before)
-            linkerArgs.add(file)
-            linkerArgs.addAll(withArgs.after)
         }
     }
 }
