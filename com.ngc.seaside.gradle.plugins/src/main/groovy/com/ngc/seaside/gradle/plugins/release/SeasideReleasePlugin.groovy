@@ -36,7 +36,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 dependsOn subprojects*.build
                 if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
-                        upload
+                        uploadArchives
                     }
                 }
             }
@@ -46,7 +46,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 dependsOn subprojects*.build
                 if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
-                        upload
+                        uploadArchives
                     }
                 }
             }
@@ -56,7 +56,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 dependsOn subprojects*.build
                 if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
-                        upload
+                        uploadArchives
                     }
                 }
             }
