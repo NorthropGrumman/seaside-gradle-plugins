@@ -6,7 +6,7 @@ import com.google.common.collect.Multimap;
 import java.util.*;
 
 /**
- *
+ * The storage of data for the {@link BuildingExtension} configuration.
  */
 public class BuildingExtensionDataStore {
 
@@ -18,24 +18,14 @@ public class BuildingExtensionDataStore {
    private List<String> extraLinkArgs = new ArrayList<>();
    private List<String> extraCompileArgs = new ArrayList<>();
 
+   /**
+    * Determine if the library has extra linker arguments configured.
+    *
+    * @param libraryName the name of the library.
+    * @return
+    */
    public boolean hasLinkArgs(String libraryName) {
       return librariesWithLinkerArgsMap.containsKey(libraryName);
-   }
-
-   public void addExtraLinkArgs(List<String> args) {
-      this.extraLinkArgs.addAll(args);
-   }
-
-   public List<String> getExtraLinkArgs() {
-      return extraLinkArgs;
-   }
-
-   public void addExtraComileArgs(List<String> args) {
-      this.extraCompileArgs.addAll(args);
-   }
-
-   public List<String> getExtraCompileArgs() {
-      return extraCompileArgs;
    }
 
    public void addLinkArgs(String libraryName, StaticBuildConfiguration.WithArgs args) {

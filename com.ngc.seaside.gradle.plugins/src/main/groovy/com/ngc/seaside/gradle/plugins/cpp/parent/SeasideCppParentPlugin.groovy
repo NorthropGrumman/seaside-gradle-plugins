@@ -1,7 +1,6 @@
 package com.ngc.seaside.gradle.plugins.cpp.parent
 
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.BuildingExtension
-import com.ngc.seaside.gradle.tasks.cpp.dependencies.SharedBuildConfiguration
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.StaticBuildConfiguration
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.UnpackCppDistributionsTask
 import org.gradle.api.Plugin
@@ -19,7 +18,37 @@ import org.gradle.platform.base.BinaryContainer
 import java.util.regex.Matcher
 
 /**
+ * The Seaside wrapper for the Native plugin in Gradle.
+ * This sets common attributes such as google-test-test-suite and provides a mechanism for unpacking
+ * dependencies.
  *
+ * The dependencies must have the following structure within a zip file.
+ * <pre>
+ * ${artifactId}-${version}.zip
+ *   - include
+ *      - ${artifactId}
+ *        - *.h
+ *   - lib
+ *      - ${os}_${arch}
+ *        - *.so / *.dll
+ *        - *.a / *.lib
+ *  </pre>
+ *  <br>Example: <br>
+ *  <pre>
+ *   celix-2.0.0.zip
+ *     include
+ *       celix
+ *         *.h
+ *     lib
+ *       linux_x86_64
+ *         *.a
+ *         *.so
+ *
+ *  </pre>
+ *
+ *  The configuration {@link BuildingExtension} allows for different library configurations.
+ *  Dependencies that have the artifactId and the library as the same name don't have to specify the
+ *  libs option for the shared or statically configurations.
  */
 class SeasideCppParentPlugin implements Plugin<Project> {
 
@@ -140,16 +169,6 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                         }
                     }
 
-                    binaries {
-                        all {
-                            if(toolChain in Gcc) {
-                                addExtraLinkArgs(p.extensions.building, linker.args)
-                                addExtraCompilerArgs(p.extensions.building, cppCompiler.args)
-//                                println linker.getArgs()
-                            }
-                        }
-                    }
-
                     components {
                         main(NativeLibrarySpec) {
                             baseName = "${project.name}"
@@ -202,23 +221,18 @@ class SeasideCppParentPlugin implements Plugin<Project> {
         }
     }
 
-    private void addExtraLinkArgs(BuildingExtension buildingExtension, List<String> args) {
-      List<String> extraArgs = buildingExtension.storage.getExtraLinkArgs();
-      if(extraArgs != null && !extraArgs.isEmpty()) {
-          args.addAll(extraArgs)
-      }
-    }
 
-    private void addExtraCompilerArgs(BuildingExtension buildingExtension, List<String> args) {
-        List<String> extraArgs = buildingExtension.storage.getExtraCompileArgs();
-        if(extraArgs != null && !extraArgs.isEmpty()) {
-            args.addAll(extraArgs)
-        }
-    }
-
+    /**
+     * This method will search the already defined linker arguments and wrap any static libraries that have
+     * been specified in the 'building' configuration with the 'withArgs' option
+     *
+     * @param buildingExtension the building configuration
+     * @param linkerArgs the already existing linker arguments. This method will mutate this parameter by
+     *                          adding arguments.
+     */
     private void filterLinkerArgs(BuildingExtension buildingExtension, List<String> linkerArgs) {
-        for(String file : buildingExtension.getStorage().getFilesWithLinkerArgs()) {
-            if(linkerArgs.contains(file)) {
+        for (String file : buildingExtension.getStorage().getFilesWithLinkerArgs()) {
+            if (linkerArgs.contains(file)) {
                 int index = linkerArgs.indexOf(file)
                 StaticBuildConfiguration.WithArgs withArgs = buildingExtension.storage.getLinkerArgs(file)
                 linkerArgs.addAll(index, withArgs.before)
