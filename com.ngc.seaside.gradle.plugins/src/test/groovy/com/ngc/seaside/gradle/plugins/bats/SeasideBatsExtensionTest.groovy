@@ -1,6 +1,5 @@
 package com.ngc.seaside.gradle.plugins.bats
 
-import com.ngc.seaside.gradle.extensions.bats.SeasideBatsExtension
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert

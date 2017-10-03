@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.extensions.bats
+package com.ngc.seaside.gradle.plugins.bats
 
 import org.gradle.api.Project
 

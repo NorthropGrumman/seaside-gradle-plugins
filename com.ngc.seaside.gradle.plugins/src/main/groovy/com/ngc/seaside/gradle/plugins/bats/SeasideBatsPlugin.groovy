@@ -1,6 +1,5 @@
 package com.ngc.seaside.gradle.plugins.bats
 
-import com.ngc.seaside.gradle.extensions.bats.SeasideBatsExtension
 import com.ngc.seaside.gradle.tasks.bats.SeasideRunBatsTask
 import com.ngc.seaside.gradle.tasks.bats.SeasideExtractBatsTask
 import org.gradle.api.Plugin
