@@ -26,7 +26,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             plugins.apply 'java'
             plugins.apply 'application'
 
-            extensions.create("seasideApplication", SeasideApplicationPluginExtension, instantiator, p)
+            extensions.create("seasideApplication", SeasideApplicationExtension, instantiator, p)
 
             // Allow user to configure the distribution name
             afterEvaluate {
@@ -99,7 +99,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             /**
              * Modify start scripts task to allow custom start scripts
              */
-            startScripts {
+            startScripts {                
                 doLast {
                     // Configure how APP_HOME variable is created using user command
                     if (seasideApplication.windows.appHomeCmd != null) {
@@ -110,8 +110,7 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                     // Configure how APP_HOME variable is created using user command
                     if (seasideApplication.unix.appHomeCmd != null) {
                         String UNIX_APP_HOME_SCRIPT = "\"`${seasideApplication.unix.appHomeCmd}`\""
-                        unixScript.text = unixScript.text.
-                                replaceFirst('(?<=APP_HOME=)((\'|\")(.*)(\'|"))(?=\n)', UNIX_APP_HOME_SCRIPT)
+                        unixScript.text = unixScript.text.replaceFirst('(?<=APP_HOME=)((\'|\")(.*)(\'|"))(?=\n)', UNIX_APP_HOME_SCRIPT)
                     }
 
                     // Add system properties set by user
@@ -150,11 +149,15 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                     } else {
                         p.getLogger().debug("seasideApplication.appHomeVarName is not set.")
                     }
+                    
+                    // Replace the classpath declaration with libs wildcard for Windows since the classpath was making 
+                    // the command too long and Windows was balking at it.
+                    windowsScript.text = windowsScript.text.replaceFirst('(set CLASSPATH=)(.*)(?=\r\n)',
+                                                                         '$1' + '"%APP_HOME%\\\\lib\\\\*"')
 
                     // Override generated start script with custom windows start script
                     if (seasideApplication.windows.startScript != null) {
-                        p.getLogger().
-                                info("Overriding Windows start script with " + seasideApplication.unix.startScript)
+                        p.getLogger().info("Overriding Windows start script with " + seasideApplication.unix.startScript)
                         def windowsCustomScript = new File(p.getProjectDir().path,
                                                            String.valueOf(seasideApplication.windows.startScript))
                         if (windowsCustomScript.exists()) {

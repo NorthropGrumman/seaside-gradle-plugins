@@ -3,7 +3,7 @@ package com.ngc.seaside.gradle.plugins.application
 import org.gradle.api.Project
 import org.gradle.internal.reflect.Instantiator
 
-class SeasideApplicationPluginExtension {
+class SeasideApplicationExtension {
 
     static class OSType {
 
@@ -16,8 +16,8 @@ class SeasideApplicationPluginExtension {
 
     Project project
 
-    SeasideApplicationPluginExtension(Instantiator instantiator,
-                                      Project project) {
+    SeasideApplicationExtension(Instantiator instantiator,
+                                Project project) {
         this.project = project
     }
 
