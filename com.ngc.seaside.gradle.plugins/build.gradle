@@ -2,20 +2,6 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
-//buildscript {
-//    repositories {
-//      mavenLocal()
-//
-//      maven {
-//        url nexusConsolidated
-//      }
-//    }
-//
-//    dependencies {
-//        classpath "com.google.guava:guava:$guavaVersion"
-//    }
-//}
-
 
 // Dependencies
 dependencies {
