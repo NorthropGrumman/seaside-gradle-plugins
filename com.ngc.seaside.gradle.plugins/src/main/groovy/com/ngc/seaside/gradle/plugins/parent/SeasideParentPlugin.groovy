@@ -174,37 +174,15 @@ class SeasideParentPlugin implements Plugin<Project> {
      */
     static String getBranchName() {
 
-        def command = "git branch"
+        def command = "git rev-parse --abbrev-ref HEAD"
         StringBuilder branchName = new StringBuilder()
         def process = command.execute()
-        //need to grab the branch you're on which is indicated by the leading "*"
-        //then tokenize on the space to get rid of the other branches
-        def spiltStr = process.text.tokenize('*')
-        if(spiltStr.size()>1 ) {
-            spiltStr = spiltStr.get(1).tokenize(" ")
-        }
-        else{
-            spiltStr = spiltStr.get(0).tokenize(" ")
+        //append local to branch name
+        if(isBuildLocal()) {
+            branchName.append(LOCAL_TAG)
         }
 
-        //Make sure we have an actual branch
-        // The git branch command should return "* master" or "* <branch name>"
-        // so the first element in the List is the * second element is usually the
-        // actual branch
-        if(spiltStr.size() >= 1) {
-
-            //append local to branch name
-            if(isBuildLocal()){
-                branchName.append(LOCAL_TAG)
-            }
-
-            // leave the trim in because there seems to be a return line
-            // as part of the string
-            branchName.append(spiltStr.get(0).trim())
-        }
-        else{
-            branchName.append("No_Branch")
-        }
+        branchName.append(process.text.trim())
 
         return branchName.toString().trim()
     }

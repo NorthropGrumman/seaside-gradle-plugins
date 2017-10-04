@@ -50,7 +50,6 @@ class SeasideParentPluginFT {
 
     @Test
     void doesRunGradleAnalyzeBuildWithSuccess() {
-//a        project.ext.sonar.branch = "TEST"
 
         BuildResult result = GradleRunner.create().withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
