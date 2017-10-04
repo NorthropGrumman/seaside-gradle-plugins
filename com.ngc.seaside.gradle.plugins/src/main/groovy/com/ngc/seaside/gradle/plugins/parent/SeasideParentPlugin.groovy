@@ -35,6 +35,7 @@ class SeasideParentPlugin implements Plugin<Project> {
     public static final String PARENT_ANALYZE_TASK_NAME = 'analyze'
     public static final String PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
     public static final String PARENT_CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
+    public static final String LOCAL_TAG = 'local-'
 
     @Override
     void apply(Project project) {
@@ -171,22 +172,55 @@ class SeasideParentPlugin implements Plugin<Project> {
      * @return String with of the Git Branch you are on otherwise
      * an empty string
      */
-    protected static String getBranchName() {
+    static String getBranchName() {
 
         def command = "git branch"
-        def branch = ""
+        StringBuilder branchName = new StringBuilder()
         def process = command.execute()
-        def spilt = process.text.tokenize(' ')
+        //need to grab the branch you're on which is indicated by the leading "*"
+        //then tokenize on the space to get rid of the other branches
+        def spiltStr = process.text.tokenize('*')
+        if(spiltStr.size()>1 ) {
+            spiltStr = spiltStr.get(1).tokenize(" ")
+        }
+        else{
+            spiltStr = spiltStr.get(0).tokenize(" ")
+        }
+
         //Make sure we have an actual branch
         // The git branch command should return "* master" or "* <branch name>"
         // so the first element in the List is the * second element is usually the
         // actual branch
-        if (spilt.size() >= 2) {
+        if(spiltStr.size() >= 1) {
+
+            //append local to branch name
+            if(isBuildLocal()){
+                branchName.append(LOCAL_TAG)
+            }
+
             // leave the trim in because there seems to be a return line
             // as part of the string
-            branch = spilt.get(1).trim()
+            branchName.append(spiltStr.get(0).trim())
         }
-        return branch
+        else{
+            branchName.append("No_Branch")
+        }
+
+        return branchName.toString().trim()
+    }
+
+    /**
+     *
+     * @return true if local and false if not
+     */
+    static boolean isBuildLocal() {
+        boolean isLocal = true
+
+        if (System.getenv('JENKINS_HOME') != null ){
+            isLocal = false
+        }
+
+        return isLocal
     }
 
     /**
