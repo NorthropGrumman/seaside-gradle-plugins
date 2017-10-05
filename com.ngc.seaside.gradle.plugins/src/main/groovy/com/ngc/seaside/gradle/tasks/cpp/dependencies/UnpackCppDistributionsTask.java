@@ -39,22 +39,19 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    private boolean testDependencies = false;
 
    /**
-    * Shared, static or api library types are required for the components configuration
+    * Simple method to get the dependency name from the given file name. This will strip the version from the file.
+    *
+    * @param fileName the name of the file.
+    * @return the dependency name.
     */
-   private enum LibraryType {
-      SHARED("shared"),
-      STATIC("static"),
-      API("api");
-
-      private String name;
-
-      LibraryType(String name) {
-         this.name = name;
+   private static String getDependencyNameFromFileName(String fileName) {
+      // Return the name of the artifact/dependency minus the version.
+      String name = fileName;
+      int position = fileName.indexOf('-');
+      if (position > 0) {
+         name = fileName.substring(0, position);
       }
-
-      public String getName() {
-         return name;
-      }
+      return name;
    }
 
    /**
@@ -123,8 +120,8 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    }
 
    /**
-    * Configure the dependency within the cpp plugin. This includes creating the libs under model > repositories
-    * and adding the dependency to the components
+    * Configure the dependency within the cpp plugin. This includes creating the libs under model > repositories and
+    * adding the dependency to the components
     *
     * @param directory      the base directory in which the dependency exists in its unpacked state.
     * @param dependencyName the name of the dependency. This is usually the artifact ID.
@@ -172,6 +169,17 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    }
 
    /**
+    * Creates the prebuilt library dynamically based on the library type specified by the user
+    * @param libs the PrebuiltLibraries libs (the object that the dependency gets added to)
+    * @param library the library to create
+    * @param type the configuration type of the libary i.e shared vs statically
+    * @return the prebuilt library created
+    */
+   private PrebuiltLibrary createPreBuildLibrary(DefaultPrebuiltLibraries libs, String library, LibraryType type) {
+      return libs.maybeCreate(String.format("%s.%s", library, type.getName()));
+   }
+
+   /**
     * Add the dependency as a static library if it is configured as such.
     *
     * @param directory         the base directory in which the dependency exists in its unpacked state.
@@ -186,14 +194,13 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                                       DefaultPrebuiltLibraries libs,
                                       List<File> dependencyHeaders) {
       Collection<StaticBuildConfiguration>
-               configs =
-               buildingExtension.getStorage().getStaticBuildConfigurations(dependencyName);
+               configs = buildingExtension.getStorage().getStaticBuildConfigurations(dependencyName);
 
       Set<File> deps = new HashSet<>();
       for (StaticBuildConfiguration config : configs) {
          if (config.getLibs() != null && !config.getLibs().isEmpty()) {
             for (String library : config.getLibs()) {
-               PrebuiltLibrary lib = libs.maybeCreate(library);
+               PrebuiltLibrary lib = createPreBuildLibrary(libs, library, LibraryType.STATIC);
 
                lib.getHeaders().setSrcDirs(dependencyHeaders);
 
@@ -224,7 +231,6 @@ public class UnpackCppDistributionsTask extends DefaultTask {
              * Standard configuration uses the dependency name as the lib name.
              */
             PrebuiltLibrary lib = libs.maybeCreate(dependencyName);
-
 
             lib.getHeaders().setSrcDirs(dependencyHeaders);
             libs.resolveLibrary(lib.getName());
@@ -271,7 +277,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       for (SharedBuildConfiguration config : configs) {
          if (config.getLibs() != null && !config.getLibs().isEmpty()) {
             for (String library : config.getLibs()) {
-               PrebuiltLibrary lib = libs.maybeCreate(library);
+               PrebuiltLibrary lib = createPreBuildLibrary(libs, library, LibraryType.SHARED);
 
                lib.getHeaders().setSrcDirs(dependencyHeaders);
 
@@ -360,8 +366,8 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       String prefix = bin.getTargetPlatform().getOperatingSystem().isWindows() ? "" : "lib";
 
       String versionString = "";
-      if(version != null && !version.isEmpty()) {
-        versionString = String.format(".%s", version);
+      if (version != null && !version.isEmpty()) {
+         versionString = String.format(".%s", version);
       }
 
       String file = String.format("lib/%s_%s/%s%s.%s%s",
@@ -432,18 +438,21 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    }
 
    /**
-    * Simple method to get the dependency name from the given file name. This will strip the version from the file.
-    *
-    * @param fileName the name of the file.
-    * @return the dependency name.
+    * Shared, static or api library types are required for the components configuration
     */
-   private static String getDependencyNameFromFileName(String fileName) {
-      // Return the name of the artifact/dependency minus the version.
-      String name = fileName;
-      int position = fileName.indexOf('-');
-      if (position > 0) {
-         name = fileName.substring(0, position);
+   private enum LibraryType {
+      SHARED("shared"),
+      STATIC("static"),
+      API("api");
+
+      private String name;
+
+      LibraryType(String name) {
+         this.name = name;
       }
-      return name;
+
+      public String getName() {
+         return name;
+      }
    }
 }
