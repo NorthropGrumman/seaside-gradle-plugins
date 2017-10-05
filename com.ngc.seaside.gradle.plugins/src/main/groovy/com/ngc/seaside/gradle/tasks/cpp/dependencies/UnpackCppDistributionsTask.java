@@ -77,7 +77,6 @@ public class UnpackCppDistributionsTask extends DefaultTask {
 
          File[] zips = dependenciesDirectory.listFiles((dir, name) -> name.endsWith(".zip"));
          for (File zip : zips) {
-            // Remove the .zip
             String destFileName = zip.getName().substring(0, zip.getName().length() - 4);
             File dest = new File(zip.getParentFile(), destFileName);
 
@@ -163,7 +162,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                                    List<File> dependencyHeaders) {
       List<String> configs = buildingExtension.getStorage().getApiDependencies();
       if (configs.contains(dependencyName)) {
-         PrebuiltLibrary lib = libs.create(dependencyName);
+         PrebuiltLibrary lib = libs.maybeCreate(dependencyName);
          lib.getHeaders().setSrcDirs(dependencyHeaders);
          if (!testDependencies) {
             addDependencyToComponent(dependencyName, LibraryType.API);
@@ -194,7 +193,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       for (StaticBuildConfiguration config : configs) {
          if (config.getLibs() != null && !config.getLibs().isEmpty()) {
             for (String library : config.getLibs()) {
-               PrebuiltLibrary lib = libs.create(library);
+               PrebuiltLibrary lib = libs.maybeCreate(library);
 
                lib.getHeaders().setSrcDirs(dependencyHeaders);
 
@@ -224,12 +223,15 @@ public class UnpackCppDistributionsTask extends DefaultTask {
             /**
              * Standard configuration uses the dependency name as the lib name.
              */
-            PrebuiltLibrary lib = libs.create(dependencyName);
+            PrebuiltLibrary lib = libs.maybeCreate(dependencyName);
+
+
             lib.getHeaders().setSrcDirs(dependencyHeaders);
             libs.resolveLibrary(lib.getName());
             for (DefaultPrebuiltStaticLibraryBinary bin :
                      lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
                File obj = getLibFile(bin, directory, dependencyName, LibraryType.STATIC, config.getVersion());
+
                if (!deps.contains(obj) && obj.exists()) {
                   deps.add(obj);
                   bin.setStaticLibraryFile(obj);
@@ -269,7 +271,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       for (SharedBuildConfiguration config : configs) {
          if (config.getLibs() != null && !config.getLibs().isEmpty()) {
             for (String library : config.getLibs()) {
-               PrebuiltLibrary lib = libs.create(library);
+               PrebuiltLibrary lib = libs.maybeCreate(library);
 
                lib.getHeaders().setSrcDirs(dependencyHeaders);
 
@@ -293,7 +295,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
             /**
              * Standard configuration uses the dependency name as the lib name.
              */
-            PrebuiltLibrary lib = libs.create(dependencyName);
+            PrebuiltLibrary lib = libs.maybeCreate(dependencyName);
             lib.getHeaders().setSrcDirs(dependencyHeaders);
             libs.resolveLibrary(lib.getName());
             for (DefaultPrebuiltSharedLibraryBinary bin :

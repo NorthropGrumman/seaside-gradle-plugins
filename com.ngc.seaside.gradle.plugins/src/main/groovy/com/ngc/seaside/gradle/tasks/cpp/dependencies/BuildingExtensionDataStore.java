@@ -15,8 +15,6 @@ public class BuildingExtensionDataStore {
    private static Multimap<String, HeaderBuildConfiguration> headersByDependencyMap = ArrayListMultimap.create();
    private static List<String> apiDependencies = new ArrayList<>();
    private static Map<String, StaticBuildConfiguration.WithArgs> librariesWithLinkerArgsMap = new HashMap<>();
-   private List<String> extraLinkArgs = new ArrayList<>();
-   private List<String> extraCompileArgs = new ArrayList<>();
 
    /**
     * Add the header configuration.

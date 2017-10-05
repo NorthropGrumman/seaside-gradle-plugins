@@ -197,7 +197,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                 }
 
                 tasks.getByName(
-                        'createDistributionZip').archiveName = "${project.group}.${project.name}-${project.version}.zip"
+                        'createDistributionZip').archiveName = "${project.name}-${project.version}.zip"
 
                 tasks.getByName('copySharedLib').onlyIf { file("${project.buildDir}/libs/main/shared").isDirectory() }
                 tasks.getByName('copyStaticLib').onlyIf { file("${project.buildDir}/libs/main/static").isDirectory() }
