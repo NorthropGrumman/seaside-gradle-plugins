@@ -36,6 +36,7 @@ class SeasideParentPlugin implements Plugin<Project> {
     public static final String PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
     public static final String PARENT_CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
     public static final String LOCAL_TAG = 'local-'
+    public static String REMOTE_TAG = ''
 
     @Override
     void apply(Project project) {
@@ -180,6 +181,8 @@ class SeasideParentPlugin implements Plugin<Project> {
         //append local to branch name
         if(isBuildLocal()) {
             branchName.append(LOCAL_TAG)
+        } else {
+            branchName.append(REMOTE_TAG)
         }
 
         branchName.append(process.text.trim())
@@ -195,6 +198,7 @@ class SeasideParentPlugin implements Plugin<Project> {
         boolean isLocal = true
 
         if (System.getenv('JENKINS_HOME') != null ){
+            REMOTE_TAG = 'jenkins-
             isLocal = false
         }
 
