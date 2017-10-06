@@ -39,22 +39,6 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    private boolean testDependencies = false;
 
    /**
-    * Simple method to get the dependency name from the given file name. This will strip the version from the file.
-    *
-    * @param fileName the name of the file.
-    * @return the dependency name.
-    */
-   private static String getDependencyNameFromFileName(String fileName) {
-      // Return the name of the artifact/dependency minus the version.
-      String name = fileName;
-      int position = fileName.indexOf('-');
-      if (position > 0) {
-         name = fileName.substring(0, position);
-      }
-      return name;
-   }
-
-   /**
     * Unpack all the necessary dependencies and update the cpp plugin's configuration.
     */
    @TaskAction
@@ -170,9 +154,10 @@ public class UnpackCppDistributionsTask extends DefaultTask {
 
    /**
     * Creates the prebuilt library dynamically based on the library type specified by the user
-    * @param libs the PrebuiltLibraries libs (the object that the dependency gets added to)
+    *
+    * @param libs    the PrebuiltLibraries libs (the object that the dependency gets added to)
     * @param library the library to create
-    * @param type the configuration type of the libary i.e shared vs statically
+    * @param type    the configuration type of the libary i.e shared vs statically
     * @return the prebuilt library created
     */
    private PrebuiltLibrary createPreBuildLibrary(DefaultPrebuiltLibraries libs, String library, LibraryType type) {
@@ -435,6 +420,22 @@ public class UnpackCppDistributionsTask extends DefaultTask {
          map.put("linkage", type.getName());
          binary.lib(map);
       }
+   }
+
+   /**
+    * Simple method to get the dependency name from the given file name. This will strip the version from the file.
+    *
+    * @param fileName the name of the file.
+    * @return the dependency name.
+    */
+   private static String getDependencyNameFromFileName(String fileName) {
+      // Return the name of the artifact/dependency minus the version.
+      String name = fileName;
+      int position = fileName.indexOf('-');
+      if (position > 0) {
+         name = fileName.substring(0, position);
+      }
+      return name;
    }
 
    /**
