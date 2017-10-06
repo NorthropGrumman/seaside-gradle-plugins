@@ -1,12 +1,13 @@
 package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
+import com.ngc.seaside.gradle.plugins.util.TaskResolver
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
-import com.ngc.seaside.gradle.tasks.release.SeasideReleaseExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -29,45 +30,28 @@ import org.gradle.api.tasks.bundling.Jar
  */
 class SeasideParentPlugin implements Plugin<Project> {
 
+    public static final String PARENT_TASK_GROUP_NAME = 'MainBuild'
+    public static final String PARENT_SOURCE_JAR_TASK_NAME = 'sourcesJar'
+    public static final String PARENT_JAVADOC_JAR_TASK_NAME = 'javadocJar'
+    public static final String PARENT_ANALYZE_TASK_NAME = 'analyze'
+    public static final String PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
+    public static final String PARENT_CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
+
     @Override
-    void apply(Project p) {
-        p.configure(p) {
+    void apply(Project project) {
+
+        project.configure(project) {
 
             // Make sure that all required properties are set.
-            GradleUtil.requireProperties(p.properties,
-                                         'nexusConsolidated',
-                                         'nexusReleases',
-                                         'nexusSnapshots',
-                                         'nexusUsername',
-                                         'nexusPassword')
-            GradleUtil.requireSystemProperties(p.properties,
-                                               'sonar.host.url')
-
-            /**
-             * This plugin requires the java and maven plugins
-             */
-            plugins.apply 'java'
-            plugins.apply 'maven'
-            plugins.apply 'eclipse'
-            plugins.apply 'org.sonarqube'
-            plugins.apply 'jacoco'
-            plugins.apply SeasideReleasePlugin
-
-            /**
-             * Create a task for generating the source jar. This will also be uploaded to Nexus.
-             */
-            task('sourcesJar', type: Jar, dependsOn: [classes]) {
-                classifier = 'sources'
-                from sourceSets.main.allSource
-            }
-
-            /**
-             * Create a task for generating the javadoc jar. This will also be uploaded to Nexus.
-             */
-            task('javadocJar', type: Jar, dependsOn: [classes, javadoc]) {
-                classifier = 'javadoc'
-                from javadoc.destinationDir
-            }
+            doRequiredGradleProperties(project,
+                                       'nexusConsolidated',
+                                       'nexusReleases',
+                                       'nexusSnapshots',
+                                       'nexusUsername',
+                                       'nexusPassword')
+            doRequiredSystemProperties(project)
+            applyPlugins(project)
+            createTasks(project)
 
             afterEvaluate {
                 /**
@@ -80,7 +64,8 @@ class SeasideParentPlugin implements Plugin<Project> {
                 }
 
                 project.tasks.getByName('build') {
-                    SeasideReleaseExtension releaseExtension = project.getExtensions().getByType(SeasideReleaseExtension.class)
+                    SeasideReleaseExtension releaseExtension = project.getExtensions().
+                            getByType(SeasideReleaseExtension.class)
                     project.version = releaseExtension.getReleaseVersion()
                 }
 
@@ -105,13 +90,20 @@ class SeasideParentPlugin implements Plugin<Project> {
                 }
 
                 /**
+                 * Configure the dependencyUpdates task report path
+                 */
+                tasks.getByName('dependencyUpdates') {
+                    outputDir = ["build", "dependencyUpdates"].join(File.separator)
+                }
+
+                /**
                  * Augment the jar name to be $groupId.$project.name).
                  */
-                tasks.getByName('sourcesJar') { jar ->
+                tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME) { jar ->
                     archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
                 }
 
-                tasks.getByName('javadocJar') { jar ->
+                tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME) { jar ->
                     archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
                 }
 
@@ -158,8 +150,8 @@ class SeasideParentPlugin implements Plugin<Project> {
                  * Ensure we call the 2 new tasks for generating the javadoc and sources artifact jars.
                  */
                 artifacts {
-                    archives sourcesJar
-                    archives javadocJar
+                    archives tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME)
+                    archives tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME)
                 }
 
                 /**
@@ -169,37 +161,10 @@ class SeasideParentPlugin implements Plugin<Project> {
                     properties {
                         property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
                         property 'sonar.projectName', "${bundleName}"
+                        property 'sonar.branch', getBranchName()
                     }
                 }
-
-                /*
-                 * Configure a task that runs the various analysis reports in the correct order.
-                 */
-                task('analyze', dependsOn: ['build', 'jacocoTestReport', 'sonarqube']) {
-                }
             }
-
-            task('downloadDependencies', type: DownloadDependenciesTask, group: 'Upload',
-                 description: 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.') {}
-
-            task('cleanupDependencies', type: DownloadDependenciesTask, group: 'Clean',
-                 description: 'Remove unused dependencies from repository.') {
-                customRepo = p.getProjectDir().path + "/build/dependencies-tmp"
-                doLast {
-                    ext.actualRepository = p.downloadDependencies.localRepository ?
-                                           p.downloadDependencies.localRepository : project.file(
-                            [p.buildDir, 'dependencies'].join(File.separator))
-
-                    logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to ${actualRepository.absolutePath}.")
-                    project.delete(actualRepository)
-                    project.copy {
-                        from localRepository
-                        into actualRepository
-                    }
-                    project.delete(localRepository)
-                }
-            }
-
 
             task('dependencyReport', type: DependencyReportTask,
                  description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies') {
@@ -207,5 +172,136 @@ class SeasideParentPlugin implements Plugin<Project> {
 
             defaultTasks = ['build']
         }
+    }
+
+    /**
+     * This will get the current working branch to pass to sonarqube
+     * @return String with of the Git Branch you are on otherwise
+     * an empty string
+     */
+    protected static String getBranchName() {
+
+        def command = "git branch"
+        def branch = ""
+        def process = command.execute()
+        def spilt = process.text.tokenize(' ')
+        //Make sure we have an actual branch
+        // The git branch command should return "* master" or "* <branch name>"
+        // so the first element in the List is the * second element is usually the
+        // actual branch
+        if (spilt.size() >= 2) {
+            // leave the trim in because there seems to be a return line
+            // as part of the string
+            branch = spilt.get(1).trim()
+        }
+        return branch
+    }
+
+    /**
+     *
+     * @param project
+     * @param propertyName
+     * @param propertyNames
+     */
+    protected void doRequiredGradleProperties(Project project, String propertyName, String... propertyNames) {
+        GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
+    }
+
+    /**
+     *
+     * @param project
+     */
+    protected void doRequiredSystemProperties(Project project) {
+        GradleUtil.requireSystemProperties(project.properties,
+                                           'sonar.host.url')
+
+    }
+
+    /**
+     * This plugin requires the java and maven plugins
+     * @param project
+     */
+    protected void applyPlugins(Project project) {
+        project.getPlugins().apply('java')
+        project.getPlugins().apply('maven')
+        project.getPlugins().apply('eclipse')
+        project.getPlugins().apply('jacoco')
+        project.getPlugins().apply('org.sonarqube')
+        project.getPlugins().apply('com.github.ben-manes.versions')
+        project.getPlugins().apply('com.github.ksoichiro.console.reporter')
+        project.getPlugins().apply(SeasideReleasePlugin)
+    }
+
+    /**
+     *
+     * @param project
+     */
+    protected void createTasks(Project project) {
+
+        /**
+         * Create a task for generating the source jar. This will also be uploaded to Nexus.
+         */
+        def classesTask = project.tasks.getByName("classes")
+        project.task(PARENT_SOURCE_JAR_TASK_NAME, type: Jar) {
+            classifier = 'sources'
+            from project.sourceSets.main.allSource
+        }
+        project.tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME).dependsOn(classesTask)
+
+        /**
+         * Create a task for generating the javadoc jar. This will also be uploaded to Nexus.
+         */
+        def javadocsTask = project.tasks.getByName("javadoc")
+        project.task(PARENT_JAVADOC_JAR_TASK_NAME, type: Jar) {
+            classifier = 'javadoc'
+            from javadocsTask.destinationDir
+        }
+        project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).dependsOn([classesTask, javadocsTask])
+
+        /**
+         * analyzeBuild task for sonarqube
+         */
+        def buildTask = project.tasks.getByName("build")
+        def jacocoTaskReportTask = project.tasks.getByName("jacocoTestReport")
+        def sonarqubeTask = project.tasks.getByName("sonarqube")
+        project.task(PARENT_ANALYZE_TASK_NAME) {
+        }
+        project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).dependsOn([buildTask, jacocoTaskReportTask, sonarqubeTask])
+        project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).setDescription('Runs jacocoTestReport and sonarqube')
+
+        /**
+         * downloadDependencies task
+         */
+        project.task(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {}
+        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription(
+                'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.')
+
+        /**
+         * cleanupDependencies task
+         */
+        project.task(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {
+            customRepo = project.getProjectDir().path + "/build/dependencies-tmp"
+            doLast {
+                ext.actualRepository = project.downloadDependencies.localRepository ?
+                                       project.downloadDependencies.localRepository : project.file(
+                        [project.buildDir, 'dependencies'].join(File.separator))
+
+                logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to " +
+                            "${actualRepository.absolutePath}.")
+                project.delete(actualRepository)
+                project.copy {
+                    from localRepository
+                    into actualRepository
+                }
+                project.delete(localRepository)
+            }
+        }
+        project.tasks.getByName(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).
+                setDescription('Remove unused dependencies from repository.')
     }
 }

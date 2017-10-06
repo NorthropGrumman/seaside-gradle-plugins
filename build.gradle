@@ -1,10 +1,10 @@
 /**
  * Project level build for the seaside-gradle-parent gradle plugin.
  */
-
 subprojects {
 
     apply plugin: 'java'
+    apply plugin: 'groovy'
     apply plugin: 'maven'
 
     group = 'com.ngc.seaside'
@@ -17,9 +17,12 @@ subprojects {
         unbescapeVersion = '1.1.3.RELEASE'
         mockitoVersion = '2.7.14'
         blocsVersion = '2.1'
+        sonarQubeVersion = '2.5'
+        dependencyUpdatesVersion = '0.15.0'
+        consoleReporterVersion = '0.5.0'
+        batsVersion = '0.4.0'
         guavaVersion = '22.0'
     }
-
 
     repositories {
         mavenLocal()
@@ -80,4 +83,59 @@ subprojects {
             }
         }
     }
+
+    sourceSets {
+        integrationTest {
+            java.srcDir file('src/integrationTest/java')
+            groovy.srcDir file('src/integrationTest/groovy')
+            resources.srcDir file('src/integrationTest/resources')
+        }
+
+        functionalTest {
+            java.srcDir file('src/functionalTest/java')
+            groovy.srcDir file('src/functionalTest/groovy')
+            resources.srcDir file('src/functionalTest/resources')
+        }
+    }
+
+    task createClasspathManifest {
+        def outputDir = file("$buildDir/$name")
+
+        inputs.files sourceSets.main.runtimeClasspath
+        outputs.dir outputDir
+
+        doLast {
+            outputDir.mkdirs()
+            file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
+        }
+    }
+
+    // Integration Dependencies
+    dependencies {
+        integrationTestCompile sourceSets.main.output
+        integrationTestCompile configurations.testCompile
+        integrationTestCompile sourceSets.test.output
+        integrationTestRuntime configurations.testRuntime
+
+        functionalTestCompile sourceSets.main.output
+        functionalTestCompile configurations.testCompile
+        functionalTestCompile sourceSets.test.output
+        functionalTestRuntime configurations.testRuntime
+    }
+
+    tasks.getByName("test").group = "test"
+
+    task integrationTest(type: Test, group: "test") {
+        testClassesDir = sourceSets.integrationTest.output.classesDir
+        classpath = sourceSets.integrationTest.runtimeClasspath
+    }
+
+    task functionalTest(type: Test, group: "test") {
+        testClassesDir = sourceSets.functionalTest.output.classesDir
+        classpath = sourceSets.functionalTest.runtimeClasspath
+    }
+
+    integrationTest.shouldRunAfter(test)
+    functionalTest.shouldRunAfter(integrationTest)
+    check.dependsOn(integrationTest, functionalTest)
 }
