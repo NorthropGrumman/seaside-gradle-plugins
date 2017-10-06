@@ -36,6 +36,8 @@ class SeasideParentPlugin implements Plugin<Project> {
     public static final String PARENT_ANALYZE_TASK_NAME = 'analyze'
     public static final String PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
     public static final String PARENT_CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
+    public static final String LOCAL_TAG = 'local-'
+    public static String REMOTE_TAG = ''
 
     @Override
     void apply(Project project) {
@@ -179,22 +181,36 @@ class SeasideParentPlugin implements Plugin<Project> {
      * @return String with of the Git Branch you are on otherwise
      * an empty string
      */
-    protected static String getBranchName() {
+    static String getBranchName() {
 
-        def command = "git branch"
-        def branch = ""
+        def command = "git rev-parse --abbrev-ref HEAD"
+        StringBuilder branchName = new StringBuilder()
         def process = command.execute()
-        def spilt = process.text.tokenize(' ')
-        //Make sure we have an actual branch
-        // The git branch command should return "* master" or "* <branch name>"
-        // so the first element in the List is the * second element is usually the
-        // actual branch
-        if (spilt.size() >= 2) {
-            // leave the trim in because there seems to be a return line
-            // as part of the string
-            branch = spilt.get(1).trim()
+        //append local to branch name
+        if(isBuildLocal()) {
+            branchName.append(LOCAL_TAG)
+        } else {
+            branchName.append(REMOTE_TAG)
         }
-        return branch
+
+        branchName.append(process.text.trim())
+
+        return branchName.toString().trim()
+    }
+
+    /**
+     *
+     * @return true if local and false if not
+     */
+    static boolean isBuildLocal() {
+        boolean isLocal = true
+
+        if (System.getenv('JENKINS_HOME') != null ){
+            REMOTE_TAG = 'jenkins-
+            isLocal = false
+        }
+
+        return isLocal
     }
 
     /**
