@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.util.TaskResolver
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project

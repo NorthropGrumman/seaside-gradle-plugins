@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
