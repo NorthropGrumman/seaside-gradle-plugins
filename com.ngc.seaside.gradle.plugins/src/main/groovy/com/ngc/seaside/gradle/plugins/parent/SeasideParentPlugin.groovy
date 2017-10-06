@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
-import com.ngc.seaside.gradle.plugins.release.SeasideReleaseExtension
+import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.TaskResolver

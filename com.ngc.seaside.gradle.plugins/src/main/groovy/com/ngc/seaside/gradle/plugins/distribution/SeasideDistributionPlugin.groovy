@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.distribution
 
+import com.ngc.seaside.gradle.extensions.distribution.SeasideDistributionExtension
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.TaskResolver
 import org.gradle.api.Plugin

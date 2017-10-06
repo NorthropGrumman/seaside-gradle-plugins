@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy
 import com.ngc.seaside.gradle.tasks.release.ReleaseTask
 import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory

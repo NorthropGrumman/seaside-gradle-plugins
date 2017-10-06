@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.bats
+package com.ngc.seaside.gradle.extensions.bats
 
 import org.gradle.api.Project
 
@@ -33,8 +33,7 @@ class SeasideBatsExtension {
          DIRECTORY_WITH_BATS_TESTS = toPath(
             "src",
             "test",
-            "resources",
-            "bats-plugin")
+            "bats")
 
          BATS_TEST_RESULTS_FILE = toPath(
             project.buildDir.name,

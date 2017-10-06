@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.application
+package com.ngc.seaside.gradle.extensions.application
 
 import org.gradle.api.Project
 import org.gradle.internal.reflect.Instantiator

@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.distribution
+package com.ngc.seaside.gradle.extensions.distribution
 
 class SeasideDistributionExtension {
    String buildDir
@@ -7,5 +7,4 @@ class SeasideDistributionExtension {
    String distributionDir
 
    Map<String, String> versions
-
 }

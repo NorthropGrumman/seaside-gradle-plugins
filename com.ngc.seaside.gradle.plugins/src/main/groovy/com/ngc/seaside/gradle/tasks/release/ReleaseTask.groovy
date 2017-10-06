@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
-import com.ngc.seaside.gradle.plugins.release.SeasideReleaseExtension
+import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 

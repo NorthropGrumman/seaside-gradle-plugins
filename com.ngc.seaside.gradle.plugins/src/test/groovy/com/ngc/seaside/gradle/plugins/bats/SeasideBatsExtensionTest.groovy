@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.bats
 
+import com.ngc.seaside.gradle.extensions.bats.SeasideBatsExtension
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert
@@ -38,8 +39,7 @@ class SeasideBatsExtensionTest {
       def expected = [
             "src",
             "test",
-            "resources",
-            "bats-plugin" ].join(File.separator)
+            "bats" ].join(File.separator)
       Assert.assertEquals(expected, extension.BATS_PATHS.DIRECTORY_WITH_BATS_TESTS)
    }
 
