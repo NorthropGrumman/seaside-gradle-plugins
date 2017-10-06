@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy
-import com.ngc.seaside.gradle.tasks.release.SeasideReleaseTask
+import com.ngc.seaside.gradle.tasks.release.ReleaseTask
 import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -31,7 +31,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
             releaseExtension.versionSuffix = (versionSuffix)? versionSuffix : releaseExtension.versionSuffix
 
             // Define the tasks
-            task(RELEASE_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
+            task(RELEASE_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
                 if (releaseExtension.uploadArtifacts) {
@@ -41,7 +41,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 }
             }
 
-            task(RELEASE_MAJOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
+            task(RELEASE_MAJOR_VERSION_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
                 if (releaseExtension.uploadArtifacts) {
@@ -51,7 +51,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 }
             }
 
-            task(RELEASE_MINOR_VERSION_TASK_NAME, type: SeasideReleaseTask, group: RELEASE_TASK_GROUP_NAME,
+            task(RELEASE_MINOR_VERSION_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
                 if (releaseExtension.uploadArtifacts) {
@@ -76,8 +76,8 @@ class SeasideReleasePlugin implements Plugin<Project> {
                             "Writing release version '$releaseVersion' to file '$releaseExtension.versionFile'")
                     releaseExtension.setVersionOnFile(releaseVersion)
                 }
-                println "**************************************************"
-                println("Setting project version to '$releaseVersion'")
+                project.logger.lifecycle "**************************************************"
+                project.logger.lifecycle("Setting project version to '$releaseVersion'")
                 project.rootProject.ext.set("releaseVersion", releaseVersion)
             }
 
