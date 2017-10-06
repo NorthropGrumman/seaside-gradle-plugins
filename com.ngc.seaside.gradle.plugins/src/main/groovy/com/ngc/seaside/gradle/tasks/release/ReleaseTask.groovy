@@ -4,7 +4,7 @@ import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
-class SeasideReleaseTask extends DefaultTask {
+class ReleaseTask extends DefaultTask {
 
     @TaskAction
     def release() {
@@ -13,15 +13,15 @@ class SeasideReleaseTask extends DefaultTask {
 
         // Perform release tasks of all projects. Do this only once
         if (!project.rootProject.hasProperty("publishedProjects")) {
-            println "**************************************************"
-            println "Beginning the release task for ${releaseExtension.tagPrefix}${project.version}"
+            project.logger.lifecycle "**************************************************"
+            project.logger.lifecycle "Beginning the release task for ${releaseExtension.tagPrefix}${project.version}"
 
             commitVersionFile("Release of version v$project.version", releaseExtension)
             createReleaseTag(releaseExtension.tagName)
 
             // Prepare next release version's snapshot
             String nextVersion = getNextVersion(project.version as String, releaseExtension.versionSuffix)
-            println("\nUpdating '$releaseExtension.versionFile' version to $nextVersion")
+            project.logger.lifecycle("\nUpdating '$releaseExtension.versionFile' version to $nextVersion")
 
             releaseExtension.setVersionOnFile(nextVersion)
             commitVersionFile("Creating new $nextVersion version after release", releaseExtension)
@@ -30,7 +30,7 @@ class SeasideReleaseTask extends DefaultTask {
             if (releaseExtension.push) {
                 pushChanges(releaseExtension.tagName)
             }
-            println "**************************************************"
+            project.logger.lifecycle "**************************************************"
             project.rootProject.ext.set("publishedProjects", true)
         }
     }

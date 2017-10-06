@@ -9,7 +9,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 
-class SeasideReleaseExtensionTest {
+class ReleaseExtensionTest {
 
     private SeasideReleaseExtension extension
     private Project project = Mockito.mock(Project)

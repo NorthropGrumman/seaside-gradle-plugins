@@ -13,6 +13,7 @@ dependencies {
     compile "com.github.ben-manes:gradle-versions-plugin:$dependencyUpdatesVersion"
     compile "com.github.ksoichiro:gradle-console-reporter:$consoleReporterVersion"
     compile "bats:bats:$batsVersion"
+    compile "com.google.guava:guava:$guavaVersion"
 
     testRuntime files(createClasspathManifest)
 

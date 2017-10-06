@@ -4,6 +4,7 @@ import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
+import com.ngc.seaside.gradle.plugins.util.TaskResolver
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
@@ -86,6 +87,13 @@ class SeasideParentPlugin implements Plugin<Project> {
                 ext {
                     // The default name of the bundle.
                     bundleName = "$group" + '.' + "$project.name"
+                }
+
+                /**
+                 * Configure the dependencyUpdates task report path
+                 */
+                tasks.getByName('dependencyUpdates') {
+                    outputDir = ["build", "dependencyUpdates"].join(File.separator)
                 }
 
                 /**
@@ -219,6 +227,8 @@ class SeasideParentPlugin implements Plugin<Project> {
         project.getPlugins().apply('eclipse')
         project.getPlugins().apply('jacoco')
         project.getPlugins().apply('org.sonarqube')
+        project.getPlugins().apply('com.github.ben-manes.versions')
+        project.getPlugins().apply('com.github.ksoichiro.console.reporter')
         project.getPlugins().apply(SeasideReleasePlugin)
     }
 
