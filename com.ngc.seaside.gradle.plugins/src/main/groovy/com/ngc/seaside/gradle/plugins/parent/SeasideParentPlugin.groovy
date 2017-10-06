@@ -219,6 +219,8 @@ class SeasideParentPlugin implements Plugin<Project> {
         project.getPlugins().apply('eclipse')
         project.getPlugins().apply('jacoco')
         project.getPlugins().apply('org.sonarqube')
+        project.getPlugins().apply('com.github.ben-manes.versions')
+        project.getPlugins().apply('com.github.ksoichiro.console.reporter')
         project.getPlugins().apply(SeasideReleasePlugin)
     }
 
