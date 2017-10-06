@@ -206,7 +206,7 @@ class SeasideParentPlugin implements Plugin<Project> {
         boolean isLocal = true
 
         if (System.getenv('JENKINS_HOME') != null ){
-            REMOTE_TAG = 'jenkins-
+            REMOTE_TAG = 'jenkins-'
             isLocal = false
         }
 
