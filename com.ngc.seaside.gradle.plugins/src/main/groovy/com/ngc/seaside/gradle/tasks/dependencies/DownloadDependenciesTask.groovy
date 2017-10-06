@@ -33,32 +33,57 @@ class DownloadDependenciesTask extends DefaultTask {
         }
     }
 
+    /**
+     * This will download the dependencies pom, jar, sources and javadoc files for all non-transitive modules.
+     * Only the pom and jar will be downloaded for all transitive dependencies.
+     *
+     * @param currentProject The project in which to download the dependencies
+     */
     void downloadDependenciesForProject(Project currentProject) {
-        def libraryFiles = [:]
         def componentIds = [] as Set
+        def transitiveIds = [] as Set
+        def libraryFiles = [:]
+
+        /**
+         * For all of the configurations within a project collect the id by non-transitive and transitive
+         */
         (currentProject.configurations + currentProject.buildscript.configurations).each { configuration ->
             if (isConfigurationResolvable(configuration)) {
                 componentIds.addAll(
                         configuration.incoming.resolutionResult.allDependencies.collect {
-                            if (it.hasProperty('selected')) {
-                                return it.selected.id
-                            }
-
-                            if (it.hasProperty('attempted')) {
-                                project.getLogger().warn("Unable to save artifacts of ${it.attempted.displayName}")
+                            if (it.hasProperty("from")) {
+                                if (it.from.toString().contains("project")) {
+                                    if (it.hasProperty('selected')) {
+                                        return it.selected.id
+                                    }
+                                }
                             }
                         }
                 )
 
+                transitiveIds.addAll(
+                        configuration.incoming.resolutionResult.allDependencies.collect {
+                            if (it.hasProperty("from")) {
+                                if (!it.from.toString().contains("project")) {
+                                    if (it.hasProperty('selected')) {
+                                        return it.selected.id
+                                    }
+                                }
+                            }
+                        }
+                )
+
+                //collect all the files in which to copy
                 configuration.incoming.files.each { file ->
                     libraryFiles[file.name] = file
                 }
             }
         }
 
-        project.getLogger().info("Dependencies of all configurations: ${componentIds.collect { it.toString() }.join(', ')}")
-
-        componentIds.each { component ->
+        /**
+         * Copy the jar artifact for all dependencies
+         */
+        (transitiveIds + componentIds).each { component ->
             if (component instanceof ModuleComponentIdentifier) {
                 findMatchingLibraries(libraryFiles, component).each { library ->
                     if (library != null) {
@@ -68,14 +93,29 @@ class DownloadDependenciesTask extends DefaultTask {
             }
         }
 
+        /**
+         * Copy the pom, jar, sources and javadoc for the non-transitive dependencies
+         */
         [(MavenModule.class): [MavenPomArtifact.class] as Class[],
          (JvmLibrary.class) : [SourcesArtifact.class, JavadocArtifact.class] as Class[]].each { module, artifactTypes ->
+
             def resolvedComponents = resolveComponents(componentIds, module, artifactTypes)
             resolvedComponents.each { component ->
                 saveArtifacts(component, artifactTypes)
             }
         }
+
+        /**
+         *  We only want the pom artifact for the transitive dependencies
+         */
+        [(MavenModule.class): [MavenPomArtifact.class] as Class[]].each { module, artifactTypes ->
+            def resolvedComponents = resolveComponents(transitiveIds, module, artifactTypes)
+            resolvedComponents.each { component ->
+                saveArtifacts(component, artifactTypes)
+            }
+        }
     }
+
 
     /**
      * Gradle 3.4 introduced the configuration 'apiElements' that isn't resolvable. So
@@ -149,7 +189,8 @@ class DownloadDependenciesTask extends DefaultTask {
             return
         }
 
-        project.getLogger().info("Saving artifact file ${source.name} of ${id.toString()} to ${destination.absolutePath}")
+        project.getLogger().
+                info("Saving artifact file ${source.name} of ${id.toString()} to ${destination.absolutePath}")
 
         destination.withOutputStream { os ->
             source.withInputStream { is ->
