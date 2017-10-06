@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.bats
 
+import com.ngc.seaside.gradle.plugins.util.TaskResolver
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -16,7 +17,7 @@ class SeasideBatsPluginIT {
 
    @Before
    void before() {
-      def testProjectDir = destinationDirectoryForTheTestProject()
+      def testProjectDir = createTheTestProjectDirectory()
       copyTheTestProjectInto(testProjectDir)
       project = createTheTestProjectUsing(testProjectDir)
       plugin = new SeasideBatsPlugin()
@@ -26,12 +27,8 @@ class SeasideBatsPluginIT {
    @Test
    void appliesPlugin() {
       Assert.assertNotNull(project.extensions.findByName(SeasideBatsPlugin.BATS_EXTENSION_NAME))
-      Assert.assertNotNull(project.tasks.findByName(SeasideBatsPlugin.EXTRACT_BATS_TASK_NAME))
-      Assert.assertNotNull(project.tasks.findByName(SeasideBatsPlugin.RUN_BATS_TASK_NAME))
-   }
-
-   private static File destinationDirectoryForTheTestProject() {
-      return createTheTestProjectDirectory()
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideBatsPlugin.EXTRACT_BATS_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideBatsPlugin.RUN_BATS_TASK_NAME))
    }
 
    private static File createTheTestProjectDirectory() {

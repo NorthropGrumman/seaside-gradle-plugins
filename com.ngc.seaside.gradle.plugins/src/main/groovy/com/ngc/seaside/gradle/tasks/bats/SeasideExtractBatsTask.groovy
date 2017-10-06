@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.tasks.bats
 
-import com.ngc.seaside.gradle.plugins.bats.SeasideBatsExtension
+import com.ngc.seaside.gradle.extensions.bats.SeasideBatsExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileTree
