@@ -52,6 +52,9 @@ This plugin configures the following tasks:
 |------|-------------|---------------------|
 | analyze | Runs Jacoco to compute code coverage and then runs Sonarqube | no | 
 | downloadDependencies | Downloads all dependencies into the build/dependencies/ folder using maven2 layout. | no |
+| dependencyUpdates | Displays a report of the project dependencies that are up-to-date, exceed the latest version found, have upgrades, or failed to be resolved. | no |
+| dependencyReport | Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies | no |
+| cleanupDependencies | Remove unused dependencies from dependencies folder | no |
 
 # com.ngc.seaside:seaside.distribution
 The seaside gradle distribution plugin provide the directory structure required to run a BLoCS application and all of its bundle dependencies. This plugin will then distribute and compress the bundles of files packaged, including blocs dependencies, jar files, and also resource files. 
