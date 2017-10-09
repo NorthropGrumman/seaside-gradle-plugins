@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.util.TaskResolver
+import com.ngc.seaside.gradle.plugins.util.VersionResolver
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -32,7 +33,6 @@ class SeasideReleasePluginIT {
 
         plugin = new SeasideReleasePlugin()
         plugin.apply(project)
-
     }
 
     @Test
@@ -48,15 +48,6 @@ class SeasideReleasePluginIT {
     @Test
     void doesGetSemanticVersionFromFile() {
         Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
-        SeasideReleaseExtension extension = project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
-        Assert.assertEquals('1.2.3-SNAPSHOT', extension.getPreReleaseVersion())
-    }
-
-    @Test
-    void doesSetSemanticVersionOnFile() {
-        Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
-        SeasideReleaseExtension extension = project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
-        extension.setVersionOnFile("1.2.4-SNAPSHOT")
-        Assert.assertEquals('1.2.4-SNAPSHOT', extension.getPreReleaseVersionFromFile())
+        Assert.assertEquals('1.2.3-SNAPSHOT', plugin.versionFromFile)
     }
 }
