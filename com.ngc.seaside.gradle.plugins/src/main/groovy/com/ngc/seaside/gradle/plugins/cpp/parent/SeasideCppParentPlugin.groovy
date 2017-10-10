@@ -11,6 +11,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.language.cpp.tasks.CppCompile
 import org.gradle.nativeplatform.NativeLibrarySpec
 import org.gradle.nativeplatform.PrebuiltLibraries
+import org.gradle.nativeplatform.test.tasks.RunTestExecutable
 import org.gradle.nativeplatform.toolchain.Gcc
 import org.gradle.nativeplatform.toolchain.VisualCpp
 import org.gradle.platform.base.BinaryContainer
@@ -194,6 +195,10 @@ class SeasideCppParentPlugin implements Plugin<Project> {
 
                 artifacts {
                     distribution createDistributionZip
+                }
+
+                tasks.withType(RunTestExecutable) {
+                    args "--gtest_output=xml:report.xml"
                 }
 
                 tasks.getByName(

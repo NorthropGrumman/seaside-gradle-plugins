@@ -317,6 +317,6 @@ class SeasideParentPlugin implements Plugin<Project> {
         }
         project.tasks.getByName(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
         project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).
-                setDescription('Remove unused dependencies from repository.')
+                setDescription('Remove unused dependencies from dependencies folder.')
     }
 }
