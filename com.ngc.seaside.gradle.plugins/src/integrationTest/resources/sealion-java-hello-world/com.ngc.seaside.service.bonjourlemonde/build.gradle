@@ -1,5 +1,6 @@
 plugins {
     id 'com.ngc.seaside.parent'
+    id 'com.ngc.seaside.command'
     id 'com.ngc.seaside.application'
 }
 
