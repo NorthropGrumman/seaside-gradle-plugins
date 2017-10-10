@@ -5,6 +5,7 @@ import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.TaskResolver
+import com.ngc.seaside.gradle.plugins.util.VersionResolver
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
@@ -66,9 +67,7 @@ class SeasideParentPlugin implements Plugin<Project> {
                 }
 
                 project.tasks.getByName('build') {
-                    SeasideReleaseExtension releaseExtension = project.getExtensions().
-                            getByType(SeasideReleaseExtension.class)
-                    project.version = releaseExtension.getReleaseVersion()
+                    project.version = new VersionResolver(project).getProjectVersion(false)
                 }
 
                 /**

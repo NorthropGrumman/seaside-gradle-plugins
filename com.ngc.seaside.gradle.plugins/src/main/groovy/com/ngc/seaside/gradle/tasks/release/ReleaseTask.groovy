@@ -1,34 +1,67 @@
 package com.ngc.seaside.gradle.tasks.release
 
-import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
+import com.ngc.seaside.gradle.plugins.util.VersionResolver
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
 class ReleaseTask extends DefaultTask {
+   public static final String RELEASE_TASK_NAME = 'release'
+   public static final String RELEASE_MAJOR_VERSION_TASK_NAME = 'releaseMajorVersion'
+   public static final String RELEASE_MINOR_VERSION_TASK_NAME = 'releaseMinorVersion'
+
+   @Input
+   String tagPrefix
+
+   @Input
+   String versionSuffix
+
+   @Input
+   boolean push
 
     @TaskAction
     def release() {
-        // Get extension reference
-        SeasideReleaseExtension releaseExtension = project.getExtensions().getByType(SeasideReleaseExtension.class)
+       VersionResolver resolver = new VersionResolver(project)
+        // Get project release version and prepare build project/file for release. Do this once
+        if (!project.rootProject.hasProperty("releaseVersion")) {
+            def versionFromFile = resolver.getProjectVersion(true)
+            def taskNames = project.gradle.startParameter.taskNames
+
+            IVersionUpgradeStrategy upgradeStrategy =
+                     resolveVersionUpgradeStrategy(taskNames, versionSuffix)
+            String releaseVersion = upgradeStrategy.getVersion(versionFromFile)
+            project.getLogger().debug("Using release version '$releaseVersion'")
+
+            if (!project.gradle.startParameter.dryRun && (versionFromFile != releaseVersion)) {
+                project.logger.debug(
+                         "Writing release version '$releaseVersion' to root build.gradle file")
+                resolver.setProjectVersionOnFile(releaseVersion)
+            }
+            project.logger.lifecycle "**************************************************"
+            project.logger.lifecycle("Setting project version to '$releaseVersion'")
+            project.rootProject.ext.set("releaseVersion", releaseVersion)
+        }
+
+       project.version = project.rootProject.releaseVersion
 
         // Perform release tasks of all projects. Do this only once
         if (!project.rootProject.hasProperty("publishedProjects")) {
             project.logger.lifecycle "**************************************************"
-            project.logger.lifecycle "Beginning the release task for ${releaseExtension.tagPrefix}${project.version}"
+            project.logger.lifecycle "Beginning the release task for ${tagPrefix}${project.version}"
 
-            commitVersionFile("Release of version v$project.version", releaseExtension)
-            createReleaseTag(releaseExtension.tagName)
+            commitVersionFile("Release of version v$project.version", resolver)
+            createReleaseTag(resolver.getTagName(tagPrefix, versionSuffix))
 
             // Prepare next release version's snapshot
-            String nextVersion = getNextVersion(project.version as String, releaseExtension.versionSuffix)
-            project.logger.lifecycle("\nUpdating '$releaseExtension.versionFile' version to $nextVersion")
+            String nextVersion = getNextVersion()
+            project.logger.lifecycle("\nUpdating project version to $nextVersion")
 
-            releaseExtension.setVersionOnFile(nextVersion)
-            commitVersionFile("Creating new $nextVersion version after release", releaseExtension)
+            resolver.setProjectVersionOnFile(nextVersion)
+            commitVersionFile("Creating new $nextVersion version after release", resolver)
 
             // Push all those changes we had been making
-            if (releaseExtension.push) {
-                pushChanges(releaseExtension.tagName)
+            if (push) {
+                pushChanges(resolver.getTagName(tagPrefix, versionSuffix))
             }
             project.logger.lifecycle "**************************************************"
             project.rootProject.ext.set("publishedProjects", true)
@@ -40,9 +73,9 @@ class ReleaseTask extends DefaultTask {
      * @param msg the commit message
      * @param releaseExtension a reference to the release extension
      */
-    def commitVersionFile(String msg, SeasideReleaseExtension releaseExtension) {
+    def commitVersionFile(String msg, VersionResolver resolver) {
         project.getLogger().info("Committing version file: $msg")
-        git 'commit', '-m', "\"$msg\"", ':/' + releaseExtension.versionFile.name
+        git 'commit', '-m', "\"$msg\"", ':/' + resolver.versionFile.name
     }
 
     /**
@@ -59,10 +92,11 @@ class ReleaseTask extends DefaultTask {
      * @param currentVersion release version information
      * @param suffix the pre-release suffix
      */
-    def static getNextVersion(String currentVersion, String suffix) {
-        def versionInfo = VersionUpgradeStrategyFactory.parseVersionInfo(currentVersion - suffix)
-        int nextPatch = versionInfo.patch + 1
-        "${versionInfo.major}.${versionInfo.minor}.${nextPatch}${suffix}" as String
+    String getNextVersion() {
+       String version = project.version.toString()
+       def versionInfo = VersionUpgradeStrategyFactory.parseVersionInfo(version - versionSuffix)
+       int nextPatch = versionInfo.patch + 1
+        return "${versionInfo.major}.${versionInfo.minor}.${nextPatch}${versionSuffix}".toString()
     }
 
     /**
@@ -98,6 +132,24 @@ class ReleaseTask extends DefaultTask {
         String gitOutput = output.toString().trim()
         if (!gitOutput.isEmpty()) {
             project.getLogger().debug(gitOutput)
+        }
+    }
+
+    /**
+     * Resolves Semantic versioning upgrade strategy based on the release task called by the user
+     * @param taskNames all gradle tasks that are called by the user
+     * @param versionSuffix project version suffix
+     * @return {@link com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy}
+     */
+    static IVersionUpgradeStrategy resolveVersionUpgradeStrategy(List<String> taskNames, String versionSuffix) {
+        if (taskNames.contains(RELEASE_MAJOR_VERSION_TASK_NAME)) {
+            return VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(versionSuffix)
+        } else if (taskNames.contains(RELEASE_MINOR_VERSION_TASK_NAME)) {
+            return VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(versionSuffix)
+        } else if (taskNames.contains(RELEASE_TASK_NAME)) {
+            return VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(versionSuffix)
+        } else {
+            return VersionUpgradeStrategyFactory.createSnapshotVersionUpgradeStrategy()
         }
     }
 }

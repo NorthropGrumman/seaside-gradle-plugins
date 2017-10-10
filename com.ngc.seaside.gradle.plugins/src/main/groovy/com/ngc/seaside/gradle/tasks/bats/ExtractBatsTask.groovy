@@ -8,7 +8,7 @@ import org.gradle.api.tasks.TaskAction
 
 import java.nio.file.Paths
 
-class SeasideExtractBatsTask extends DefaultTask {
+class ExtractBatsTask extends DefaultTask {
    private SeasideBatsExtension batsExtension =
             project.extensions
                    .getByType(SeasideBatsExtension.class)

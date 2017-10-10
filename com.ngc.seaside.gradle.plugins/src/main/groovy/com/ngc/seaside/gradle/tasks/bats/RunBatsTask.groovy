@@ -4,7 +4,7 @@ import com.ngc.seaside.gradle.extensions.bats.SeasideBatsExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
-class SeasideRunBatsTask extends DefaultTask {
+class RunBatsTask extends DefaultTask {
    SeasideBatsExtension batsExtension =
             project.extensions
                    .findByType(SeasideBatsExtension.class)
