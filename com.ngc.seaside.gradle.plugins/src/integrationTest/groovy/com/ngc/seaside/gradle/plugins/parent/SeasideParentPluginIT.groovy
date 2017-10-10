@@ -21,7 +21,7 @@ class SeasideParentPluginIT {
     @Before
     void before() {
 
-        File source = Paths.get("src/integrationTest/resources/parent/com.ngc.example.parent").toFile()
+        File source = Paths.get("src/integrationTest/resources/sealion-java-hello-world").toFile()
         Path targetPath = Paths.get("build/integrationTest/resources/parent/com.ngc.example.parent")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)

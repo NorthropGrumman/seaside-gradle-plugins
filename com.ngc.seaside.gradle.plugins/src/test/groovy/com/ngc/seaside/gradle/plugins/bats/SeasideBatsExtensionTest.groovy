@@ -2,18 +2,19 @@ package com.ngc.seaside.gradle.plugins.bats
 
 import com.ngc.seaside.gradle.extensions.bats.SeasideBatsExtension
 import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito
 
 class SeasideBatsExtensionTest {
    private SeasideBatsExtension extension
-   private Project project
+   private Project project = Mockito.mock(Project)
+   private File file = Mockito.mock(File)
 
    @Before
    void before() {
-      project = ProjectBuilder.builder().build()
+      Mockito.when(project.buildDir).thenReturn(file)
       extension = new SeasideBatsExtension(project)
    }
 
