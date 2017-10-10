@@ -29,7 +29,7 @@ class ReleaseTask extends DefaultTask {
 
             IVersionUpgradeStrategy upgradeStrategy =
                      resolveVersionUpgradeStrategy(taskNames, versionSuffix)
-            def releaseVersion = upgradeStrategy.getVersion(versionFromFile)
+            String releaseVersion = upgradeStrategy.getVersion(versionFromFile)
             project.getLogger().debug("Using release version '$releaseVersion'")
 
             if (!project.gradle.startParameter.dryRun && (versionFromFile != releaseVersion)) {
@@ -56,7 +56,7 @@ class ReleaseTask extends DefaultTask {
             String nextVersion = getNextVersion()
             project.logger.lifecycle("\nUpdating project version to $nextVersion")
 
-            VersionResolver.setProjectVersionOnFile(nextVersion)
+            resolver.setProjectVersionOnFile(nextVersion)
             commitVersionFile("Creating new $nextVersion version after release", resolver)
 
             // Push all those changes we had been making

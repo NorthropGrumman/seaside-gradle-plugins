@@ -18,7 +18,6 @@ jar {
     }
 }
 
-
 seasideApplication {
     mainClassName = "com.ngc.seaside.service.Main"
     includeDistributionDirs = ['src/main/resources/']

@@ -2,9 +2,7 @@ package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.util.VersionResolver
-import com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy
 import com.ngc.seaside.gradle.tasks.release.ReleaseTask
-import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -15,7 +13,7 @@ class SeasideReleasePlugin implements Plugin<Project> {
     public static final String RELEASE_MINOR_VERSION_TASK_NAME = 'releaseMinorVersion'
     public static final String RELEASE_EXTENSION_NAME = 'seasideRelease'
 
-   private String versionFromFile
+    private String versionFromFile
     String uploadArtifacts
 
    String push
@@ -30,8 +28,12 @@ class SeasideReleasePlugin implements Plugin<Project> {
             releaseExtension.tagPrefix = (tagPrefix)? tagPrefix : releaseExtension.tagPrefix
             releaseExtension.versionSuffix = (versionSuffix)? versionSuffix : releaseExtension.versionSuffix
 
-           versionFromFile = (new VersionResolver(project)).getProjectVersion(true)
-           def taskNames = project.gradle.startParameter.taskNames
+            def taskNames = project.gradle.startParameter.taskNames
+            def isReleaseJob =
+               taskNames.contains(RELEASE_TASK_NAME) ||
+               taskNames.contains(RELEASE_MAJOR_VERSION_TASK_NAME) ||
+               taskNames.contains(RELEASE_MINOR_VERSION_TASK_NAME)
+           versionFromFile = (new VersionResolver(project)).getProjectVersion(isReleaseJob)
            project.version = ReleaseTask.resolveVersionUpgradeStrategy(taskNames, releaseExtension.versionSuffix).getVersion(versionFromFile)
 
             task(RELEASE_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,

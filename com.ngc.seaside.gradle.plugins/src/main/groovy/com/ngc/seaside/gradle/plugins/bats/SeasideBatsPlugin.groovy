@@ -1,8 +1,8 @@
 package com.ngc.seaside.gradle.plugins.bats
 
 import com.ngc.seaside.gradle.extensions.bats.SeasideBatsExtension
-import com.ngc.seaside.gradle.tasks.bats.SeasideRunBatsTask
-import com.ngc.seaside.gradle.tasks.bats.SeasideExtractBatsTask
+import com.ngc.seaside.gradle.tasks.bats.RunBatsTask
+import com.ngc.seaside.gradle.tasks.bats.ExtractBatsTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -29,14 +29,14 @@ class SeasideBatsPlugin implements Plugin<Project> {
 
          task(
             EXTRACT_BATS_TASK_NAME,
-            type: SeasideExtractBatsTask,
+            type: ExtractBatsTask,
             group: BATS_TASK_GROUP_NAME,
             description: "Extract the bats release archive",
             dependsOn: "build")
 
          task(
             RUN_BATS_TASK_NAME,
-            type: SeasideRunBatsTask,
+            type: RunBatsTask,
             group: BATS_TASK_GROUP_NAME,
             description: "Run the bats command on the specified directory",
             dependsOn: EXTRACT_BATS_TASK_NAME)

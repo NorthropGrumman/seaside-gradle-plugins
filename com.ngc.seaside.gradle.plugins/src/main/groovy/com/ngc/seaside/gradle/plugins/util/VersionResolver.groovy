@@ -8,13 +8,14 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class VersionResolver {
+   private static final Pattern PATTERN =
+      Pattern.compile(
+         "^\\s*version\\s*=\\s*[\"']?(?!\\.)(\\d+(\\.\\d+)+)([-.][A-Z]+)?[\"']?(?![\\d.])\$",
+         Pattern.MULTILINE
+      )
+
    private static String versionSuffix = "-SNAPSHOT"
    private Logger logger
-   private static final Pattern PATTERN =
-            Pattern.compile(
-               "^\\s*version\\s*=\\s*[\"']?(?!\\.)(\\d+(\\.\\d+)+)([-.][A-Z]+)?[\"']?(?![\\d.])\$",
-               Pattern.MULTILINE
-            )
    private File versionFile
    private Project project
 
@@ -55,18 +56,10 @@ class VersionResolver {
       }
    }
 
-   /**
-    * Modifies the version number on the version file
-    * @param newVersion the new version to write to version file
-    */
    void setProjectVersionOnFile(String newVersion) {
       versionFile.text = versionFile.text.replaceFirst(PATTERN, "\tversion = \'$newVersion\'")
    }
 
-   /**
-    * Returns the tagName that will be used for committing the released project
-    * @return {@link String} of git tag name
-    */
    String getTagName(String tagPrefix, String versionSuffix) {
       return tagPrefix + "$project.version" - versionSuffix
    }

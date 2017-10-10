@@ -1,8 +1,6 @@
 package com.ngc.seaside.gradle.plugins.release
 
-import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.util.TaskResolver
-import com.ngc.seaside.gradle.plugins.util.VersionResolver
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -15,7 +13,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class SeasideReleasePluginIT {
-
     private static final String TEST_VERSION_NUMBER = " 1.2.3-SNAPSHOT     " // with whitespace
 
     private File projectDir
