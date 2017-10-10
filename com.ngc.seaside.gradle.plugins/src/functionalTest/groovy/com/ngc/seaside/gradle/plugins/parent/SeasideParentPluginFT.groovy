@@ -29,7 +29,7 @@ class SeasideParentPluginFT {
         }
         pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
 
-        File source = Paths.get("src/functionalTest/resources/parent/sealion-java-hello-world").toFile()
+        File source = Paths.get("src/functionalTest/resources/sealion-java-hello-world").toFile()
         Path targetPath = Paths.get("build/functionalTest/resources/parent/sealion-java-hello-world")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)

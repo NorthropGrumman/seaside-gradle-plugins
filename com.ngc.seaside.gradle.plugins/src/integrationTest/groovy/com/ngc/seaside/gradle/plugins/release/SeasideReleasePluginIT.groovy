@@ -23,7 +23,7 @@ class SeasideReleasePluginIT {
 
     @Before
     void before() {
-        File source = Paths.get("src/integrationTest/resources/release/sealion-java-hello-world").toFile()
+        File source = Paths.get("src/integrationTest/resources/sealion-java-hello-world").toFile()
         Path targetPath = Paths.get("build/integrationTest/resources/release/sealion-java-hello-world")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
