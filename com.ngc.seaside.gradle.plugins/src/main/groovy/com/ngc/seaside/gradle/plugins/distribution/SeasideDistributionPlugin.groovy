@@ -83,7 +83,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
                 }
 
                 artifacts {
-                    archives TaskResolver.findTask(project, "tar")
+                    archives TaskResolver.findTask(project, "zip")
                 }
             }
         }
@@ -114,11 +114,6 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 
     protected doConfigureAfterEvaluate(Project project) {
         project.afterEvaluate {
-            resolver.findTask('tar') { tar ->
-                archiveName = "${seasideDistribution.distributionName}.tar.gz"
-                destinationDir = file("${seasideDistribution.distributionDestDir}")
-            }
-
             resolver.findTask('zip') { zip ->
                 archiveName = "${seasideDistribution.distributionName}.zip"
                 destinationDir = file("${seasideDistribution.distributionDestDir}")
@@ -160,11 +155,6 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             from { "${distributionExtension.distributionDir}" }
         }
 
-        project.task('tar', type: Tar) {
-            from { "${distributionExtension.distributionDir}" }
-            compression = Compression.GZIP
-        }
-
         project.task('copyThirdPartyBundles', type: Copy) {
             from project.configurations.getByName("thirdParty")
             into { "${distributionExtension.distributionDir}/bundles" }
@@ -197,7 +187,6 @@ class SeasideDistributionPlugin implements Plugin<Project> {
                                               resolver.findTask("copyThirdPartyBundles"),
                                               resolver.findTask("copyBlocsBundles"),
                                               resolver.findTask("copyBundles"),
-                                              resolver.findTask("tar"),
                                               resolver.findTask("zip")])
         resolver.findTask("assemble").dependsOn(resolver.findTask("buildDist"))
     }
