@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.distribution
+package com.ngc.seaside.gradle.plugins.bats
 
 import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
@@ -15,7 +15,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class SeasideDistributionPluginFT {
+class SeasideBatsPluginFT {
 
 
     private File projectDir
@@ -26,23 +26,34 @@ class SeasideDistributionPluginFT {
     void before() {
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
 
-        File source = Paths.get("src/functionalTest/resources/distribution/com.ngc.example.distribution").toFile()
-        Path targetPath = Paths.get("build/functionalTest/distribution/com.ngc.example.distribution")
+        File source = Paths.get("src/functionalTest/resources/sealion-java-hello-world").toFile()
+        Path targetPath = Paths.get("build/functionalTest/bats/sealion-java-hello-world")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
 
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
     }
 
-
     @Test
     void doesRunGradleBuildWithSuccess() {
-        BuildResult result = GradleRunner.create().withProjectDir(project.projectDir)
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
                 .withArguments("clean", "build")
                 .build()
 
-        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":build").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:build").getOutcome())
+    }
+
+    @Test
+    void doesRunGradleAnalyzeBuildWithSuccess() {
+
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("runBats")
+                .build()
+
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:runBats").getOutcome())
     }
 }
