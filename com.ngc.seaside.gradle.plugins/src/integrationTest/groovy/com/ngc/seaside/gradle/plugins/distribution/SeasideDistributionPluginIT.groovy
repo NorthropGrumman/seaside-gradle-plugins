@@ -43,6 +43,7 @@ class SeasideDistributionPluginIT {
         Assert.assertNotNull(resolver.findTask("copyPlatformBundles"))
         Assert.assertNotNull(resolver.findTask("copyThirdPartyBundles"))
         Assert.assertNotNull(resolver.findTask("copyBundles"))
+        Assert.assertNotNull(resolver.findTask("tar"))
         Assert.assertNotNull(resolver.findTask("zip"))
         Assert.assertNotNull(resolver.findTask("buildDist"))
     }

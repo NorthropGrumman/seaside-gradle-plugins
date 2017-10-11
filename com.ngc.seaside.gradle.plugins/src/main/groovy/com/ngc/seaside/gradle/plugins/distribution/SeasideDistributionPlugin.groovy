@@ -7,6 +7,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Compression
+import org.gradle.api.tasks.bundling.Tar
 import org.gradle.api.tasks.bundling.Zip
 
 /**
@@ -82,6 +83,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
                 }
 
                 artifacts {
+                    archives TaskResolver.findTask(project, "tar")
                     archives TaskResolver.findTask(project, "zip")
                 }
             }
@@ -150,6 +152,11 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             into { "${distributionExtension.distributionDir}/platform" }
         }
 
+        project.task('tar', type: Tar) {
+            from { "${distributionExtension.distributionDir}" }
+            compression = Compression.GZIP
+        }
+
         project.task('zip', type: Zip) {
             from { "${distributionExtension.distributionDir}" }
         }
@@ -186,6 +193,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
                                               resolver.findTask("copyThirdPartyBundles"),
                                               resolver.findTask("copyBlocsBundles"),
                                               resolver.findTask("copyBundles"),
+                                              resolver.findTask("tar"),
                                               resolver.findTask("zip")])
         resolver.findTask("assemble").dependsOn(resolver.findTask("buildDist"))
     }
