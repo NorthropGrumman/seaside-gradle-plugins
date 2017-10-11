@@ -115,6 +115,11 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 
     protected doConfigureAfterEvaluate(Project project) {
         project.afterEvaluate {
+            resolver.findTask('tar') { tar ->
+                archiveName = "${seasideDistribution.distributionName}.tar"
+                destinationDir = file("${seasideDistribution.distributionDestDir}")
+            }
+
             resolver.findTask('zip') { zip ->
                 archiveName = "${seasideDistribution.distributionName}.zip"
                 destinationDir = file("${seasideDistribution.distributionDestDir}")

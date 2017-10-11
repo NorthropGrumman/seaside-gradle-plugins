@@ -39,6 +39,10 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                 }
 
                 if (seasideApplication.distributionName != null) {
+                    project.tasks.getByName('distTar') {
+                        compression = Compression.GZIP
+                        archiveName = "${seasideApplication.distributionName}.tar.gz"
+                    }
                     project.tasks.getByName('distZip') {
                         archiveName = "${seasideApplication.distributionName}.zip"
                     }
