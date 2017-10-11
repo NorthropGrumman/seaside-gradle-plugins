@@ -21,6 +21,7 @@ subprojects {
         dependencyUpdatesVersion = '0.15.0'
         consoleReporterVersion = '0.5.0'
         batsVersion = '0.4.0'
+        lcovVersion = '1.13'
         guavaVersion = '22.0'
     }
 
