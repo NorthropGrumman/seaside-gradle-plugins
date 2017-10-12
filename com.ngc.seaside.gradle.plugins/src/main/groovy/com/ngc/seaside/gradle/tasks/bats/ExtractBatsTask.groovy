@@ -14,7 +14,7 @@ class ExtractBatsTask extends DefaultTask {
                    .getByType(SeasideBatsExtension.class)
 
    @TaskAction
-   extractBats() {
+   def extractBats() {
       def batsFiles = extractTheBatsReleaseArchive()
       def outputDir = pathToTheDirectoryWithBatsScripts()
 
