@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.application
 
+import com.ngc.seaside.gradle.extensions.application.SeasideApplicationExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Compression

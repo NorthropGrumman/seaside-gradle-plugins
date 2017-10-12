@@ -1,0 +1,35 @@
+plugins {
+    id 'com.ngc.seaside.parent'
+    id 'com.ngc.seaside.application'
+}
+
+dependencies {
+    /* log4j for app message logging */
+    compile "log4j:log4j:$log4jVersion"
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile "org.slf4j:slf4j-log4j12:$slf4jVersion"
+    testCompile "junit:junit:$junitVersion"
+}
+
+jar {
+    manifest {
+        // Bnd instructions to export the package.
+        attributes('Export-Package': 'com.ngc.seaside.service.helloworld.*')
+    }
+}
+
+seasideApplication {
+    mainClassName = "com.ngc.seaside.service.Main"
+    includeDistributionDirs = ['src/main/resources/', 'src/main/output/']
+    appHomeVarName = 'myAppHome'
+    appSystemProperties = [NG_FW_HOME: "APP_HOME_VAR"]
+    distributionName = "test-dist"
+    installationDir = "build/distributions/test-install"
+
+    windows {
+        startScript = 'src/main/output/bin/start.bat'
+    }
+    unix {
+        startScript = 'src/main/output/bin/start'
+    }
+}

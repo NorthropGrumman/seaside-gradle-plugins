@@ -11,6 +11,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.language.cpp.tasks.CppCompile
 import org.gradle.nativeplatform.NativeLibrarySpec
 import org.gradle.nativeplatform.PrebuiltLibraries
+import org.gradle.nativeplatform.test.tasks.RunTestExecutable
 import org.gradle.nativeplatform.toolchain.Gcc
 import org.gradle.nativeplatform.toolchain.VisualCpp
 import org.gradle.platform.base.BinaryContainer
@@ -196,8 +197,12 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                     distribution createDistributionZip
                 }
 
+                tasks.withType(RunTestExecutable) {
+                    args "--gtest_output=xml:report.xml"
+                }
+
                 tasks.getByName(
-                        'createDistributionZip').archiveName = "${project.group}.${project.name}-${project.version}.zip"
+                        'createDistributionZip').archiveName = "${project.name}-${project.version}.zip"
 
                 tasks.getByName('copySharedLib').onlyIf { file("${project.buildDir}/libs/main/shared").isDirectory() }
                 tasks.getByName('copyStaticLib').onlyIf { file("${project.buildDir}/libs/main/static").isDirectory() }
