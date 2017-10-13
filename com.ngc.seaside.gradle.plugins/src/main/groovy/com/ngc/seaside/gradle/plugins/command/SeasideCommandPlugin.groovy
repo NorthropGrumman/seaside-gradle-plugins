@@ -32,16 +32,29 @@ class SeasideCommandPlugin implements Plugin<Project> {
                 archiveName "${project.group}.${project.name}-${project.version}-template.zip"
                 destinationDir(file("$projectDir/build/libs"))
             }
-
+            
+            def templates = file("$projectDir/src/main/templates/")
+            if (templates.exists()) {
+	            templates.eachFile { 
+	            	def templateFile = it
+	                task("createTemplate${templateFile.name}", type: Zip, dependsOn: [classes]) {
+	                    classifier = 'template'
+	                    appendix = templateFile.name
+	                    from templateFile
+	                    include "*"
+	                    include "*/**"
+	                    archiveName "${project.group}.${project.name}-${templateFile.name}-${project.version}-template.zip"
+	                    destinationDir(file("$projectDir/build/libs"))
+	                }
+	            }
+            }
 
             afterEvaluate {
-                def file = file("$projectDir/src/main/template/")
-
                 configurations {
                     commandTemplate
                 }
 
-                if (file.exists()) {
+                if (file("$projectDir/src/main/template/").exists()) {
                     artifacts {
                         archives createTemplate
                         commandTemplate createTemplate
@@ -49,6 +62,19 @@ class SeasideCommandPlugin implements Plugin<Project> {
 
                     install.dependsOn createTemplate
                     build.dependsOn createTemplate
+                }
+                
+                if (templates.exists()) { 
+	                templates.eachFile { 
+	                	def name = it.name
+	                	artifacts { 
+	                		archives p["createTemplate${name}"]
+	                		commandTemplate p["createTemplate${name}"]
+	                	}
+	                	
+	                	install.dependsOn p["createTemplate${name}"]
+	                	build.dependsOn p["createTemplate${name}"]
+	                }
                 }
             }
 
