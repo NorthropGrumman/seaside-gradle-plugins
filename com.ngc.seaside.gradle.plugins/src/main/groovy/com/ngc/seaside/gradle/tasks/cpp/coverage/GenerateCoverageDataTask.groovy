@@ -18,14 +18,20 @@ class GenerateCoverageDataTask extends DefaultTask {
          standardOutput commandOutput
       }
 
-      def workingDir = commandOutput.toString()
-      def lcov = [project.buildDir.name, "tmp", "lcov", "lcov-$cppCoverageExtension.LCOV_VERSION", "bin", "lcov"].join(File.separator)
-      def coverageFilePath = [project.buildDir.name, "lcov", "coverage.info"].join(File.separator)
-      def arguments = ["--no-external", "--base-directory", "$workingDir?", "--directory", "$workingDir?", "--rc", "lcov_branch_coverage=1", "-c", "-o", coverageFilePath]
+      def pwd = commandOutput.toString().trim()
+      def lcov = [project.buildDir.absolutePath, "tmp", "lcov", "lcov-$cppCoverageExtension.LCOV_VERSION", "bin", "lcov"].join(File.separator)
+      def coverageFilePath = [project.buildDir.absolutePath, "lcov", "coverage.info"].join(File.separator)
+
+      File cfp = new File(coverageFilePath)
+      cfp.getParentFile().mkdirs()
+      cfp.createNewFile()
+
+      def arguments = ["--no-external", "--base-directory", pwd, "--directory", pwd, "--rc", "lcov_branch_coverage=1", "-c", "-o", coverageFilePath]
 
       commandOutput = new ByteArrayOutputStream()
 
       project.exec {
+         workingDir pwd
          executable lcov
          args arguments
          standardOutput commandOutput

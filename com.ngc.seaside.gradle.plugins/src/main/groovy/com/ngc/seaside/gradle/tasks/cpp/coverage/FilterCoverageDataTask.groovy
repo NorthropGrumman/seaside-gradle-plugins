@@ -11,12 +11,13 @@ class FilterCoverageDataTask extends DefaultTask {
 
    @TaskAction
    def filterCoverageData() {
-      def lcov = [project.buildDir.name, "tmp", "lcov", "lcov-$cppCoverageExtension.LCOV_VERSION", "bin", "lcov"].join(File.separator)
-      def coverageFilePath = [project.buildDir.name, "lcov", "coverage.info"].join(File.separator)
-      def arguments = ["-r", coverageFilePath, project.buildDir.name, "--rc", "lcov_branch_coverage=1", "-o", coverageFilePath]
+      def lcov = [project.buildDir.absolutePath, "tmp", "lcov", "lcov-$cppCoverageExtension.LCOV_VERSION", "bin", "lcov"].join(File.separator)
+      def coverageFilePath = [project.buildDir.absolutePath, "lcov", "coverage.info"].join(File.separator)
+      def arguments = ["-r", coverageFilePath, project.buildDir.absolutePath, "--rc", "lcov_branch_coverage=1", "-o", coverageFilePath]
       def commandOutput = new ByteArrayOutputStream()
 
       project.exec {
+         workingDir environment.PWD.toString().trim()
          executable lcov
          args arguments
          standardOutput commandOutput
