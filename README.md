@@ -2,6 +2,13 @@
 `com.ngc.seaside.gradle.plugins` contains the core Seaside plugins used by many Gradle builds.  All core plugins are
 contained in a single JAR and versioned together to make them easier to use.
 
+## Notes on building this project
+* To build, you can run: `./gradlew build`
+* If you want to see which Gradle tasks are available for you to run, execute: `./gradlew tasks [--all]`
+* You can always skip a part of the build process by passing the `-x` option
+    * For example, if you don't want to wait for all of the functional tests to pass: `./gradlew build -xfunctionalTest`
+* NB: if you're using Windows, use `gradlew` instead of `./gradlew`
+
 # com.ngc.seaside:seaside.parent
 The seaside gradle parent plugin provides a base gradle build for all seaside projects. This plugin will ensure your
 bundles are named correctly, provide an OSGi enabled jar file (bundle), generate javadocs jar, generate sources jar
