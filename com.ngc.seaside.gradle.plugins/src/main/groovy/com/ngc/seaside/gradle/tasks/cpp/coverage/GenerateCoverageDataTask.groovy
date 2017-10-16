@@ -11,32 +11,21 @@ class GenerateCoverageDataTask extends DefaultTask {
 
    @TaskAction
    def generateCoverageData() {
-      def commandOutput = new ByteArrayOutputStream()
-
-      project.exec {
-         executable "pwd"
-         standardOutput commandOutput
-      }
-
-      def pwd = commandOutput.toString().trim()
+      def dir = project.projectDir.absolutePath
       def lcov = [project.buildDir.absolutePath, "tmp", "lcov", "lcov-$cppCoverageExtension.LCOV_VERSION", "bin", "lcov"].join(File.separator)
       def coverageFilePath = [project.buildDir.absolutePath, "lcov", "coverage.info"].join(File.separator)
+      def arguments = "--no-external --base-directory $dir --directory $dir --rc lcov_branch_coverage=1 -c -o $coverageFilePath".split()
 
-      File cfp = new File(coverageFilePath)
-      cfp.getParentFile().mkdirs()
-      cfp.createNewFile()
-
-      def arguments = ["--no-external", "--base-directory", pwd, "--directory", pwd, "--rc", "lcov_branch_coverage=1", "-c", "-o", coverageFilePath]
-
-      commandOutput = new ByteArrayOutputStream()
+      def coverageFile = new File(coverageFilePath)
+      coverageFile.parentFile.mkdirs()
 
       project.exec {
-         workingDir pwd
+         workingDir dir
          executable lcov
          args arguments
-         standardOutput commandOutput
       }
 
-      println commandOutput.toString()
+      if (coverageFile.text.trim().empty)
+         coverageFile.delete()
    }
 }

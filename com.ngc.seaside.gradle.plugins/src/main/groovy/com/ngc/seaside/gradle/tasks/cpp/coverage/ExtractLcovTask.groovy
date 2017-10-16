@@ -42,6 +42,6 @@ class ExtractLcovTask extends DefaultTask {
    }
 
    private String pathToTheDirectoryWithLcovFiles() {
-      return [project.buildDir.name, "tmp", "lcov"].join(File.separator)
+      return [project.buildDir.absolutePath, "tmp", "lcov"].join(File.separator)
    }
 }
