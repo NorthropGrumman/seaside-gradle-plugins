@@ -1,0 +1,33 @@
+dependencies {
+   compile project(path: ':service.api', configuration: 'distribution')
+   compile project(path: ':service.utilities', configuration: 'distribution')
+   testCompile "com.google.test:gtest:$gTestVersion@zip"
+   testCompile "com.google.test:gmock:$gMockVersion@zip"
+}
+
+building {
+   api('service.api')
+   api('service.utilities')
+   statically('gtest')
+   statically('gmock')
+}
+
+model {
+   binaries {
+      all {
+         if (toolChain in Gcc) {
+            cppCompiler.args "-fprofile-arcs", "-ftest-coverage", "-fPIC", "-std=gnu++11", "-Wall", "-pthread", "-Werror", "-fno-rtti"
+            linker.args "-pthread", "-lgcov", "--coverage"
+         }
+      }
+   }
+
+   testSuites {
+      mainTest(GoogleTestTestSuiteSpec) {
+         testing $.components.main
+         sources {
+            cpp.source.srcDir 'src/test/cpp'
+         }
+      }
+   }
+}

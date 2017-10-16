@@ -1,0 +1,15 @@
+dependencies {
+   compile "com.google.test:gtest:$gTestVersion@zip"
+   compile "com.google.test:gmock:$gMockVersion@zip"
+}
+
+model {
+   binaries {
+      all {
+          if (toolChain in Gcc) {
+             cppCompiler.args "-fprofile-arcs", "-ftest-coverage", "-fPIC", "-std=gnu++11", "-Wall", "-pthread", "-Werror", "-fno-rtti"
+             linker.args "-pthread", "-lgcov", "--coverage"
+          }
+      }
+   }
+}

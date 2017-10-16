@@ -1,0 +1,10 @@
+rootProject.name = 'pipeline-test-cpp'
+
+include ':com.ngc.blocs.cpp.service.api'
+project(':com.ngc.blocs.cpp.service.api').name = 'service.api'
+
+include ':com.ngc.blocs.cpp.service.utilities'
+project(':com.ngc.blocs.cpp.service.utilities').name = 'service.utilities'
+
+include ':com.ngc.blocs.cpp.service.log.impl.logservice'
+project(':com.ngc.blocs.cpp.service.log.impl.logservice').name = 'logservice'
