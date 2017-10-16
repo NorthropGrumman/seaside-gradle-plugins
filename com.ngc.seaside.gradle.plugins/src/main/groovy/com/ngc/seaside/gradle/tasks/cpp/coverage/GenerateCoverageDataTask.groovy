@@ -13,15 +13,14 @@ class GenerateCoverageDataTask extends DefaultTask {
    def generateCoverageData() {
       def dir = project.projectDir.absolutePath
       def lcov = cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_LCOV_EXECUTABLE
+      def coverageFile = createCoverageFile()
       def arguments = [
          "--no-external",
          "--base-directory", dir,
          "--directory", dir,
          "--rc", "lcov_branch_coverage=1",
-         "-c", "-o", cppCoverageExtension.coverageFilePath
+         "-c", "-o", coverageFile
       ]
-
-      createCoverageFilePath()
 
       project.exec {
          workingDir dir
@@ -29,16 +28,17 @@ class GenerateCoverageDataTask extends DefaultTask {
          args arguments
       }
 
-      deleteCoverageFileIfEmpty()
+      deleteCoverageFileIfEmpty(coverageFile)
    }
 
-   private createCoverageFilePath() {
-      (new File(cppCoverageExtension.coverageFilePath)).parentFile.mkdirs()
-   }
-
-   private deleteCoverageFileIfEmpty() {
+   private File createCoverageFile() {
       def f = new File(cppCoverageExtension.coverageFilePath)
-      if (f.text.trim().empty)
-         f.delete()
+      f.parentFile.mkdirs()
+      return f
+   }
+
+   private static void deleteCoverageFileIfEmpty(File coverageFile) {
+      if (coverageFile.text.trim().empty)
+         coverageFile.delete()
    }
 }

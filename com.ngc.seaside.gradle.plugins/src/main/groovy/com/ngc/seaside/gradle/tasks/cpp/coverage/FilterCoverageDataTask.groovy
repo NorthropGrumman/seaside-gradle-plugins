@@ -12,15 +12,15 @@ class FilterCoverageDataTask extends DefaultTask {
    @TaskAction
    def filterCoverageData() {
       def lcov = cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_LCOV_EXECUTABLE
-      def coverageFilePath = cppCoverageExtension.coverageFilePath
+      def coverageFile = new File(cppCoverageExtension.coverageFilePath)
       def arguments = [
-         "-r", coverageFilePath,
+         "-r", coverageFile,
          "/$project.buildDir.name/*",
          "--rc", "lcov_branch_coverage=1",
-         "-o", coverageFilePath
+         "-o", coverageFile
       ]
 
-      if (new File(coverageFilePath).exists()) {
+      if (coverageFile.exists()) {
          project.exec {
             executable lcov
             args arguments

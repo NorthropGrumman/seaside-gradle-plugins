@@ -47,7 +47,8 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             type: FilterCoverageDataTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Filter coverage data and store in the specified directory",
-            dependsOn: GENERATE_COVERAGE_DATA_TASK_NAME)      }
+            dependsOn: GENERATE_COVERAGE_DATA_TASK_NAME)
+      }
    }
 
    private static createTheCppCoverageExtensionOnTheProject(Project p) {
