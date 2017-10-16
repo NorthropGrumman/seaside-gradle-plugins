@@ -5,15 +5,20 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class FilterCoverageDataTask extends DefaultTask {
-   SeasideCppCoverageExtension cppCoverageExtension =
+   private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
                    .findByType(SeasideCppCoverageExtension.class)
 
    @TaskAction
    def filterCoverageData() {
-      def lcov = [project.buildDir.absolutePath, "tmp", "lcov", "lcov-$cppCoverageExtension.LCOV_VERSION", "bin", "lcov"].join(File.separator)
-      def coverageFilePath = [project.buildDir.absolutePath, "lcov", "coverage.info"].join(File.separator)
-      def arguments = "-r $coverageFilePath /$project.buildDir.name/* --rc lcov_branch_coverage=1 -o $coverageFilePath".split()
+      def lcov = cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_LCOV_EXECUTABLE
+      def coverageFilePath = cppCoverageExtension.coverageFilePath
+      def arguments = [
+         "-r", coverageFilePath,
+         "/$project.buildDir.name/*",
+         "--rc", "lcov_branch_coverage=1",
+         "-o", coverageFilePath
+      ]
 
       if (new File(coverageFilePath).exists()) {
          project.exec {

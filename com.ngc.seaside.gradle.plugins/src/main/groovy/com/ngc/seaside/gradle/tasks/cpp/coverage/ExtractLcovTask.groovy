@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.tasks.cpp.coverage
 
+import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileTree
@@ -8,6 +9,10 @@ import org.gradle.api.tasks.TaskAction
 import java.nio.file.Paths
 
 class ExtractLcovTask extends DefaultTask {
+   private SeasideCppCoverageExtension cppCoverageExtension =
+            project.extensions
+                  .findByType(SeasideCppCoverageExtension.class)
+
    @TaskAction
    def extractLcov() {
       def lcovFiles = extractTheLcovReleaseArchive()
@@ -42,6 +47,6 @@ class ExtractLcovTask extends DefaultTask {
    }
 
    private String pathToTheDirectoryWithLcovFiles() {
-      return [project.buildDir.absolutePath, "tmp", "lcov"].join(File.separator)
+      return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV
    }
 }

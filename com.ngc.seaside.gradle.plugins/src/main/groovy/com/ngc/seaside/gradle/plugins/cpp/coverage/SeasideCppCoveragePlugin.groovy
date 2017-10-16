@@ -14,6 +14,8 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
    public static final String GENERATE_COVERAGE_DATA_TASK_NAME = "generateCoverageData"
    public static final String FILTER_COVERAGE_DATA_TASK_NAME = "filterCoverageData"
 
+   String coverageFile
+
    @Override
    void apply(Project p) {
       p.configure(p) {
@@ -50,9 +52,10 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
 
    private static createTheCppCoverageExtensionOnTheProject(Project p) {
       return p.extensions
-              .create(CPP_COVERAGE_EXTENSION_NAME, SeasideCppCoverageExtension)
+              .create(CPP_COVERAGE_EXTENSION_NAME, SeasideCppCoverageExtension, p)
    }
 
    private initializeConfigurableCppCoverageExtensionProperties(SeasideCppCoverageExtension e) {
+      e.coverageFilePath = coverageFile ?: e.coverageFilePath
    }
 }

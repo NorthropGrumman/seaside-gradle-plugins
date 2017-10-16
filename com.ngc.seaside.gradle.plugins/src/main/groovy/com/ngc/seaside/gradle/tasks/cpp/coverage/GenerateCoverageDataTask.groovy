@@ -5,19 +5,23 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class GenerateCoverageDataTask extends DefaultTask {
-   SeasideCppCoverageExtension cppCoverageExtension =
+   private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
                    .findByType(SeasideCppCoverageExtension.class)
 
    @TaskAction
    def generateCoverageData() {
       def dir = project.projectDir.absolutePath
-      def lcov = [project.buildDir.absolutePath, "tmp", "lcov", "lcov-$cppCoverageExtension.LCOV_VERSION", "bin", "lcov"].join(File.separator)
-      def coverageFilePath = [project.buildDir.absolutePath, "lcov", "coverage.info"].join(File.separator)
-      def arguments = "--no-external --base-directory $dir --directory $dir --rc lcov_branch_coverage=1 -c -o $coverageFilePath".split()
+      def lcov = cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_LCOV_EXECUTABLE
+      def arguments = [
+         "--no-external",
+         "--base-directory", dir,
+         "--directory", dir,
+         "--rc", "lcov_branch_coverage=1",
+         "-c", "-o", cppCoverageExtension.coverageFilePath
+      ]
 
-      def coverageFile = new File(coverageFilePath)
-      coverageFile.parentFile.mkdirs()
+      createCoverageFilePath()
 
       project.exec {
          workingDir dir
@@ -25,7 +29,16 @@ class GenerateCoverageDataTask extends DefaultTask {
          args arguments
       }
 
-      if (coverageFile.text.trim().empty)
-         coverageFile.delete()
+      deleteCoverageFileIfEmpty()
+   }
+
+   private createCoverageFilePath() {
+      (new File(cppCoverageExtension.coverageFilePath)).parentFile.mkdirs()
+   }
+
+   private deleteCoverageFileIfEmpty() {
+      def f = new File(cppCoverageExtension.coverageFilePath)
+      if (f.text.trim().empty)
+         f.delete()
    }
 }
