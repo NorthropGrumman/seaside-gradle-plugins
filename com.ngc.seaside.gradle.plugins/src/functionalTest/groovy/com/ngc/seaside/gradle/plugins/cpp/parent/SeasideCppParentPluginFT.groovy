@@ -9,7 +9,6 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 import java.nio.file.Files
@@ -19,31 +18,37 @@ import java.nio.file.Paths
 class SeasideCppParentPluginFT {
 
 
-//    private File projectDir
-//    private Project project
-//    private List<File> pluginClasspath
-//
-//    @Before
-//    void before() {
-//        pluginClasspath = TestingUtilities.getTestClassPath(getClass())
-//
-//        File source = Paths.get("src/functionalTest/resources/pipeline-test-cpp").toFile()
-//        Path targetPath = Paths.get("build/functionalTest/cpp-parent/pipeline-test-cpp")
-//        projectDir = Files.createDirectories(targetPath).toFile()
-//        FileUtils.copyDirectory(source, projectDir)
-//
-//        project = ProjectBuilder.builder().withProjectDir(projectDir).build()
-//    }
-//
-//    @Ignore
-//    @Test
-//    void doesRunGradleBuildWithSuccess() {
-//        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
-//                .withPluginClasspath(pluginClasspath)
-//                .forwardOutput()
-//                .withArguments("clean", "build")
-//                .build()
-//
-//        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:build").getOutcome())
-//    }
+    private File projectDir
+    private Project project
+    private List<File> pluginClasspath
+
+    @Before
+    void before() {
+        pluginClasspath = TestingUtilities.getTestClassPath(getClass())
+
+        File source = Paths.get("src/functionalTest/resources/pipeline-test-cpp").toFile()
+        Path targetPath = Paths.get("build/functionalTest/cpp-parent/pipeline-test-cpp")
+        projectDir = Files.createDirectories(targetPath).toFile()
+        FileUtils.copyDirectory(source, projectDir)
+
+        project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+    }
+
+
+    @Test
+    void doesRunGradleBuildWithSuccess() {
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("clean", "build")
+                .build()
+
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:build").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:build").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:build").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:build").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:build").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:build").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:build").getOutcome())
+    }
 }

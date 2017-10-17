@@ -1,0 +1,11 @@
+subprojects {
+    group = 'com.ngc.blocs.cpp'
+    version = '1.0-SNAPSHOT'
+
+    ext {
+        gTestVersion = '1.8'
+        gMockVersion = "$gTestVersion"
+        boostVersion = '1_64'
+	    celixVersion = '2.0.0'
+    }
+}

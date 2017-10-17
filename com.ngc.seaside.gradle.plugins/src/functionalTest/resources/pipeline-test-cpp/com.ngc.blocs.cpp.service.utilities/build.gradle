@@ -3,20 +3,15 @@ plugins {
 }
 
 dependencies {
-    compile project(path: ':service.api', configuration: 'distribution')
-    compile project(path: ':service.utilities', configuration: 'distribution')
-    compile project(path: ':service.log.impl.logservice', configuration: 'distribution')
-    testCompile "com.google.test:gtest:$gTestVersion@zip"
-    testCompile "com.google.test:gmock:$gMockVersion@zip"
+    compile "com.google.test:gtest:$gTestVersion@zip"
+    compile "com.google.test:gmock:$gMockVersion@zip"
 }
 
 building {
-    api('service.api')
-    api('service.utilities')
-    shared(':service.log.impl.logservice')
     statically('gtest')
     statically('gmock')
 }
+
 
 model {
     binaries {
@@ -25,7 +20,7 @@ model {
             if (toolChain in Gcc) {
                 //cppCompiler.args "-O2", "-fno-access-control"
                 //cppCompiler.args "-std=gnu++11"
-                cppCompiler.args "-fPIC", "-std=gnu++11", "-pthread", "-Wall", "-Werror"
+                cppCompiler.args "-fPIC", "-std=gnu++11", "-pthread", "-Wall", "-Werror", "-fno-rtti"
                 linker.args "-pthread"
             }
         }
