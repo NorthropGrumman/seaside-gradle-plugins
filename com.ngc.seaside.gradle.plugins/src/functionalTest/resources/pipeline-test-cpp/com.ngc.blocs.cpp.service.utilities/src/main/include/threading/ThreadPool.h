@@ -7,18 +7,20 @@
 
 #include <iostream>
 #include <list>
+#include <vector>
 
+#include "IThreadable.h"
 #include "threading/Condition.h"
 #include "threading/Mutex.h"
-#include "threading/Threadable.h"
 #include "threading/Threader.h"
+#include "time/Duration.h"
 
 namespace blocs {
 
       // See http://www.devguy.com/bb/viewtopic.php?p=1039 for the basis for
       // this class.
 
-      class ThreadPool : public Threadable {
+      class ThreadPool : public IThreadable {
 
          public:
 
@@ -49,8 +51,8 @@ namespace blocs {
 
             void setQueueSize(unsigned int x) {
                {
-                  ScopedLock lock1(poolDataMutex);
-                  queueSize = x;
+            	   ScopedLock lock1(poolDataMutex);
+            	   queueSize = x;
                }
 
                needThread.notifyAll();
@@ -112,7 +114,7 @@ namespace blocs {
             }
 
             // Call a function in a separate thread managed by the pool
-            std::vector<long> invoke(Threadable *threadableObj) {
+            std::vector<long> invoke(IThreadable *threadableObj, const std::string& threadName = "") {
 
                std::vector<long> invokeState(6);
                //0 = num pool threads active/running
@@ -147,7 +149,7 @@ namespace blocs {
                         if (waitingThreadables.size() < numThreadsAllocated) {
                            // Don't create a thread unless it's needed.  There
                            // is a thread available to service this request.
-                           addThreadable(threadableObj);
+                           addThreadable(threadableObj, threadName);
                            invokeState[0] = numThreadsActive;
                            invokeState[3] = waitingThreadables.size() - numThreadsActive;
                            lock1.unlock();
@@ -158,7 +160,7 @@ namespace blocs {
 
                         if (  (queueSize == 0) ||
                               (waitingThreadables.size() < (queueSize + numThreadsActive))) {
-                           addThreadable(threadableObj);
+                           addThreadable(threadableObj, threadName);
                            added = true;
                         }
 
@@ -172,7 +174,7 @@ namespace blocs {
 
                            lock1.unlock();
                            //ANR-std::pair<Threader *, long> threaderAndSizePair =
-                           poolThreads.createThreader(this);
+                           poolThreads.createThreader(this, threadName);
                            //numThreadsAllocated = threaderAndSizePair.second;
                            //invokeState[1] = numThreadsAllocated;
 
@@ -273,7 +275,7 @@ namespace blocs {
                }
 
                if (waitMilliseconds > 0) {
-                  stopping.timedWait(lock1, std::chrono::milliseconds(waitMilliseconds));
+                  stopping.timedWait(lock1, Duration(waitMilliseconds / 1000.0));
                }
                else {
                   stopping.wait(lock1);
@@ -475,7 +477,8 @@ namespace blocs {
             ThreadPool(const ThreadPool&);
             ThreadPool& operator = (const ThreadPool&);
 
-            typedef std::list<Threadable *> ThreadableContainer;
+            typedef std::pair<IThreadable *, std::string> ThreadableNamePair;
+            typedef std::list<ThreadableNamePair> ThreadableContainer;
 
             ThreadableContainer waitingThreadables;  //m_functorQueue
             ThreadableContainer::iterator nextThreadable;
@@ -540,13 +543,13 @@ namespace blocs {
             }
 
 
-            void addThreadable(Threadable *threadable) {   //addFunctor
+            void addThreadable(IThreadable *threadable, const std::string& threadName) {   //addFunctor
                bool bAtEnd = false;
 
                if (nextThreadable == waitingThreadables.end())
                   bAtEnd = true;
 
-               waitingThreadables.push_back(threadable);
+               waitingThreadables.push_back(std::make_pair(threadable, threadName));
                busy = true;
 
                if (bAtEnd) {
@@ -574,21 +577,25 @@ namespace blocs {
 
                         try {
                            ThreadableContainer::iterator iter = nextThreadable;
-                           Threadable *obj = (*iter); // waitingThreadables.front();
+                           IThreadable *obj = (*iter).first; // waitingThreadables.front();
+                           std::string threadName = (*iter).second;
                            ++nextThreadable;
 
                            lock1.unlock();
 
                            try {
+                        	  threader->setName(threadName);
                               obj->execute(threader);
 
                               if (deleteThreadable) {
+                            	  std::cout << "DELETING THREADABLE IN THREADPOOL" << std::endl;
                                  delete obj;
                                  obj = NULL;
                               }
                            }
                            catch (...) {
                               if (deleteThreadable && (obj != NULL)) {
+                            	  std::cout << "DELETING THREADABLE IN THREADPOOL" << std::endl;
                                  delete obj;
                                  obj = NULL;
                               }

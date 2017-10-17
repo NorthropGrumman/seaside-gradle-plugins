@@ -17,31 +17,31 @@ namespace blocs { namespace basiclogservice {
 /*
       struct LogSourceLocation {
       private:
-         std::string sourceFileName;
-         std::string sourceFunctionName;
-         int sourceLine;
-         bool isSet;
+    	  std::string sourceFileName;
+    	  std::string sourceFunctionName;
+    	  int sourceLine;
+    	  bool isSet;
 
       public:
-         LogSourceLocation() :
-            sourceFileName(""),
-           sourceFunctionName(""),
-           sourceLine(-1),
-           isSet(false) {}
+    	  LogSourceLocation() :
+    		  sourceFileName(""),
+			  sourceFunctionName(""),
+			  sourceLine(-1),
+			  isSet(false) {}
 
-         LogSourceLocation(
-               const std::string& sourceFile,
-              const std::string& sourceFunctionName,
-              int line) :
-                  sourceFileName(sourceFile),
-                 sourceFunctionName(sourceFunctionName),
-                 sourceLine(line),
-                 isSet(true) {}
+    	  LogSourceLocation(
+    			  const std::string& sourceFile,
+				  const std::string& sourceFunctionName,
+				  int line) :
+		    		  sourceFileName(sourceFile),
+					  sourceFunctionName(sourceFunctionName),
+					  sourceLine(line),
+					  isSet(true) {}
 
-         const std::string& getSourceFileName() { return sourceFileName; }
-         const std::string& getSourceFunctionName() { return sourceFunctionName; }
-         int getSourceLine() { return sourceLine; }
-         bool isSet() { return isSet; }
+    	  const std::string& getSourceFileName() { return sourceFileName; }
+    	  const std::string& getSourceFunctionName() { return sourceFunctionName; }
+    	  int getSourceLine() { return sourceLine; }
+    	  bool isSet() { return isSet; }
       };
       */
 
@@ -60,7 +60,7 @@ namespace blocs { namespace basiclogservice {
                logTimeRelative(NULL),
                logLevel(LogLevel::NONE),
                logText(NULL),
-            sourceLocationData(NULL) {}
+			   sourceLocationData(NULL) {}
 
       };
 
@@ -102,9 +102,9 @@ namespace blocs { namespace basiclogservice {
                formatBuffer << *logData.logText;
 
                if (logData.sourceLocationData != NULL) {
-                  formatBuffer << " [";
-                  formatBuffer << *logData.sourceLocationData;
-                  formatBuffer << "]";
+				   formatBuffer << " [";
+				   formatBuffer << *logData.sourceLocationData;
+				   formatBuffer << "]";
                }
 
                formatBuffer << std::endl;

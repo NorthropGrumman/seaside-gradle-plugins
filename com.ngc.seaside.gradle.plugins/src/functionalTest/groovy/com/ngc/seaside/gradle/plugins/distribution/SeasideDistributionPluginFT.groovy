@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.distribution
 
+import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -23,14 +24,10 @@ class SeasideDistributionPluginFT {
 
     @Before
     void before() {
-        URL pluginClasspathResource = getClass().classLoader.getResource("plugin-classpath.txt")
-        if (pluginClasspathResource == null) {
-            throw new IllegalStateException("Did not find plugin classpath resource, run `testClasses` build task.")
-        }
-        pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
+        pluginClasspath = TestingUtilities.getTestClassPath(getClass())
 
         File source = Paths.get("src/functionalTest/resources/distribution/com.ngc.example.distribution").toFile()
-        Path targetPath = Paths.get("build/functionalTest/resources/distribution/com.ngc.example.distribution")
+        Path targetPath = Paths.get("build/functionalTest/distribution/com.ngc.example.distribution")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
 
@@ -43,9 +40,9 @@ class SeasideDistributionPluginFT {
         BuildResult result = GradleRunner.create().withProjectDir(project.projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
-                .withArguments( "clean","build")
+                .withArguments("clean", "build")
                 .build()
 
-        Assert.assertEquals(TaskOutcome.valueOf( "SUCCESS"), result.task(":build").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":build").getOutcome())
     }
 }

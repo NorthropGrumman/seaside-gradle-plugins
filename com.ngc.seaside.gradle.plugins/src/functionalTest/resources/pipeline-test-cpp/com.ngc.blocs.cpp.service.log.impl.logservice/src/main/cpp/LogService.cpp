@@ -11,29 +11,29 @@
 namespace blocs { namespace basiclogservice {
 
 
-   LogService::LogService() {
+	LogService::LogService() {
 
-   }
+	}
 
-   LogService::~LogService() {
+	LogService::~LogService() {
 
-   }
+	}
 
-   void LogService::activate() {
-      // Do Configuration here
-   }
+	void LogService::activate() {
+		// Do Configuration here
+	}
 
-   void LogService::start() {
+	void LogService::start() {
 
-   }
+	}
 
-   void LogService::stop() {
+	void LogService::stop() {
 
-   }
+	}
 
-   void LogService::deactivate() {
+	void LogService::deactivate() {
 
-   }
+	}
 
     void LogService::logTrace(const std::string & location, const std::string & loggerId, const char * messageFormat, ...) {
 

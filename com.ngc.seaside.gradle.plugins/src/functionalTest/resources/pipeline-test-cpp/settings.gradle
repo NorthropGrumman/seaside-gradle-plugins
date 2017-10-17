@@ -7,4 +7,16 @@ include ':com.ngc.blocs.cpp.service.utilities'
 project(':com.ngc.blocs.cpp.service.utilities').name = 'service.utilities'
 
 include ':com.ngc.blocs.cpp.service.log.impl.logservice'
-project(':com.ngc.blocs.cpp.service.log.impl.logservice').name = 'logservice'
+project(':com.ngc.blocs.cpp.service.log.impl.logservice').name = 'service.log.impl.logservice'
+
+include ':com.ngc.blocs.cpp.service.thread.impl.threadservice'
+project(':com.ngc.blocs.cpp.service.thread.impl.threadservice').name = 'service.thread.impl.threadservice'
+
+include ':com.ngc.blocs.cpp.service.time.impl.timeservice'
+project(':com.ngc.blocs.cpp.service.time.impl.timeservice').name = 'service.time.impl.timeservice'
+
+include ':com.ngc.blocs.cpp.service.event.impl.synceventservice'
+project(':com.ngc.blocs.cpp.service.event.impl.synceventservice').name = 'service.event.impl.synceventservice'
+
+include ':com.ngc.blocs.cpp.service.print.impl.printservice'
+project(':com.ngc.blocs.cpp.service.print.impl.printservice').name = 'service.log.impl.printservice'

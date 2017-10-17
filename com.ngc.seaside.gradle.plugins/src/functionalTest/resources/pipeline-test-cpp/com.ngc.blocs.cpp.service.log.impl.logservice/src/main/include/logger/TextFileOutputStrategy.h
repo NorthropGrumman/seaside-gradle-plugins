@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "logger/LogOutputStrategy.h"
-#include "threading/Threadable.h"
+#include "threading/IThreadable.h"
 #include "threading/Threader.h"
 #include "threading/ThreadPool.h"
 
@@ -32,13 +32,14 @@ namespace blocs { namespace basiclogservice {
             static void writeTextToFile(const std::string & fileName, const std::string & textToWrite);
 
 
-            class TextFileLogBuffer : public Threadable {
+            class TextFileLogBuffer : public IThreadable {
                public :
                   TextFileLogBuffer(const std::string & logFileName);
                   virtual ~TextFileLogBuffer();
                   void append(const std::string & bufferData);
                   bool snap();
                   virtual void execute(Threader *threader);
+
                private :
                   std::string fileName;
                   std::ostringstream textBuffer1;
@@ -48,7 +49,7 @@ namespace blocs { namespace basiclogservice {
                   mutable Mutex textBufferMutex;
             };
 
-            class TextFileAsynchronousLogWriter : public Threadable {
+            class TextFileAsynchronousLogWriter : public IThreadable {
 
                public :
                   static Threader * logWriterThread;

@@ -9,6 +9,7 @@
 
 #include "threading/Condition.h"
 #include "threading/Mutex.h"
+#include "time/Duration.h"
 
 
 namespace blocs {

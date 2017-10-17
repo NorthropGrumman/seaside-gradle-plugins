@@ -205,9 +205,9 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                      }
 
                      if (!testDependencies) {
-                        addDependencyToComponent(library, LibraryType.STATIC);
+                        addDependencyToComponent(lib.getName(), LibraryType.STATIC);
                      }
-                     addDependencyToGoogleTestBinary(library, LibraryType.STATIC);
+                     addDependencyToGoogleTestBinary(lib.getName(), LibraryType.STATIC);
                   }
                }
             }
@@ -216,12 +216,12 @@ public class UnpackCppDistributionsTask extends DefaultTask {
              * Standard configuration uses the dependency name as the lib name.
              */
             PrebuiltLibrary lib = libs.maybeCreate(dependencyName);
-
             lib.getHeaders().setSrcDirs(dependencyHeaders);
             libs.resolveLibrary(lib.getName());
             for (DefaultPrebuiltStaticLibraryBinary bin :
                      lib.getBinaries().withType(DefaultPrebuiltStaticLibraryBinary.class)) {
                File obj = getLibFile(bin, directory, dependencyName, LibraryType.STATIC, config.getVersion());
+
 
                if (!deps.contains(obj) && obj.exists()) {
                   deps.add(obj);
@@ -258,12 +258,12 @@ public class UnpackCppDistributionsTask extends DefaultTask {
       Collection<SharedBuildConfiguration>
                configs =
                buildingExtension.getStorage().getSharedBuildConfigurations(dependencyName);
+
       Set<File> deps = new HashSet<>();
       for (SharedBuildConfiguration config : configs) {
          if (config.getLibs() != null && !config.getLibs().isEmpty()) {
             for (String library : config.getLibs()) {
                PrebuiltLibrary lib = createPreBuildLibrary(libs, library, LibraryType.SHARED);
-
                lib.getHeaders().setSrcDirs(dependencyHeaders);
 
                libs.resolveLibrary(lib.getName());
@@ -271,14 +271,15 @@ public class UnpackCppDistributionsTask extends DefaultTask {
                for (DefaultPrebuiltSharedLibraryBinary bin :
                         lib.getBinaries().withType(DefaultPrebuiltSharedLibraryBinary.class)) {
                   File obj = getLibFile(bin, directory, library, LibraryType.SHARED, config.getVersion());
+
                   if (!deps.contains(obj) && obj.exists()) {
                      deps.add(obj);
                      bin.setSharedLibraryFile(obj);
 
                      if (!testDependencies) {
-                        addDependencyToComponent(library, LibraryType.SHARED);
+                        addDependencyToComponent(lib.getName(), LibraryType.SHARED);
                      }
-                     addDependencyToGoogleTestBinary(library, LibraryType.SHARED);
+                     addDependencyToGoogleTestBinary(lib.getName(), LibraryType.SHARED);
                   }
                }
             }

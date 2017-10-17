@@ -1,0 +1,41 @@
+plugins {
+    id 'com.ngc.seaside.cpp.parent'
+    id 'com.ngc.seaside.cpp.coverage'
+}
+
+dependencies {
+    compile project(path: ':service.api', configuration: 'distribution')
+    compile project(path: ':service.utilities', configuration: 'distribution')
+    testCompile "com.google.test:gtest:$gTestVersion@zip"
+    testCompile "com.google.test:gmock:$gMockVersion@zip"
+}
+
+
+building {
+    api(project(':service.api'))
+    api(project(':service.utilities'))
+    statically('gtest')
+    statically('gmock')
+}
+
+model {
+    binaries {
+        all {
+            // Define toolchain-specific compiler and linker options
+            if (toolChain in Gcc) {
+              //cppCompiler.args "-O2", "-fno-access-control"
+              cppCompiler.args "-fPIC", "-std=gnu++11", "-pthread", "-Wall", "-Werror", "-fprofile-arcs", "-ftest-coverage"
+              linker.args "-Wl,--no-undefined", "-pthread", "-lgcov", "--coverage"           }
+        }
+    }
+    
+    testSuites {
+        mainTest(GoogleTestTestSuiteSpec) {
+            testing $.components.main
+            sources {
+                cpp.source.srcDir 'src/test/cpp'
+            }
+        }
+    }
+    
+}

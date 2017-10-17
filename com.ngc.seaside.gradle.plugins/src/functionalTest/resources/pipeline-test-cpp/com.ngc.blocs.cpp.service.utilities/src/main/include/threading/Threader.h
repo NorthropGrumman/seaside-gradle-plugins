@@ -13,10 +13,11 @@
 #include <chrono>
 #include <list>
 #include <set>
+#include <sstream>
 
+#include "IThreadable.h"
 
 #include "threading/Mutex.h"
-#include "threading/Threadable.h"
 
 #ifdef WIN32
 #include "Windows.h"
@@ -49,12 +50,12 @@ namespace blocs {
                NOT_RUNNING
             };
 
-            Threader() : state(NOT_RUNNING) {}
+            Threader(const std::string& _name = "") : state(NOT_RUNNING), name(_name) {}
 
             virtual ~Threader() {
             }
 
-            void execute(Threadable *threadableObj) {
+            void execute(IThreadable *threadableObj) {
                // create the thread and run it
                myThreadable = threadableObj;
                thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&Threader::run, this)));
@@ -75,10 +76,10 @@ namespace blocs {
 
             void interrupt() {
 #ifdef WIN32
-               ::TerminateThread(thread->native_handle(), 0);
+               //::TerminateThread(thread->native_handle(), 0);
                //throw Interrupted();
 #else
-               pthread_cancel(thread->native_handle());
+               //pthread_cancel(thread->native_handle());
                //throw Interrupted();
 #endif
                //thread->interrupt();
@@ -91,6 +92,14 @@ namespace blocs {
 
             const std::string & getId() const {
                return id;
+            }
+
+            const std::string & getName() const {
+               return name;
+            }
+
+            void setName(const std::string& name) {
+            	this->name = name;
             }
 
             static void yield() {
@@ -120,11 +129,11 @@ namespace blocs {
             }
 
             std::shared_ptr<std::thread> thread;
-            Threadable *myThreadable;
+            IThreadable *myThreadable;
 
             ThreadState state;
             std::string id;
-
+            std::string name;
 
       };
 
@@ -143,9 +152,9 @@ namespace blocs {
                threaders.clear();
             }
 
-            std::pair<Threader *, long> createThreader(Threadable *threadable) {
+            std::pair<Threader *, long> createThreader(IThreadable *threadable, const std::string& threadName = "") {
                ScopedLock guard(mutex);
-               Threader * new_threader = new Threader();
+               Threader * new_threader = new Threader(threadName);
                threaders.push_back(new_threader);
                std::pair<Threader *, long> threaderAndSizePair (new_threader, threaders.size());
                new_threader->execute(threadable);

@@ -7,6 +7,7 @@
 #define _BLOCS_ProtectedPriorityQueue_H
 
 #include <set>  //for priority_queue
+#include <vector>
 
 #include "threading/Condition.h"
 #include "threading/Mutex.h"
@@ -210,7 +211,7 @@ namespace blocs {
             the timeout occurs prior to getting an item off the queue,
             then a ProtectedPriorityQueueTimeout exception will be thrown.
             */
-            T waitForItem(const Duration &timeout) {
+            T waitForItem(const std::chrono::milliseconds& timeout) {
 
                ScopedLock lock (guard);
 

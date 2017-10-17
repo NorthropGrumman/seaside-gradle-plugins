@@ -10,6 +10,8 @@
 #include <condition_variable>
 
 #include "threading/Mutex.h"
+#include "time/Duration.h"
+#include "time/Time.h"
 
 namespace blocs {
       /**
@@ -38,12 +40,12 @@ namespace blocs {
                cond.wait(lock ());
             }*/
 
-            bool timedWait(ScopedLock &lock, const std::chrono::milliseconds& waitFor)  {
-               auto t = std::chrono::system_clock::now() + waitFor;
+            bool timedWait(ScopedLock &lock, const Duration& waitFor)  {
+               Time t = Time() + waitFor;
                /*boost::system_time t = boost::get_system_time() + boost::posix_time::seconds((long)waitFor.AsSeconds()) +
                                       boost::posix_time::microseconds( (long)((waitFor.AsSeconds() - (long)waitFor.AsSeconds()) * MICROSECONDS_PER_SECOND));
                */
-               return (cond.wait_until(lock(), t) == std::cv_status::timeout);
+               return (cond.wait_until(lock(), t.getTimePoint()) == std::cv_status::timeout);
             }
 
             /*

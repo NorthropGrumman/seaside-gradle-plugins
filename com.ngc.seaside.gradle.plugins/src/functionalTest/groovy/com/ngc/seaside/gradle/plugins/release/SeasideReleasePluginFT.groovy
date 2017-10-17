@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -15,92 +16,92 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class SeasideReleasePluginFT {
-   private File projectDir
-   private Project project
-   private List<File> pluginClasspath
 
-   @Before
-   void before() {
-      URL pluginClasspathResource = getClass().classLoader.getResource("plugin-classpath.txt")
-      if (!pluginClasspathResource)
-         throw new IllegalStateException("Did not find plugin classpath resource, run `testClasses` build task.")
-      pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
-      File source = Paths.get("src/functionalTest/resources/sealion-java-hello-world").toFile()
-      Path targetPath = Paths.get("build/functionalTest/resources/release/sealion-java-hello-world")
-      projectDir = Files.createDirectories(targetPath).toFile()
-      FileUtils.copyDirectory(source, projectDir)
-      project = ProjectBuilder.builder().withProjectDir(projectDir).build()
-   }
+    private File projectDir
+    private Project project
+    private List<File> pluginClasspath
 
-   @Test
-   void doesReleaseWhenSnapshotIsSpecified() {
-      SeasideReleasePlugin plugin = new SeasideReleasePlugin()
-      plugin.apply(project)
+    @Before
+    void before() {
+        pluginClasspath = TestingUtilities.getTestClassPath(getClass())
+        File source = Paths.get("src/functionalTest/resources/sealion-java-hello-world").toFile()
+        Path targetPath = Paths.get("build/functionalTest/release/sealion-java-hello-world")
+        projectDir = Files.createDirectories(targetPath).toFile()
+        FileUtils.copyDirectory(source, projectDir)
+        project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+    }
 
-      BuildResult result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath(pluginClasspath)
-            .forwardOutput()
-            .withArguments("-PuploadArtifacts=false", "-Ppush=false", "clean", "build", "release")
-            .build()
+    @Test
+    void doesReleaseWhenSnapshotIsSpecified() {
+        SeasideReleasePlugin plugin = new SeasideReleasePlugin()
+        plugin.apply(project)
 
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:release").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:release").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:release").getOutcome())
-   }
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("-PuploadArtifacts=false", "-Ppush=false", "clean", "build", "release")
+                .build()
 
-   @Test
-   void doesFailWhenReleasingAndSnapshotIsNotSpecified() {
-      FileUtils.copyFile(
-            Paths.get("src/functionalTest/resources/sealion-java-hello-world/build-without-snapshot.gradle").toFile(),
-            Paths.get("build/functionalTest/resources/release/sealion-java-hello-world/build.gradle").toFile()
-      )
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:release").getOutcome())
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:release").getOutcome())
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:release").getOutcome())
+    }
 
-      SeasideReleasePlugin plugin = new SeasideReleasePlugin()
-      plugin.apply(project)
+    @Test
+    void doesFailWhenReleasingAndSnapshotIsNotSpecified() {
+        FileUtils.copyFile(
+                Paths.get("src/functionalTest/resources/sealion-java-hello-world/build-without-snapshot.gradle").
+                        toFile(),
+                Paths.get("build/functionalTest/release/sealion-java-hello-world/build.gradle").toFile()
+        )
 
-      BuildResult result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath(pluginClasspath)
-            .forwardOutput()
-            .withArguments("-PuploadArtifacts=false", "-Ppush=false", "clean", "build", "release")
-            .buildAndFail()
+        SeasideReleasePlugin plugin = new SeasideReleasePlugin()
+        plugin.apply(project)
 
-      Assert.assertNull(result.task(":clean"))
-      Assert.assertNull(result.task(":build"))
-      Assert.assertNull(result.task(":release"))
-   }
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("-PuploadArtifacts=false", "-Ppush=false", "clean", "build", "release")
+                .buildAndFail()
 
-   @Test
-   void doesNotFailBuildWhenSnapshotMissingAndReleaseTaskNotStated() {
-      FileUtils.copyFile(
-            Paths.get("src/functionalTest/resources/sealion-java-hello-world/build-without-snapshot.gradle").toFile(),
-            Paths.get("build/functionalTest/resources/release/sealion-java-hello-world/build.gradle").toFile()
-      )
+        Assert.assertNull(result.task(":clean"))
+        Assert.assertNull(result.task(":build"))
+        Assert.assertNull(result.task(":release"))
+    }
 
-      BuildResult result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath(pluginClasspath)
-            .forwardOutput()
-            .withArguments("clean", "build", "install")
-            .build()
+    @Test
+    void doesNotFailBuildWhenSnapshotMissingAndReleaseTaskNotStated() {
+        FileUtils.copyFile(
+                Paths.get("src/functionalTest/resources/sealion-java-hello-world/build-without-snapshot.gradle").
+                        toFile(),
+                Paths.get("build/functionalTest/release/sealion-java-hello-world/build.gradle").toFile()
+        )
 
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:install").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:install").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:install").getOutcome())
-   }
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("clean", "build", "install")
+                .build()
 
-   @Test
-   void doesNotFailBuildWhenSnapshotPresentAndReleaseTaskNotStated() {
-      BuildResult result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath(pluginClasspath)
-            .forwardOutput()
-            .withArguments("clean", "build", "install")
-            .build()
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:install").getOutcome())
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:install").getOutcome())
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:install").getOutcome())
+    }
 
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:install").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:install").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:install").getOutcome())
-   }
+    @Test
+    void doesNotFailBuildWhenSnapshotPresentAndReleaseTaskNotStated() {
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("clean", "build", "install")
+                .build()
+
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:install").getOutcome())
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:install").getOutcome())
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:install").getOutcome())
+    }
 }

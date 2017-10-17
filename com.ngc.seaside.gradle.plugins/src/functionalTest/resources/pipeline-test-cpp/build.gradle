@@ -1,27 +1,11 @@
-buildscript {
-   repositories {
-      mavenLocal() 
-
-      maven {
-         url nexusConsolidated
-      }
-   }
-
-   dependencies {
-      classpath 'com.ngc.seaside:gradle.plugins:1.6.2-SNAPSHOT'
-   }
-}
-
 subprojects {
-   apply plugin: 'com.ngc.seaside.cpp.parent'
-   apply plugin: 'com.ngc.seaside.cpp.coverage'
+    group = 'com.ngc.blocs.cpp'
+    version = '1.0-SNAPSHOT'
 
-   group = 'com.ngc.blocs.cpp'
-   version = '1.0-SNAPSHOT'
-
-   ext {
-      gTestVersion = '1.8'
-      gMockVersion = "$gTestVersion"
-      boostVersion = '1_64'
-   }
+    ext {
+        gTestVersion = '1.8'
+        gMockVersion = "$gTestVersion"
+        boostVersion = '1_64'
+	    celixVersion = '2.0.0'
+    }
 }

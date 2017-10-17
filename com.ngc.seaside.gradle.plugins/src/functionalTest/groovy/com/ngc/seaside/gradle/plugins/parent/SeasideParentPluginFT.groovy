@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.parent
 
+import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -23,14 +24,10 @@ class SeasideParentPluginFT {
 
     @Before
     void before() {
-        URL pluginClasspathResource = getClass().classLoader.getResource("plugin-classpath.txt")
-        if (pluginClasspathResource == null) {
-            throw new IllegalStateException("Did not find plugin classpath resource, run `testClasses` build task.")
-        }
-        pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
+        pluginClasspath = TestingUtilities.getTestClassPath(getClass())
 
         File source = Paths.get("src/functionalTest/resources/sealion-java-hello-world").toFile()
-        Path targetPath = Paths.get("build/functionalTest/resources/parent/sealion-java-hello-world")
+        Path targetPath = Paths.get("build/functionalTest/parent/sealion-java-hello-world")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
 

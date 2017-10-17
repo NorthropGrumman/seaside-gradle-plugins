@@ -15,8 +15,12 @@ class ExtractLcovTask extends DefaultTask {
 
    @TaskAction
    def extractLcov() {
+      println "beginning of extractLcov task"
       def lcovFiles = extractTheLcovReleaseArchive()
       def outputDir = pathToTheDirectoryWithLcovFiles()
+      println "after directory defs"
+      println "lcovFiles: $lcovFiles"
+      println "outputDir: $outputDir"
 
       project.copy {
          from lcovFiles

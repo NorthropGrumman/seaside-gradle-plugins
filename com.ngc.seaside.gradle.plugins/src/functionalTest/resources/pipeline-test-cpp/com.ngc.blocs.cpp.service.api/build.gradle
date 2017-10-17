@@ -1,0 +1,27 @@
+plugins {
+    id 'com.ngc.seaside.cpp.parent'
+    id 'com.ngc.seaside.cpp.coverage'
+}
+
+dependencies {
+    compile project(path: ':service.utilities', configuration: 'distribution')
+}
+
+building {
+    api('service.utilities')
+}
+
+model {
+    binaries {
+        all {
+            // Define toolchain-specific compiler and linker options
+            if (toolChain in Gcc) {
+                //cppCompiler.args "-O2", "-fno-access-control"
+                //cppCompiler.args "-std=gnu++11"
+                cppCompiler.args "-fPIC", "-std=gnu++11", "-pthread", "-Wall", "-Werror", "-fno-rtti", "-fprofile-arcs", "-ftest-coverage"
+                linker.args "-pthread", "-lgcov", "--coverage"
+            }
+        }
+    }
+
+ }

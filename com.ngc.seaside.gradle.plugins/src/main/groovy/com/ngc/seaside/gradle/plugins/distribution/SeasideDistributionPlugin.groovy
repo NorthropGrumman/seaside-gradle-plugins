@@ -84,6 +84,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
 
                 artifacts {
                     archives TaskResolver.findTask(project, "tar")
+                    archives TaskResolver.findTask(project, "zip")
                 }
             }
         }
@@ -156,13 +157,13 @@ class SeasideDistributionPlugin implements Plugin<Project> {
             into { "${distributionExtension.distributionDir}/platform" }
         }
 
-        project.task('zip', type: Zip) {
-            from { "${distributionExtension.distributionDir}" }
-        }
-
         project.task('tar', type: Tar) {
             from { "${distributionExtension.distributionDir}" }
             compression = Compression.GZIP
+        }
+
+        project.task('zip', type: Zip) {
+            from { "${distributionExtension.distributionDir}" }
         }
 
         project.task('copyThirdPartyBundles', type: Copy) {
