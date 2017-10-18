@@ -22,6 +22,8 @@ class SeasideCelixPlugin implements Plugin<Project>  {
                 entry 'Bundle-SymbolicName', "${project.group}.${project.name}"
                 entry 'Bundle-Name', "${project.group}.${project.name}"
                 entry 'Bundle-Version', Versions.makeOsgiCompliantVersion("${project.version}")
+                entry 'Bundle-Activator', "lib/linux_x86_64/lib${project.name}.so"
+                entry 'Private-Library', "lib/linux_x86_64/lib${project.name}.so"
             }
 
             afterEvaluate {
