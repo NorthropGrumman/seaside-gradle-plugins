@@ -34,7 +34,6 @@ subprojects {
         sonarQubeVersion = '2.5'
         dependencyUpdatesVersion = '0.15.0'
         consoleReporterVersion = '0.5.0'
-        batsVersion = '0.4.0'
         guavaVersion = '22.0'
     }
 
