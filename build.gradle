@@ -1,3 +1,17 @@
+buildscript {
+    repositories {
+        mavenLocal()
+
+        maven {
+            url nexusConsolidated
+        }
+    }
+    dependencies {
+        classpath 'com.github.ksoichiro:gradle-console-reporter:0.5.0'
+    }
+}
+
+
 /**
  * Project level build for the seaside-gradle-parent gradle plugin.
  */
@@ -32,6 +46,7 @@ subprojects {
             url nexusConsolidated
         }
     }
+
 
     //Augment the name of the jar to prepend the group.
     jar {
