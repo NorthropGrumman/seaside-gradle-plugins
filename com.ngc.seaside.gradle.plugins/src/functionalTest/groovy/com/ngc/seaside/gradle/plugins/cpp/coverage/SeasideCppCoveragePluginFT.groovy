@@ -27,56 +27,39 @@ class SeasideCppCoveragePluginFT {
 
    @Test
    void doesExtractLcov() {
-      BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath(pluginClasspath)
-            .forwardOutput()
-            .withArguments("clean", "extractLcov")
-            .build()
-
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:extractLcov").getOutcome())
+      testTask("extractLcov")
    }
 
    @Test
    void doesGenerateCoverageData() {
-      BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath(pluginClasspath)
-            .forwardOutput()
-            .withArguments("clean", "generateCoverageData")
-            .build()
-
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:generateCoverageData").getOutcome())
+      testTask("generateCoverageData")
    }
 
    @Test
    void doesFilterCoverageData() {
+      testTask("filterCoverageData")
+   }
+   
+   @Test
+   void doesGenerateCoverageDataHtml() {
+      testTask("generateCoverageDataHtml")
+   }
+   
+   private void testTask(final String taskName) { 
       BuildResult result = GradleRunner.create()
             .withProjectDir(testProjectDir)
             .withPluginClasspath(pluginClasspath)
             .forwardOutput()
-            .withArguments("clean", "filterCoverageData")
+            .withArguments("clean", taskName)
             .build()
 
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:filterCoverageData").getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:"                         + taskName).getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:"                   + taskName).getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:"         + taskName).getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:"   + taskName).getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:"       + taskName).getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:" + taskName).getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:"       + taskName).getOutcome())
    }
 
    private static File setUpTheTestProjectDirectory() {

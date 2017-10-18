@@ -13,6 +13,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
    public static final String EXTRACT_LCOV_TASK_NAME = "extractLcov"
    public static final String GENERATE_COVERAGE_DATA_TASK_NAME = "generateCoverageData"
    public static final String FILTER_COVERAGE_DATA_TASK_NAME = "filterCoverageData"
+   public static final String GENERATE_COVERAGE_DATA_HTML_TASK_NAME = "generateCoverageDataHtml"
 
    String coverageFile
 
@@ -47,6 +48,13 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Filter coverage data and store in the specified directory",
             dependsOn: GENERATE_COVERAGE_DATA_TASK_NAME)
+            
+         task(
+            GENERATE_COVERAGE_DATA_HTML_TASK_NAME,
+            type: GenLcovHtmlTask,
+            group: CPP_COVERAGE_TASK_GROUP_NAME,
+            description: "Generate html from the coverage data in the specified directory",
+            dependsOn: FILTER_COVERAGE_DATA_TASK_NAME)
 
          p.afterEvaluate {
             p.dependencies {

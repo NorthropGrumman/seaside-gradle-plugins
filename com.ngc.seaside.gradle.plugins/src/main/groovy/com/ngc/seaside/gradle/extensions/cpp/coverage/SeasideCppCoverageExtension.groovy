@@ -16,6 +16,7 @@ class SeasideCppCoverageExtension {
    private class CppCoveragePaths {
       final String PATH_TO_THE_DIRECTORY_WITH_LCOV
       final String PATH_TO_THE_LCOV_EXECUTABLE
+      final String PATH_TO_THE_GENHTML_EXECUTABLE
       final String PATH_TO_THE_COVERAGE_FILE
 
       CppCoveragePaths(Project p, String lcovVersion) {
@@ -29,6 +30,12 @@ class SeasideCppCoverageExtension {
                "lcov-$lcovVersion",
                "bin",
                "lcov")
+               
+         PATH_TO_THE_GENHTML_EXECUTABLE = toPath(
+               PATH_TO_THE_DIRECTORY_WITH_LCOV,
+               "lcov-$lcovVersion",
+               "bin",
+               "genhtml")
 
          PATH_TO_THE_COVERAGE_FILE = toPath(
                p.buildDir.absolutePath,
