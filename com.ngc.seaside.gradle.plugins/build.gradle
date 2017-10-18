@@ -19,3 +19,5 @@ dependencies {
     testCompile "org.mockito:mockito-core:$mockitoVersion"
     testCompile "com.ngc.blocs:test.impl.common.testutilities:$blocsVersion"
 }
+
+apply plugin: 'com.github.ksoichiro.console.reporter'
