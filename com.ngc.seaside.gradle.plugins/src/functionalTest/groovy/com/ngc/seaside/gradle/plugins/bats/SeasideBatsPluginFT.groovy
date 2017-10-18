@@ -15,10 +15,9 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermission
 
 class SeasideBatsPluginFT {
-
-
     private File projectDir
     private Project project
     private List<File> pluginClasspath
@@ -35,28 +34,45 @@ class SeasideBatsPluginFT {
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
     }
 
-
     @Test
     void doesRunGradleBuildWithSuccess() {
-        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
-                .withPluginClasspath(pluginClasspath)
-                .forwardOutput()
-                .withArguments("clean", "build")
-                .build()
+        BuildResult result = GradleRunner.create()
+              .withProjectDir(projectDir)
+              .withPluginClasspath(pluginClasspath)
+              .forwardOutput()
+              .withArguments("clean", "build")
+              .build()
 
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:build").getOutcome())
     }
 
-    @Ignore
     @Test
     void doesRunGradleAnalyzeBuildWithSuccess() {
-
-        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
-                .withPluginClasspath(pluginClasspath)
-                .forwardOutput()
-                .withArguments("runBats")
-                .build()
+        makeShellScriptsExecutable()
+        BuildResult result = GradleRunner.create()
+              .withProjectDir(projectDir)
+              .withPluginClasspath(pluginClasspath)
+              .forwardOutput()
+              .withArguments("runBats")
+              .build()
 
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.holamundo:runBats").getOutcome())
+    }
+
+    private void makeShellScriptsExecutable() {
+        projectDir.eachFileRecurse { file ->
+            if (file.name.endsWith(".sh") || file.name.endsWith(".bash")) {
+                def permissions = EnumSet.of(
+                     PosixFilePermission.OWNER_READ,
+                     PosixFilePermission.OWNER_WRITE,
+                     PosixFilePermission.OWNER_EXECUTE,
+                     PosixFilePermission.GROUP_READ,
+                     PosixFilePermission.GROUP_WRITE,
+                     PosixFilePermission.GROUP_EXECUTE,
+                     PosixFilePermission.OTHERS_READ,
+                     PosixFilePermission.OTHERS_EXECUTE)
+                Files.setPosixFilePermissions(file.toPath(), permissions)
+            }
+         }
     }
 }

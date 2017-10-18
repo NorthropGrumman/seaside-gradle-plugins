@@ -40,6 +40,12 @@ class SeasideBatsPlugin implements Plugin<Project> {
             group: BATS_TASK_GROUP_NAME,
             description: "Run the bats command on the specified directory",
             dependsOn: EXTRACT_BATS_TASK_NAME)
+
+         p.afterEvaluate {
+            p.dependencies {
+               compile "bats:bats:$e.BATS_VERSION"
+            }
+         }
       }
    }
 
