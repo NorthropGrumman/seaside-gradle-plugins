@@ -1,7 +1,10 @@
 package com.ngc.seaside.gradle.tasks.cpp.coverage.reports
 
+import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.TaskAction
 
-class GenLcovHtmlTask extends DefaultTask {
+class GenerateCoverageDataHtmlTask extends DefaultTask {
     private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
                    .findByType(SeasideCppCoverageExtension.class)

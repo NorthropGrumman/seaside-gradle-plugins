@@ -4,6 +4,7 @@ import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtensio
 import com.ngc.seaside.gradle.tasks.cpp.coverage.ExtractLcovTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.GenerateCoverageDataTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.FilterCoverageDataTask
+import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCoverageDataHtmlTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -51,7 +52,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             
          task(
             GENERATE_COVERAGE_DATA_HTML_TASK_NAME,
-            type: GenLcovHtmlTask,
+            type: GenerateCoverageDataHtmlTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Generate html from the coverage data in the specified directory",
             dependsOn: FILTER_COVERAGE_DATA_TASK_NAME)
