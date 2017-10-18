@@ -13,7 +13,6 @@ dependencies {
 
 
 building {
-
   headers('celix') {
     dirs 'include/celix',
          'include/celix/dependency_manager',

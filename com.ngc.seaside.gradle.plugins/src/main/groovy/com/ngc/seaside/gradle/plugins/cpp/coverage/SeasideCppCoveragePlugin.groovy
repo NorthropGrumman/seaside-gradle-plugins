@@ -32,15 +32,14 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             EXTRACT_LCOV_TASK_NAME,
             type: ExtractLcovTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
-            description: "Extract the lcov release archive",
-            dependsOn: "build")
+            description: "Extract the lcov release archive")
 
          task(
             GENERATE_COVERAGE_DATA_TASK_NAME,
             type: GenerateCoverageDataTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Generate preliminary coverage data and store in the specified directory",
-            dependsOn: EXTRACT_LCOV_TASK_NAME)
+            dependsOn: ["build", EXTRACT_LCOV_TASK_NAME])
 
          task(
             FILTER_COVERAGE_DATA_TASK_NAME,
@@ -48,6 +47,12 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Filter coverage data and store in the specified directory",
             dependsOn: GENERATE_COVERAGE_DATA_TASK_NAME)
+
+         p.afterEvaluate {
+            p.dependencies {
+               compile "lcov:lcov:$e.LCOV_VERSION"
+            }
+         }
       }
    }
 

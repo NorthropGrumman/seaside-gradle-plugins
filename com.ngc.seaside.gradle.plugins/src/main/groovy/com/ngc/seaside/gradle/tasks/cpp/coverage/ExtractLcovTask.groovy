@@ -15,12 +15,8 @@ class ExtractLcovTask extends DefaultTask {
 
    @TaskAction
    def extractLcov() {
-      println "beginning of extractLcov task"
       def lcovFiles = extractTheLcovReleaseArchive()
       def outputDir = pathToTheDirectoryWithLcovFiles()
-      println "after directory defs"
-      println "lcovFiles: $lcovFiles"
-      println "outputDir: $outputDir"
 
       project.copy {
          from lcovFiles
@@ -38,16 +34,14 @@ class ExtractLcovTask extends DefaultTask {
 
    private String lcovReleaseArchiveFile() {
       return projectClasspathConfiguration().filter { file ->
-         return file.getName().contains("lcov")
+         return file.name.contains("lcov")
       }.getAsPath()
    }
 
    private Configuration projectClasspathConfiguration() {
       return project
-               .rootProject
-               .buildscript
                .configurations
-               .getByName("classpath")
+               .getByName("compile")
    }
 
    private String pathToTheDirectoryWithLcovFiles() {
