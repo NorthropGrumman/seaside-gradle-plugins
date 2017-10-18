@@ -14,7 +14,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
    public static final String GENERATE_COVERAGE_DATA_TASK_NAME = "generateCoverageData"
    public static final String FILTER_COVERAGE_DATA_TASK_NAME = "filterCoverageData"
 
-   String coverageFile
+   String coverageFilePath
 
    @Override
    void apply(Project p) {
@@ -62,6 +62,6 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
    }
 
    private initializeConfigurableCppCoverageExtensionProperties(SeasideCppCoverageExtension e) {
-      e.coverageFilePath = coverageFile ?: e.coverageFilePath
+      e.coverageFilePath = coverageFilePath ?: e.coverageFilePath
    }
 }
