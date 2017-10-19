@@ -1,5 +1,9 @@
 package com.ngc.seaside.gradle.plugins.util.test
 
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Assert
+
 import java.nio.file.Paths
 
 class TestingUtilities {
@@ -24,5 +28,9 @@ class TestingUtilities {
 
     static File turnListIntoPath(String... list) {
         return Paths.get(list.flatten().join(File.separator)).toFile()
+    }
+
+    static void AssertTaskSuccess(BuildResult result, String projectName, String taskName) {
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(String.format(":%s:%s",projectName, taskName)).getOutcome())
     }
 }

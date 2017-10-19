@@ -56,7 +56,9 @@ class SeasideBatsPluginFT {
               .withArguments("runBats")
               .build()
 
-        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.holamundo:runBats").getOutcome())
+        String projectName = "service.holamundo"
+        String taskName = "runBats"
+        TestingUtilities.AssertTaskSuccess(result, projectName , taskName)
     }
 
     private void makeShellScriptsExecutable() {
