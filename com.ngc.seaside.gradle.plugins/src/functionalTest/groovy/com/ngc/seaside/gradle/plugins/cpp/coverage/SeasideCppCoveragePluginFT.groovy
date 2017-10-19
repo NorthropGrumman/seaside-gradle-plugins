@@ -31,7 +31,7 @@ class SeasideCppCoveragePluginFT {
             .withProjectDir(testProjectDir)
             .withPluginClasspath(pluginClasspath)
             .forwardOutput()
-            .withArguments("clean", "extractLcov")
+            .withArguments( "extractLcov")
             .build()
 
       Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:extractLcov").getOutcome())
@@ -49,7 +49,7 @@ class SeasideCppCoveragePluginFT {
             .withProjectDir(testProjectDir)
             .withPluginClasspath(pluginClasspath)
             .forwardOutput()
-            .withArguments("clean", "generateCoverageData")
+            .withArguments("generateCoverageData")
             .build()
 
       Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:generateCoverageData").getOutcome())
@@ -67,7 +67,7 @@ class SeasideCppCoveragePluginFT {
             .withProjectDir(testProjectDir)
             .withPluginClasspath(pluginClasspath)
             .forwardOutput()
-            .withArguments("clean", "filterCoverageData")
+            .withArguments("filterCoverageData")
             .build()
 
       Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:filterCoverageData").getOutcome())

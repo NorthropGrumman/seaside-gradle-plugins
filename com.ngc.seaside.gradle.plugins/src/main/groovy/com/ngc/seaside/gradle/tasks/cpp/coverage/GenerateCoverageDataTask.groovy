@@ -23,7 +23,6 @@ class GenerateCoverageDataTask extends DefaultTask {
       ]
 
       project.exec {
-         workingDir dir
          executable lcov
          args arguments
       }
