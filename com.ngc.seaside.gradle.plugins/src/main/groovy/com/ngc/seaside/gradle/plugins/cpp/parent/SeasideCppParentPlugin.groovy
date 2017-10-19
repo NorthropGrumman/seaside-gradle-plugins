@@ -1,12 +1,16 @@
 package com.ngc.seaside.gradle.plugins.cpp.parent
 
+import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
+import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.BuildingExtension
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.StaticBuildConfiguration
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.UnpackCppDistributionsTask
+import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.resolve.ProjectModelResolver
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.language.cpp.tasks.CppCompile
 import org.gradle.nativeplatform.NativeLibrarySpec
@@ -53,15 +57,16 @@ import java.util.regex.Matcher
  */
 class SeasideCppParentPlugin implements Plugin<Project> {
 
+    public static final String ANALYZE_TASK_NAME = 'analyze'
 
     @Override
     void apply(Project p) {
         p.configure(p) {
-            plugins.apply 'cpp'
-            plugins.apply 'maven'
-            plugins.apply 'google-test-test-suite'
 
             project.extensions.create("building", BuildingExtension, p)
+
+            applyPlugins(p)
+            createTasks(p)
 
             configurations {
                 compile
@@ -132,6 +137,11 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                     }
                 }
 
+                ext {
+                    // The default name of the bundle.
+                    bundleName = "$group" + '.' + "$project.name"
+                }
+
                 model {
                     repositories {
                         libs(PrebuiltLibraries) {
@@ -197,6 +207,19 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                     distribution createDistributionZip
                 }
 
+                sonarqube {
+                    properties {
+                        property 'sonar.cxx.coverage.reportPath', ["${project.buildDir}/lcov/coverage.xml"]
+                        property 'sonar.cxx.xunit.reportPath', ["${project.buildDir}/test-results/**report.xml"]
+                        property 'sonar.branch', SeasideParentPlugin.getBranchName()
+                        property 'sonar.cxx.compiler.reportPath', ["${project.buildDir}/*.log"]
+                        property 'sonar.projectName', "${bundleName}"
+                        property 'sonar.cxx.compiler.parser', "GCC"
+                        property 'sonar.cxx.compiler.charset', "UTF-8"
+                        property 'sonar.cxx.compiler.regex', '=^(.*):([0-9]+):[0-9]+: warning: (.*)\\[(.*)\\]$'
+                    }
+                }
+
                 tasks.withType(RunTestExecutable) {
                     args "--gtest_output=xml:report.xml"
                 }
@@ -244,5 +267,30 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                 linkerArgs.addAll(index + 1 + (withArgs.before.size()), withArgs.after)
             }
         }
+    }
+
+    protected void createTasks(Project project) {
+
+        /**
+         * analyzeBuild task for sonarqube
+         */
+        def buildTask = project.tasks.getByName("build")
+        def sonarqubeTask = project.tasks.getByName("sonarqube")
+        project.task(ANALYZE_TASK_NAME) {
+        }
+        project.tasks.getByName(ANALYZE_TASK_NAME).setGroup(project.getGroup())
+        project.tasks.getByName(ANALYZE_TASK_NAME).dependsOn([buildTask, sonarqubeTask])
+        project.tasks.getByName(ANALYZE_TASK_NAME).setDescription('Runs build and sonarqube')
+    }
+
+    /**
+     * This plugin requires the java and maven plugins
+     * @param project
+     */
+    protected void applyPlugins(Project project) {
+        project.getPlugins().apply('cpp')
+        project.getPlugins().apply('maven')
+        project.getPlugins().apply('google-test-test-suite')
+        project.getPlugins().apply('org.sonarqube')
     }
 }
