@@ -12,11 +12,12 @@ class GenerateCoverageDataHtmlTask extends DefaultTask {
    @TaskAction
    def generateLcovHtml() {
       def genhtml = cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_GENHTML_EXECUTABLE
+      def coverageHtmlDir = new File(cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_HTML_DIR)
       def coverageFile = new File(cppCoverageExtension.coverageFilePath)
+
       def arguments = [
-         "-o", "$buildDir/reports/lcov/html/${projectDir.name}", 
-         "-t", "${projectDir.name}",
-         "code", "coverage", 
+         "-o", coverageHtmlDir.absolutePath,
+         "-t", "${project.projectDir.name}",
          "--demangle-cpp",
          "--branch-coverage",
          "--function-coverage",

@@ -34,7 +34,6 @@ class SeasideCppParentPluginFT {
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
     }
 
-
     @Test
     void doesRunGradleBuildWithSuccess() {
         BuildResult result = GradleRunner.create().withProjectDir(projectDir)

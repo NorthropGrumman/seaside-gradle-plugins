@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.cpp.coverage
 
+import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
 import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
@@ -11,12 +12,23 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
+import java.io.File
 import java.nio.file.Files
 
 class SeasideCppCoveragePluginFT {
    private File testProjectDir
    private Project project
    private List<File> pluginClasspath
+
+   private List<String> subprojectNames = [
+      "service.api",                         
+      "service.utilities",
+      "service.log.impl.logservice",         
+      "service.thread.impl.threadservice",   
+      "service.time.impl.timeservice",       
+      "service.event.impl.synceventservice", 
+      "service.log.impl.printservice"      
+   ]
 
    @Before
    void before() {
@@ -43,6 +55,19 @@ class SeasideCppCoveragePluginFT {
    @Test
    void doesGenerateCoverageDataHtml() {
       testTask("generateCoverageDataHtml")
+
+      subprojectNames.each { eachSubprojectName ->
+         def eachSubprojectDirName = "com.ngc.blocs.cpp." + eachSubprojectName
+         def subprojectDir = new File("${project.projectDir}/${eachSubprojectDirName}")
+         def subproject = ProjectBuilder.builder().withProjectDir(subprojectDir).withParent(project).build()
+         def cppCoverageExtension = new SeasideCppCoverageExtension(subproject)
+         def coverageFile = new File(cppCoverageExtension.coverageFilePath)
+         def htmlFile = new File(cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_HTML_DIR + "/index.html")
+
+         if (coverageFile.exists()) {           
+            Assert.assertTrue("The file does not exist: ${htmlFile.absolutePath}", htmlFile.exists())
+         }
+      }
    }
    
    private void testTask(final String taskName) { 
@@ -53,13 +78,9 @@ class SeasideCppCoveragePluginFT {
             .withArguments("clean", taskName)
             .build()
 
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:"                         + taskName).getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:"                   + taskName).getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:"         + taskName).getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:"   + taskName).getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:"       + taskName).getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:" + taskName).getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:"       + taskName).getOutcome())
+      subprojectNames.each { eachSubprojectName ->
+         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":${eachSubprojectName}:" + taskName).getOutcome())
+      }
    }
 
    private static File setUpTheTestProjectDirectory() {
