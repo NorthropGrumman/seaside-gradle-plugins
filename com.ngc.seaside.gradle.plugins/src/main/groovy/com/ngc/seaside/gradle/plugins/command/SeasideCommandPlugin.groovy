@@ -39,7 +39,6 @@ class SeasideCommandPlugin implements Plugin<Project> {
 	            	def templateFile = it
 	                task("createTemplate${templateFile.name}", type: Zip, dependsOn: [classes]) {
 	                    classifier = "template-${templateFile.name}"
-	                    appendix = templateFile.name
 	                    from templateFile
 	                    include "*"
 	                    include "*/**"
