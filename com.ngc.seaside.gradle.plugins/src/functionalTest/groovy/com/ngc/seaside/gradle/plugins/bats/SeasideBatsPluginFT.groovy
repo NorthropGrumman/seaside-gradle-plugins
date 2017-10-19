@@ -58,7 +58,7 @@ class SeasideBatsPluginFT {
 
         String projectName = "service.holamundo"
         String taskName = "runBats"
-        TestingUtilities.AssertTaskSuccess(result, projectName , taskName)
+        TestingUtilities.assertTaskSuccess(result, projectName , taskName)
     }
 
     private void makeShellScriptsExecutable() {

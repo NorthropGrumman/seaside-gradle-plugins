@@ -1,9 +1,8 @@
 package com.ngc.seaside.gradle.plugins.cpp.coverage
 
+import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
 import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
-import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -11,55 +10,49 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
-import java.nio.file.Files
-
 class SeasideCppCoveragePluginFT {
+   private final String SUBPROJECT_DIR_PREFIX = "com.ngc.blocs.cpp."
+
+   private SeasideCppCoverageExtension coverageExtension
    private File testProjectDir
    private Project project
    private List<File> pluginClasspath
+   private List<String> subprojectNames = [
+         "service.api",
+         "service.utilities",
+         "service.log.impl.logservice",
+         "service.thread.impl.threadservice",
+         "service.time.impl.timeservice",
+         "service.event.impl.synceventservice",
+         "service.log.impl.printservice"
+   ]
 
    @Before
    void before() {
       pluginClasspath = TestingUtilities.getTestClassPath(getClass())
-      testProjectDir = setUpTheTestProjectDirectory()
-      project = createTheTestProject()
+      testProjectDir = TestingUtilities.setUpTheTestProjectDirectory(
+            sourceDirectoryWithTheTestProject(),
+            pathToTheDestinationProjectDirectory()
+      )
+      project = TestingUtilities.createTheTestProjectWith(testProjectDir)
    }
 
    @Test
    void doesExtractLcov() {
       checkForTaskSuccess("extractLcov")
+      checkForTheExtractedLcovFiles()
    }
 
    @Test
    void doesGenerateCoverageData() {
       checkForTaskSuccess("generateCoverageData")
+      checkForTheCoverageFile()
    }
 
    @Test
    void doesFilterCoverageData() {
       checkForTaskSuccess("filterCoverageData")
-   }
-
-   private static File setUpTheTestProjectDirectory() {
-      def dir = createTheTestProjectDirectory()
-      copyTheTestProjectIntoTheTestProjectDirectory(dir)
-      return dir
-   }
-
-   private static File createTheTestProjectDirectory() {
-      def dir = pathToTheDestinationProjectDirectory()
-      return Files.createDirectories(dir.toPath()).toFile()
-   }
-
-   private static File pathToTheDestinationProjectDirectory() {
-      return TestingUtilities.turnListIntoPath(
-            "build", "functionalTest", "resources",
-            "cpp", "coverage", "pipeline-test-cpp"
-      )
-   }
-
-   private static void copyTheTestProjectIntoTheTestProjectDirectory(File dir) {
-      FileUtils.copyDirectory(sourceDirectoryWithTheTestProject(), dir)
+      checkForTheCoverageFile()
    }
 
    private static File sourceDirectoryWithTheTestProject() {
@@ -68,8 +61,11 @@ class SeasideCppCoveragePluginFT {
       )
    }
 
-   private Project createTheTestProject() {
-      return ProjectBuilder.builder().withProjectDir(testProjectDir).build()
+   private static File pathToTheDestinationProjectDirectory() {
+      return TestingUtilities.turnListIntoPath(
+            "build", "functionalTest",
+            "cpp", "coverage", "pipeline-test-cpp"
+      )
    }
 
    private void checkForTaskSuccess(String taskName) {
@@ -80,12 +76,43 @@ class SeasideCppCoveragePluginFT {
             .withArguments(taskName)
             .build()
 
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.api:$taskName").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.utilities:$taskName").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.log.impl.logservice:$taskName").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.thread.impl.threadservice:$taskName").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.time.impl.timeservice:$taskName").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.event.impl.synceventservice:$taskName").getOutcome())
-      Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.log.impl.printservice:$taskName").getOutcome())
+      subprojectNames.each { subprojectName ->
+         Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":$subprojectName:$taskName").outcome)
+      }
+   }
+
+   private void checkForTheExtractedLcovFiles() {
+      subprojectNames.each { subprojectName ->
+         def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
+         if (isSubproject(file)) {
+            coverageExtension = createAnExtensionOnTheSubproject(file)
+            def f = new File(coverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV)
+            Assert.assertTrue(f.exists())
+         }
+      }
+   }
+
+   private checkForTheCoverageFile() {
+      subprojectNames.each { subprojectName ->
+         def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
+         if (file.name.endsWith(SUBPROJECT_DIR_PREFIX + subprojectNames[0]))
+            return
+
+         if (isSubproject(file)) {
+            coverageExtension = createAnExtensionOnTheSubproject(file)
+            def f = new File(coverageExtension.coverageFilePath)
+            Assert.assertTrue(f.exists())
+         }
+      }
+   }
+
+   private boolean isSubproject(File file) {
+      return file.directory && file.name.startsWith(SUBPROJECT_DIR_PREFIX)
+   }
+
+   private SeasideCppCoverageExtension createAnExtensionOnTheSubproject(File file) {
+      def subproject = TestingUtilities.createSubprojectWithDir(project, file)
+      coverageExtension = new SeasideCppCoverageExtension(subproject)
+      return coverageExtension
    }
 }
