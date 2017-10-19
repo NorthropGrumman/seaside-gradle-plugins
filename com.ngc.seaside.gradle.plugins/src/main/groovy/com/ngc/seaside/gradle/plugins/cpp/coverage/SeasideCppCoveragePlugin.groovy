@@ -25,12 +25,6 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
          SeasideCppCoverageExtension e = createTheCppCoverageExtensionOnTheProject(p)
          initializeConfigurableCppCoverageExtensionProperties(e)
 
-         buildscript {
-            configurations {
-               classpath
-            }
-         }
-
          task(
             EXTRACT_LCOV_TASK_NAME,
             type: ExtractLcovTask,
@@ -61,7 +55,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
          p.afterEvaluate {
             p.dependencies {
                compile "lcov:lcov:$e.LCOV_VERSION"
-               compile "lcov-cobertura:lcov-cobertura:$e.LCOV_COBERTURA_VERSION"
+               //compile "lcov-cobertura:lcov-cobertura:$e.LCOV_COBERTURA_VERSION"
             }
          }
       }

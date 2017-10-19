@@ -26,7 +26,7 @@ class GenerateLcovXmlTask extends DefaultTask {
         def lcovCoberturaPath = [project.buildDir.absolutePath, "tmp", "lcov-cobertura"].join(File.separator)
         def coverageFilePath = cppCoverageExtension.coverageFilePath
         def coverageXmlPath = cppCoverageExtension.coverageXmlPath
-        def commandLineString = ["python", "${lcovCoberturaPath}/lcov_cobertura.py", coverageFilePath, "--demangle", "--output", coverageXmlPath]
+        def commandLineString = ["python", "${lcovCoberturaPath}/lcov-to-cobertura-xml-1.6/lcov_cobertura.py", coverageFilePath, "--demangle", "--output", coverageXmlPath]
         def commandOutput = new ByteArrayOutputStream()
 
         project.exec {
