@@ -80,7 +80,6 @@ class SeasideCppCoveragePluginFT {
       Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:filterCoverageData").getOutcome())
    }
 
-   @Ignore
    @Test
    void doesGenerateCoverageXml() {
       BuildResult result = GradleRunner.create()

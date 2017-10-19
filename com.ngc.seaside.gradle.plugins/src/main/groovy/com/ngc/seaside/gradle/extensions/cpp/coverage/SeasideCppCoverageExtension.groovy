@@ -3,8 +3,14 @@ package com.ngc.seaside.gradle.extensions.cpp.coverage
 import org.gradle.api.Project
 
 class SeasideCppCoverageExtension {
+   final String LCOV_GAV = "lcov:lcov:1.13"
    final String LCOV_VERSION = "1.13"
+   final String LCOV_FILENAME = "lcov-${LCOV_VERSION}.zip"
+
+   final String LCOV_COBERTURA_GAV = "lcov-cobertura:lcov-cobertura:1.6"
    final String LCOV_COBERTURA_VERSION = "1.6"
+   final String LCOV_COBERTURA_FILENAME = "lcov-cobertura-${LCOV_COBERTURA_VERSION}.zip"
+
    final CppCoveragePaths CPP_COVERAGE_PATHS
 
    String coverageFilePath

@@ -6,6 +6,8 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.TaskAction
 
+import java.nio.file.Paths
+
 class GenerateLcovXmlTask extends DefaultTask {
 
     private SeasideCppCoverageExtension cppCoverageExtension =
@@ -48,7 +50,7 @@ class GenerateLcovXmlTask extends DefaultTask {
 
     private String lcovCoberturaReleaseArchiveFile() {
         return projectClasspathConfiguration().filter { file ->
-            return file.getName().contains("lcov-cobertura")
+            return file.getName().contains(cppCoverageExtension.LCOV_COBERTURA_FILENAME)
         }.getAsPath()
     }
 
@@ -57,7 +59,7 @@ class GenerateLcovXmlTask extends DefaultTask {
                 .rootProject
                 .buildscript
                 .configurations
-                .getByName("classpath")
+                .getByName("compile")
     }
 
     private String pathToTheDirectoryWithLcovCoberturaFiles() {

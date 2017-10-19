@@ -54,8 +54,8 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
 
          p.afterEvaluate {
             p.dependencies {
-               compile "lcov:lcov:$e.LCOV_VERSION"
-               //compile "lcov-cobertura:lcov-cobertura:$e.LCOV_COBERTURA_VERSION"
+               compile "$e.LCOV_GAV"
+               compile "$e.LCOV_COBERTURA_GAV"
             }
          }
       }

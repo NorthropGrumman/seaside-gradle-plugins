@@ -34,7 +34,7 @@ class ExtractLcovTask extends DefaultTask {
 
    private String lcovReleaseArchiveFile() {
       return projectClasspathConfiguration().filter { file ->
-         return file.name.contains("lcov")
+         return file.name.contains(cppCoverageExtension.LCOV_FILENAME)
       }.getAsPath()
    }
 
