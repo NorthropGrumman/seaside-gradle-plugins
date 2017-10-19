@@ -5,7 +5,6 @@ import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -77,7 +76,7 @@ class SeasideCppCoveragePluginFT {
             .build()
 
       subprojectNames.each { subprojectName ->
-         Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":$subprojectName:$taskName").outcome)
+         TestingUtilities.assertTaskSuccess(result, subprojectName, taskName)
       }
    }
 

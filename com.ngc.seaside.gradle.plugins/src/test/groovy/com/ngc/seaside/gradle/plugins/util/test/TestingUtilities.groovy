@@ -17,31 +17,10 @@ class TestingUtilities {
         return createNewFileForEachItemInClasspath(r)
     }
 
-    private static URL getThePluginClassPathResource(Class c) {
-        return c.classLoader.getResource("plugin-classpath.txt")
-    }
-
-    private static void throwIfTheClasspathResourceIsNotFound(URL r) {
-        if (!r)
-            throw new IllegalStateException("Did not find plugin classpath resource, run `testClasses` build task.")
-    }
-
-    private static List<File> createNewFileForEachItemInClasspath(URL r) {
-        return r.readLines().collect { new File(it) }
-    }
-
     static File setUpTheTestProjectDirectory(File sourcePath, File destPath) {
         def testProjectDir = createTheTestProjectDirectory(destPath)
         copyTheTestProjectIntoTheTestProjectDirectory(sourcePath, testProjectDir)
         return testProjectDir
-    }
-
-    private static File createTheTestProjectDirectory(File dir) {
-        return Files.createDirectories(dir.toPath()).toFile()
-    }
-
-    private static void copyTheTestProjectIntoTheTestProjectDirectory(File source, File destination) {
-        FileUtils.copyDirectory(source, destination)
     }
 
     static Project createTheTestProjectWith(File testProjectDir) {
@@ -63,5 +42,26 @@ class TestingUtilities {
 
     static void assertTaskSuccess(BuildResult result, String projectName, String taskName) {
         Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":$projectName:$taskName").outcome)
+    }
+
+    private static URL getThePluginClassPathResource(Class c) {
+        return c.classLoader.getResource("plugin-classpath.txt")
+    }
+
+    private static void throwIfTheClasspathResourceIsNotFound(URL r) {
+        if (!r)
+            throw new IllegalStateException("Did not find plugin classpath resource, run `testClasses` build task.")
+    }
+
+    private static List<File> createNewFileForEachItemInClasspath(URL r) {
+        return r.readLines().collect { new File(it) }
+    }
+
+    private static File createTheTestProjectDirectory(File dir) {
+        return Files.createDirectories(dir.toPath()).toFile()
+    }
+
+    private static void copyTheTestProjectIntoTheTestProjectDirectory(File source, File destination) {
+        FileUtils.copyDirectory(source, destination)
     }
 }
