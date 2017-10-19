@@ -9,42 +9,45 @@ import org.gradle.api.tasks.TaskAction
 import java.nio.file.Paths
 
 class ExtractLcovTask extends DefaultTask {
-   private SeasideCppCoverageExtension cppCoverageExtension =
+    private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
-                  .findByType(SeasideCppCoverageExtension.class)
+                    .findByType(SeasideCppCoverageExtension.class)
 
-   @TaskAction
-   def extractLcov() {
-      def lcovFiles = extractTheLcovReleaseArchive()
-      def outputDir = pathToTheDirectoryWithLcovFiles()
+    public final String LCOV_FILENAME = cppCoverageExtension.LCOV_FILENAME
 
-      project.copy {
-         from lcovFiles
-         into outputDir
-      }
-   }
+    @TaskAction
+    def extractLcov() {
+        def lcovFiles = extractTheLcovReleaseArchive()
+        def outputDir = pathToTheDirectoryWithLcovFiles()
 
-   private FileTree extractTheLcovReleaseArchive() {
-      return project.zipTree(pathToTheLcovReleaseArchive())
-   }
+        project.copy {
+            from lcovFiles
+            into outputDir
+        }
+    }
 
-   private String pathToTheLcovReleaseArchive() {
-      return Paths.get(lcovReleaseArchiveFile())
-   }
+    private FileTree extractTheLcovReleaseArchive() {
+        return project.zipTree(pathToTheLcovReleaseArchive())
+    }
 
-   private String lcovReleaseArchiveFile() {
-      return projectClasspathConfiguration().filter { file ->
-         return file.name.contains(cppCoverageExtension.LCOV_FILENAME)
-      }.getAsPath()
-   }
+    private String pathToTheLcovReleaseArchive() {
+        return Paths.get(lcovReleaseArchiveFile())
+    }
 
-   private Configuration projectClasspathConfiguration() {
-      return project
-               .configurations
-               .getByName("compile")
-   }
+    private String lcovReleaseArchiveFile() {
+        return projectClasspathConfiguration().filter { file ->
+            return file.name.contains(LCOV_FILENAME)
+        }.getAsPath()
+    }
 
-   private String pathToTheDirectoryWithLcovFiles() {
-      return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV
-   }
+    private Configuration projectClasspathConfiguration() {
+        return project
+                .configurations
+                .getByName("compile")
+    }
+
+    private String pathToTheDirectoryWithLcovFiles() {
+        return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV
+    }
+
 }

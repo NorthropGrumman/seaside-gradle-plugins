@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.TaskAction
 
+import java.nio.file.Files
 import java.nio.file.Paths
 
 class GenerateLcovXmlTask extends DefaultTask {
@@ -13,6 +14,8 @@ class GenerateLcovXmlTask extends DefaultTask {
     private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
                     .findByType(SeasideCppCoverageExtension.class)
+
+    final String LCOV_COBERTURA_FILENAME = cppCoverageExtension.LCOV_COBERTURA_FILENAME
 
     @TaskAction
     def generateLcovXml() {
@@ -25,11 +28,13 @@ class GenerateLcovXmlTask extends DefaultTask {
             into outputDir
         }
 
-        def lcovCoberturaPath = [project.buildDir.absolutePath, "tmp", "lcov-cobertura"].join(File.separator)
+        def lcovCoberturaPath = [project.buildDir.absolutePath, "tmp", "lcov-cobertura", "lcov-to-cobertura-xml-${cppCoverageExtension.LCOV_COBERTURA_VERSION}", "lcov_cobertura"].join(File.separator)
         def coverageFilePath = cppCoverageExtension.coverageFilePath
         def coverageXmlPath = cppCoverageExtension.coverageXmlPath
-        def commandLineString = ["python", "${lcovCoberturaPath}/lcov-to-cobertura-xml-1.6/lcov_cobertura.py", coverageFilePath, "--demangle", "--output", coverageXmlPath]
+        def commandLineString = ["python", "${lcovCoberturaPath}/lcov_cobertura.py", coverageFilePath, "--demangle", "--output", coverageXmlPath]
         def commandOutput = new ByteArrayOutputStream()
+
+        Files.createDirectories(Paths.get(cppCoverageExtension.coverageXmlPath).getParent())
 
         project.exec {
             commandLine commandLineString
@@ -50,14 +55,12 @@ class GenerateLcovXmlTask extends DefaultTask {
 
     private String lcovCoberturaReleaseArchiveFile() {
         return projectClasspathConfiguration().filter { file ->
-            return file.getName().contains(cppCoverageExtension.LCOV_COBERTURA_FILENAME)
+            return file.getName().contains(LCOV_COBERTURA_FILENAME)
         }.getAsPath()
     }
 
     private Configuration projectClasspathConfiguration() {
         return project
-                .rootProject
-                .buildscript
                 .configurations
                 .getByName("compile")
     }
