@@ -30,7 +30,10 @@ class SeasideCppCoveragePluginIT {
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.EXTRACT_LCOV_TASK_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_COVERAGE_DATA_TASK_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.FILTER_COVERAGE_DATA_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.COVERAGE_TASK_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_COVERAGE_DATA_HTML_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_LCOV_XML_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_FULL_COVERAGE_REPORT_TASK_NAME))
    }
 
    private static File createTheTestProjectDirectory() {
