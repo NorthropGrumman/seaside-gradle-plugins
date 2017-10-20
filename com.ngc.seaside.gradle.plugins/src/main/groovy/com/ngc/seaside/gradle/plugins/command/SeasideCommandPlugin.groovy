@@ -38,12 +38,11 @@ class SeasideCommandPlugin implements Plugin<Project> {
 	            templates.eachFile { 
 	            	def templateFile = it
 	                task("createTemplate${templateFile.name}", type: Zip, dependsOn: [classes]) {
-	                    classifier = 'template'
-	                    appendix = templateFile.name
+	                    classifier = "template-${templateFile.name}"
 	                    from templateFile
 	                    include "*"
 	                    include "*/**"
-	                    archiveName "${project.group}.${project.name}-${templateFile.name}-${project.version}-template.zip"
+	                    archiveName "${project.group}.${project.name}-${project.version}-template-${templateFile.name}.zip"
 	                    destinationDir(file("$projectDir/build/libs"))
 	                }
 	            }

@@ -9,7 +9,6 @@ dependencies {
     compile "commons-io:commons-io:$commonsIOVersion"
     compile "com.github.ben-manes:gradle-versions-plugin:$dependencyUpdatesVersion"
     compile "com.github.ksoichiro:gradle-console-reporter:$consoleReporterVersion"
-    compile "bats:bats:$batsVersion"
     compile "com.google.guava:guava:$guavaVersion"
 
     testRuntime files(createClasspathManifest)
@@ -19,3 +18,5 @@ dependencies {
     testCompile "org.mockito:mockito-core:$mockitoVersion"
     testCompile "com.ngc.blocs:test.impl.common.testutilities:$blocsVersion"
 }
+
+apply plugin: 'com.github.ksoichiro.console.reporter'
