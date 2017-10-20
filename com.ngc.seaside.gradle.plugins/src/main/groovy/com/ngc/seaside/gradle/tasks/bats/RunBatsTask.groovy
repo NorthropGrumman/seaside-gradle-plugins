@@ -10,7 +10,7 @@ class RunBatsTask extends DefaultTask {
                    .findByType(SeasideBatsExtension.class)
 
    @TaskAction
-   runBats() {
+   def runBats() {
       def bats = pathToTheBatsScript()
       def tests = enumerateAllBatsFilesIn(pathToTheDirectoryWithBatsTests())
       def commandOutput = new ByteArrayOutputStream()
