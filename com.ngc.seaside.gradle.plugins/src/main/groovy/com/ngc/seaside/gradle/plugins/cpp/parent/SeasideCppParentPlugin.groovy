@@ -53,6 +53,7 @@ import java.util.regex.Matcher
  */
 class SeasideCppParentPlugin implements Plugin<Project> {
 
+    public final static String CREATE_DISTRIBUTION_ZIP_TASK_NAME = "createDistributionZip"
 
     @Override
     void apply(Project p) {
@@ -118,7 +119,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                 }
             }
 
-            task('createDistributionZip', type: Zip, dependsOn: [copyExportedHeaders, copySharedLib, copyStaticLib]) {
+            task(CREATE_DISTRIBUTION_ZIP_TASK_NAME, type: Zip, dependsOn: [copyExportedHeaders, copySharedLib, copyStaticLib]) {
                 from { "${project.distsDir}/${project.group}.${project.name}-${project.version}" }
             }
 
@@ -194,15 +195,15 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                 }
 
                 artifacts {
-                    distribution createDistributionZip
+                    distribution p[CREATE_DISTRIBUTION_ZIP_TASK_NAME]
                 }
 
                 tasks.withType(RunTestExecutable) {
                     args "--gtest_output=xml:report.xml"
                 }
 
-                tasks.getByName(
-                        'createDistributionZip').archiveName = "${project.name}-${project.version}.zip"
+                tasks.getByName(CREATE_DISTRIBUTION_ZIP_TASK_NAME)
+                      .archiveName = "${project.name}-${project.version}.zip"
 
                 tasks.getByName('copySharedLib').onlyIf { file("${project.buildDir}/libs/main/shared").isDirectory() }
                 tasks.getByName('copyStaticLib').onlyIf { file("${project.buildDir}/libs/main/static").isDirectory() }
