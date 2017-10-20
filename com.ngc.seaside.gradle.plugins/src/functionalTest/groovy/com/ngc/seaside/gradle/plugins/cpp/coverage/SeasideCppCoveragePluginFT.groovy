@@ -113,6 +113,7 @@ class SeasideCppCoveragePluginFT {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.coverageFilePath)
             Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+            Assert.assertTrue("The file is empty: ${f.absolutePath}",f.text.length() > 0)
          }
       }
    }
@@ -127,6 +128,7 @@ class SeasideCppCoveragePluginFT {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_HTML_DIR + "/index.html")
             Assert.assertTrue("The file does not exist: ${f.absolutePath}", f.exists())
+            Assert.assertTrue("The file is empty: ${f.absolutePath}",f.text.length() > 0)
          }
       }
    }
@@ -141,6 +143,7 @@ class SeasideCppCoveragePluginFT {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.coverageXmlPath)
             Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+            Assert.assertTrue("The file is empty: ${f.absolutePath}",f.text.length() > 0)
          }
       }
    }

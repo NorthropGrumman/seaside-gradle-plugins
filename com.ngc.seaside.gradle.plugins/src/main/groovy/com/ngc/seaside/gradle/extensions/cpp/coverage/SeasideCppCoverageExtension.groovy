@@ -4,7 +4,7 @@ import org.gradle.api.Project
 
 class SeasideCppCoverageExtension {
 
-    final String LCOV_VERSION = "1.13"
+    final String LCOV_VERSION = "1.12"
     final String LCOV_GAV = "lcov:lcov:${LCOV_VERSION}"
     final String LCOV_FILENAME = "lcov-${LCOV_VERSION}.zip"
 
