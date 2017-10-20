@@ -15,7 +15,7 @@ class SeasideCppCoverageExtensionTest {
    @Before
    void before() {
       Mockito.when(project.buildDir).thenReturn(file)
-      Mockito.when(project.projectDirg).thenReturn(file)
+      Mockito.when(project.projectDir).thenReturn(file)
       extension = new SeasideCppCoverageExtension(project)
    }
 
