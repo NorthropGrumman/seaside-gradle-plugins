@@ -34,16 +34,14 @@ class ExtractBatsTask extends DefaultTask {
 
    private String batsReleaseArchiveFile() {
       return projectClasspathConfiguration().filter { file ->
-         return file.getName().contains("bats")
+         return file.name.contains("bats")
       }.getAsPath()
    }
 
    private Configuration projectClasspathConfiguration() {
       return project
-               .rootProject
-               .buildscript
                .configurations
-               .getByName("classpath")
+               .getByName("compile")
    }
 
    private String pathToTheDirectoryWithBatsScripts() {

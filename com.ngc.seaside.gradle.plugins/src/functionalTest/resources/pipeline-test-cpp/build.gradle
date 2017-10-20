@@ -6,6 +6,6 @@ subprojects {
         gTestVersion = '1.8'
         gMockVersion = "$gTestVersion"
         boostVersion = '1_64'
-        celixVersion = '2.0.0'
+        celixVersion = '2.0.1'
     }
 }
