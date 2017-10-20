@@ -387,7 +387,7 @@ subprojects {
 ```
 
 You can also override these properties when you run the gradle command. For example:
-`gradlew filterCoverageData -PcoverageFilePath='build/my/coverage/data.info' -PcoverageXMLPath='build/my/cobertura/output.xml'`
+`gradlew genFullCoverageReport -PcoverageFilePath='build/my/coverage/data.info' -PcoverageXMLPath='build/my/cobertura/output.xml'`
 
 # Reference
 [seaside-gradle-plugins wiki](http://10.207.42.137/confluence/display/SEAS/seaside-gradle-plugins+-+Core+Gradle+plugins+for+Seaside+development)
