@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.extensions.cpp.coverage
 import org.gradle.api.Project
 
 class SeasideCppCoverageExtension {
+
     final String LCOV_VERSION = "1.13"
     final String LCOV_GAV = "lcov:lcov:${LCOV_VERSION}"
     final String LCOV_FILENAME = "lcov-${LCOV_VERSION}.zip"
@@ -23,12 +24,13 @@ class SeasideCppCoverageExtension {
     }
 
     private class CppCoveragePaths {
+
         final String PATH_TO_THE_DIRECTORY_WITH_LCOV
         final String PATH_TO_THE_LCOV_EXECUTABLE
         final String PATH_TO_THE_COVERAGE_FILE
         final String PATH_TO_LCOV_COBERTURA_XML
-      final String PATH_TO_THE_GENHTML_EXECUTABLE
-      final String PATH_TO_THE_COVERAGE_HTML_DIR
+        final String PATH_TO_THE_GENHTML_EXECUTABLE
+        final String PATH_TO_THE_COVERAGE_HTML_DIR
 
         CppCoveragePaths(Project p, String lcovVersion) {
             PATH_TO_THE_DIRECTORY_WITH_LCOV = toPath(
@@ -42,11 +44,11 @@ class SeasideCppCoverageExtension {
                     "bin",
                     "lcov")
 
-         PATH_TO_THE_GENHTML_EXECUTABLE = toPath(
-               PATH_TO_THE_DIRECTORY_WITH_LCOV,
-               "lcov-$lcovVersion",
-               "bin",
-               "genhtml")
+            PATH_TO_THE_GENHTML_EXECUTABLE = toPath(
+                    PATH_TO_THE_DIRECTORY_WITH_LCOV,
+                    "lcov-$lcovVersion",
+                    "bin",
+                    "genhtml")
 
             PATH_TO_THE_COVERAGE_FILE = toPath(
                     p.buildDir.absolutePath,
@@ -55,16 +57,16 @@ class SeasideCppCoverageExtension {
 
             PATH_TO_LCOV_COBERTURA_XML = toPath(
                     p.buildDir.absolutePath,
-                    "lcov-cobertura",
+                    "lcov",
                     "coverage.xml")
 
-         PATH_TO_THE_COVERAGE_HTML_DIR = toPath(
-               p.buildDir.absolutePath,
-               "reports",
-               "lcov",
-               "html",
-               p.projectDir.name)
-      }
+            PATH_TO_THE_COVERAGE_HTML_DIR = toPath(
+                    p.buildDir.absolutePath,
+                    "reports",
+                    "lcov",
+                    "html",
+                    p.projectDir.name)
+        }
 
         private static String toPath(String... items) {
             return items.flatten().join(File.separator)

@@ -60,6 +60,12 @@ class SeasideCppCoveragePluginFT {
       checkForTheXMLFile()
    }
 
+   @Test
+   void doesGenerateCoverageDataHtml() {
+      checkForTaskSuccess("generateCoverageDataHtml")
+      checkForTheHtmlFile()
+   }
+
    private static File sourceDirectoryWithTheTestProject() {
       return TestingUtilities.turnListIntoPath(
             "src", "functionalTest", "resources", "pipeline-test-cpp"
@@ -92,7 +98,7 @@ class SeasideCppCoveragePluginFT {
          if (isSubproject(file)) {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV)
-            Assert.assertTrue(f.exists())
+            Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
          }
       }
    }
@@ -106,13 +112,49 @@ class SeasideCppCoveragePluginFT {
          if (isSubproject(file)) {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.coverageFilePath)
-            Assert.assertTrue(f.exists())
+            Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
          }
+      }
+   }
+
+   private checkForTheHtmlFile() {
+      subprojectNames.each { subprojectName ->
+         def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
+         if (file.name.endsWith(SUBPROJECT_DIR_PREFIX + subprojectNames[0]))
+            return
+
+         if (isSubproject(file)) {
+            coverageExtension = createAnExtensionOnTheSubproject(file)
+            def f = new File(coverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_HTML_DIR + "/index.html")
+            Assert.assertTrue("The file does not exist: ${f.absolutePath}", f.exists())
+         }
+
+//         def eachSubprojectDirName = "com.ngc.blocs.cpp." + eachSubprojectName
+//         def subprojectDir = new File("${project.projectDir}/${eachSubprojectDirName}")
+//         def subproject = ProjectBuilder.builder().withProjectDir(subprojectDir).withParent(project).build()
+//         def cppCoverageExtension = new SeasideCppCoverageExtension(subproject)
+//         def coverageFile = new File(cppCoverageExtension.coverageFilePath)
+//         def htmlFile = new File(cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_HTML_DIR + "/index.html")
+//
+//         if (coverageFile.exists()) {
+//            Assert.assertTrue("The file does not exist: ${htmlFile.absolutePath}", htmlFile.exists())
+//         }
       }
    }
 
    private checkForTheXMLFile() {
       // TODO(Cameron): need to fill this in
+      subprojectNames.each { subprojectName ->
+         def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
+         if (file.name.endsWith(SUBPROJECT_DIR_PREFIX + subprojectNames[0]))
+            return
+
+         if (isSubproject(file)) {
+            coverageExtension = createAnExtensionOnTheSubproject(file)
+            def f = new File(coverageExtension.coverageXmlPath)
+            Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+         }
+      }
    }
 
    private boolean isSubproject(File file) {
