@@ -23,10 +23,16 @@ class SeasideReleasePlugin implements Plugin<Project> {
     void apply(Project project) {
         project.configure(project) {
             def releaseExtension = project.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension)
+            def releaseTask = project.tasks.create(RELEASE_TASK_NAME, ReleaseTask)
             releaseExtension.uploadArtifacts = (uploadArtifacts)? Boolean.parseBoolean(uploadArtifacts) : releaseExtension.uploadArtifacts
             releaseExtension.push = (push)? Boolean.parseBoolean(push) : releaseExtension.uploadArtifacts
             releaseExtension.tagPrefix = (tagPrefix)? tagPrefix : releaseExtension.tagPrefix
             releaseExtension.versionSuffix = (versionSuffix)? versionSuffix : releaseExtension.versionSuffix
+            if (releaseExtension.commitChanges)  {
+                releaseExtension.uploadArtifacts
+                releaseExtension.push
+                releaseTask.commitVersionFileWithMessage("hi-ho-the-dairy-yo")
+            }
 
             def taskNames = project.gradle.startParameter.taskNames
             def isReleaseJob =
