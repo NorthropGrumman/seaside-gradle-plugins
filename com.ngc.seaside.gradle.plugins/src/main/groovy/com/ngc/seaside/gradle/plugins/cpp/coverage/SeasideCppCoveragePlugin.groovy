@@ -18,7 +18,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
    public static final String GENERATE_LCOV_XML_TASK_NAME = "generateLcovXml"
    public static final String GENERATE_COVERAGE_DATA_HTML_TASK_NAME = "generateCoverageDataHtml"
 
-   String coverageFilePath
+   String coverageFilePath 
    String coverageXmlPath
 
    @Override
