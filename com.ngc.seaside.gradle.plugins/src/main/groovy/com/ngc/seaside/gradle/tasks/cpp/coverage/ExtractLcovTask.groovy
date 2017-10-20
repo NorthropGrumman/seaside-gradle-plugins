@@ -11,32 +11,32 @@ import java.nio.file.Paths
 class ExtractLcovTask extends DefaultTask {
     private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
-                    .findByType(SeasideCppCoverageExtension.class)
-
-    public final String LCOV_FILENAME = cppCoverageExtension.LCOV_FILENAME
+                   .findByType(SeasideCppCoverageExtension.class)
 
     @TaskAction
     def extractLcov() {
-        def lcovFiles = extractTheLcovReleaseArchive()
-        def outputDir = pathToTheDirectoryWithLcovFiles()
+        def lcovFiles = extractTheReleaseArchive(pathToTheLcovReleaseArchive())
+        def lcovCoberturaFiles = extractTheReleaseArchive(pathToTheLcovCoberturaReleaseArchive())
 
-        project.copy {
-            from lcovFiles
-            into outputDir
-        }
+        copyTheFiles(lcovFiles, pathToTheDirectoryWithLcovFiles())
+        copyTheFiles(lcovCoberturaFiles, pathToTheDirectoryWithLcovCoberturaFiles())
     }
 
-    private FileTree extractTheLcovReleaseArchive() {
-        return project.zipTree(pathToTheLcovReleaseArchive())
+    private FileTree extractTheReleaseArchive(String releaseArchive) {
+        return project.zipTree(releaseArchive)
     }
 
     private String pathToTheLcovReleaseArchive() {
-        return Paths.get(lcovReleaseArchiveFile())
+        return Paths.get(findTheReleaseArchiveFile(cppCoverageExtension.LCOV_FILENAME))
     }
 
-    private String lcovReleaseArchiveFile() {
+    private String pathToTheLcovCoberturaReleaseArchive() {
+        return Paths.get(findTheReleaseArchiveFile(cppCoverageExtension.LCOV_COBERTURA_FILENAME))
+    }
+
+    private String findTheReleaseArchiveFile(String filename) {
         return projectClasspathConfiguration().filter { file ->
-            return file.name.contains(LCOV_FILENAME)
+            return file.name.contains(filename)
         }.getAsPath()
     }
 
@@ -46,8 +46,18 @@ class ExtractLcovTask extends DefaultTask {
                 .getByName("compile")
     }
 
+    def copyTheFiles(FileTree source, String destination) {
+        project.copy {
+            from source
+            into destination
+        }
+    }
+
     private String pathToTheDirectoryWithLcovFiles() {
         return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV
     }
 
+    private String pathToTheDirectoryWithLcovCoberturaFiles() {
+        return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV_COBERTURA
+    }
 }
