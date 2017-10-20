@@ -46,11 +46,11 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             dependsOn: GENERATE_COVERAGE_DATA_TASK_NAME)
 
          task(
-                 GENERATE_LCOV_XML_TASK_NAME,
-                 type: GenerateLcovXmlTask,
-                 group: CPP_COVERAGE_TASK_GROUP_NAME,
-                 description: "Generates a cobertura xml file from the lcov coverage info.",
-                 dependsOn: FILTER_COVERAGE_DATA_TASK_NAME)
+            GENERATE_LCOV_XML_TASK_NAME,
+            type: GenerateLcovXmlTask,
+            group: CPP_COVERAGE_TASK_GROUP_NAME,
+            description: "Generates a cobertura xml file from the lcov coverage info.",
+            dependsOn: FILTER_COVERAGE_DATA_TASK_NAME)
 
          p.afterEvaluate {
             p.dependencies {
