@@ -25,13 +25,11 @@ class SeasideBatsPluginFT {
     @Before
     void before() {
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
-
-        File source = Paths.get("src/functionalTest/resources/sealion-java-hello-world").toFile()
-        Path targetPath = Paths.get("build/functionalTest/bats/sealion-java-hello-world")
-        projectDir = Files.createDirectories(targetPath).toFile()
-        FileUtils.copyDirectory(source, projectDir)
-
-        project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+        projectDir = TestingUtilities.setUpTheTestProjectDirectory(
+              sourceDirectoryWithTheTestProject(),
+              pathToTheDestinationProjectDirectory()
+        )
+        project = TestingUtilities.createTheTestProjectWith(projectDir)
     }
 
     @Test
@@ -43,11 +41,11 @@ class SeasideBatsPluginFT {
               .withArguments("clean", "build")
               .build()
 
-        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:build").getOutcome())
+        TestingUtilities.assertTaskSuccess(result, "service.helloworld", "build")
     }
 
     @Test
-    void doesRunGradleAnalyzeBuildWithSuccess() {
+    void doesRunBatsTestsWithSuccess() {
         makeShellScriptsExecutable()
         BuildResult result = GradleRunner.create()
               .withProjectDir(projectDir)
@@ -56,7 +54,20 @@ class SeasideBatsPluginFT {
               .withArguments("runBats")
               .build()
 
-        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.holamundo:runBats").getOutcome())
+        TestingUtilities.assertTaskSuccess(result, "service.holamundo" , "runBats")
+    }
+
+    private static File sourceDirectoryWithTheTestProject() {
+        return TestingUtilities.turnListIntoPath(
+              "src", "functionalTest", "resources", "sealion-java-hello-world"
+        )
+    }
+
+    private static File pathToTheDestinationProjectDirectory() {
+        return TestingUtilities.turnListIntoPath(
+              "build", "functionalTest",
+              "bats", "sealion-java-hello-world"
+        )
     }
 
     private void makeShellScriptsExecutable() {

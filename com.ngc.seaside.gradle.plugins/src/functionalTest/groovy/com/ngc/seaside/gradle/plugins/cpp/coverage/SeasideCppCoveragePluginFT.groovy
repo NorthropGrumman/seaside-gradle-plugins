@@ -1,123 +1,57 @@
 package com.ngc.seaside.gradle.plugins.cpp.coverage
 
+import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
 import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
-import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
-import java.nio.file.Files
-
 class SeasideCppCoveragePluginFT {
+   private final String SUBPROJECT_DIR_PREFIX = "com.ngc.blocs.cpp."
+
+   private SeasideCppCoverageExtension coverageExtension
    private File testProjectDir
    private Project project
    private List<File> pluginClasspath
+   private List<String> subprojectNames = [
+         "service.api",
+         "service.utilities",
+         "service.log.impl.logservice",
+         "service.thread.impl.threadservice",
+         "service.time.impl.timeservice",
+         "service.event.impl.synceventservice",
+         "service.log.impl.printservice"
+   ]
 
    @Before
    void before() {
       pluginClasspath = TestingUtilities.getTestClassPath(getClass())
-      testProjectDir = setUpTheTestProjectDirectory()
-      project = createTheTestProject()
+      testProjectDir = TestingUtilities.setUpTheTestProjectDirectory(
+            sourceDirectoryWithTheTestProject(),
+            pathToTheDestinationProjectDirectory()
+      )
+      project = TestingUtilities.createTheTestProjectWith(testProjectDir)
    }
 
    @Test
    void doesExtractLcov() {
-      BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath(pluginClasspath)
-            .forwardOutput()
-            .withArguments( "extractLcov")
-            .build()
-
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:extractLcov").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:extractLcov").getOutcome())
+      checkForTaskSuccess("extractLcov")
+      checkForTheExtractedLcovFiles()
    }
 
    @Test
    void doesGenerateCoverageData() {
-      BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath(pluginClasspath)
-            .forwardOutput()
-            .withArguments("generateCoverageData")
-            .build()
-
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:generateCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:generateCoverageData").getOutcome())
+      checkForTaskSuccess("generateCoverageData")
+      checkForTheCoverageFile()
    }
 
    @Test
    void doesFilterCoverageData() {
-      BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath(pluginClasspath)
-            .forwardOutput()
-            .withArguments("filterCoverageData")
-            .build()
-
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:filterCoverageData").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:filterCoverageData").getOutcome())
-   }
-
-   @Test
-   void doesGenerateCoverageXml() {
-      BuildResult result = GradleRunner.create()
-              .withProjectDir(testProjectDir)
-              .withPluginClasspath(pluginClasspath)
-              .forwardOutput()
-              .withArguments("generateLcovXml")
-              .build()
-
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:generateLcovXml").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:generateLcovXml").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:generateLcovXml").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:generateLcovXml").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:generateLcovXml").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:generateLcovXml").getOutcome())
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:generateLcovXml").getOutcome())
-   }
-
-   private static File setUpTheTestProjectDirectory() {
-      def dir = createTheTestProjectDirectory()
-      copyTheTestProjectIntoTheTestProjectDirectory(dir)
-      return dir
-   }
-
-   private static File createTheTestProjectDirectory() {
-      def dir = pathToTheDestinationProjectDirectory()
-      return Files.createDirectories(dir.toPath()).toFile()
-   }
-
-   private static File pathToTheDestinationProjectDirectory() {
-      return TestingUtilities.turnListIntoPath(
-            "build", "functionalTest", "resources",
-            "cpp", "coverage", "pipeline-test-cpp"
-      )
-   }
-
-   private static void copyTheTestProjectIntoTheTestProjectDirectory(File dir) {
-      FileUtils.copyDirectory(sourceDirectoryWithTheTestProject(), dir)
+      checkForTaskSuccess("filterCoverageData")
+      checkForTheCoverageFile()
    }
 
    private static File sourceDirectoryWithTheTestProject() {
@@ -126,7 +60,58 @@ class SeasideCppCoveragePluginFT {
       )
    }
 
-   private Project createTheTestProject() {
-      return ProjectBuilder.builder().withProjectDir(testProjectDir).build()
+   private static File pathToTheDestinationProjectDirectory() {
+      return TestingUtilities.turnListIntoPath(
+            "build", "functionalTest",
+            "cpp", "coverage", "pipeline-test-cpp"
+      )
+   }
+
+   private void checkForTaskSuccess(String taskName) {
+      BuildResult result = GradleRunner.create()
+            .withProjectDir(testProjectDir)
+            .withPluginClasspath(pluginClasspath)
+            .forwardOutput()
+            .withArguments(taskName)
+            .build()
+
+      subprojectNames.each { subprojectName ->
+         TestingUtilities.assertTaskSuccess(result, subprojectName, taskName)
+      }
+   }
+
+   private void checkForTheExtractedLcovFiles() {
+      subprojectNames.each { subprojectName ->
+         def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
+         if (isSubproject(file)) {
+            coverageExtension = createAnExtensionOnTheSubproject(file)
+            def f = new File(coverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV)
+            Assert.assertTrue(f.exists())
+         }
+      }
+   }
+
+   private checkForTheCoverageFile() {
+      subprojectNames.each { subprojectName ->
+         def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
+         if (file.name.endsWith(SUBPROJECT_DIR_PREFIX + subprojectNames[0]))
+            return
+
+         if (isSubproject(file)) {
+            coverageExtension = createAnExtensionOnTheSubproject(file)
+            def f = new File(coverageExtension.coverageFilePath)
+            Assert.assertTrue(f.exists())
+         }
+      }
+   }
+
+   private boolean isSubproject(File file) {
+      return file.directory && file.name.startsWith(SUBPROJECT_DIR_PREFIX)
+   }
+
+   private SeasideCppCoverageExtension createAnExtensionOnTheSubproject(File file) {
+      def subproject = TestingUtilities.createSubprojectWithDir(project, file)
+      coverageExtension = new SeasideCppCoverageExtension(subproject)
+      return coverageExtension
    }
 }
