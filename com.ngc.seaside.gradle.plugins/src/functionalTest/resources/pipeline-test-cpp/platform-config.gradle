@@ -1,0 +1,34 @@
+model {
+   toolChains {
+      visualCpp(VisualCpp)
+      cygwin(Gcc) {
+         path new File("C:/cygwin/bin")
+         target("cygwin")
+      }
+      gcc(Gcc)
+      clang(Clang)
+   }
+
+   platforms {
+      win {
+         operatingSystem "windows"
+         architecture "x86_64"
+      }
+      cygwin {
+         operatingSystem "windows"
+         architecture "x86_64"
+      }
+      linux {
+         operatingSystem "linux"
+         architecture "x86_64"
+      }
+   }
+
+   components {
+      all {
+         ["win", "cygwin", "linux"].each {
+            targetPlatform it
+         }
+      }
+   }
+}

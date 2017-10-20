@@ -2,6 +2,13 @@
 `com.ngc.seaside.gradle.plugins` contains the core Seaside plugins used by many Gradle builds.  All core plugins are
 contained in a single JAR and versioned together to make them easier to use.
 
+## Notes on building this project
+* To build, you can run: `./gradlew build`
+* If you want to see which Gradle tasks are available for you to run, execute: `./gradlew tasks [--all]`
+* You can always skip a part of the build process by passing the `-x` option
+    * For example, if you don't want to wait for all of the functional tests to pass: `./gradlew build -xfunctionalTest`
+* NB: if you're using Windows, use `gradlew` instead of `./gradlew`
+
 # com.ngc.seaside:seaside.parent
 The seaside gradle parent plugin provides a base gradle build for all seaside projects. This plugin will ensure your
 bundles are named correctly, provide an OSGi enabled jar file (bundle), generate javadocs jar, generate sources jar
@@ -301,12 +308,12 @@ subprojects {
    // optionally, include something like the following
    seasideBats {
       // the results from running bats will be written here
-      resultsFile 'build/your-custom-results-file.txt'
+      resultsFile = 'build/your-custom-results-file.txt'
 
       // we will look for bats tests (recursively) inside this directory
       // this means you can structure the tests however you want and all
       // of them will still be run
-      batsTestsDir 'src/test/my-bats-tests'
+      batsTestsDir = 'src/test/my-bats-tests'
    }
 
    ext {
@@ -318,7 +325,66 @@ subprojects {
 }
 ```
 
-You can also override these properties when you run the gradle command. For example: `gradlew runBats -PresultsFile='build/myresults.out' -PbatsTestsDir='my/bats/tests'`
+You can also override these properties when you run the gradle command. For example:
+`gradlew runBats -PresultsFile='build/myresults.out' -PbatsTestsDir='my/bats/tests'`
+
+# com.ngc.seaside:seaside.cpp.coverage
+The seaside gradle C++ coverage plugin provides a method of running the lcov command
+as a gradle task
+
+## This plugin requires you to install the following `lcov` dependency
+* perl-Digest-MD5
+    * Install with: `sudo yum install -y perl-Digest-MD5`
+
+## Using this plugin
+To use this plugin, you must add compiler and linker flags to your `build.gradle` in any
+in any project for which you want to generate coverage data. See
+[this](http://10.207.42.137/confluence/pages/viewpage.action?pageId=13664611) page to determine
+which flags are required.
+
+*NB: This plugin must be used from a unix machine. There is no guarantee (or implication) that it
+will work on Windows.*
+
+Below is an example of using the C++ coverage plugin.
+```java
+buildscript {
+   repositories {
+      mavenLocal()
+
+      maven {
+         url nexusConsolidated
+      }
+   }
+
+   dependencies {
+      classpath 'com.ngc.seaside:gradle.plugins:1.6.1'
+   }
+}
+
+subprojects {
+   apply plugin: 'com.ngc.seaside.cpp.parent'
+   apply plugin: 'com.ngc.seaside.cpp.coverage'   // <- this is the minimum required
+
+   group = 'com.ngc.blocs.cpp'
+   version = '1.0-SNAPSHOT'
+
+   // optionally, include something like the following
+   seasideCppCov {
+      // the results from generating coverage data will be written here
+      coverageFilePath = 'build/your/custom/coverage/output/file.txt'
+   }
+
+   ext {
+      gTestVersion = '1.8'
+      gMockVersion = "$gTestVersion"
+      boostVersion = '1_64'
+      celixVersion = '2.0.0'
+   }
+}
+```
+
+You can also override these properties when you run the gradle command. For example:
+`gradlew filterCoverageData -PcoverageFilePath='build/my/coverage/data.info'`
 
 # Reference
 [seaside-gradle-plugins wiki](http://10.207.42.137/confluence/display/SEAS/seaside-gradle-plugins+-+Core+Gradle+plugins+for+Seaside+development)
