@@ -126,12 +126,12 @@ subprojects {
     tasks.getByName("test").group = "test"
 
     task integrationTest(type: Test, group: "test") {
-        testClassesDir = sourceSets.integrationTest.output.classesDir
+        testClassesDirs = sourceSets.integrationTest.output
         classpath = sourceSets.integrationTest.runtimeClasspath
     }
 
     task functionalTest(type: Test, group: "test") {
-        testClassesDir = sourceSets.functionalTest.output.classesDir
+        testClassesDirs = sourceSets.functionalTest.output
         classpath = sourceSets.functionalTest.runtimeClasspath
     }
 
