@@ -4,10 +4,20 @@ import com.google.common.base.Preconditions
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+/**
+ * A task that generates a script file to run Celix with.  The actual script itself determines which bundles to start
+ * so there is no need to make the script dynamic.
+ */
 class CreateCelixRunScriptTask extends DefaultTask {
 
+    /**
+     * The script file to write.
+     */
     String scriptFile
 
+    /**
+     * The contents of the script.
+     */
     String scriptTemplate = '''
 #!/bin/sh
 
