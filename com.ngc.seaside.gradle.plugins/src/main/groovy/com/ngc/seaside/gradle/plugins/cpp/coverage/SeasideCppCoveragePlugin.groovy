@@ -14,11 +14,11 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
    public static final String CPP_COVERAGE_TASK_GROUP_NAME = "C++ Coverage"
 
    public static final String COVERAGE_TASK_NAME = "coverage"
-   public static final String EXTRACT_LCOV_TASK_NAME = "extractLcov"
+   public static final String EXTRACT_COVERAGE_TOOLS_TASK_NAME = "extractCoverageTools"
    public static final String GENERATE_COVERAGE_DATA_TASK_NAME = "genCoverageData"
    public static final String FILTER_COVERAGE_DATA_TASK_NAME = "filterCoverageData"
-   public static final String GENERATE_COVERAGE_DATA_HTML_TASK_NAME = "coverageWithHtml"
-   public static final String GENERATE_LCOV_XML_TASK_NAME = "coverageWithXml"
+   public static final String GENERATE_COVERAGE_HTML_TASK_NAME = "coverageWithHtml"
+   public static final String GENERATE_COVERAGE_XML_TASK_NAME = "coverageWithXml"
    public static final String GENERATE_FULL_COVERAGE_REPORT_TASK_NAME = "genFullCoverageReport"
 
    String coverageFilePath 
@@ -31,7 +31,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
          initializeConfigurableCppCoverageExtensionProperties(e)
 
          task(
-            EXTRACT_LCOV_TASK_NAME,
+            EXTRACT_COVERAGE_TOOLS_TASK_NAME,
             type: ExtractCoverageToolsTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Extract the lcov release archive")
@@ -41,7 +41,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             type: GenerateCoverageDataTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Generate preliminary coverage data and store in the specified directory",
-            dependsOn: ["build", EXTRACT_LCOV_TASK_NAME])
+            dependsOn: ["build", EXTRACT_COVERAGE_TOOLS_TASK_NAME])
 
          task(
             FILTER_COVERAGE_DATA_TASK_NAME,
@@ -57,14 +57,14 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
          )
 
          task(
-            GENERATE_COVERAGE_DATA_HTML_TASK_NAME,
+            GENERATE_COVERAGE_HTML_TASK_NAME,
             type: GenerateCoverageHtmlTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Generate html from the coverage data in the specified directory",
             dependsOn: COVERAGE_TASK_NAME)
 
          task(
-            GENERATE_LCOV_XML_TASK_NAME,
+            GENERATE_COVERAGE_XML_TASK_NAME,
             type: GenerateCoverageXmlTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Generate a cobertura xml file from the lcov coverage info.",
@@ -74,7 +74,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             GENERATE_FULL_COVERAGE_REPORT_TASK_NAME,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Generate the cobertura and html reports.",
-            dependsOn: [GENERATE_COVERAGE_DATA_HTML_TASK_NAME, GENERATE_LCOV_XML_TASK_NAME])
+            dependsOn: [GENERATE_COVERAGE_HTML_TASK_NAME, GENERATE_COVERAGE_XML_TASK_NAME])
 
          p.afterEvaluate {
             p.dependencies {

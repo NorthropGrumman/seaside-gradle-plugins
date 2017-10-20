@@ -38,7 +38,7 @@ class SeasideCppCoveragePluginFT {
 
    @Test
    void doesExtractLcov() {
-      checkForTaskSuccess(SeasideCppCoveragePlugin.EXTRACT_LCOV_TASK_NAME)
+      checkForTaskSuccess(SeasideCppCoveragePlugin.EXTRACT_COVERAGE_TOOLS_TASK_NAME)
       checkForTheExtractedLcovFiles()
    }
 
@@ -56,13 +56,13 @@ class SeasideCppCoveragePluginFT {
 
    @Test
    void doesGenerateCoverageDataHtml() {
-      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_COVERAGE_DATA_HTML_TASK_NAME)
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_COVERAGE_HTML_TASK_NAME)
       checkForTheHtmlFile()
    }
 
    @Test
    void doesGenerateCoverageXML() {
-      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_LCOV_XML_TASK_NAME)
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_COVERAGE_XML_TASK_NAME)
       checkForTheXMLFile()
    }
 
