@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.plugins.cpp.coverage
 
 import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
-import com.ngc.seaside.gradle.tasks.cpp.coverage.ExtractLcovTask
+import com.ngc.seaside.gradle.tasks.cpp.coverage.ExtractCoverageToolsTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.GenerateCoverageDataTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.FilterCoverageDataTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCoverageXmlTask
@@ -32,7 +32,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
 
          task(
             EXTRACT_LCOV_TASK_NAME,
-            type: ExtractLcovTask,
+            type: ExtractCoverageToolsTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Extract the lcov release archive")
 

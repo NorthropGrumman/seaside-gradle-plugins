@@ -8,7 +8,7 @@ import org.gradle.api.tasks.TaskAction
 
 import java.nio.file.Paths
 
-class ExtractLcovTask extends DefaultTask {
+class ExtractCoverageToolsTask extends DefaultTask {
     private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
                    .findByType(SeasideCppCoverageExtension.class)
