@@ -54,6 +54,12 @@ class SeasideCppCoveragePluginFT {
       checkForTheCoverageFile()
    }
 
+   @Test
+   void doesGenerateCoverageXML() {
+      checkForTaskSuccess("generateLcovXml")
+      checkForTheXMLFile()
+   }
+
    private static File sourceDirectoryWithTheTestProject() {
       return TestingUtilities.turnListIntoPath(
             "src", "functionalTest", "resources", "pipeline-test-cpp"
@@ -103,6 +109,10 @@ class SeasideCppCoveragePluginFT {
             Assert.assertTrue(f.exists())
          }
       }
+   }
+
+   private checkForTheXMLFile() {
+      // TODO(Cameron): need to fill this in
    }
 
    private boolean isSubproject(File file) {
