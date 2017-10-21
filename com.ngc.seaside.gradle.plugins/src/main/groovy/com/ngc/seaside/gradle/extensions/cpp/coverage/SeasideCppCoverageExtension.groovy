@@ -12,6 +12,10 @@ class SeasideCppCoverageExtension {
     final String LCOV_COBERTURA_GAV = "lcov-cobertura:lcov-cobertura:${LCOV_COBERTURA_VERSION}"
     final String LCOV_COBERTURA_FILENAME = "lcov-cobertura-${LCOV_COBERTURA_VERSION}.zip"
 
+    final String CPPCHECK_VERSION = "1.81"
+    final String CPPCHECK_VERSION_GAV = "cppcheck:cppcheck:${CPPCHECK_VERSION}"
+    final String CPPCHECK_FILENAME = "cppcheck-${CPPCHECK_VERSION}.zip"
+
     final CppCoveragePaths CPP_COVERAGE_PATHS
 
     String coverageFilePath
@@ -35,7 +39,7 @@ class SeasideCppCoverageExtension {
         CppCoveragePaths(Project p, String lcovVersion) {
             PATH_TO_THE_DIRECTORY_WITH_LCOV = toPath(
                     p.buildDir.absolutePath,
-                    "tmp",
+                    "lib",
                     "lcov")
 
             PATH_TO_THE_LCOV_EXECUTABLE = toPath(

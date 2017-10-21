@@ -38,11 +38,11 @@ class SeasideParentPluginIT {
     @Test
     void doesApplyPlugin() {
         TaskResolver resolver = new TaskResolver(project)
-        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_SOURCE_JAR_TASK_NAME))
-        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_JAVADOC_JAR_TASK_NAME))
-        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_ANALYZE_TASK_NAME))
-        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME))
-        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.PARENT_CLEANUP_DEPENDENCIES_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.SOURCE_JAR_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.JAVADOC_JAR_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.ANALYZE_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.DOWNLOAD_DEPENDENCIES_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.CLEANUP_DEPENDENCIES_TASK_NAME))
     }
 
     static void setRequiredProjectProperties(Project project) {
