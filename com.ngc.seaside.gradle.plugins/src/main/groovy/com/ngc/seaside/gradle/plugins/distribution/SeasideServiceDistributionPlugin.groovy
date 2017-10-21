@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.distribution
 
-import com.ngc.seaside.gradle.extensions.distribution.SeasideDistributionExtension
+import com.ngc.seaside.gradle.extensions.distribution.SeasideServiceDistributionExtension
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.TaskResolver
 import org.gradle.api.Plugin
@@ -31,9 +31,9 @@ import org.gradle.api.tasks.bundling.Zip
  *      apply plugin: 'com.ngc.seaside.distribution'
  * </pre>
  */
-class SeasideDistributionPlugin implements Plugin<Project> {
+class SeasideServiceDistributionPlugin implements Plugin<Project> {
 
-    SeasideDistributionExtension distributionExtension
+    SeasideServiceDistributionExtension distributionExtension
     private TaskResolver resolver
 
     @Override
@@ -49,7 +49,7 @@ class SeasideDistributionPlugin implements Plugin<Project> {
                                                   'nexusUsername',
                                                   'nexusPassword')
 
-            distributionExtension = project.extensions.create("seasideDistribution", SeasideDistributionExtension)
+            distributionExtension = project.extensions.create("seasideDistribution", SeasideServiceDistributionExtension)
 
             doConfigureConfigurations(project)
             doConfigureAfterEvaluate(project)

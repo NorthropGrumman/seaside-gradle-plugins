@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.extensions.distribution
 
-class SeasideDistributionExtension {
+class SeasideServiceDistributionExtension {
    String buildDir
    String distributionName
    String distributionDestDir

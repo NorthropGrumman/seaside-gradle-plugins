@@ -12,7 +12,7 @@ buildscript {
     }
 }
 
-apply plugin: 'com.ngc.seaside.distribution'
+apply plugin: 'com.ngc.seaside.service-distribution'
 
 group = 'com.ngc.seaside'
 version = '1.0-SNAPSHOT'
