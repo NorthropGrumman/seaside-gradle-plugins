@@ -169,13 +169,21 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                                      "${project.buildDir.absolutePath}/test-results/mainTest/linux_x86_64/report.xml"
                         }
 
+                        if (new File("${project.buildDir.absolutePath}/cppcheck/cppcheck.xml").exists()) {
+                            property 'sonar.cxx.cppcheck.reportPath',
+                                     "${project.buildDir.absolutePath}/cppcheck/cppcheck.xml"
+                        }
+
                         property 'sonar.branch', SeasideParentPlugin.getBranchName()
+
                         if (new File("${project.projectDir}/src/main/cpp").exists()) {
                             property 'sonar.sources', "${project.projectDir}/src/main/cpp"
                         }
+
                         if (new File("${project.projectDir}/src/test/cpp").exists()) {
                             property 'sonar.tests', "${project.projectDir}/src/test/cpp"
                         }
+
                         if (new File("${project.projectDir}/src/main/include").exists()) {
                             property 'sonar.cxx.includeDirectories', "${project.projectDir}/src/main/include"
                         }
@@ -238,14 +246,12 @@ class SeasideCppParentPlugin implements Plugin<Project> {
          * analyzeBuild task for sonarqube
          */
         def buildTask = resolver.findTask("build")
-        def lcovReportTask = resolver.findTask("generateLcovXml")
-        def genHtmlReportTask = resolver.findTask("generateCoverageDataHtml")
+        def coverageReportTask = resolver.findTask("genFullCoverageReport")
         def sonarqubeTask = resolver.findTask("sonarqube")
         project.task(ANALYZE_TASK_NAME) {
         }
         project.tasks.getByName(ANALYZE_TASK_NAME).setGroup("analysis")
-        project.tasks.getByName(ANALYZE_TASK_NAME).dependsOn([buildTask, lcovReportTask, genHtmlReportTask,
-                                                              sonarqubeTask])
+        project.tasks.getByName(ANALYZE_TASK_NAME).dependsOn([buildTask, coverageReportTask, sonarqubeTask])
         project.tasks.getByName(ANALYZE_TASK_NAME).setDescription('Runs build and sonarqube')
 
         project.task('copyCompileDependencies', type: Copy) {

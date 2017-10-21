@@ -61,4 +61,36 @@ class SeasideCppCoverageExtensionTest {
       ].join(File.separator)
       Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_FILE)
    }
+
+   @Test
+   void returnsCorrectPathToDefaultCppCheckXml() {
+      def expected = [
+              project.buildDir.absolutePath,
+              "cppcheck",
+              "cppcheck.xml"
+      ].join(File.separator)
+      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_CPPCHECK_XML)
+   }
+
+   @Test
+   void returnsCorrectPathToDefaultLcovCoberturaXml() {
+      def expected = [
+              project.buildDir.absolutePath,
+              "lcov",
+              "coverage.xml"
+      ].join(File.separator)
+      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_LCOV_COBERTURA_XML)
+   }
+
+   @Test
+   void returnsCorrectPathToDefaultLcovHtmlDir() {
+      def expected = [
+              project.buildDir.absolutePath,
+              "reports",
+              "lcov",
+              "html",
+              project.projectDir.name
+      ].join(File.separator)
+      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_HTML_DIR)
+   }
 }
