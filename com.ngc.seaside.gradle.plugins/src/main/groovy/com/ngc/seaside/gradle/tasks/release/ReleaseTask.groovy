@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
+import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
@@ -9,6 +10,7 @@ class ReleaseTask extends DefaultTask {
    public static final String RELEASE_TASK_NAME = "release"
    public static final String RELEASE_MAJOR_VERSION_TASK_NAME = "releaseMajorVersion"
    public static final String RELEASE_MINOR_VERSION_TASK_NAME = "releaseMinorVersion"
+   public static final String RELEASE_EXTENSION_NAME = 'seasideRelease'
 
    private VersionResolver resolver = new VersionResolver(project)
 
@@ -78,8 +80,11 @@ class ReleaseTask extends DefaultTask {
    }
 
    private void commitVersionFileWithMessage(String msg) {
-      git "commit", "-m", "\"$msg\"", ":/$resolver.versionFile.name"
-      project.logger.info("Committed version file: $msg")
+      def releaseExtension = project.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension)
+      if (releaseExtension.commitChanges){
+         git "commit", "-m", "\"$msg\"", ":/$resolver.versionFile.name"
+         project.logger.info("Committed version file: $msg")
+      }
    }
 
    private void git(Object[] arguments) {
