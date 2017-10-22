@@ -18,10 +18,12 @@ class ExtractCoverageToolsTask extends DefaultTask {
         def lcovFiles = extractTheReleaseArchive(pathToTheLcovReleaseArchive())
         def lcovCoberturaFiles = extractTheReleaseArchive(pathToTheLcovCoberturaReleaseArchive())
         def cppCheckFiles = extractTheReleaseArchive(pathToTheCppCheckReleaseArchive())
+        def ratsFiles = extractTheReleaseArchive(pathToTheRatsReleaseArchive())
 
         copyTheFiles(lcovFiles, pathToTheDirectoryWithLcovFiles())
         copyTheFiles(lcovCoberturaFiles, pathToTheDirectoryWithLcovCoberturaFiles())
         copyTheFiles(cppCheckFiles, pathToTheDirectoryWithCppCheckFiles())
+        copyTheFiles(ratsFiles, pathToTheDirectoryWithRatsFiles())
     }
 
     private FileTree extractTheReleaseArchive(String releaseArchive) {
@@ -38,6 +40,10 @@ class ExtractCoverageToolsTask extends DefaultTask {
 
     private String pathToTheCppCheckReleaseArchive() {
         return Paths.get(findTheReleaseArchiveFile(cppCoverageExtension.CPPCHECK_FILENAME))
+    }
+
+    private String pathToTheRatsReleaseArchive() {
+        return Paths.get(findTheReleaseArchiveFile(cppCoverageExtension.RATS_FILENAME))
     }
 
     private String findTheReleaseArchiveFile(String filename) {
@@ -69,5 +75,9 @@ class ExtractCoverageToolsTask extends DefaultTask {
 
     private String pathToTheDirectoryWithCppCheckFiles() {
         return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_CPPCHECK
+    }
+
+    private String pathToTheDirectoryWithRatsFiles() {
+        return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_RATS
     }
 }

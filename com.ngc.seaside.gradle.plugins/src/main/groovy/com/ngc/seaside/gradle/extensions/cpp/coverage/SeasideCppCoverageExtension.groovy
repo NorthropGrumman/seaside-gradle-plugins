@@ -15,31 +15,46 @@ class SeasideCppCoverageExtension {
     final String CPPCHECK_GROUP_ARTIFACT_VERSION = "cppcheck:cppcheck:${CPPCHECK_VERSION}"
     final String CPPCHECK_FILENAME = "cppcheck-${CPPCHECK_VERSION}.zip"
 
+    final String RATS_VERSION = "2.4"
+    final String RATS_GROUP_ARTIFACT_VERSION = "rats:rats:${RATS_VERSION}"
+    final String RATS_FILENAME = "rats-${RATS_VERSION}.zip"
+
     final CppCoveragePaths CPP_COVERAGE_PATHS
 
     String coverageFilePath
     String coverageXmlPath
     String cppCheckXmlPath
+    String ratsXmlPath
+    String ratsHtmlPath
 
     SeasideCppCoverageExtension(Project p) {
         CPP_COVERAGE_PATHS = new CppCoveragePaths(p)
         coverageFilePath = CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_FILE
         coverageXmlPath = CPP_COVERAGE_PATHS.PATH_TO_LCOV_COBERTURA_XML
         cppCheckXmlPath = CPP_COVERAGE_PATHS.PATH_TO_CPPCHECK_XML
+        ratsXmlPath = CPP_COVERAGE_PATHS.PATH_TO_RATS_XML
+        ratsHtmlPath = CPP_COVERAGE_PATHS.PATH_TO_RATS_HTML
     }
 
     private class CppCoveragePaths {
         final String PATH_TO_THE_DIRECTORY_WITH_LCOV
+        final String PATH_TO_THE_DIRECTORY_WITH_LCOV_COBERTURA
+        final String PATH_TO_THE_DIRECTORY_WITH_CPPCHECK
+        final String PATH_TO_THE_DIRECTORY_WITH_RATS
         final String PATH_TO_THE_LCOV_EXECUTABLE
         final String PATH_TO_THE_CPPCHECK_EXECUTABLE
-        final String PATH_TO_THE_COVERAGE_FILE
         final String PATH_TO_THE_GENHTML_EXECUTABLE
-        final String PATH_TO_THE_COVERAGE_HTML_DIR
-        final String PATH_TO_THE_DIRECTORY_WITH_LCOV_COBERTURA
+        final String PATH_TO_THE_CPPCHECK_HTML_EXECUTABLE
+        final String PATH_TO_THE_RATS_EXECUTABLE
         final String PATH_TO_THE_LCOV_COBERTURA_SCRIPT
+        final String PATH_TO_THE_COVERAGE_FILE
+        final String PATH_TO_THE_COVERAGE_HTML_DIR
+        final String PATH_TO_THE_CPPCHECK_HTML_DIR
         final String PATH_TO_LCOV_COBERTURA_XML
-        final String PATH_TO_THE_DIRECTORY_WITH_CPPCHECK
         final String PATH_TO_CPPCHECK_XML
+        final String PATH_TO_RATS_XML
+        final String PATH_TO_THE_RATS_DATABASE
+        final String PATH_TO_RATS_HTML
 
         CppCoveragePaths(Project p) {
             PATH_TO_THE_DIRECTORY_WITH_LCOV = toPath(
@@ -56,6 +71,11 @@ class SeasideCppCoverageExtension {
                     p.buildDir.name,
                     "tmp",
                     "cppcheck")
+
+            PATH_TO_THE_DIRECTORY_WITH_RATS = toPath(
+                    p.buildDir.name,
+                    "tmp",
+                    "rats")
 
             PATH_TO_THE_LCOV_EXECUTABLE = toPath(
                     PATH_TO_THE_DIRECTORY_WITH_LCOV,
@@ -80,6 +100,22 @@ class SeasideCppCoverageExtension {
                     "cppcheck-$CPPCHECK_VERSION",
                     "cppcheck")
 
+            PATH_TO_THE_CPPCHECK_HTML_EXECUTABLE = toPath(
+                    PATH_TO_THE_DIRECTORY_WITH_CPPCHECK,
+                    "cppcheck-$CPPCHECK_VERSION",
+                    "htmlreport",
+                    "cppcheck-htmlreport")
+
+            PATH_TO_THE_RATS_EXECUTABLE = toPath(
+                    PATH_TO_THE_DIRECTORY_WITH_RATS,
+                    "rats-$RATS_VERSION",
+                    "rats")
+
+            PATH_TO_THE_RATS_DATABASE = toPath(
+                    PATH_TO_THE_DIRECTORY_WITH_RATS,
+                    "rats-$RATS_VERSION",
+                    "rats-c.xml")
+
             PATH_TO_THE_COVERAGE_FILE = toPath(
                     p.buildDir.absolutePath,
                     "lcov",
@@ -89,8 +125,20 @@ class SeasideCppCoverageExtension {
                     p.buildDir.absolutePath,
                     "reports",
                     "lcov",
+                    "html")
+
+            PATH_TO_THE_CPPCHECK_HTML_DIR = toPath(
+                    p.buildDir.absolutePath,
+                    "reports",
+                    "cppcheck",
+                    "html")
+
+            PATH_TO_RATS_HTML = toPath(
+                    p.buildDir.absolutePath,
+                    "reports",
+                    "rats",
                     "html",
-                    p.projectDir.name)
+                    "rats.html")
 
             PATH_TO_LCOV_COBERTURA_XML = toPath(
                     p.buildDir.absolutePath,
@@ -101,6 +149,11 @@ class SeasideCppCoverageExtension {
                     p.buildDir.absolutePath,
                     "cppcheck",
                     "cppcheck.xml")
+
+            PATH_TO_RATS_XML = toPath(
+                    p.buildDir.absolutePath,
+                    "rats",
+                    "rats-report.xml")
 
         }
 

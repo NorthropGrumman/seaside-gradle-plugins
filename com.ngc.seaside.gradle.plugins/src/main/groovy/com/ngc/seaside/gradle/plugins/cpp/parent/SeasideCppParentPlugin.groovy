@@ -62,11 +62,12 @@ class SeasideCppParentPlugin implements Plugin<Project> {
     public static final String ANALYZE_TASK_NAME = 'analyze'
     public static final String DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
     public static final String CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
+    TaskResolver resolver
 
     @Override
     void apply(Project project) {
         project.configure(project) {
-
+            resolver  = new TaskResolver(project)
             project.extensions.create("building", BuildingExtension, project)
 
             project.configurations {
@@ -174,6 +175,11 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                                      "${project.buildDir.absolutePath}/cppcheck/cppcheck.xml"
                         }
 
+                        if (new File("${project.buildDir.absolutePath}/rats/rats-report.xml").exists()) {
+                            property 'sonar.cxx.rats.reportPath',
+                                     "${project.buildDir.absolutePath}/rats/rats-report.xml"
+                        }
+
                         property 'sonar.branch', SeasideParentPlugin.getBranchName()
 
                         if (new File("${project.projectDir}/src/main/cpp").exists()) {
@@ -190,21 +196,26 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                     }
                 }
 
-                tasks.withType(RunTestExecutable) {
+                project.tasks.withType(RunTestExecutable) {
                     args "--gtest_output=xml:report.xml"
                 }
 
-                tasks.getByName(
-                        'createDistributionZip').archiveName = "${project.name}-${project.version}.zip"
+                resolver.findTask('createDistributionZip')
+                        .archiveName = "${project.name}-${project.version}.zip"
 
-                tasks.getByName('copySharedLib').onlyIf { file("${project.buildDir}/libs/main/shared").isDirectory() }
-                tasks.getByName('copyStaticLib').onlyIf { file("${project.buildDir}/libs/main/static").isDirectory() }
+                resolver.findTask('copySharedLib').onlyIf {
+                    file("${project.buildDir}/libs/main/shared").isDirectory()
+                }
 
-                tasks.getByName('unpackCompileDependencies').dependenciesDirectory =
+                resolver.findTask('copyStaticLib').onlyIf {
+                    file("${project.buildDir}/libs/main/static").isDirectory()
+                }
+
+                resolver.findTask('unpackCompileDependencies').dependenciesDirectory =
                         file("${project.buildDir}/dependencies")
-                tasks.getByName('unpackTestCompileDependencies').dependenciesDirectory =
+                resolver.findTask('unpackTestCompileDependencies').dependenciesDirectory =
                         file("${project.buildDir}/testDependencies")
-                tasks.withType(CppCompile, { task ->
+                project.tasks.withType(CppCompile, { task ->
                     task.dependsOn([unpackCompileDependencies, unpackTestCompileDependencies])
                 })
 
@@ -213,8 +224,8 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                         .resolveProjectModel(project.path)
                         .find('binaries', BinaryContainer)
                         .findAll { b -> b.buildable }
-                tasks.getByName('copySharedLib').dependsOn(binaries)
-                tasks.getByName('copyStaticLib').dependsOn(binaries)
+                resolver.findTask('copySharedLib').dependsOn(binaries)
+                resolver.findTask('copyStaticLib').dependsOn(binaries)
             }
         }
     }

@@ -4,9 +4,10 @@ import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtensio
 import com.ngc.seaside.gradle.tasks.cpp.coverage.ExtractCoverageToolsTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.GenerateCoverageDataTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.FilterCoverageDataTask
-import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCppCheckXmlTask
+import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCppCheckReportsTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCoverageXmlTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCoverageHtmlTask
+import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateRatsReportsTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -20,12 +21,14 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
    public static final String FILTER_COVERAGE_DATA_TASK_NAME = "filterCoverageData"
    public static final String GENERATE_COVERAGE_HTML_TASK_NAME = "coverageWithHtml"
    public static final String GENERATE_COVERAGE_XML_TASK_NAME = "coverageWithXml"
-   public static final String GENERATE_FULL_COVERAGE_REPORT_TASK_NAME = "genFullCoverageReport"
    public static final String GENERATE_CPPCHECK_REPORT_TASK_NAME = "cppCheck"
+   public static final String GENERATE_RATS_REPORT_TASK_NAME = "rats"
+   public static final String GENERATE_FULL_COVERAGE_REPORT_TASK_NAME = "genFullCoverageReport"
 
    String coverageFilePath
    String coverageXmlPath
    String cppCheckXmlPath
+   String ratsXmlPath
 
    @Override
    void apply(Project p) {
@@ -66,7 +69,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             description: "Generate html from the coverage data in the specified directory",
             dependsOn: COVERAGE_TASK_NAME)
 
-         task(
+         p.task(
             GENERATE_COVERAGE_XML_TASK_NAME,
             type: GenerateCoverageXmlTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
@@ -75,17 +78,24 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
 
          p.task(
             GENERATE_CPPCHECK_REPORT_TASK_NAME,
-            type: GenerateCppCheckXmlTask,
+            type: GenerateCppCheckReportsTask,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
-            description: "Generates static code analysis xml on cpp project.",
+            description: "Generates xml and html reports for static code analysis on cpp projects.",
+            dependsOn: ["build", EXTRACT_COVERAGE_TOOLS_TASK_NAME])
+
+         p.task(
+            GENERATE_RATS_REPORT_TASK_NAME,
+            type: GenerateRatsReportsTask,
+            group: CPP_COVERAGE_TASK_GROUP_NAME,
+            description: "Generates xml and html reports security scans on cpp projects.",
             dependsOn: ["build", EXTRACT_COVERAGE_TOOLS_TASK_NAME])
 
          p.task(
             GENERATE_FULL_COVERAGE_REPORT_TASK_NAME,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Generate the cobertura and html reports.",
-            dependsOn: [GENERATE_COVERAGE_HTML_TASK_NAME,  GENERATE_CPPCHECK_REPORT_TASK_NAME,
-                        GENERATE_COVERAGE_XML_TASK_NAME])
+            dependsOn: [GENERATE_COVERAGE_HTML_TASK_NAME, GENERATE_COVERAGE_XML_TASK_NAME,
+                        GENERATE_CPPCHECK_REPORT_TASK_NAME, GENERATE_RATS_REPORT_TASK_NAME])
 
 
          p.afterEvaluate {
@@ -93,6 +103,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
                compile "$e.LCOV_GROUP_ARTIFACT_VERSION"
                compile "$e.LCOV_COBERTURA_GROUP_ARTIFACT_VERSION"
                compile "$e.CPPCHECK_GROUP_ARTIFACT_VERSION"
+               compile "$e.RATS_GROUP_ARTIFACT_VERSION"
             }
          }
       }
@@ -107,5 +118,6 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
       e.coverageFilePath = coverageFilePath ?: e.coverageFilePath
       e.coverageXmlPath = coverageXmlPath ?: e.coverageXmlPath
       e.cppCheckXmlPath = cppCheckXmlPath ?: e.cppCheckXmlPath
+      e.ratsXmlPath = ratsXmlPath ?: e.ratsXmlPath
    }
 }

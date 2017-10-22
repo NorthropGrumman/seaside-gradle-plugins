@@ -66,11 +66,16 @@ class SeasideCppCoveragePluginFT {
       checkForTheXMLFile()
    }
 
+   @Test
+   void doesGenerateCppCheckReports() {
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_CPPCHECK_REPORT_TASK_NAME)
+      checkForTheCppCheckFiles()
+   }
 
    @Test
-   void doesGenerateCppCheckXML() {
-      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_CPPCHECK_REPORT_TASK_NAME)
-      checkForTheCppCheckFile()
+   void doesGenerateRatsReports() {
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_RATS_REPORT_TASK_NAME)
+      checkForTheRatsFiles()
    }
 
    @Test
@@ -164,7 +169,7 @@ class SeasideCppCoveragePluginFT {
       }
    }
 
-   private checkForTheCppCheckFile() {
+   private checkForTheCppCheckFiles() {
       subprojectNames.each { subprojectName ->
          def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
          if (file.name.endsWith(SUBPROJECT_DIR_PREFIX + subprojectNames[0]))
@@ -173,8 +178,29 @@ class SeasideCppCoveragePluginFT {
          if (isSubproject(file)) {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.cppCheckXmlPath)
+            def f2 = new File(coverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_CPPCHECK_HTML_DIR + "/index.html")
             Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+            Assert.assertTrue("The file does not exist: ${f2.absolutePath}",f.exists())
             Assert.assertTrue("The file is empty: ${f.absolutePath}", f.text.length() > 0)
+            Assert.assertTrue("The file is empty: ${f2.absolutePath}", f.text.length() > 0)
+         }
+      }
+   }
+
+   private checkForTheRatsFiles() {
+      subprojectNames.each { subprojectName ->
+         def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
+         if (file.name.endsWith(SUBPROJECT_DIR_PREFIX + subprojectNames[0]))
+            return
+
+         if (isSubproject(file)) {
+            coverageExtension = createAnExtensionOnTheSubproject(file)
+            def f = new File(coverageExtension.ratsXmlPath)
+            def f2 = new File(coverageExtension.ratsHtmlPath)
+            Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+            Assert.assertTrue("The file does not exist: ${f2.absolutePath}",f2.exists())
+            Assert.assertTrue("The file is empty: ${f.absolutePath}", f.text.length() > 0)
+            Assert.assertTrue("The file is empty: ${f2.absolutePath}", f2.text.length() > 0)
          }
       }
    }
