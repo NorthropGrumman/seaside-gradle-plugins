@@ -332,9 +332,16 @@ You can also override these properties when you run the gradle command. For exam
 The seaside gradle C++ coverage plugin provides a method of running the lcov command
 as a gradle task
 
-## This plugin requires you to install the following `lcov` dependency
+## This plugin requires you to install the following dependencies
 * perl-Digest-MD5
     * Install with: `sudo yum install -y perl-Digest-MD5`
+    * This is a dependency for `lcov`
+* pygments
+    * Install with: `sudo pip install pygments`
+    * You may need to install `pip`, if it's not already available
+        * Install with: `sudo yum install -y python2-pip`
+    * This is a dependency for `cppcheck`
+
 
 ## Using this plugin
 To use this plugin, you must add compiler and linker flags to your `build.gradle` in any
