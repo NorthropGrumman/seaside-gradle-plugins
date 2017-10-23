@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.tasks.cpp.celix
 
 import com.ngc.seaside.gradle.testutils.GradleMocks
+import com.ngc.seaside.gradle.testutils.TaskBuilder
 import org.gradle.api.internal.project.ProjectInternal
 import org.junit.Before
 import org.junit.Rule
@@ -30,10 +31,9 @@ class CreateCelixRunScriptTaskIT {
         when(project.file(anyString())).thenReturn(file)
 
         // If you don't create the task like this, Gradle blows up.
-        task = CreateCelixRunScriptTask.injectIntoNewInstance(
-              project,
-              "test",
-              CreateCelixRunScriptTask, { new CreateCelixRunScriptTask() })
+        task = new TaskBuilder<CreateCelixRunScriptTask>(CreateCelixRunScriptTask)
+              .setProject(project)
+              .create()
         task.scriptFile = file
     }
 
