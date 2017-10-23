@@ -6,10 +6,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
 class ReleaseTask extends DefaultTask {
-   public static final String RELEASE_TASK_NAME = "release"
-   public static final String RELEASE_MAJOR_VERSION_TASK_NAME = "releaseMajorVersion"
-   public static final String RELEASE_MINOR_VERSION_TASK_NAME = "releaseMinorVersion"
-
    private VersionResolver resolver = new VersionResolver(project)
 
    @Input String tagPrefix
@@ -25,7 +21,7 @@ class ReleaseTask extends DefaultTask {
 
    private void createNewReleaseVersionIfNecessary() {
       if (!isReleaseVersionSet()) {
-         def currentProjectVersion = resolver.getProjectVersion(true)
+         def currentProjectVersion = resolver.getProjectVersion()
          def newReleaseVersion = getTheReleaseVersion(currentProjectVersion)
          setTheNewReleaseVersion(currentProjectVersion, newReleaseVersion)
          setTheReleaseVersionProjectProperty(newReleaseVersion)
@@ -137,29 +133,5 @@ class ReleaseTask extends DefaultTask {
 
    private void setThePublishedProjectsProjectProperty() {
       project.rootProject.ext.set("publishedProjects", true)
-   }
-
-   static IVersionUpgradeStrategy resolveVersionUpgradeStrategy(List<String> taskNames, String versionSuffix) {
-      if (isMajorVersionRelease(taskNames)) {
-         return VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(versionSuffix)
-      } else if (isMinorVersionRelease(taskNames)) {
-         return VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(versionSuffix)
-      } else if (isPatchVersionRelease(taskNames)) {
-         return VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(versionSuffix)
-      } else {
-         return VersionUpgradeStrategyFactory.createSnapshotVersionUpgradeStrategy()
-      }
-   }
-
-   private static boolean isPatchVersionRelease(List<String> taskNames) {
-      return taskNames.contains(RELEASE_TASK_NAME)
-   }
-
-   private static boolean isMinorVersionRelease(List<String> taskNames) {
-      return taskNames.contains(RELEASE_MINOR_VERSION_TASK_NAME)
-   }
-
-   private static boolean isMajorVersionRelease(List<String> taskNames) {
-      return taskNames.contains(RELEASE_MAJOR_VERSION_TASK_NAME)
    }
 }

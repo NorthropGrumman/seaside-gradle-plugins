@@ -60,7 +60,7 @@ class SeasideParentPlugin implements Plugin<Project> {
             applyPlugins(project)
             createTasks(project)
 
-            afterEvaluate {
+            project.afterEvaluate {
                 /**
                  * Ensure to add the doclint option to the javadoc task if using Java 8.
                  */
@@ -70,9 +70,11 @@ class SeasideParentPlugin implements Plugin<Project> {
                     }
                 }
 
+                project.version = new VersionResolver(project).getProjectVersion()
                 resolver.findTask('build') {
-                    project.version = new VersionResolver(project).getProjectVersion(false)
+                   project.version = new VersionResolver(project).getProjectVersion()
                 }
+                project.logger.lifecycle("Setting project version to " + project.version)
 
                 /**
                  * Add the standard repositories. All of the seaside content should be downloaded from
