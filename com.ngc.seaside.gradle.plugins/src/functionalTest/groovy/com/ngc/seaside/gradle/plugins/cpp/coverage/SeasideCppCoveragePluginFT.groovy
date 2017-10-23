@@ -85,6 +85,8 @@ class SeasideCppCoveragePluginFT {
       checkForTheCoverageFile()
       checkForTheHtmlFile()
       checkForTheXMLFile()
+      checkForTheCppCheckFiles()
+      checkForTheRatsFiles()
    }
 
    private static File sourceDirectoryWithTheTestProject() {

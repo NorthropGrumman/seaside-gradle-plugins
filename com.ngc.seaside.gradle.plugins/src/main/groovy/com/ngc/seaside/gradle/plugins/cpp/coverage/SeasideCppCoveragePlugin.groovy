@@ -94,8 +94,12 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
             GENERATE_FULL_COVERAGE_REPORT_TASK_NAME,
             group: CPP_COVERAGE_TASK_GROUP_NAME,
             description: "Generate the cobertura and html reports.",
-            dependsOn: [GENERATE_COVERAGE_HTML_TASK_NAME, GENERATE_COVERAGE_XML_TASK_NAME,
-                        GENERATE_CPPCHECK_REPORT_TASK_NAME, GENERATE_RATS_REPORT_TASK_NAME])
+            dependsOn: [
+                  GENERATE_COVERAGE_HTML_TASK_NAME,
+                  GENERATE_COVERAGE_XML_TASK_NAME,
+                  GENERATE_CPPCHECK_REPORT_TASK_NAME,
+                  GENERATE_RATS_REPORT_TASK_NAME
+            ])
 
 
          p.afterEvaluate {
