@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.cpp.parent
 
+import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.BuildingExtension
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.StaticBuildConfiguration
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.UnpackCppDistributionsTask
@@ -58,6 +59,14 @@ class SeasideCppParentPlugin implements Plugin<Project> {
     @Override
     void apply(Project p) {
         p.configure(p) {
+            // Make sure that all required properties are set.
+            doRequiredGradleProperties(project,
+                                       'nexusConsolidated',
+                                       'nexusReleases',
+                                       'nexusSnapshots',
+                                       'nexusUsername',
+                                       'nexusPassword')
+
             plugins.apply 'cpp'
             plugins.apply 'maven'
             plugins.apply 'google-test-test-suite'
@@ -227,6 +236,9 @@ class SeasideCppParentPlugin implements Plugin<Project> {
         }
     }
 
+    protected void doRequiredGradleProperties(Project project, String propertyName, String... propertyNames) {
+        GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
+    }
 
     /**
      * This method will search the already defined linker arguments and wrap any static libraries that have
