@@ -1,6 +1,5 @@
 package com.ngc.seaside.gradle.extensions.release
 
-import org.gradle.api.Task
 
 class SeasideReleaseExtension {
     private static final DEFAULT_PUSH = true

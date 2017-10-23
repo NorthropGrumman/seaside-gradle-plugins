@@ -15,7 +15,7 @@ class SeasideCommandPlugin implements Plugin<Project> {
     @Override
     void apply(Project p) {
         p.configure(p) {
-//            p.version = new VersionResolver(p).getProjectVersion()
+            p.version = new VersionResolver(p).getProjectVersion()
             /**
              * This plugin requires the java and maven plugins
              */
@@ -30,7 +30,7 @@ class SeasideCommandPlugin implements Plugin<Project> {
                 from "$projectDir/src/main/template/"
                 include "*"
                 include "*/**"
-                archiveName "${project.group}.${project.name}-${project.version}-template.zip"
+                archiveName "${p.group}.${p.name}-${p.version}-template.zip"
                 destinationDir(file("$projectDir/build/libs"))
             }
             
@@ -49,7 +49,7 @@ class SeasideCommandPlugin implements Plugin<Project> {
 	            }
             }
 
-            afterEvaluate {
+            p.afterEvaluate {
                 configurations {
                     commandTemplate
                 }
