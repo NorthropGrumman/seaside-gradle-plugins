@@ -74,7 +74,7 @@ class SeasideParentPlugin implements Plugin<Project> {
                 resolver.findTask('build') {
                    project.version = new VersionResolver(project).getProjectVersion()
                 }
-                project.logger.lifecycle("Setting project version to " + project.version)
+                project.logger.lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
 
                 /**
                  * Add the standard repositories. All of the seaside content should be downloaded from
