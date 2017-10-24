@@ -10,6 +10,12 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
 
+/**
+ * A plugin that can be applied to a project which will produce a ZIP that contains Celix, bundles, and configuration
+ * files.  The distribution will contain any configured bundles and will have a start script which makes it a running
+ * application out of the box.  This plugin is typically applied to projects that only produce a ZIP file; these
+ * projects usually don't have code.
+ */
 class CelixDistributionPlugin implements Plugin<Project> {
 
     public static final String BUILD_TASK_NAME = "build"
@@ -57,9 +63,9 @@ class CelixDistributionPlugin implements Plugin<Project> {
                 postEvaluateConfigureTasks(p)
                 configureTaskDependencies(p)
 
-//                artifacts {
-//                    archives TaskResolver.findTask(p, CREATE_DISTRIBUTION_ZIP_TASK_NAME)
-//                }
+                artifacts {
+                    archives TaskResolver.findTask(p, CREATE_DISTRIBUTION_ZIP_TASK_NAME)
+                }
             }
         }
     }
