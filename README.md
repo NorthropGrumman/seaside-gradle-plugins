@@ -1,6 +1,4 @@
-# seaside-gradle-plugins
-[![Build Status](http://10.207.42.137/jenkins/job/seaside-gradle-plugins/job/seaside-gradle-plugins/job/master/badge/icon)](http://10.207.42.137/jenkins/job/seaside-gradle-plugins/job/seaside-gradle-plugins/job/master/)
-
+# seaside-gradle-plugins [![Build Status](http://10.207.42.137/jenkins/job/seaside-gradle-plugins/job/seaside-gradle-plugins/job/master/badge/icon)](http://10.207.42.137/jenkins/job/seaside-gradle-plugins/job/seaside-gradle-plugins/job/master/)
 `com.ngc.seaside.gradle.plugins` contains the core Seaside plugins used by many Gradle builds.  All core plugins are
 contained in a single JAR and versioned together to make them easier to use.
 
