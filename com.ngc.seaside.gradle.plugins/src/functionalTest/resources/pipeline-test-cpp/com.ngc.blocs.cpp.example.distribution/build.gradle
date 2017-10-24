@@ -15,6 +15,6 @@ celixDistribution {
 dependencies {
     celix "org.apache.celix:celix:$celixVersion@zip"
 
-    bundles project(":service.log.impl.logservice")
+    bundles project(path: ":service.log.impl.logservice", configuration: "distribution")
 }
 

@@ -57,6 +57,6 @@ class CelixDistributionPluginFT {
                          "com.ngc.blocs.cpp.example.distribution-1.0-SNAPSHOT/bundles/shell.zip")))
         assertTrue("did not include extra bundles!",
                    Files.exists(distributionDir.resolve(
-                         "com.ngc.blocs.cpp.example.distribution-1.0-SNAPSHOT/bundles/service.log.impl.logservice.zip")))
+                         "com.ngc.blocs.cpp.example.distribution-1.0-SNAPSHOT/bundles/service.log.impl.logservice-1.0-SNAPSHOT.zip")))
     }
 }
