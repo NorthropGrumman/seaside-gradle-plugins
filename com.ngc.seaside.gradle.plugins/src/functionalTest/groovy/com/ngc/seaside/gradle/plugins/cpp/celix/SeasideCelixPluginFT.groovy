@@ -23,7 +23,6 @@ class SeasideCelixPluginFT {
 
     private File projectDir
     private Path targetPath
-    private Project project
     private List<File> pluginClasspath
 
     @Before
@@ -34,16 +33,16 @@ class SeasideCelixPluginFT {
         targetPath = Paths.get("build/functionalTest/cpp/celix/pipeline-test-cpp")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
-
-        project = ProjectBuilder.builder().withProjectDir(projectDir).build()
     }
 
     @Test
     void doesRunGradleBuildWithSuccess() {
-        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+        BuildResult result = GradleRunner.create()
+              .withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()
-              .withArguments("clean", "build")
+              .withArguments(":service.event.impl.synceventservice:clean",
+                             ":service.event.impl.synceventservice:build")
               .build()
 
         assertEquals(TaskOutcome.valueOf("SUCCESS"),

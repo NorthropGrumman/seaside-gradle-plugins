@@ -1,0 +1,18 @@
+plugins {
+    id 'com.ngc.seaside.cpp.celix.distribution'
+}
+
+ext {
+    celixVersion = '2.0.1'
+}
+
+celixDistribution {
+    distributionName = "${group}.${project.name}-${version}"
+    distributionDir = "${project.distsDir}/${group}.${project.name}-${version}"
+    runScript = "${distributionDir}/run.sh"
+}
+
+dependencies {
+    celix "org.apache.celix:celix:$celixVersion@zip"
+}
+
