@@ -1,5 +1,6 @@
 plugins {
     id 'com.ngc.seaside.cpp.parent'
+    id 'com.ngc.seaside.cpp.coverage'
 }
 
 dependencies {
@@ -21,10 +22,8 @@ model {
         all {
             // Define toolchain-specific compiler and linker options
             if (toolChain in Gcc) {
-                //cppCompiler.args "-O2", "-fno-access-control"
-                //cppCompiler.args "-std=gnu++11"
-                cppCompiler.args "-fPIC", "-std=gnu++11", "-pthread", "-Wall", "-Werror", "-fno-rtti"
-                linker.args "-pthread"
+                cppCompiler.args "-fPIC", "-std=gnu++11", "-pthread", "-Wall", "-Werror", "-fno-rtti", "-fprofile-arcs", "-ftest-coverage"
+                linker.args "-pthread", "-lgcov", "--coverage"
             }
         }
     }

@@ -1,3 +1,17 @@
+buildscript {
+    repositories {
+        mavenLocal()
+
+        maven {
+            url nexusConsolidated
+        }
+    }
+    dependencies {
+        classpath 'com.github.ksoichiro:gradle-console-reporter:0.5.0'
+    }
+}
+
+
 /**
  * Project level build for the seaside-gradle-parent gradle plugin.
  */
@@ -20,7 +34,6 @@ subprojects {
         sonarQubeVersion = '2.5'
         dependencyUpdatesVersion = '0.15.0'
         consoleReporterVersion = '0.5.0'
-        batsVersion = '0.4.0'
         guavaVersion = '22.0'
     }
 
@@ -31,6 +44,7 @@ subprojects {
             url nexusConsolidated
         }
     }
+
 
     //Augment the name of the jar to prepend the group.
     jar {
@@ -139,3 +153,4 @@ subprojects {
     functionalTest.shouldRunAfter(integrationTest)
     check.dependsOn(integrationTest, functionalTest)
 }
+

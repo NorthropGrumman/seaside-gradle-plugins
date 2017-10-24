@@ -27,13 +27,12 @@ class SeasideCppParentPluginFT {
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
 
         File source = Paths.get("src/functionalTest/resources/pipeline-test-cpp").toFile()
-        Path targetPath = Paths.get("build/functionalTest/cpp-parent/pipeline-test-cpp")
+        Path targetPath = Paths.get("build/functionalTest/cpp/parent/pipeline-test-cpp")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
 
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
     }
-
 
     @Test
     void doesRunGradleBuildWithSuccess() {
@@ -50,5 +49,23 @@ class SeasideCppParentPluginFT {
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:build").getOutcome())
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:build").getOutcome())
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:build").getOutcome())
+    }
+
+    @Test
+    void doesRunGradleAnalyzeBuildWithSuccess() {
+
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("analyze")
+                .build()
+
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:analyze").getOutcome())
     }
 }
