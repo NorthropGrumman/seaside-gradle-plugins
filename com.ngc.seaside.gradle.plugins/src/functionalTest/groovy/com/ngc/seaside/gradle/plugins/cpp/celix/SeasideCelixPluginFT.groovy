@@ -14,10 +14,15 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.jar.Manifest
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
 
 class SeasideCelixPluginFT {
 
     private File projectDir
+    private Path targetPath
     private Project project
     private List<File> pluginClasspath
 
@@ -26,7 +31,7 @@ class SeasideCelixPluginFT {
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
 
         File source = Paths.get("src/functionalTest/resources/pipeline-test-cpp").toFile()
-        Path targetPath = Paths.get("build/functionalTest/cpp/celix/pipeline-test-cpp")
+        targetPath = Paths.get("build/functionalTest/cpp/celix/pipeline-test-cpp")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
 
@@ -41,6 +46,24 @@ class SeasideCelixPluginFT {
               .withArguments("clean", "build")
               .build()
 
-        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:build").getOutcome())
+        assertEquals(TaskOutcome.valueOf("SUCCESS"),
+                            result.task(":service.event.impl.synceventservice:build").getOutcome())
+
+        Path manifestFile = targetPath.resolve(Paths.get(
+              "com.ngc.blocs.cpp.service.event.impl.synceventservice",
+              "build",
+              "distributions",
+              "com.ngc.blocs.cpp.service.event.impl.synceventservice-1.0-SNAPSHOT",
+              "META-INF"))
+        assertTrue("manifest file not created!",
+                   manifestFile.toFile().exists())
+
+        manifestFile.toFile().withInputStream { stream ->
+            Manifest manifest = new Manifest()
+            manifest.read(stream)
+            assertEquals("Bundle-SymbolicName not correct",
+                         "com.ngc.blocs.cpp.service.event.impl.synceventservice",
+                         manifest.getMainAttributes().getValue("Bundle-SymbolicName"))
+        }
     }
 }
