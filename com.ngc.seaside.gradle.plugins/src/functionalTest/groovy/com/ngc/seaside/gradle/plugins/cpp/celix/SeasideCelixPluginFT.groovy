@@ -26,7 +26,7 @@ class SeasideCelixPluginFT {
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
 
         File source = Paths.get("src/functionalTest/resources/pipeline-test-cpp").toFile()
-        Path targetPath = Paths.get("build/functionalTest/cpp/parent/pipeline-test-cpp")
+        Path targetPath = Paths.get("build/functionalTest/cpp/celix/pipeline-test-cpp")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
 

@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.tasks.cpp.celix
 
-import com.ngc.seaside.gradle.testutils.GradleMocks
-import com.ngc.seaside.gradle.testutils.TaskBuilder
+import com.ngc.seaside.gradle.plugins.util.test.GradleMocks
+import com.ngc.seaside.gradle.plugins.util.test.TaskBuilder
 import org.gradle.api.internal.project.ProjectInternal
 import org.junit.Before
 import org.junit.Rule
