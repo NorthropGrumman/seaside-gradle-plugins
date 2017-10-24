@@ -61,4 +61,57 @@ class SeasideCppCoverageExtensionTest {
       ].join(File.separator)
       Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_FILE)
    }
+
+   @Test
+   void returnsCorrectPathToDefaultCppCheckXml() {
+      def expected = [
+              project.buildDir.absolutePath,
+              "cppcheck",
+              "cppcheck.xml"
+      ].join(File.separator)
+      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_CPPCHECK_XML)
+   }
+
+   @Test
+   void returnsCorrectPathToDefaultRatsXml() {
+      def expected = [
+              project.buildDir.absolutePath,
+              "rats",
+              "rats-report.xml"
+      ].join(File.separator)
+      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_RATS_XML)
+   }
+
+   @Test
+   void returnsCorrectPathToDefaultRatsHtml() {
+      def expected = [
+              project.buildDir.absolutePath,
+              "reports",
+              "rats",
+              "html",
+              "rats.html"
+      ].join(File.separator)
+      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_RATS_HTML)
+   }
+
+   @Test
+   void returnsCorrectPathToDefaultLcovCoberturaXml() {
+      def expected = [
+              project.buildDir.absolutePath,
+              "lcov",
+              "coverage.xml"
+      ].join(File.separator)
+      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_LCOV_COBERTURA_XML)
+   }
+
+   @Test
+   void returnsCorrectPathToDefaultLcovHtmlDir() {
+      def expected = [
+              project.buildDir.absolutePath,
+              "reports",
+              "lcov",
+              "html"
+      ].join(File.separator)
+      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_HTML_DIR)
+   }
 }

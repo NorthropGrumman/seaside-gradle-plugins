@@ -27,10 +27,15 @@ class SeasideCppCoveragePluginIT {
    @Test
    void appliesPlugin() {
       Assert.assertNotNull(project.extensions.findByName(SeasideCppCoveragePlugin.CPP_COVERAGE_EXTENSION_NAME))
-      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.EXTRACT_LCOV_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.EXTRACT_COVERAGE_TOOLS_TASK_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_COVERAGE_DATA_TASK_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.FILTER_COVERAGE_DATA_TASK_NAME))
-      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_COVERAGE_DATA_HTML_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.COVERAGE_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_COVERAGE_HTML_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_CPPCHECK_REPORT_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_RATS_REPORT_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_COVERAGE_XML_TASK_NAME))
+      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_FULL_COVERAGE_REPORT_TASK_NAME))
    }
 
    private static File createTheTestProjectDirectory() {
@@ -40,7 +45,7 @@ class SeasideCppCoveragePluginIT {
 
    private static File pathToTheDestinationProjectDirectory() {
       return turnListIntoPath(
-            "build", "integrationTest", "resources",
+            "build", "integrationTest",
             "cpp", "coverage", "sealion-java-hello-world"
       )
    }

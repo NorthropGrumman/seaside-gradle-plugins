@@ -1,7 +1,6 @@
 package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
-import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.TaskResolver
@@ -31,17 +30,22 @@ import org.gradle.api.tasks.bundling.Jar
  */
 class SeasideParentPlugin implements Plugin<Project> {
 
-    public static final String PARENT_TASK_GROUP_NAME = 'MainBuild'
-    public static final String PARENT_SOURCE_JAR_TASK_NAME = 'sourcesJar'
-    public static final String PARENT_JAVADOC_JAR_TASK_NAME = 'javadocJar'
-    public static final String PARENT_ANALYZE_TASK_NAME = 'analyze'
-    public static final String PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
-    public static final String PARENT_CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
+    public static final String PARENT_TASK_GROUP_NAME = 'parent'
+    public static final String SOURCE_JAR_TASK_NAME = 'sourcesJar'
+    public static final String JAVADOC_JAR_TASK_NAME = 'javadocJar'
+    public static final String ANALYZE_TASK_NAME = 'analyze'
+    public static final String DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
+    public static final String DEPENDENCY_UPDATES_TASK_NAME = 'dependencyUpdates'
+    public static final String DEPENDENCY_REPORT_TASK_NAME = 'dependencyReport'
+    public static final String CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
     public static final String LOCAL_TAG = 'local-'
     public static String REMOTE_TAG = ''
 
+    TaskResolver resolver
+
     @Override
     void apply(Project project) {
+        resolver = new TaskResolver(project)
 
         project.configure(project) {
 
@@ -66,7 +70,7 @@ class SeasideParentPlugin implements Plugin<Project> {
                     }
                 }
 
-                project.tasks.getByName('build') {
+                resolver.findTask('build') {
                     project.version = new VersionResolver(project).getProjectVersion(false)
                 }
 
@@ -93,26 +97,26 @@ class SeasideParentPlugin implements Plugin<Project> {
                 /**
                  * Configure the dependencyUpdates task report path
                  */
-                tasks.getByName('dependencyUpdates') {
-                    outputDir = ["build", "dependencyUpdates"].join(File.separator)
+                resolver.findTask(DEPENDENCY_UPDATES_TASK_NAME) {
+                    outputDir = ["build", DEPENDENCY_UPDATES_TASK_NAME].join(File.separator)
                 }
 
                 /**
                  * Augment the jar name to be $groupId.$project.name).
                  */
-                tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME) { jar ->
+                resolver.findTask(SOURCE_JAR_TASK_NAME) { jar ->
                     archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
                 }
 
-                tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME) { jar ->
+                resolver.findTask(JAVADOC_JAR_TASK_NAME) { jar ->
                     archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
                 }
 
                 /**
                  * Augment the jar to be OSGi compatible.
                  */
-                tasks.getByName('jar') { jar ->
-                    convention.plugins.bundle = new BundleTaskConvention(jar)
+                resolver.findTask('jar') { jar ->
+                    convention.plugins.bundle = new BundleTaskConvention((Jar)jar)
 
                     archiveName = "${project.group}.${project.name}-${project.version}.jar"
 
@@ -151,8 +155,8 @@ class SeasideParentPlugin implements Plugin<Project> {
                  * Ensure we call the 2 new tasks for generating the javadoc and sources artifact jars.
                  */
                 artifacts {
-                    archives tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME)
-                    archives tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME)
+                    archives resolver.findTask(SOURCE_JAR_TASK_NAME)
+                    archives resolver.findTask(JAVADOC_JAR_TASK_NAME)
                 }
 
                 /**
@@ -165,10 +169,6 @@ class SeasideParentPlugin implements Plugin<Project> {
                         property 'sonar.branch', getBranchName()
                     }
                 }
-            }
-
-            task('dependencyReport', type: DependencyReportTask,
-                 description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies') {
             }
 
             defaultTasks = ['build']
@@ -252,53 +252,53 @@ class SeasideParentPlugin implements Plugin<Project> {
      * @param project
      */
     protected void createTasks(Project project) {
+        TaskResolver resolver = new TaskResolver(project)
 
         /**
          * Create a task for generating the source jar. This will also be uploaded to Nexus.
          */
-        def classesTask = project.tasks.getByName("classes")
-        project.task(PARENT_SOURCE_JAR_TASK_NAME, type: Jar) {
+        def classesTask = resolver.findTask("classes")
+        project.task(SOURCE_JAR_TASK_NAME, type: Jar) {
             classifier = 'sources'
             from project.sourceSets.main.allSource
         }
-        project.tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
-        project.tasks.getByName(PARENT_SOURCE_JAR_TASK_NAME).dependsOn(classesTask)
+        resolver.findTask(SOURCE_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        resolver.findTask(SOURCE_JAR_TASK_NAME).dependsOn(classesTask)
 
         /**
          * Create a task for generating the javadoc jar. This will also be uploaded to Nexus.
          */
-        def javadocsTask = project.tasks.getByName("javadoc")
-        project.task(PARENT_JAVADOC_JAR_TASK_NAME, type: Jar) {
+        def javadocsTask = resolver.findTask("javadoc")
+        project.task(JAVADOC_JAR_TASK_NAME, type: Jar) {
             classifier = 'javadoc'
             from javadocsTask.destinationDir
         }
-        project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
-        project.tasks.getByName(PARENT_JAVADOC_JAR_TASK_NAME).dependsOn([classesTask, javadocsTask])
+        resolver.findTask(JAVADOC_JAR_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        resolver.findTask(JAVADOC_JAR_TASK_NAME).dependsOn([classesTask, javadocsTask])
 
         /**
          * analyzeBuild task for sonarqube
          */
-        def buildTask = project.tasks.getByName("build")
-        def jacocoTaskReportTask = project.tasks.getByName("jacocoTestReport")
-        def sonarqubeTask = project.tasks.getByName("sonarqube")
-        project.task(PARENT_ANALYZE_TASK_NAME) {
-        }
-        project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
-        project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).dependsOn([buildTask, jacocoTaskReportTask, sonarqubeTask])
-        project.tasks.getByName(PARENT_ANALYZE_TASK_NAME).setDescription('Runs jacocoTestReport and sonarqube')
+        def buildTask = resolver.findTask("build")
+        def jacocoReportTask = resolver.findTask("jacocoTestReport")
+        def sonarqubeTask = resolver.findTask("sonarqube")
+        project.task(ANALYZE_TASK_NAME)
+        resolver.findTask(ANALYZE_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        resolver.findTask(ANALYZE_TASK_NAME).dependsOn([buildTask, jacocoReportTask, sonarqubeTask])
+        resolver.findTask(ANALYZE_TASK_NAME).setDescription('Runs jacocoTestReport and sonarqube')
 
         /**
          * downloadDependencies task
          */
-        project.task(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {}
-        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
-        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription(
+        project.task(DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {}
+        resolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        resolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription(
                 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.')
 
         /**
          * cleanupDependencies task
          */
-        project.task(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {
+        project.task(CLEANUP_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {
             customRepo = project.getProjectDir().path + "/build/dependencies-tmp"
             doLast {
                 ext.actualRepository = project.downloadDependencies.localRepository ?
@@ -315,8 +315,14 @@ class SeasideParentPlugin implements Plugin<Project> {
                 project.delete(localRepository)
             }
         }
-        project.tasks.getByName(PARENT_CLEANUP_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
-        project.tasks.getByName(PARENT_DOWNLOAD_DEPENDENCIES_TASK_NAME).
+        resolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+        resolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME).
                 setDescription('Remove unused dependencies from dependencies folder.')
+
+        /**
+         * dependencyReport task
+         */
+        project.task(DEPENDENCY_REPORT_TASK_NAME, type: DependencyReportTask,
+             description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies')
     }
 }

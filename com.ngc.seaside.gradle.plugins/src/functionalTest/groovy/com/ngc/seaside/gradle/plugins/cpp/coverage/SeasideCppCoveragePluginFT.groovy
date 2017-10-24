@@ -38,32 +38,55 @@ class SeasideCppCoveragePluginFT {
 
    @Test
    void doesExtractLcov() {
-      checkForTaskSuccess("extractLcov")
+      checkForTaskSuccess(SeasideCppCoveragePlugin.EXTRACT_COVERAGE_TOOLS_TASK_NAME)
       checkForTheExtractedLcovFiles()
    }
 
    @Test
    void doesGenerateCoverageData() {
-      checkForTaskSuccess("generateCoverageData")
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_COVERAGE_DATA_TASK_NAME)
       checkForTheCoverageFile()
    }
 
    @Test
    void doesFilterCoverageData() {
-      checkForTaskSuccess("filterCoverageData")
+      checkForTaskSuccess(SeasideCppCoveragePlugin.FILTER_COVERAGE_DATA_TASK_NAME)
       checkForTheCoverageFile()
    }
 
    @Test
+   void doesGenerateCoverageDataHtml() {
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_COVERAGE_HTML_TASK_NAME)
+      checkForTheHtmlFile()
+   }
+
+   @Test
    void doesGenerateCoverageXML() {
-      checkForTaskSuccess("generateLcovXml")
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_COVERAGE_XML_TASK_NAME)
       checkForTheXMLFile()
    }
 
    @Test
-   void doesGenerateCoverageDataHtml() {
-      checkForTaskSuccess("generateCoverageDataHtml")
+   void doesGenerateCppCheckReports() {
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_CPPCHECK_REPORT_TASK_NAME)
+      checkForTheCppCheckFiles()
+   }
+
+   @Test
+   void doesGenerateRatsReports() {
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_RATS_REPORT_TASK_NAME)
+      checkForTheRatsFiles()
+   }
+
+   @Test
+   void doesGenerateFullReport() {
+      checkForTaskSuccess(SeasideCppCoveragePlugin.GENERATE_FULL_COVERAGE_REPORT_TASK_NAME)
+      checkForTheExtractedLcovFiles()
+      checkForTheCoverageFile()
       checkForTheHtmlFile()
+      checkForTheXMLFile()
+      checkForTheCppCheckFiles()
+      checkForTheRatsFiles()
    }
 
    private static File sourceDirectoryWithTheTestProject() {
@@ -98,7 +121,7 @@ class SeasideCppCoveragePluginFT {
          if (isSubproject(file)) {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV)
-            Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+            Assert.assertTrue("The file does not exist: ${f.absolutePath}", f.exists())
          }
       }
    }
@@ -112,7 +135,8 @@ class SeasideCppCoveragePluginFT {
          if (isSubproject(file)) {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.coverageFilePath)
-            Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+            Assert.assertTrue("The file does not exist: ${f.absolutePath}", f.exists())
+            Assert.assertTrue("The file is empty: ${f.absolutePath}", f.text.length() > 0)
          }
       }
    }
@@ -127,6 +151,7 @@ class SeasideCppCoveragePluginFT {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_HTML_DIR + "/index.html")
             Assert.assertTrue("The file does not exist: ${f.absolutePath}", f.exists())
+            Assert.assertTrue("The file is empty: ${f.absolutePath}", f.text.length() > 0)
          }
       }
    }
@@ -141,6 +166,43 @@ class SeasideCppCoveragePluginFT {
             coverageExtension = createAnExtensionOnTheSubproject(file)
             def f = new File(coverageExtension.coverageXmlPath)
             Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+            Assert.assertTrue("The file is empty: ${f.absolutePath}", f.text.length() > 0)
+         }
+      }
+   }
+
+   private checkForTheCppCheckFiles() {
+      subprojectNames.each { subprojectName ->
+         def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
+         if (file.name.endsWith(SUBPROJECT_DIR_PREFIX + subprojectNames[0]))
+            return
+
+         if (isSubproject(file)) {
+            coverageExtension = createAnExtensionOnTheSubproject(file)
+            def f = new File(coverageExtension.cppCheckXmlPath)
+            def f2 = new File(coverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_CPPCHECK_HTML_DIR + "/index.html")
+            Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+            Assert.assertTrue("The file does not exist: ${f2.absolutePath}",f.exists())
+            Assert.assertTrue("The file is empty: ${f.absolutePath}", f.text.length() > 0)
+            Assert.assertTrue("The file is empty: ${f2.absolutePath}", f.text.length() > 0)
+         }
+      }
+   }
+
+   private checkForTheRatsFiles() {
+      subprojectNames.each { subprojectName ->
+         def file = new File([testProjectDir, SUBPROJECT_DIR_PREFIX + subprojectName].join(File.separator))
+         if (file.name.endsWith(SUBPROJECT_DIR_PREFIX + subprojectNames[0]))
+            return
+
+         if (isSubproject(file)) {
+            coverageExtension = createAnExtensionOnTheSubproject(file)
+            def f = new File(coverageExtension.ratsXmlPath)
+            def f2 = new File(coverageExtension.ratsHtmlPath)
+            Assert.assertTrue("The file does not exist: ${f.absolutePath}",f.exists())
+            Assert.assertTrue("The file does not exist: ${f2.absolutePath}",f2.exists())
+            Assert.assertTrue("The file is empty: ${f.absolutePath}", f.text.length() > 0)
+            Assert.assertTrue("The file is empty: ${f2.absolutePath}", f2.text.length() > 0)
          }
       }
    }

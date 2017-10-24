@@ -50,4 +50,22 @@ class SeasideCppParentPluginFT {
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:build").getOutcome())
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:build").getOutcome())
     }
+
+    @Test
+    void doesRunGradleAnalyzeBuildWithSuccess() {
+
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("analyze")
+                .build()
+
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.api:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.utilities:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.logservice:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.thread.impl.threadservice:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.time.impl.timeservice:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.event.impl.synceventservice:analyze").getOutcome())
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:analyze").getOutcome())
+    }
 }

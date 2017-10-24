@@ -15,7 +15,7 @@ class FilterCoverageDataTask extends DefaultTask {
       def coverageFile = new File(cppCoverageExtension.coverageFilePath)
       def arguments = [
          "-r", coverageFile,
-         "/$project.buildDir.name/*",
+         "$project.projectDir.name/$project.buildDir.name/*",
          "--rc", "lcov_branch_coverage=1",
          "-o", coverageFile
       ]
