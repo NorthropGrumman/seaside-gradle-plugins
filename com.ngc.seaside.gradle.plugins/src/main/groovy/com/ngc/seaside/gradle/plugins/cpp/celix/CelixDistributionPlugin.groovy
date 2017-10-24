@@ -125,20 +125,20 @@ class CelixDistributionPlugin implements Plugin<Project> {
         project.task(CREATE_RUN_SCRIPT_TASK_NAME,
                      group: DISTRIBUTION_TASK_GROUP_NAME,
                      type: CreateCelixRunScriptTask,
-                     description: 'Creates a run script to run Celix.')
+                     description: 'Creates a run script to run Celix.') {
+        }
 
         project.task(CREATE_DISTRIBUTION_ZIP_TASK_NAME,
                      group: DISTRIBUTION_TASK_GROUP_NAME,
                      type: Zip,
                      description: 'Creates a ZIP of the distribution.') {
-            from { extension.distributionDir }
         }
+
     }
 
     protected void postEvaluateConfigureTasks(Project project) {
-        TaskResolver.findTask(project, CREATE_RUN_SCRIPT_TASK_NAME, {
-            scriptFile = extension.runScript
-        })
+        TaskResolver.findTask(project, CREATE_RUN_SCRIPT_TASK_NAME).scriptFile = extension.runScript
+        TaskResolver.findTask(project, CREATE_DISTRIBUTION_ZIP_TASK_NAME).from(extension.distributionDir)
     }
 
     protected void configureTaskDependencies(Project project) {
@@ -150,10 +150,11 @@ class CelixDistributionPlugin implements Plugin<Project> {
         TaskResolver.findTask(project, CREATE_RUN_SCRIPT_TASK_NAME).dependsOn(
               TaskResolver.findTask(project, UNPACK_CELIX_TASK_NAME))
 
-//        distroTask.dependsOn(TaskResolver.findTask(project, CREATE_RUN_SCRIPT_TASK_NAME),
-//                             TaskResolver.findTask(project, COPY_BUNDLES_TASK_NAME))
+        distroTask.dependsOn(TaskResolver.findTask(project, CREATE_RUN_SCRIPT_TASK_NAME),
+                             TaskResolver.findTask(project, COPY_BUNDLES_TASK_NAME))
 
         TaskResolver.findTask(project, BUILD_TASK_NAME).dependsOn(distroTask)
         TaskResolver.findTask(project, ASSEMBLE_TASK_NAME).dependsOn(distroTask)
     }
+
 }
