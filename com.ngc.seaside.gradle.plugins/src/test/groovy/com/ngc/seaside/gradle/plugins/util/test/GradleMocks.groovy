@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.util.test
 
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.internal.service.ServiceRegistry
+import org.gradle.util.Path
 
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
@@ -22,8 +23,12 @@ class GradleMocks {
         // create tasks outside of the DSL.
         ServiceRegistry registry = mock(ServiceRegistry)
 
+        Path projectPath = Path.ROOT
+
         ProjectInternal project = mock(ProjectInternal)
         when(project.getServices()).thenReturn(registry)
+        when(project.getProjectPath()).thenReturn(projectPath)
+        when(project.getIdentityPath()).thenReturn(projectPath)
 
         return project
     }
