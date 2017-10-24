@@ -10,13 +10,13 @@ class ReleaseTask extends DefaultTask {
    public static final String RELEASE_TASK_NAME = "release"
    public static final String RELEASE_MAJOR_VERSION_TASK_NAME = "releaseMajorVersion"
    public static final String RELEASE_MINOR_VERSION_TASK_NAME = "releaseMinorVersion"
-   public static final String RELEASE_EXTENSION_NAME = 'seasideRelease'
 
    private VersionResolver resolver = new VersionResolver(project)
 
    @Input String tagPrefix
    @Input String versionSuffix
    @Input boolean push
+   @Input boolean commitChanges
 
    @TaskAction
    def release() {
@@ -80,8 +80,7 @@ class ReleaseTask extends DefaultTask {
    }
 
    private void commitVersionFileWithMessage(String msg) {
-      def releaseExtension = project.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension)
-      if (releaseExtension.commitChanges){
+      if (commitChanges){
          git "commit", "-m", "\"$msg\"", ":/$resolver.versionFile.name"
          project.logger.info("Committed version file: $msg")
       }
@@ -108,8 +107,10 @@ class ReleaseTask extends DefaultTask {
    }
 
    private void createReleaseTag(String tagName) {
-      git "tag", "-a", tagName, "-m Release $tagName"
-      project.logger.debug("Created release tag: $tagName")
+      if(commitChanges) {
+         git "tag", "-a", tagName, "-m Release $tagName"
+         project.logger.debug("Created release tag: $tagName")
+      }
    }
 
    private void persistTheNewProjectVersion() {

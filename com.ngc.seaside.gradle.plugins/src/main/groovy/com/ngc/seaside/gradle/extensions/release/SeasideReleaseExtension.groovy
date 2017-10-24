@@ -5,7 +5,7 @@ class SeasideReleaseExtension {
     private static final DEFAULT_UPLOAD_ARTIFACTS = true
     private static final DEFAULT_TAG_PREFIX = 'v'
     private static final DEFAULT_VERSION_SUFFIX = '-SNAPSHOT'
-    private static final DEFAULT_COMMIT_CHANGES = true
+    private static final DEFAULT_COMMIT_CHANGES = false
 
     boolean commitChanges = DEFAULT_COMMIT_CHANGES
     boolean push = DEFAULT_PUSH
