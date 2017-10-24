@@ -62,6 +62,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
     public static final String ANALYZE_TASK_NAME = 'analyze'
     public static final String DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
     public static final String CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
+    public static final String CREATE_DISTRIBUTION_ZIP_TASK_NAME = 'createDistributionZip'
     TaskResolver resolver
 
     @Override
@@ -200,7 +201,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                     args "--gtest_output=xml:report.xml"
                 }
 
-                resolver.findTask('createDistributionZip')
+                resolver.findTask(CREATE_DISTRIBUTION_ZIP_TASK_NAME)
                         .archiveName = "${project.name}-${project.version}.zip"
 
                 resolver.findTask('copySharedLib').onlyIf {
@@ -320,7 +321,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
         def copyExportedHeadersTask = resolver.findTask("copyExportedHeaders")
         def copySharedLibTask = resolver.findTask("copySharedLib")
         def copyStaticLibTask = resolver.findTask("copyStaticLib")
-        project.task('createDistributionZip', type: Zip, dependsOn: [copyExportedHeadersTask, copySharedLibTask, copyStaticLibTask]) {
+        project.task(CREATE_DISTRIBUTION_ZIP_TASK_NAME, type: Zip, dependsOn: [copyExportedHeadersTask, copySharedLibTask, copyStaticLibTask]) {
             from { "${project.distsDir}/${project.group}.${project.name}-${project.version}" }
         }
 
