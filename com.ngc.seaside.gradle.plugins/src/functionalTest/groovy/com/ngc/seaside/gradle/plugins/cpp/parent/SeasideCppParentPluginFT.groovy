@@ -9,6 +9,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 import java.nio.file.Files
@@ -51,6 +52,7 @@ class SeasideCppParentPluginFT {
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.log.impl.printservice:build").getOutcome())
     }
 
+    @Ignore // Ignoring until sonarqube server is fix
     @Test
     void doesRunGradleAnalyzeBuildWithSuccess() {
 
