@@ -12,12 +12,12 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class SeasideDistributionPluginIT {
+class SeasideServiceDistributionPluginIT {
 
 
     private File projectDir
     private Project project
-    private SeasideDistributionPlugin plugin
+    private SeasideServiceDistributionPlugin plugin
 
     @Before
     void before() {
@@ -29,7 +29,7 @@ class SeasideDistributionPluginIT {
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
 
 
-        plugin = new SeasideDistributionPlugin()
+        plugin = new SeasideServiceDistributionPlugin()
 
         setRequiredProjectProperties(project)
         plugin.apply(project)

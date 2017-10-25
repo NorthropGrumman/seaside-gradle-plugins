@@ -1,5 +1,5 @@
 plugins {
-    id 'com.ngc.seaside.distribution'
+    id 'com.ngc.seaside.service-distribution'
 }
 
 group = 'com.ngc.seaside'
