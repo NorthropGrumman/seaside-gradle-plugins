@@ -40,7 +40,7 @@ class SeasideReleasePluginFT {
                 .withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
-                .withArguments("-PuploadArtifacts=false", "-Ppush=false", "clean", "build", "release")
+                .withArguments("-PuploadArtifacts=false", "-PcommitChanges=false", "-Ppush=false", "clean", "build", "release")
                 .build()
 
         Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:release").getOutcome())
@@ -63,7 +63,7 @@ class SeasideReleasePluginFT {
                 .withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
-                .withArguments("-PuploadArtifacts=false", "-Ppush=false", "clean", "build", "release")
+                .withArguments("-PuploadArtifacts=false", "-PcommitChanges=false", "-Ppush=false", "clean", "build", "release")
                 .buildAndFail()
 
         Assert.assertNull(result.task(":clean"))

@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
+import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.plugins.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
@@ -15,6 +16,7 @@ class ReleaseTask extends DefaultTask {
    @Input String tagPrefix
    @Input String versionSuffix
    @Input boolean push
+   @Input boolean commitChanges
 
    @TaskAction
    def release() {
@@ -78,8 +80,10 @@ class ReleaseTask extends DefaultTask {
    }
 
    private void commitVersionFileWithMessage(String msg) {
-      git "commit", "-m", "\"$msg\"", ":/$resolver.versionFile.name"
-      project.logger.info("Committed version file: $msg")
+      if (commitChanges){
+         git "commit", "-m", "\"$msg\"", ":/$resolver.versionFile.name"
+         project.logger.info("Committed version file: $msg")
+      }
    }
 
    private void git(Object[] arguments) {
@@ -103,8 +107,10 @@ class ReleaseTask extends DefaultTask {
    }
 
    private void createReleaseTag(String tagName) {
-      git "tag", "-a", tagName, "-m Release $tagName"
-      project.logger.debug("Created release tag: $tagName")
+      if(commitChanges) {
+         git "tag", "-a", tagName, "-m Release $tagName"
+         project.logger.debug("Created release tag: $tagName")
+      }
    }
 
    private void persistTheNewProjectVersion() {

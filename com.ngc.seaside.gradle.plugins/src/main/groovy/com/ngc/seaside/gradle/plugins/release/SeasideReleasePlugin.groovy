@@ -15,18 +15,21 @@ class SeasideReleasePlugin implements Plugin<Project> {
 
     private String versionFromFile
     String uploadArtifacts
+    String commitChanges
+    String push
+    String tagPrefix
+    String versionSuffix
 
-   String push
-   String tagPrefix
-   String versionSuffix
+
     @Override
     void apply(Project project) {
         project.configure(project) {
             def releaseExtension = project.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension)
             releaseExtension.uploadArtifacts = (uploadArtifacts)? Boolean.parseBoolean(uploadArtifacts) : releaseExtension.uploadArtifacts
-            releaseExtension.push = (push)? Boolean.parseBoolean(push) : releaseExtension.uploadArtifacts
+            releaseExtension.push = (push)? Boolean.parseBoolean(push) : releaseExtension.push
             releaseExtension.tagPrefix = (tagPrefix)? tagPrefix : releaseExtension.tagPrefix
             releaseExtension.versionSuffix = (versionSuffix)? versionSuffix : releaseExtension.versionSuffix
+            releaseExtension.commitChanges = (commitChanges)? Boolean.parseBoolean(commitChanges) : releaseExtension.commitChanges
 
             def taskNames = project.gradle.startParameter.taskNames
             def isReleaseJob =
@@ -36,12 +39,13 @@ class SeasideReleasePlugin implements Plugin<Project> {
            versionFromFile = (new VersionResolver(project)).getProjectVersion(isReleaseJob)
            project.version = ReleaseTask.resolveVersionUpgradeStrategy(taskNames, releaseExtension.versionSuffix).getVersion(versionFromFile)
 
-            task(RELEASE_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
+            project.task(RELEASE_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
                 tagPrefix = releaseExtension.tagPrefix
                 versionSuffix = releaseExtension.versionSuffix
                 push = releaseExtension.push
+                commitChanges = releaseExtension.commitChanges
                 if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
                         uploadArchives
@@ -49,12 +53,13 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 }
             }
 
-            task(RELEASE_MAJOR_VERSION_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
+            project.task(RELEASE_MAJOR_VERSION_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
                 tagPrefix = releaseExtension.tagPrefix
                 versionSuffix = releaseExtension.versionSuffix
                 push = releaseExtension.push
+                commitChanges = releaseExtension.commitChanges
                 if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
                         uploadArchives
@@ -62,12 +67,13 @@ class SeasideReleasePlugin implements Plugin<Project> {
                 }
             }
 
-            task(RELEASE_MINOR_VERSION_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
+            project.task(RELEASE_MINOR_VERSION_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                  description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
                 dependsOn subprojects*.build
                 tagPrefix = releaseExtension.tagPrefix
                 versionSuffix = releaseExtension.versionSuffix
                 push = releaseExtension.push
+                commitChanges = releaseExtension.commitChanges
                 if (releaseExtension.uploadArtifacts) {
                     finalizedBy {
                         uploadArchives
