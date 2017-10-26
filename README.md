@@ -1,4 +1,4 @@
-# seaside-gradle-plugins
+# seaside-gradle-plugins [![Build Status](http://10.207.42.137/jenkins/job/seaside-gradle-plugins/job/seaside-gradle-plugins/job/master/badge/icon)](http://10.207.42.137/jenkins/job/seaside-gradle-plugins/job/seaside-gradle-plugins/job/master/)
 `com.ngc.seaside.gradle.plugins` contains the core Seaside plugins used by many Gradle builds.  All core plugins are
 contained in a single JAR and versioned together to make them easier to use.
 
@@ -63,8 +63,8 @@ This plugin configures the following tasks:
 | dependencyReport | Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies | no |
 | cleanupDependencies | Remove unused dependencies from dependencies folder | no |
 
-# com.ngc.seaside:seaside.distribution
-The seaside gradle distribution plugin provide the directory structure required to run a BLoCS application and all of its bundle dependencies. This plugin will then distribute and compress the bundles of files packaged, including blocs dependencies, jar files, and also resource files. 
+# com.ngc.seaside:seaside.service-distribution
+The seaside gradle service distribution plugin provide the directory structure required to run a BLoCS application and all of its bundle dependencies. This plugin will then distribute and compress the bundles of files packaged, including blocs dependencies, jar files, and also resource files. 
 
 ## This plugin requires properties in your gradle.properties file (usually ~/.gradle/gradle.properties):
 * nexusUsername     : the username to use when uploading artifacts to nexus
@@ -90,11 +90,11 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.ngc.seaside:gradle.plugins:1.4.1'
+        classpath 'com.ngc.seaside:gradle.plugins:2.0.4'
     }
 }
 
-apply plugin: 'com.ngc.seaside.distribution'
+apply plugin: 'com.ngc.seaside.service-distribution'
 
 group = 'com.ngc.seaside'
 version = '1.0-SNAPSHOT'

@@ -432,7 +432,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    private static String getDependencyNameFromFileName(String fileName) {
       // Return the name of the artifact/dependency minus the version.
       String name = fileName;
-      int position = fileName.indexOf('-');
+      int position = fileName.lastIndexOf('-');
       if (position > 0) {
          name = fileName.substring(0, position);
       }
