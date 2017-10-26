@@ -46,7 +46,7 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
                                                  releaseExtension.commitChanges
             }
 
-            doCreateTasks(project)
+            createTasks(project)
 
             project.afterEvaluate {
                 TaskResolver.findTask(project, RELEASE_TASK_NAME) {
@@ -77,10 +77,10 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
     }
 
     /**
-     * Create tasks for this plugin
+     * Create project tasks for this plugin
      * @param project
      */
-    private void doCreateTasks(Project project) {
+    private void createTasks(Project project) {
         project.logger.info(String.format("Creating tasks for %s", project.name))
         project.task(RELEASE_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                      description: 'Creates a tagged non-SNAPSHOT release.') {
