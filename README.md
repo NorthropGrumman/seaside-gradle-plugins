@@ -2,6 +2,16 @@
 `com.ngc.seaside.gradle.plugins` contains the core Seaside plugins used by many Gradle builds.  All core plugins are
 contained in a single JAR and versioned together to make them easier to use.
 
+## Prerequisites
+* perl-Digest-MD5
+    * Install with: `sudo yum install -y perl-Digest-MD5`
+    * This is a dependency for `lcov`
+* pygments
+    * Install with: `sudo pip install pygments`
+    * You may need to install `pip`, if it's not already available
+        * Install with: `sudo yum install -y python2-pip`
+    * This is a dependency for `cppcheck`
+    
 ## Notes on building this project
 * To build, you can run: `./gradlew build`
 * If you want to see which Gradle tasks are available for you to run, execute: `./gradlew tasks [--all]`
