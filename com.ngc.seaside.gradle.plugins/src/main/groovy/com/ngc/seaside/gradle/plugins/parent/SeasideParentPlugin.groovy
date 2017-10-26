@@ -56,6 +56,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
             createTasks(project)
 
             project.afterEvaluate {
+                project.logger.lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
                 /**
                  * Ensure to add the doclint option to the javadoc task if using Java 8.
                  */
@@ -222,7 +223,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
     }
 
     /**
-     * This plugin requires the java and maven plugins
+     * Applies additional plugins to the project the project
      * @param project
      */
     private static void applyPlugins(Project project) {

@@ -43,22 +43,26 @@ class ReleaseTask extends DefaultTask {
         if (!isDryRun() && currentProjectVersion != newReleaseVersion) {
             resolver.setProjectVersionOnFile(newReleaseVersion)
         } else {
-            project.logger.lifecycle("Would have set version in root build.gradle to $newReleaseVersion")
+            project.logger.lifecycle("Dry Run >> Would have set version in root build.gradle to $newReleaseVersion")
         }
     }
 
     private boolean isDryRun() {
-        return releaseExtension.push && releaseExtension.commitChanges && releaseExtension.uploadArtifacts
+        return !(releaseExtension.push && releaseExtension.commitChanges && releaseExtension.uploadArtifacts)
     }
 
     private void setTheReleaseVersionProjectProperty(String newReleaseVersion) {
         project.rootProject.ext.set("releaseVersion", newReleaseVersion)
-        project.logger.lifecycle("Set project version to '$newReleaseVersion'")
+
+        String dryRunHeader = (isDryRun()) ? "Dry Run >>" : ""
+        project.logger.lifecycle("$dryRunHeader Set project version to '$newReleaseVersion'")
     }
 
     private void releaseAllProjectsIfNecessary() {
+        String dryRunHeader = (isDryRun()) ? "Dry Run >>" : ""
         if (!areAllProjectsReleased()) {
-            project.logger.lifecycle("Beginning the release task for ${releaseExtension.tagPrefix}${project.version}")
+            project.logger.lifecycle("$dryRunHeader Beginning the release task for " +
+                                     "${releaseExtension.tagPrefix}${project.version}")
             tagTheRelease()
             persistTheNewProjectVersion()
             pushTheChangesIfNecessary()
@@ -82,7 +86,7 @@ class ReleaseTask extends DefaultTask {
         }
 
         if (isDryRun()) {
-            project.logger.lifecycle("Would have committed version file: $msg")
+            project.logger.lifecycle("Dry Run >> Would have committed version file: $msg")
         }
     }
 
@@ -110,15 +114,18 @@ class ReleaseTask extends DefaultTask {
         }
 
         if (isDryRun()) {
-            project.logger.lifecycle("Would have created release tag: $tagName")
+            project.logger.lifecycle("Dry Run >> Would have created release tag: $tagName")
         }
     }
 
     private void persistTheNewProjectVersion() {
         String nextVersion = getNextVersion()
-        resolver.setProjectVersionOnFile(nextVersion)
+        String dryRunHeader = (isDryRun()) ? "Dry Run >>" : ""
+        if (!isDryRun()) {
+            resolver.setProjectVersionOnFile(nextVersion)
+        }
         commitVersionFileWithMessage("Creating new $nextVersion version after release")
-        project.logger.lifecycle("\nUpdated project version to $nextVersion")
+        project.logger.lifecycle("\n$dryRunHeader Updated project version to $nextVersion")
     }
 
     private String getNextVersion() {
@@ -138,7 +145,7 @@ class ReleaseTask extends DefaultTask {
         }
 
         if (isDryRun()) {
-            project.logger.lifecycle("Would have pushed changes to remote")
+            project.logger.lifecycle("Dry Run >> Would have pushed changes to remote")
         }
     }
 

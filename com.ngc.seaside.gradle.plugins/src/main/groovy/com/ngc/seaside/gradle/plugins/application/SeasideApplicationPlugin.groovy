@@ -13,8 +13,7 @@ import javax.inject.Inject
  */
 class SeasideApplicationPlugin extends AbstractProjectPlugin {
 
-    private static final String COPY_APPLICATION_RESOURCES_TASKNAME = "copyApplicationResources"
-    private SeasideApplicationExtension applicationExtension
+    SeasideApplicationExtension applicationExtension
     final Instantiator instantiator;
 
     @Inject
@@ -25,59 +24,76 @@ class SeasideApplicationPlugin extends AbstractProjectPlugin {
     @Override
     void doApply(Project project) {
         project.configure(project) {
-            applicationExtension = project.extensions.create("seasideApplication", SeasideApplicationExtension,
-                                                             instantiator, project)
 
             applyPlugins(project)
+
+            applicationExtension = project.extensions.create("seasideApplication",
+                                                             SeasideApplicationExtension,
+                                                             instantiator, project)
 
             // Allow user to configure the distribution name
             project.afterEvaluate {
                 // Make sure the user sets the mainClassName
-                if (applicationExtension.mainClassName != null) {
-                    taskResolver.findTask('startScripts') {
-                        mainClassName = applicationExtension.mainClassName
+                if (seasideApplication.mainClassName != null) {
+                    project.tasks.getByName('startScripts') {
+                        mainClassName = seasideApplication.mainClassName
                     }
                 }
 
-                if (applicationExtension.distributionName != null) {
-                    taskResolver.findTask('distTar') {
+                if (seasideApplication.distributionName != null) {
+                    project.tasks.getByName('distTar') {
                         compression = Compression.GZIP
-                        archiveName = "${applicationExtension.distributionName}.tar.gz"
+                        archiveName = "${seasideApplication.distributionName}.tar.gz"
                     }
-                    taskResolver.findTask('distZip') {
-                        archiveName = "${applicationExtension.distributionName}.zip"
+                    project.tasks.getByName('distZip') {
+                        archiveName = "${seasideApplication.distributionName}.zip"
                     }
-                    taskResolver.findTask('installDist') {
-                        if (applicationExtension.installationDir != null) {
-                            destinationDir = new File(String.valueOf(applicationExtension.installationDir))
+                    project.tasks.getByName('installDist') {
+                        if (seasideApplication.installationDir != null) {
+                            destinationDir = file(String.valueOf(seasideApplication.installationDir))
                         }
                     }
                 }
             }
 
-            createTasks(project)
+            /**
+             * Copies files specified in includeDistributionDirs variable
+             */
+            project.task('copyApplicationResources') {
+                doLast {
+                    List includeDistributionDirs = seasideApplication.includeDistributionDirs
+                    if (includeDistributionDirs != null) {
+                        includeDistributionDirs.each {
+                            applicationDistribution.from(it) {
+                                into "resources"
+                            }
+                        }
+                    } else { // Default
+                        applicationDistribution.from("src/main/resources/") {
+                            into "resources"
+                        }
+                    }
+                }
+            }
 
             /**
              * Modify installDist task to include resources and allow user to configure installation directory
              */
-            installDist {
-                dependsOn taskResolver.findTask(COPY_APPLICATION_RESOURCES_TASKNAME)
-            }
+            taskResolver.findTask("installDist").dependsOn(taskResolver.findTask("copyApplicationResources"))
+
             // Perform installDist each build
-            assemble.finalizedBy(installDist)
+            taskResolver.findTask("assemble").finalizedBy(taskResolver.findTask("installDist"))
 
             /**
              * Modify distZip task to include resources
              */
-            distZip {
-                dependsOn taskResolver.findTask(COPY_APPLICATION_RESOURCES_TASKNAME)
-            }
+            taskResolver.findTask("distZip").dependsOn(taskResolver.findTask("copyApplicationResources"))
 
             /**
              * Modify distTar task to include resources
              */
             distTar {
-                dependsOn taskResolver.findTask(COPY_APPLICATION_RESOURCES_TASKNAME)
+                dependsOn copyApplicationResources
             }
 
             /**
@@ -135,7 +151,7 @@ class SeasideApplicationPlugin extends AbstractProjectPlugin {
                         project.getLogger().debug("seasideApplication.appHomeVarName is not set.")
                     }
 
-                    // Replace the classpath declaration with libs wildcard for Windows since the classpath was making 
+                    // Replace the classpath declaration with libs wildcard for Windows since the classpath was making
                     // the command too long and Windows was balking at it.
                     windowsScript.text = windowsScript.text.replaceFirst('(set CLASSPATH=)(.*)(?=\r\n)',
                                                                          '$1' + '"%APP_HOME%\\\\lib\\\\*"')
@@ -167,41 +183,14 @@ class SeasideApplicationPlugin extends AbstractProjectPlugin {
         }
     }
 
-    /**
-     * Create tasks for this plugin
-     * @param project
-     */
-    private void createTasks(Project project) {
-        /**
-         * Copies files specified in includeDistributionDirs variable
-         */
-        project.task('copyApplicationResources') {
-            doLast {
-                List includeDistributionDirs = applicationExtension.includeDistributionDirs
-                if (includeDistributionDirs != null) {
-                    includeDistributionDirs.each {
-                        applicationDistribution.from(it) {
-                            into "resources"
-                        }
-                    }
-                } else { // Default
-                    applicationDistribution.from("src/main/resources/") {
-                        into "resources"
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * This plugin requires the java and application plugins
-     * @param project
-     */
+/**
+ * Applies additional plugins to the project the project
+ * @param project
+ */
     private static void applyPlugins(Project project) {
         project.logger.info(String.format("Applying plugins for %s", project.name))
         project.getPlugins().apply('java')
         project.getPlugins().apply('application')
-        project.getPlugins().apply('maven')
     }
 
 }

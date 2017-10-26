@@ -21,7 +21,7 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
     String tagPrefix
     String versionSuffix
     String commitChanges
-    String dryRun
+    String dryRun = "false"
 
 
     @Override

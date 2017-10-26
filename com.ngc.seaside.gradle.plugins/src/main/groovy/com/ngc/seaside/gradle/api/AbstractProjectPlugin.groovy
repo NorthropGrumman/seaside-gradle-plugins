@@ -24,8 +24,6 @@ abstract class AbstractProjectPlugin implements IProjectPlugin {
         this.versionResolver = new VersionResolver(project)
         project.configure(project) {
             project.afterEvaluate {
-                project.logger.
-                        lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
                 project.version = versionResolver.getProjectVersion()
                 taskResolver.findTask('build') {
                     project.version = versionResolver.getProjectVersion()
