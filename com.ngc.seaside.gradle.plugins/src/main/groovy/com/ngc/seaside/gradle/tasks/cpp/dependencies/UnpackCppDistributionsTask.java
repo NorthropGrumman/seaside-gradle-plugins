@@ -27,11 +27,45 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This task unpacks the dependencies and configures the cpp task.
  */
 public class UnpackCppDistributionsTask extends DefaultTask {
+
+   /**
+    * This regex is used to extract the artifact name from a zip file name.  A zip file name is of the form:
+    * {@code
+    *   <artifactId>-<majorVersion>.<minorVersion>.<optionalIncrementalVersion>-<optionalQualifier>.zip
+    * }
+    * In the expression below, group 1 matches the name of the artifact.  Below are examples (the second column is the
+    * artifact ID):
+    * <table>
+    *    <tr>
+    *       <td>foo-1.0</td>
+    *       <td>foo</td>
+    *    </tr>
+    *    <tr>
+    *       <td>foo-1.0.0</td>
+    *       <td>foo</td>
+    *    </tr>
+    *    <tr>
+    *       <td>foo-1.0.0-SNAPSHOT</td>
+    *       <td>foo</td>
+    *    </tr>
+    *    <tr>
+    *       <td>foo-1.0-SNAPSHOT</td>
+    *       <td>foo</td>
+    *    </tr>
+    *    <tr>
+    *       <td>foo-bar-1.0</td>
+    *       <td>foo-bar</td>
+    *    </tr>
+    * </table>
+    */
+   private final static Pattern ARTIFACT_NAME_REGEX = Pattern.compile("(.+)-\\d+\\.\\d+(\\.\\d+)?(-\\w+)?");
 
    private File dependenciesDirectory;
    private String componentName;
@@ -432,9 +466,9 @@ public class UnpackCppDistributionsTask extends DefaultTask {
    private static String getDependencyNameFromFileName(String fileName) {
       // Return the name of the artifact/dependency minus the version.
       String name = fileName;
-      int position = fileName.indexOf('-');
-      if (position > 0) {
-         name = fileName.substring(0, position);
+      Matcher matcher = ARTIFACT_NAME_REGEX.matcher(fileName);
+      if(matcher.matches()) {
+         name = matcher.group(1);
       }
       return name;
    }
