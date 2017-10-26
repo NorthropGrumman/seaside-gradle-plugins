@@ -13,11 +13,6 @@ class ReleaseTask extends DefaultTask {
 
     @TaskAction
     def release() {
-
-        println("Dry Run?" + project.property("dryRun"))
-        println(">>Push2 Set to:" + releaseExtension.push)
-        println(">>commitChanges2 Set to:" + releaseExtension.commitChanges)
-        println(">>versionSuffix Set to:" + releaseExtension.versionSuffix)
         createNewReleaseVersionIfNecessary()
         project.version = project.rootProject.releaseVersion
         releaseAllProjectsIfNecessary()
@@ -40,18 +35,20 @@ class ReleaseTask extends DefaultTask {
         def taskNames = project.gradle.startParameter.taskNames
         def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(taskNames)
         String newReleaseVersion = upgradeStrategy.getVersion(currentProjectVersion)
-        project.logger.debug("Using release version '$newReleaseVersion'")
+        project.logger.info("Using release version '$newReleaseVersion'")
         return newReleaseVersion
     }
 
     private void setTheNewReleaseVersion(String currentProjectVersion, String newReleaseVersion) {
         if (!isDryRun() && currentProjectVersion != newReleaseVersion) {
             resolver.setProjectVersionOnFile(newReleaseVersion)
+        } else {
+            project.logger.lifecycle("Would have set version in root build.gradle to $newReleaseVersion")
         }
     }
 
     private boolean isDryRun() {
-        return project.gradle.startParameter.dryRun
+        return releaseExtension.push && releaseExtension.commitChanges && releaseExtension.uploadArtifacts
     }
 
     private void setTheReleaseVersionProjectProperty(String newReleaseVersion) {
@@ -83,16 +80,16 @@ class ReleaseTask extends DefaultTask {
             git "commit", "-m", "\"$msg\"", ":/$resolver.versionFile.name"
             project.logger.info("Committed version file: $msg")
         }
+
+        if (isDryRun()) {
+            project.logger.lifecycle("Would have committed version file: $msg")
+        }
     }
 
     private void git(Object[] arguments) {
         project.logger.debug("Will run: git $arguments")
         def output = new ByteArrayOutputStream()
 
-        // TODO: evaluate a better way to catch git command execution return.
-        // The .assertNormalExitValue will throw an exception when you do gradlew release and a commit is already made..
-        // works fine for gradlew release[Major/Minor]Version...
-        // We need a better way to tell the user what occurred without throwing an exception
         project.exec {
             executable "git"
             args arguments
@@ -108,8 +105,12 @@ class ReleaseTask extends DefaultTask {
 
     private void createReleaseTag(String tagName) {
         if (releaseExtension.commitChanges) {
-            git "tag", "-a", tagName, "-m Release $tagName"
+            git "tag", "-a", tagName, "-m Release of $tagName"
             project.logger.debug("Created release tag: $tagName")
+        }
+
+        if (isDryRun()) {
+            project.logger.lifecycle("Would have created release tag: $tagName")
         }
     }
 
@@ -134,6 +135,10 @@ class ReleaseTask extends DefaultTask {
     private void pushTheChangesIfNecessary() {
         if (releaseExtension.push) {
             pushChanges(resolver.getTagName(releaseExtension.tagPrefix, releaseExtension.versionSuffix))
+        }
+
+        if (isDryRun()) {
+            project.logger.lifecycle("Would have pushed changes to remote")
         }
     }
 
