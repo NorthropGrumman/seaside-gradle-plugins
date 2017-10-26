@@ -209,7 +209,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
      * @param propertyName
      * @param propertyNames
      */
-    protected void doRequireGradleProperties(Project project, String propertyName, String... propertyNames) {
+    protected static void doRequireGradleProperties(Project project, String propertyName, String... propertyNames) {
         GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
     }
 
