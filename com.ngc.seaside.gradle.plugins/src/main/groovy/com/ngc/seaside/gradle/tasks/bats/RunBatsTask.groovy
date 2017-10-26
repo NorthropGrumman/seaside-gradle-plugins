@@ -5,55 +5,57 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class RunBatsTask extends DefaultTask {
-   SeasideBatsExtension batsExtension =
+
+    SeasideBatsExtension batsExtension =
             project.extensions
-                   .findByType(SeasideBatsExtension.class)
+                    .findByType(SeasideBatsExtension.class)
 
-   @TaskAction
-   def runBats() {
-      def bats = pathToTheBatsScript()
-      def tests = enumerateAllBatsFilesIn(pathToTheDirectoryWithBatsTests())
-      def commandOutput = new ByteArrayOutputStream()
+    @TaskAction
+    def runBats() {
+        println(">>>>>>>>>>>BATS:" + batsExtension.resultsFile)
+        def bats = pathToTheBatsScript()
+        def tests = enumerateAllBatsFilesIn(pathToTheDirectoryWithBatsTests())
+        def commandOutput = new ByteArrayOutputStream()
 
-      project.exec {
-         executable bats
-         args tests
-         standardOutput commandOutput
-      }
+        project.exec {
+            executable bats
+            args tests
+            standardOutput commandOutput
+        }
 
-      print commandOutput.toString()
-      writeTestResultsFile(commandOutput)
-   }
+        print commandOutput.toString()
+        writeTestResultsFile(commandOutput)
+    }
 
-   private String pathToTheBatsScript() {
-      return batsExtension.BATS_PATHS.PATH_TO_THE_BATS_SCRIPT
-   }
+    private String pathToTheBatsScript() {
+        return batsExtension.BATS_PATHS.PATH_TO_THE_BATS_SCRIPT
+    }
 
-   private String pathToTheDirectoryWithBatsTests() {
-      return batsExtension.batsTestsDir
-   }
+    private String pathToTheDirectoryWithBatsTests() {
+        return batsExtension.batsTestsDir
+    }
 
-   private Set<File> enumerateAllBatsFilesIn(String path) {
-      return project.fileTree(path).getFiles()
-                    .findAll { file -> file.name.endsWith(".bats") }
-   }
+    private Set<File> enumerateAllBatsFilesIn(String path) {
+        return project.fileTree(path).getFiles()
+                .findAll { file -> file.name.endsWith(".bats") }
+    }
 
-   private void writeTestResultsFile(ByteArrayOutputStream commandOutput) {
-      def f = resultsFile(pathToTheBatsResultsFile())
-      f << commandOutput.toString()
-   }
+    private void writeTestResultsFile(ByteArrayOutputStream commandOutput) {
+        def f = resultsFile(pathToTheBatsResultsFile())
+        f << commandOutput.toString()
+    }
 
-   private File resultsFile(String path) {
-      return createTheResultsFileIfNecessary(project.file(path))
-   }
+    private File resultsFile(String path) {
+        return createTheResultsFileIfNecessary(project.file(path))
+    }
 
-   private static File createTheResultsFileIfNecessary(File f) {
-      f.getParentFile().mkdirs()
-      f.createNewFile()
-      return f
-   }
+    private static File createTheResultsFileIfNecessary(File f) {
+        f.getParentFile().mkdirs()
+        f.createNewFile()
+        return f
+    }
 
-   private String pathToTheBatsResultsFile() {
-      return batsExtension.resultsFile
-   }
+    private String pathToTheBatsResultsFile() {
+        return batsExtension.resultsFile
+    }
 }

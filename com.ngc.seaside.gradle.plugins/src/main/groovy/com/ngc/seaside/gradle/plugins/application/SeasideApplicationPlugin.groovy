@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.plugins.application
 
+import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.application.SeasideApplicationExtension
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Compression
 import org.gradle.internal.reflect.Instantiator
@@ -11,8 +11,10 @@ import javax.inject.Inject
 /**
  * Created by J57467 on 7/18/2017.
  */
-class SeasideApplicationPlugin implements Plugin<Project> {
+class SeasideApplicationPlugin extends AbstractProjectPlugin {
 
+    private static final String COPY_APPLICATION_RESOURCES_TASKNAME = "copyApplicationResources"
+    private SeasideApplicationExtension applicationExtension
     final Instantiator instantiator;
 
     @Inject
@@ -21,64 +23,45 @@ class SeasideApplicationPlugin implements Plugin<Project> {
     }
 
     @Override
-    void apply(Project p) {
-        p.configure(p) {
+    void doApply(Project project) {
+        project.configure(project) {
+            applicationExtension = project.extensions.create("seasideApplication", SeasideApplicationExtension,
+                                                             instantiator, project)
 
-            plugins.apply 'java'
-            plugins.apply 'application'
-
-            extensions.create("seasideApplication", SeasideApplicationExtension, instantiator, p)
+            applyPlugins(project)
 
             // Allow user to configure the distribution name
-            afterEvaluate {
+            project.afterEvaluate {
                 // Make sure the user sets the mainClassName
-                if (seasideApplication.mainClassName != null) {
-                    project.tasks.getByName('startScripts') {
-                        mainClassName = seasideApplication.mainClassName
+                if (applicationExtension.mainClassName != null) {
+                    taskResolver.findTask('startScripts') {
+                        mainClassName = applicationExtension.mainClassName
                     }
                 }
 
-                if (seasideApplication.distributionName != null) {
-                    project.tasks.getByName('distTar') {
+                if (applicationExtension.distributionName != null) {
+                    taskResolver.findTask('distTar') {
                         compression = Compression.GZIP
-                        archiveName = "${seasideApplication.distributionName}.tar.gz"
+                        archiveName = "${applicationExtension.distributionName}.tar.gz"
                     }
-                    project.tasks.getByName('distZip') {
-                        archiveName = "${seasideApplication.distributionName}.zip"
+                    taskResolver.findTask('distZip') {
+                        archiveName = "${applicationExtension.distributionName}.zip"
                     }
-                    project.tasks.getByName('installDist') {
-                        if (seasideApplication.installationDir != null) {
-                            destinationDir = file(String.valueOf(seasideApplication.installationDir))
+                    taskResolver.findTask('installDist') {
+                        if (applicationExtension.installationDir != null) {
+                            destinationDir = new File(String.valueOf(applicationExtension.installationDir))
                         }
                     }
                 }
             }
 
-            /**
-             * Copies files specified in includeDistributionDirs variable
-             */
-            task('copyApplicationResources') {
-                doLast {
-                    List includeDistributionDirs = seasideApplication.includeDistributionDirs
-                    if (includeDistributionDirs != null) {
-                        includeDistributionDirs.each {
-                            applicationDistribution.from(it) {
-                                into "resources"
-                            }
-                        }
-                    } else { // Default
-                        applicationDistribution.from("src/main/resources/") {
-                            into "resources"
-                        }
-                    }
-                }
-            }
+            createTasks(project)
 
             /**
              * Modify installDist task to include resources and allow user to configure installation directory
              */
             installDist {
-                dependsOn copyApplicationResources
+                dependsOn taskResolver.findTask(COPY_APPLICATION_RESOURCES_TASKNAME)
             }
             // Perform installDist each build
             assemble.finalizedBy(installDist)
@@ -87,20 +70,20 @@ class SeasideApplicationPlugin implements Plugin<Project> {
              * Modify distZip task to include resources
              */
             distZip {
-                dependsOn copyApplicationResources
+                dependsOn taskResolver.findTask(COPY_APPLICATION_RESOURCES_TASKNAME)
             }
 
             /**
              * Modify distTar task to include resources
              */
             distTar {
-                dependsOn copyApplicationResources
+                dependsOn taskResolver.findTask(COPY_APPLICATION_RESOURCES_TASKNAME)
             }
 
             /**
              * Modify start scripts task to allow custom start scripts
              */
-            startScripts {                
+            startScripts {
                 doLast {
                     // Configure how APP_HOME variable is created using user command
                     if (seasideApplication.windows.appHomeCmd != null) {
@@ -111,14 +94,15 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                     // Configure how APP_HOME variable is created using user command
                     if (seasideApplication.unix.appHomeCmd != null) {
                         String UNIX_APP_HOME_SCRIPT = "\"`${seasideApplication.unix.appHomeCmd}`\""
-                        unixScript.text = unixScript.text.replaceFirst('(?<=APP_HOME=)((\'|\")(.*)(\'|"))(?=\n)', UNIX_APP_HOME_SCRIPT)
+                        unixScript.text = unixScript.text.
+                                replaceFirst('(?<=APP_HOME=)((\'|\")(.*)(\'|"))(?=\n)', UNIX_APP_HOME_SCRIPT)
                     }
 
                     // Add system properties set by user
                     if (seasideApplication.appSystemProperties != null) {
                         seasideApplication.appSystemProperties.each { key, value ->
                             String systemProp = "\"-D" + key + "=" + value + "\""
-                            p.getLogger().info("Adding " + systemProp + " to DEFAULT_JVM_OPTS")
+                            project.getLogger().info("Adding " + systemProp + " to DEFAULT_JVM_OPTS")
 
                             // Adds system property to start scripts
                             unixScript.text = unixScript.text.
@@ -129,12 +113,12 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                                                                                  '$1 ' + systemProp + ' ')
                         }
                     } else {
-                        p.getLogger().debug("seasideApplication.appSystemProperties is not set.")
+                        project.getLogger().debug("seasideApplication.appSystemProperties is not set.")
                     }
 
                     // Configure appHomeVarName to point to the APP_HOME
                     if (seasideApplication.appHomeVarName != null) {
-                        p.getLogger().info("Setting " + seasideApplication.appHomeVarName + " to APP_HOME_VAR")
+                        project.getLogger().info("Setting " + seasideApplication.appHomeVarName + " to APP_HOME_VAR")
                         String appNameProp = "\"-D" + seasideApplication.appHomeVarName + "=APP_HOME_VAR\""
 
                         // Provide the app home directory has a system property.
@@ -148,9 +132,9 @@ class SeasideApplicationPlugin implements Plugin<Project> {
                         windowsScript.text = windowsScript.text.replaceAll('APP_HOME_VAR', '%APP_HOME%')
                         unixScript.text = unixScript.text.replaceAll('APP_HOME_VAR', '\\$APP_HOME')
                     } else {
-                        p.getLogger().debug("seasideApplication.appHomeVarName is not set.")
+                        project.getLogger().debug("seasideApplication.appHomeVarName is not set.")
                     }
-                    
+
                     // Replace the classpath declaration with libs wildcard for Windows since the classpath was making 
                     // the command too long and Windows was balking at it.
                     windowsScript.text = windowsScript.text.replaceFirst('(set CLASSPATH=)(.*)(?=\r\n)',
@@ -158,8 +142,9 @@ class SeasideApplicationPlugin implements Plugin<Project> {
 
                     // Override generated start script with custom windows start script
                     if (seasideApplication.windows.startScript != null) {
-                        p.getLogger().info("Overriding Windows start script with " + seasideApplication.unix.startScript)
-                        def windowsCustomScript = new File(p.getProjectDir().path,
+                        project.getLogger().
+                                info("Overriding Windows start script with " + seasideApplication.unix.startScript)
+                        def windowsCustomScript = new File(project.getProjectDir().path,
                                                            String.valueOf(seasideApplication.windows.startScript))
                         if (windowsCustomScript.exists()) {
                             windowsScript.text = windowsCustomScript.readLines().join('\r\n')
@@ -168,8 +153,9 @@ class SeasideApplicationPlugin implements Plugin<Project> {
 
                     // Override generated start script with custom unix start script
                     if (seasideApplication.unix.startScript != null) {
-                        p.getLogger().info("Overriding Unix start script with " + seasideApplication.unix.startScript)
-                        def unixCustomScript = new File(p.getProjectDir().path,
+                        project.getLogger().
+                                info("Overriding Unix start script with " + seasideApplication.unix.startScript)
+                        def unixCustomScript = new File(project.getProjectDir().path,
                                                         String.valueOf(seasideApplication.unix.startScript))
                         if (unixCustomScript.exists()) {
                             unixScript.text = unixCustomScript.readLines().join('\n')
@@ -180,4 +166,42 @@ class SeasideApplicationPlugin implements Plugin<Project> {
             defaultTasks = ['build']
         }
     }
+
+    /**
+     * Create tasks for this plugin
+     * @param project
+     */
+    private void createTasks(Project project) {
+        /**
+         * Copies files specified in includeDistributionDirs variable
+         */
+        project.task('copyApplicationResources') {
+            doLast {
+                List includeDistributionDirs = applicationExtension.includeDistributionDirs
+                if (includeDistributionDirs != null) {
+                    includeDistributionDirs.each {
+                        applicationDistribution.from(it) {
+                            into "resources"
+                        }
+                    }
+                } else { // Default
+                    applicationDistribution.from("src/main/resources/") {
+                        into "resources"
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * This plugin requires the java and application plugins
+     * @param project
+     */
+    private static void applyPlugins(Project project) {
+        project.logger.info(String.format("Applying plugins for %s", project.name))
+        project.getPlugins().apply('java')
+        project.getPlugins().apply('application')
+        project.getPlugins().apply('maven')
+    }
+
 }

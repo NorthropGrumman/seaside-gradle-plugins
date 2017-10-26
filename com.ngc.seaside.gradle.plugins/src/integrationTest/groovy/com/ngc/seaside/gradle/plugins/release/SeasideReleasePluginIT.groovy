@@ -42,9 +42,9 @@ class SeasideReleasePluginIT {
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME))
     }
 
-    @Test
-    void doesGetSemanticVersionFromFile() {
-        Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
-        Assert.assertEquals('1.2.3-SNAPSHOT', plugin.versionFromFile)
-    }
+//    @Test
+//    void doesGetSemanticVersionFromFile() {
+//        Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
+//        Assert.assertEquals('1.2.3-SNAPSHOT', plugin.versionFromFile)
+//    }
 }

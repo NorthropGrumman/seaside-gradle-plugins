@@ -7,6 +7,7 @@ import org.gradle.api.GradleException
  */
 final class VersionUpgradeStrategyFactory {
 
+
     /**
      * Creates {@link VersionInfo} object from String
      * @param version version to be create
