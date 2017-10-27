@@ -62,7 +62,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                  * Ensure to add the doclint option to the javadoc task if using Java 8.
                  */
                 if (JavaVersion.current().isJava8Compatible()) {
-                    taskResolver.findTask('javadoc') { doc ->
+                    project.tasks.getByName('javadoc') {
                         options.addStringOption('Xdoclint:none', '-quiet')
                     }
                 }
