@@ -32,7 +32,7 @@ import org.gradle.api.tasks.bundling.Zip
  */
 class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
 
-    SeasideServiceDistributionExtension distributionExtension
+    private SeasideServiceDistributionExtension distributionExtension
 
     @Override
     void doApply(Project project) {
@@ -49,8 +49,8 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
             distributionExtension = project.extensions.
                     create("seasideDistribution", SeasideServiceDistributionExtension)
 
-            doConfigureConfigurations(project)
-            doConfigureAfterEvaluate(project)
+            configureConfigurations(project)
+            configureAfterEvaluate(project)
             createTasks(project)
 
             // Configure the maven related tasks here because we can't move it into a closure
@@ -71,7 +71,7 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
                 }
             }
 
-            afterEvaluate {
+            project.afterEvaluate {
                 repositories {
                     mavenLocal()
 
@@ -88,12 +88,12 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
         }
     }
 
-    protected static void doRequireDistributionGradleProperties(Project project, String propertyName,
-                                                                String... propertyNames) {
+    static void doRequireDistributionGradleProperties(Project project, String propertyName,
+                                                      String... propertyNames) {
         GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
     }
 
-    protected doConfigureConfigurations(Project project) {
+    void configureConfigurations(Project project) {
         project.configurations {
             bundles {
                 transitive = false
@@ -111,7 +111,7 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
         }
     }
 
-    protected doConfigureAfterEvaluate(Project project) {
+    void configureAfterEvaluate(Project project) {
         project.afterEvaluate {
             taskResolver.findTask('tar') { tar ->
                 archiveName = "${distributionExtension.distributionName}.tar.gz"
@@ -125,7 +125,11 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
         }
     }
 
-    protected void createTasks(Project project) {
+    /**
+     * Create project tasks for this plugin
+     * @param project
+     */
+    void createTasks(Project project) {
 
         taskResolver.findTask('clean') {
             doLast {
@@ -204,7 +208,7 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
      * Applies additional plugins to the project the project
      * @param project
      */
-    private static void applyPlugins(Project project) {
+    static void applyPlugins(Project project) {
         project.logger.info(String.format("Applying plugins for %s", project.name))
         project.getPlugins().apply('java')
         project.getPlugins().apply('maven')

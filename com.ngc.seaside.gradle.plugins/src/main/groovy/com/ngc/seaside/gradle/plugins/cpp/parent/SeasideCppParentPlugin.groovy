@@ -1,18 +1,16 @@
 package com.ngc.seaside.gradle.plugins.cpp.parent
 
+import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.cpp.coverage.SeasideCppCoveragePlugin
 import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
-import com.ngc.seaside.gradle.plugins.util.TaskResolver
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.BuildingExtension
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.StaticBuildConfiguration
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.UnpackCppDistributionsTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.resolve.ProjectModelResolver
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.language.cpp.tasks.CppCompile
 import org.gradle.nativeplatform.NativeLibrarySpec
@@ -33,11 +31,9 @@ import java.util.regex.Matcher
  * <pre>
  * ${artifactId}-${version}.zip
  *   - include
- *      - ${artifactId}
- *        - *.h
+ *      - ${artifactId}*        - *.h
  *   - lib
- *      - ${os}_${arch}
- *        - *.so / *.dll
+ *      - ${os}_${arch}*        - *.so / *.dll
  *        - *.a / *.lib
  *  </pre>
  *  <br>Example: <br>
@@ -57,18 +53,16 @@ import java.util.regex.Matcher
  *  Dependencies that have the artifactId and the library as the same name don't have to specify the
  *  libs option for the shared or statically configurations.
  */
-class SeasideCppParentPlugin implements Plugin<Project> {
+class SeasideCppParentPlugin extends AbstractProjectPlugin {
 
     public static final String ANALYZE_TASK_NAME = 'analyze'
     public static final String DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
     public static final String CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
-    TaskResolver resolver
 
     @Override
-    void apply(Project project) {
+    void doApply(Project project) {
         project.configure(project) {
-            resolver  = new TaskResolver(project)
-            project.extensions.create("building", BuildingExtension, project)
+            BuildingExtension extension = project.extensions.create("building", BuildingExtension, project)
 
             project.configurations {
                 compile
@@ -79,7 +73,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
             applyPlugins(project)
             createTasks(project)
 
-            afterEvaluate {
+            project.afterEvaluate {
 
                 repositories {
                     mavenLocal()
@@ -91,13 +85,12 @@ class SeasideCppParentPlugin implements Plugin<Project> {
 
                 ext {
                     // The default name of the bundle.
-                    bundleName = "$group" + '.' + "$project.name"
+                    bundleName = "$project.group" + '.' + "$project.name"
                 }
 
                 model {
                     repositories {
-                        libs(PrebuiltLibraries) {
-                        }
+                        libs(PrebuiltLibraries)
                     }
 
                     platforms {
@@ -119,7 +112,7 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                         visualCpp(VisualCpp) {
                             eachPlatform {
                                 linker.withArguments { args ->
-                                    filterLinkerArgs(project.extensions.building, args)
+                                    filterLinkerArgs(extension, args)
                                 }
                             }
                         }
@@ -156,16 +149,18 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                 }
 
                 artifacts {
-                    distribution createDistributionZip
+                    distribution taskResolver.findTask("createDistributionZip")
                 }
 
                 sonarqube {
                     properties {
                         if (new File("${project.buildDir.absolutePath}/lcov/coverage.xml").exists()) {
-                            property 'sonar.cxx.coverage.reportPath',"${project.buildDir.absolutePath}/lcov/coverage.xml"
+                            property 'sonar.cxx.coverage.reportPath',
+                                     "${project.buildDir.absolutePath}/lcov/coverage.xml"
                         }
 
-                        if (new File("${project.buildDir.absolutePath}/test-results/mainTest/linux_x86_64/report.xml").exists()) {
+                        if (new File("${project.buildDir.absolutePath}/test-results/mainTest/linux_x86_64/report.xml").
+                                exists()) {
                             property 'sonar.cxx.xunit.reportPath',
                                      "${project.buildDir.absolutePath}/test-results/mainTest/linux_x86_64/report.xml"
                         }
@@ -200,23 +195,25 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                     args "--gtest_output=xml:report.xml"
                 }
 
-                resolver.findTask('createDistributionZip')
-                        .archiveName = "${project.name}-${project.version}.zip"
+                taskResolver.findTask('createDistributionZip').archiveName = "${project.name}-${project.version}.zip"
 
-                resolver.findTask('copySharedLib').onlyIf {
-                    file("${project.buildDir}/libs/main/shared").isDirectory()
+                taskResolver.findTask('copySharedLib').onlyIf {
+                    new File("${project.buildDir}/libs/main/shared").isDirectory()
                 }
 
-                resolver.findTask('copyStaticLib').onlyIf {
-                    file("${project.buildDir}/libs/main/static").isDirectory()
+                taskResolver.findTask('copyStaticLib').onlyIf {
+                    new File("${project.buildDir}/libs/main/static").isDirectory()
                 }
 
-                resolver.findTask('unpackCompileDependencies').dependenciesDirectory =
-                        file("${project.buildDir}/dependencies")
-                resolver.findTask('unpackTestCompileDependencies').dependenciesDirectory =
-                        file("${project.buildDir}/testDependencies")
+                taskResolver.findTask('unpackCompileDependencies').dependenciesDirectory =
+                        new File("${project.buildDir}/dependencies")
+
+                taskResolver.findTask('unpackTestCompileDependencies').dependenciesDirectory =
+                        new File("${project.buildDir}/testDependencies")
+
                 project.tasks.withType(CppCompile, { task ->
-                    task.dependsOn([unpackCompileDependencies, unpackTestCompileDependencies])
+                    task.dependsOn([taskResolver.findTask("unpackCompileDependencies"),
+                                    taskResolver.findTask("unpackTestCompileDependencies")])
                 })
 
                 def binaries = project.getServices()
@@ -224,12 +221,11 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                         .resolveProjectModel(project.path)
                         .find('binaries', BinaryContainer)
                         .findAll { b -> b.buildable }
-                resolver.findTask('copySharedLib').dependsOn(binaries)
-                resolver.findTask('copyStaticLib').dependsOn(binaries)
+                taskResolver.findTask('copySharedLib').dependsOn(binaries)
+                taskResolver.findTask('copyStaticLib').dependsOn(binaries)
             }
         }
     }
-
 
     /**
      * This method will search the already defined linker arguments and wrap any static libraries that have
@@ -252,13 +248,12 @@ class SeasideCppParentPlugin implements Plugin<Project> {
 
     protected void createTasks(Project project) {
 
-        TaskResolver resolver = new TaskResolver(project)
         /**
          * analyzeBuild task for sonarqube
          */
-        def buildTask = resolver.findTask("build")
-        def coverageReportTask = resolver.findTask("genFullCoverageReport")
-        def sonarqubeTask = resolver.findTask("sonarqube")
+        def buildTask = taskResolver.findTask("build")
+        def coverageReportTask = taskResolver.findTask("genFullCoverageReport")
+        def sonarqubeTask = taskResolver.findTask("sonarqube")
         project.task(ANALYZE_TASK_NAME) {
         }
         project.tasks.getByName(ANALYZE_TASK_NAME).setGroup("analysis")
@@ -276,15 +271,16 @@ class SeasideCppParentPlugin implements Plugin<Project> {
         }
 
 
-        def copyCompileDependenciesTask = resolver.findTask("copyCompileDependencies")
-        project.task('unpackCompileDependencies', type: UnpackCppDistributionsTask, dependsOn: copyCompileDependenciesTask) {
+        def copyCompileDependenciesTask = taskResolver.findTask("copyCompileDependencies")
+        project.task('unpackCompileDependencies', type: UnpackCppDistributionsTask,
+                     dependsOn: copyCompileDependenciesTask) {
             componentName = 'main'
             componentSourceSetName = 'cpp'
         }
 
-        def copyTestCompileDependenciesTask = resolver.findTask("copyTestCompileDependencies")
+        def copyTestCompileDependenciesTask = taskResolver.findTask("copyTestCompileDependencies")
         project.task('unpackTestCompileDependencies', type: UnpackCppDistributionsTask,
-            dependsOn: copyTestCompileDependenciesTask) {
+                     dependsOn: copyTestCompileDependenciesTask) {
             testDependencies = true
         }
 
@@ -317,10 +313,11 @@ class SeasideCppParentPlugin implements Plugin<Project> {
             }
         }
 
-        def copyExportedHeadersTask = resolver.findTask("copyExportedHeaders")
-        def copySharedLibTask = resolver.findTask("copySharedLib")
-        def copyStaticLibTask = resolver.findTask("copyStaticLib")
-        project.task('createDistributionZip', type: Zip, dependsOn: [copyExportedHeadersTask, copySharedLibTask, copyStaticLibTask]) {
+        def copyExportedHeadersTask = taskResolver.findTask("copyExportedHeaders")
+        def copySharedLibTask = taskResolver.findTask("copySharedLib")
+        def copyStaticLibTask = taskResolver.findTask("copyStaticLib")
+        project.task('createDistributionZip', type: Zip,
+                     dependsOn: [copyExportedHeadersTask, copySharedLibTask, copyStaticLibTask]) {
             from { "${project.distsDir}/${project.group}.${project.name}-${project.version}" }
         }
 
@@ -328,8 +325,8 @@ class SeasideCppParentPlugin implements Plugin<Project> {
          * downloadDependencies task
          */
         project.task(DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {}
-        resolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setGroup("dependencies")
-        resolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription(
+        taskResolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setGroup("dependencies")
+        taskResolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription(
                 'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.')
 
         /**
@@ -352,8 +349,9 @@ class SeasideCppParentPlugin implements Plugin<Project> {
                 project.delete(localRepository)
             }
         }
-        resolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME).setGroup("dependencies")
-        resolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME).setDescription('Remove unused dependencies from dependencies folder.')
+        taskResolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME).setGroup("dependencies")
+        taskResolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME)
+                .setDescription('Remove unused dependencies from dependencies folder.')
 
     }
 

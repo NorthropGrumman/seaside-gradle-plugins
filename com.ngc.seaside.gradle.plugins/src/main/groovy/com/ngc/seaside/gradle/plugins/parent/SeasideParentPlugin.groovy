@@ -56,7 +56,8 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
             createTasks(project)
 
             project.afterEvaluate {
-                project.logger.lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
+                project.logger.
+                        lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
                 /**
                  * Ensure to add the doclint option to the javadoc task if using Java 8.
                  */
@@ -156,7 +157,9 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                  */
                 sonarqube {
                     properties {
-                        property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
+                        if (new File("${project.buildDir}/jacoco/test.exec").exists()) {
+                            property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
+                        }
                         property 'sonar.projectName', "${bundleName}"
                         property 'sonar.branch', getBranchName()
                     }

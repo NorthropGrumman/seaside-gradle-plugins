@@ -30,7 +30,7 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
             releaseExtension = project.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension)
             project.logger.info(String.format("Initializing extensions for %s", project.name))
 
-            // This has to be done in this closure else, the scope is lost
+            // This has to be done in this closure else the visibility for the -P & -D is lost
             if (Boolean.parseBoolean(dryRun)) {
                 releaseExtension.push = false
                 releaseExtension.commitChanges = false
@@ -80,7 +80,7 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
      * Create project tasks for this plugin
      * @param project
      */
-    private void createTasks(Project project) {
+    void createTasks(Project project) {
         project.logger.info(String.format("Creating tasks for %s", project.name))
         project.task(RELEASE_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                      description: 'Creates a tagged non-SNAPSHOT release.') {
