@@ -1,9 +1,10 @@
 package com.ngc.seaside.gradle.plugins.util
 
+import com.ngc.seaside.gradle.api.IResolver
 import org.gradle.api.Project
 import org.gradle.api.Task
 
-class TaskResolver {
+class TaskResolver implements IResolver{
 
     private Project project
 

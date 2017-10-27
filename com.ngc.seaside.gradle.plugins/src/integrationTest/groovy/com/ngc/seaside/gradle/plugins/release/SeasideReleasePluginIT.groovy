@@ -13,6 +13,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class SeasideReleasePluginIT {
+
     private static final String TEST_VERSION_NUMBER = " 1.2.3-SNAPSHOT     " // with whitespace
 
     private File projectDir
@@ -40,11 +41,5 @@ class SeasideReleasePluginIT {
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME))
-    }
-
-    @Test
-    void doesGetSemanticVersionFromFile() {
-        Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
-        Assert.assertEquals('1.2.3-SNAPSHOT', plugin.versionFromFile)
     }
 }

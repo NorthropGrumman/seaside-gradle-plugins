@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.command
 
-import org.gradle.api.Plugin
+import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Zip
 
@@ -9,75 +9,92 @@ import org.gradle.api.tasks.bundling.Zip
  * template task that will zip the contents of src/main/template and add it to the archives to be used
  * in the maven repository.
  */
-class SeasideCommandPlugin implements Plugin<Project> {
+class SeasideCommandPlugin extends AbstractProjectPlugin {
 
     @Override
-    void apply(Project p) {
-        p.configure(p) {
-
+    void doApply(Project project) {
+        project.configure(project) {
             /**
              * This plugin requires the java and maven plugins
              */
-            plugins.apply 'java'
-            plugins.apply 'maven'
+            applyPlugins(project)
+            createTasks(project)
 
-            /**
-             * Create a task for generating the template zip. This will also be uploaded to Nexus.
-             */
-            task('createTemplate', type: Zip, dependsOn: [classes]) {
-                classifier = 'template'
-                from "$projectDir/src/main/template/"
-                include "*"
-                include "*/**"
-                archiveName "${project.group}.${project.name}-${project.version}-template.zip"
-                destinationDir(file("$projectDir/build/libs"))
-            }
-            
-            def templates = file("$projectDir/src/main/templates/")
+            def templates = new File("$project.projectDir/src/main/templates/")
             if (templates.exists()) {
-	            templates.eachFile { 
-	            	def templateFile = it
-	                task("createTemplate${templateFile.name}", type: Zip, dependsOn: [classes]) {
-	                    classifier = "template-${templateFile.name}"
-	                    from templateFile
-	                    include "*"
-	                    include "*/**"
-	                    archiveName "${project.group}.${project.name}-${project.version}-template-${templateFile.name}.zip"
-	                    destinationDir(file("$projectDir/build/libs"))
-	                }
-	            }
+                templates.eachFile {
+                    def templateFile = it
+                    project.task("createTemplate${templateFile.name}", type: Zip,
+                                 dependsOn: taskResolver.findTask("classes")) {
+                        classifier = "template-${templateFile.name}"
+                        from templateFile
+                        include "*"
+                        include "*/**"
+                        archiveName "${project.group}.${project.name}-${project.version}-template-${templateFile.name}.zip"
+                        destinationDir(new File("$project.projectDir/build/libs"))
+                    }
+                }
             }
 
-            afterEvaluate {
+            project.afterEvaluate {
                 configurations {
                     commandTemplate
                 }
 
-                if (file("$projectDir/src/main/template/").exists()) {
+                if (file("$project.projectDir/src/main/template/").exists()) {
                     artifacts {
-                        archives createTemplate
-                        commandTemplate createTemplate
+                        archives taskResolver.findTask("createTemplate")
+                        commandTemplate taskResolver.findTask("createTemplate")
                     }
 
-                    install.dependsOn createTemplate
-                    build.dependsOn createTemplate
+                    taskResolver.findTask("install").dependsOn(taskResolver.findTask("createTemplate"))
+                    taskResolver.findTask("build").dependsOn(taskResolver.findTask("createTemplate"))
                 }
-                
-                if (templates.exists()) { 
-	                templates.eachFile { 
-	                	def name = it.name
-	                	artifacts { 
-	                		archives p["createTemplate${name}"]
-	                		commandTemplate p["createTemplate${name}"]
-	                	}
-	                	
-	                	install.dependsOn p["createTemplate${name}"]
-	                	build.dependsOn p["createTemplate${name}"]
-	                }
+
+                if (templates.exists()) {
+                    templates.eachFile {
+                        def name = it.name
+                        artifacts {
+                            archives project["createTemplate${name}"]
+                            commandTemplate project["createTemplate${name}"]
+                        }
+
+                        taskResolver.findTask("install").dependsOn project["createTemplate${name}"]
+                        taskResolver.findTask("build").dependsOn project["createTemplate${name}"]
+                    }
                 }
             }
 
-            defaultTasks = ['build']
+            project.defaultTasks = ['build']
         }
+    }
+
+    /**
+     * Create project tasks for this plugin
+     * @param project
+     */
+    private void createTasks(Project project) {
+        project.logger.info(String.format("Creating tasks for %s", project.name))
+        /**
+         * Create a task for generating the template zip. This will also be uploaded to Nexus.
+         */
+        project.task('createTemplate', type: Zip, dependsOn: taskResolver.findTask("classes")) {
+            classifier = 'template'
+            from "$project.projectDir/src/main/template/"
+            include "*"
+            include "*/**"
+            archiveName "${project.group}.${project.name}-${project.version}-template.zip"
+            destinationDir(new File("$project.projectDir/build/libs"))
+        }
+    }
+
+    /**
+     * Applies additional plugins to the project the project
+     * @param project
+     */
+    private static void applyPlugins(Project project) {
+        project.logger.info(String.format("Applying plugins for %s", project.name))
+        project.getPlugins().apply('java')
+        project.getPlugins().apply('maven')
     }
 }

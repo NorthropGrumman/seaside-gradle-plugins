@@ -1,5 +1,8 @@
 package com.ngc.seaside.gradle.plugins.util
 
+import com.ngc.seaside.gradle.api.IResolver
+import com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy
+import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
@@ -7,14 +10,18 @@ import org.gradle.api.logging.Logger
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class VersionResolver {
+class VersionResolver implements IResolver {
+   public static final String RELEASE_TASK_NAME = "release"
+   public static final String VERSION_SUFFIX = "-SNAPSHOT"
+   public static final String RELEASE_MAJOR_VERSION_TASK_NAME = "releaseMajorVersion"
+   public static final String RELEASE_MINOR_VERSION_TASK_NAME = "releaseMinorVersion"
+
    private static final Pattern PATTERN =
       Pattern.compile(
          "^\\s*version\\s*=\\s*[\"']?(?!\\.)(\\d+(\\.\\d+)+)([-.][A-Z]+)?[\"']?(?![\\d.])\$",
          Pattern.MULTILINE
       )
 
-   private static String versionSuffix = "-SNAPSHOT"
    private Logger logger
    private File versionFile
    private Project project
@@ -25,8 +32,15 @@ class VersionResolver {
       logger = project.logger
    }
 
-   String getProjectVersion(boolean enforceVersionSuffix) throws Exception {
-      return getSemanticVersion(versionFile.text.trim(), enforceVersionSuffix)
+   String getProjectVersion() throws Exception {
+      def taskNames = project.gradle.startParameter.taskNames
+      def isReleaseJob =
+            taskNames.contains(RELEASE_TASK_NAME) ||
+            taskNames.contains(RELEASE_MAJOR_VERSION_TASK_NAME) ||
+            taskNames.contains(RELEASE_MINOR_VERSION_TASK_NAME)
+      def versionFromFile =  getSemanticVersion(versionFile.text.trim(), isReleaseJob)
+
+      return resolveVersionUpgradeStrategy(taskNames).getVersion(versionFromFile)
    }
 
    protected String getSemanticVersion(String input, boolean enforceVersionSuffix = false) {
@@ -39,8 +53,8 @@ class VersionResolver {
          if (version) {
             sb.append(version)
             if (!suffix && enforceVersionSuffix) {
-               logger.error("Missing project version (${version}${suffix})  suffix: $versionSuffix")
-               throw new GradleException("Missing project version (${version}${suffix}) suffix:$versionSuffix")
+               logger.error("Missing project version (${version}${suffix})  suffix: $VERSION_SUFFIX")
+               throw new GradleException("Missing project version (${version}${suffix}) suffix:$VERSION_SUFFIX")
             } else if (suffix) {
                sb.append(suffix)
             }
@@ -66,5 +80,30 @@ class VersionResolver {
 
    File getVersionFile() {
       return versionFile
+   }
+
+
+   static IVersionUpgradeStrategy resolveVersionUpgradeStrategy(List<String> taskNames) {
+      if (isMajorVersionRelease(taskNames)) {
+         return VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(VERSION_SUFFIX)
+      } else if (isMinorVersionRelease(taskNames)) {
+         return VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(VERSION_SUFFIX)
+      } else if (isPatchVersionRelease(taskNames)) {
+         return VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(VERSION_SUFFIX)
+      } else {
+         return VersionUpgradeStrategyFactory.createSnapshotVersionUpgradeStrategy()
+      }
+   }
+
+   private static boolean isPatchVersionRelease(List<String> taskNames) {
+      return taskNames.contains(RELEASE_TASK_NAME)
+   }
+
+   private static boolean isMinorVersionRelease(List<String> taskNames) {
+      return taskNames.contains(RELEASE_MINOR_VERSION_TASK_NAME)
+   }
+
+   private static boolean isMajorVersionRelease(List<String> taskNames) {
+      return taskNames.contains(RELEASE_MAJOR_VERSION_TASK_NAME)
    }
 }

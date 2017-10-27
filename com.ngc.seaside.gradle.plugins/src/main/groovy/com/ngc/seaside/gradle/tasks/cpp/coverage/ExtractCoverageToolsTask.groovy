@@ -73,6 +73,10 @@ class ExtractCoverageToolsTask extends DefaultTask {
         return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV_COBERTURA
     }
 
+    private String pathToTheDirectoryWithPygmentFiles() {
+        return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_CPPCHECK
+    }
+
     private String pathToTheDirectoryWithCppCheckFiles() {
         return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_CPPCHECK
     }

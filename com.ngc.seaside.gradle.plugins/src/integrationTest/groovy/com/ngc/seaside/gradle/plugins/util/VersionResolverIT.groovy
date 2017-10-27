@@ -1,11 +1,9 @@
 package com.ngc.seaside.gradle.plugins.util
 
-import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.logging.Logger
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert
 import org.junit.Before
@@ -36,25 +34,14 @@ class VersionResolverIT {
       plugin.apply(project)
    }
 
-   @Test(expected = GradleException.class)
-   void doesThrowExceptionWhenGetProjectVersionWithSuffixEnforced() {
-      resolver.setProjectVersionOnFile("1.2.3")
-      resolver.getProjectVersion(true)
-   }
-
-   @Test
-   void doesNotThrowExceptionWhenGetProjectVersionWithNoSuffixEnforced() {
-      resolver.getProjectVersion(false)
-   }
-
    @Test
    void doesSetProjectVersionOnFile() {
       def version = "4.5.6"
       resolver.setProjectVersionOnFile(version)
-      Assert.assertEquals(version, resolver.getProjectVersion(false))
+      Assert.assertEquals(version, resolver.getProjectVersion())
 
       version = "4.5.6-SUFFIX"
       resolver.setProjectVersionOnFile(version)
-      Assert.assertEquals(version, resolver.getProjectVersion(false))
+      Assert.assertEquals(version, resolver.getProjectVersion())
    }
 }

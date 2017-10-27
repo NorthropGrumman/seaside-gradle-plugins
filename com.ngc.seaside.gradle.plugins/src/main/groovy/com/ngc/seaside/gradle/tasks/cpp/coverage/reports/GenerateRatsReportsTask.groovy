@@ -5,7 +5,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class GenerateRatsReportsTask extends DefaultTask {
-
     private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
                     .findByType(SeasideCppCoverageExtension.class)

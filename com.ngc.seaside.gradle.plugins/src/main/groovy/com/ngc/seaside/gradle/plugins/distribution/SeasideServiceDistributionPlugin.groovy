@@ -1,9 +1,8 @@
 package com.ngc.seaside.gradle.plugins.distribution
 
+import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.distribution.SeasideServiceDistributionExtension
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
-import com.ngc.seaside.gradle.plugins.util.TaskResolver
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Compression
@@ -22,25 +21,23 @@ import org.gradle.api.tasks.bundling.Zip
  *
  * To use this plugin in your gradle.build :
  * <pre>
- *    buildscript {*       repositories {*           mavenLocal()
+ *    buildscript {*         repositories {*              mavenLocal()
  *
- *            maven {*              url nexusConsolidated
+ *              maven {*                  url nexusConsolidated
  *}*}*
  *        dependencies {*             classpath 'com.ngc.seaside:seaside.distribution:1.1-SNAPSHOT'
  *}*}*
  *      apply plugin: 'com.ngc.seaside.distribution'
  * </pre>
  */
-class SeasideServiceDistributionPlugin implements Plugin<Project> {
+class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
 
-    SeasideServiceDistributionExtension distributionExtension
-    private TaskResolver resolver
+    private SeasideServiceDistributionExtension distributionExtension
 
     @Override
-    void apply(Project project) {
-        this.resolver = new TaskResolver(project)
+    void doApply(Project project) {
         project.configure(project) {
-            project.plugins.apply('maven')
+            applyPlugins(project)
 
             // Make sure that all required properties are set.
             doRequireDistributionGradleProperties(project, 'nexusConsolidated',
@@ -49,10 +46,11 @@ class SeasideServiceDistributionPlugin implements Plugin<Project> {
                                                   'nexusUsername',
                                                   'nexusPassword')
 
-            distributionExtension = project.extensions.create("seasideDistribution", SeasideServiceDistributionExtension)
+            distributionExtension = project.extensions.
+                    create("seasideDistribution", SeasideServiceDistributionExtension)
 
-            doConfigureConfigurations(project)
-            doConfigureAfterEvaluate(project)
+            configureConfigurations(project)
+            configureAfterEvaluate(project)
             createTasks(project)
 
             // Configure the maven related tasks here because we can't move it into a closure
@@ -73,7 +71,7 @@ class SeasideServiceDistributionPlugin implements Plugin<Project> {
                 }
             }
 
-            afterEvaluate {
+            project.afterEvaluate {
                 repositories {
                     mavenLocal()
 
@@ -83,19 +81,19 @@ class SeasideServiceDistributionPlugin implements Plugin<Project> {
                 }
 
                 artifacts {
-                    archives TaskResolver.findTask(project, "tar")
-                    archives TaskResolver.findTask(project, "zip")
+                    archives taskResolver.findTask("tar")
+                    archives taskResolver.findTask("zip")
                 }
             }
         }
     }
 
-    protected void doRequireDistributionGradleProperties(Project project, String propertyName,
-                                                         String... propertyNames) {
+    static void doRequireDistributionGradleProperties(Project project, String propertyName,
+                                                      String... propertyNames) {
         GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
     }
 
-    protected doConfigureConfigurations(Project project) {
+    void configureConfigurations(Project project) {
         project.configurations {
             bundles {
                 transitive = false
@@ -113,26 +111,29 @@ class SeasideServiceDistributionPlugin implements Plugin<Project> {
         }
     }
 
-    protected doConfigureAfterEvaluate(Project project) {
+    void configureAfterEvaluate(Project project) {
         project.afterEvaluate {
-            resolver.findTask('tar') { tar ->
-                archiveName = "${seasideDistribution.distributionName}.tar.gz"
-                destinationDir = file("${seasideDistribution.distributionDestDir}")
+            taskResolver.findTask('tar') { tar ->
+                archiveName = "${distributionExtension.distributionName}.tar.gz"
+                destinationDir = file("${distributionExtension.distributionDestDir}")
             }
 
-            resolver.findTask('zip') { zip ->
-                archiveName = "${seasideDistribution.distributionName}.zip"
-                destinationDir = file("${seasideDistribution.distributionDestDir}")
+            taskResolver.findTask('zip') { zip ->
+                archiveName = "${distributionExtension.distributionName}.zip"
+                destinationDir = new File("${distributionExtension.distributionDestDir}")
             }
         }
     }
 
-    protected void createTasks(Project project) {
+    /**
+     * Create project tasks for this plugin
+     * @param project
+     */
+    void createTasks(Project project) {
 
-        resolver.findTask('clean') {
+        taskResolver.findTask('clean') {
             doLast {
-                project.getLogger().
-                        trace("Removing build distribution directory '${distributionExtension.buildDir}'.")
+                project.getLogger().debug("Removing build distribution directory '${distributionExtension.buildDir}'.")
 
                 project.delete(distributionExtension.buildDir)
             }
@@ -145,7 +146,7 @@ class SeasideServiceDistributionPlugin implements Plugin<Project> {
             into { distributionExtension.distributionDir }
         }
 
-        project.task('copyResources', type: Copy, dependsOn: [resolver.findTask('copyConfig')]) {
+        project.task('copyResources', type: Copy, dependsOn: [taskResolver.findTask('copyConfig')]) {
 
             from 'src/main/resources'
             exclude '**/config.ini'
@@ -193,13 +194,24 @@ class SeasideServiceDistributionPlugin implements Plugin<Project> {
             into { "${distributionExtension.distributionDir}/bundles" }
         }
 
-        project.task('buildDist', dependsOn: [resolver.findTask("copyResources"),
-                                              resolver.findTask("copyPlatformBundles"),
-                                              resolver.findTask("copyThirdPartyBundles"),
-                                              resolver.findTask("copyBlocsBundles"),
-                                              resolver.findTask("copyBundles"),
-                                              resolver.findTask("tar"),
-                                              resolver.findTask("zip")])
-        resolver.findTask("assemble").dependsOn(resolver.findTask("buildDist"))
+        project.task('buildDist', dependsOn: [taskResolver.findTask("copyResources"),
+                                              taskResolver.findTask("copyPlatformBundles"),
+                                              taskResolver.findTask("copyThirdPartyBundles"),
+                                              taskResolver.findTask("copyBlocsBundles"),
+                                              taskResolver.findTask("copyBundles"),
+                                              taskResolver.findTask("tar"),
+                                              taskResolver.findTask("zip")])
+        taskResolver.findTask("assemble").dependsOn(taskResolver.findTask("buildDist"))
     }
+
+    /**
+     * Applies additional plugins to the project the project
+     * @param project
+     */
+    static void applyPlugins(Project project) {
+        project.logger.info(String.format("Applying plugins for %s", project.name))
+        project.getPlugins().apply('java')
+        project.getPlugins().apply('maven')
+    }
+
 }
