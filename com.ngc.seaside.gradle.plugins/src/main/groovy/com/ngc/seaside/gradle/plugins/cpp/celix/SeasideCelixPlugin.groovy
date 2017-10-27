@@ -4,7 +4,6 @@ import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.cpp.parent.SeasideCppParentPlugin
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.cpp.celix.CelixManifestTask
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
@@ -19,14 +18,14 @@ class SeasideCelixPlugin extends AbstractProjectPlugin {
     @Override
     void doApply(Project p) {
         p.configure(p) {
-            plugins.apply 'com.ngc.seaside.cpp.parent'
+            p.getPlugins().apply('com.ngc.seaside.cpp.parent')
 
             addManifestTask(p)
 
-            afterEvaluate {
-                tasks.getByName(MANIFEST_TASK_NAME).file =
-                      "${project.distsDir}/${project.group}.${project.name}-${project.version}/META-INF/MANIFEST.MF"
-                tasks.getByName(SeasideCppParentPlugin.CREATE_DISTRIBUTION_ZIP_TASK_NAME)
+            p.afterEvaluate {
+                taskResolver.findTask(MANIFEST_TASK_NAME).file =
+                      "${p.distsDir}/${p.group}.${p.name}-${p.version}/META-INF/MANIFEST.MF"
+                taskResolver.findTask(SeasideCppParentPlugin.CREATE_DISTRIBUTION_ZIP_TASK_NAME)
                       .dependsOn([MANIFEST_TASK_NAME])
             }
         }
@@ -37,11 +36,11 @@ class SeasideCelixPlugin extends AbstractProjectPlugin {
                group: CELIX_TASK_GROUP_NAME,
                type: CelixManifestTask,
                description: "Generates a MANIFEST for a Celix bundle.") {
-            entry 'Bundle-SymbolicName', "${project.group}.${project.name}"
-            entry 'Bundle-Name', "${project.group}.${project.name}"
-            entry 'Bundle-Version', Versions.makeOsgiCompliantVersion("${project.version}")
-            entry 'Bundle-Activator', "lib/linux_x86_64/lib${project.name}.so"
-            entry 'Private-Library', "lib/linux_x86_64/lib${project.name}.so"
+            entry 'Bundle-SymbolicName', "${p.group}.${p.name}"
+            entry 'Bundle-Name', "${p.group}.${p.name}"
+            entry 'Bundle-Version', Versions.makeOsgiCompliantVersion("${p.version}")
+            entry 'Bundle-Activator', "lib/linux_x86_64/lib${p.name}.so"
+            entry 'Private-Library', "lib/linux_x86_64/lib${p.name}.so"
         }
     }
 }

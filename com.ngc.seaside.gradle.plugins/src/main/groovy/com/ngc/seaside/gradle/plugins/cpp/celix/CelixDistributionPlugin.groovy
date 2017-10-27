@@ -50,7 +50,7 @@ class CelixDistributionPlugin extends AbstractProjectPlugin {
             createConfigurations(p)
             createTasks(p)
 
-            afterEvaluate {
+            p.afterEvaluate {
                 repositories {
                     mavenLocal()
 
