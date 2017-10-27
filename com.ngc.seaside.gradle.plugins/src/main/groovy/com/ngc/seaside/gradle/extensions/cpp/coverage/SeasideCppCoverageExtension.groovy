@@ -15,6 +15,10 @@ class SeasideCppCoverageExtension {
     final String CPPCHECK_GROUP_ARTIFACT_VERSION = "cppcheck:cppcheck:${CPPCHECK_VERSION}"
     final String CPPCHECK_FILENAME = "cppcheck-${CPPCHECK_VERSION}.zip"
 
+    final String PYGMENTS_VERSION = "2.2.0"
+    final String PYGMENTS_GROUP_ARTIFACT_VERSION = "pygments:pygments:${PYGMENTS_VERSION}"
+    final String PYGMENTS_FILENAME = "pygments-${PYGMENTS_VERSION}.zip"
+
     final String RATS_VERSION = "2.4"
     final String RATS_GROUP_ARTIFACT_VERSION = "rats:rats:${RATS_VERSION}"
     final String RATS_FILENAME = "rats-${RATS_VERSION}.zip"

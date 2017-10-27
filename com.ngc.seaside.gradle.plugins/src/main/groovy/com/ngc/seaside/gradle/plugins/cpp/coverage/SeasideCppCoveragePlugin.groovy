@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.cpp.coverage
 
+import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
 import com.ngc.seaside.gradle.tasks.cpp.coverage.ExtractCoverageToolsTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.GenerateCoverageDataTask
@@ -11,7 +12,7 @@ import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateRatsReportsTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-class SeasideCppCoveragePlugin implements Plugin<Project> {
+class SeasideCppCoveragePlugin extends AbstractProjectPlugin{
 
     public static final String CPP_COVERAGE_EXTENSION_NAME = "seasideCppCov"
     public static final String CPP_COVERAGE_TASK_GROUP_NAME = "cpp_analysis"
@@ -32,7 +33,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
     String ratsXmlPath
 
     @Override
-    void apply(Project project) {
+    void doApply(Project project) {
         project.configure(project) {
             SeasideCppCoverageExtension extension = createTheCppCoverageExtensionOnTheProject(project)
 
@@ -50,6 +51,7 @@ class SeasideCppCoveragePlugin implements Plugin<Project> {
                     compile "$extension.LCOV_GROUP_ARTIFACT_VERSION"
                     compile "$extension.LCOV_COBERTURA_GROUP_ARTIFACT_VERSION"
                     compile "$extension.CPPCHECK_GROUP_ARTIFACT_VERSION"
+                    compile "$extension.PYGMENTS_GROUP_ARTIFACT_VERSION"
                     compile "$extension.RATS_GROUP_ARTIFACT_VERSION"
                 }
             }
