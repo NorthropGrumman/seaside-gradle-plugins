@@ -3,13 +3,12 @@ package com.ngc.seaside.gradle.plugins.cpp.coverage
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
 import com.ngc.seaside.gradle.tasks.cpp.coverage.ExtractCoverageToolsTask
-import com.ngc.seaside.gradle.tasks.cpp.coverage.GenerateCoverageDataTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.FilterCoverageDataTask
-import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCppCheckReportsTask
-import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCoverageXmlTask
+import com.ngc.seaside.gradle.tasks.cpp.coverage.GenerateCoverageDataTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCoverageHtmlTask
+import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCoverageXmlTask
+import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCppCheckReportsTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateRatsReportsTask
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 class SeasideCppCoveragePlugin extends AbstractProjectPlugin{

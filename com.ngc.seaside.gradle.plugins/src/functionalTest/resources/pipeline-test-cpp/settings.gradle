@@ -20,3 +20,7 @@ project(':com.ngc.blocs.cpp.service.event.impl.synceventservice').name = 'servic
 
 include ':com.ngc.blocs.cpp.service.print.impl.printservice'
 project(':com.ngc.blocs.cpp.service.print.impl.printservice').name = 'service.log.impl.printservice'
+
+include ':com.ngc.blocs.cpp.example.distribution'
+project(':com.ngc.blocs.cpp.example.distribution').name = 'example.distribution'
+

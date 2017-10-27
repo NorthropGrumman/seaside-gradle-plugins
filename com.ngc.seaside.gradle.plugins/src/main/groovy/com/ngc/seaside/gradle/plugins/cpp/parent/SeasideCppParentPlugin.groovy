@@ -31,9 +31,11 @@ import java.util.regex.Matcher
  * <pre>
  * ${artifactId}-${version}.zip
  *   - include
- *      - ${artifactId}*        - *.h
+ *      - ${artifactId}
+ *        - *.h
  *   - lib
- *      - ${os}_${arch}*        - *.so / *.dll
+ *      - ${os}_${arch}
+ *        - *.so / *.dll
  *        - *.a / *.lib
  *  </pre>
  *  <br>Example: <br>
@@ -58,6 +60,7 @@ class SeasideCppParentPlugin extends AbstractProjectPlugin {
     public static final String ANALYZE_TASK_NAME = 'analyze'
     public static final String DOWNLOAD_DEPENDENCIES_TASK_NAME = 'downloadDependencies'
     public static final String CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
+    public static final String CREATE_DISTRIBUTION_ZIP_TASK_NAME = 'createDistributionZip'
 
     @Override
     void doApply(Project project) {
@@ -80,6 +83,23 @@ class SeasideCppParentPlugin extends AbstractProjectPlugin {
 
                     maven {
                         url nexusConsolidated
+                    }
+                }
+
+                uploadArchives {
+                    repositories {
+                        mavenDeployer {
+                            // Use the main repo for full releases.
+                            repository(url: nexusReleases) {
+                                // Make sure that nexusUsername and nexusPassword are in your
+                                // ${gradle.user.home}/gradle.properties file.
+                                authentication(userName: nexusUsername, password: nexusPassword)
+                            }
+                            // If the version has SNAPSHOT in the name, use the snapshot repo.
+                            snapshotRepository(url: nexusSnapshots) {
+                                authentication(userName: nexusUsername, password: nexusPassword)
+                            }
+                        }
                     }
                 }
 
@@ -155,12 +175,10 @@ class SeasideCppParentPlugin extends AbstractProjectPlugin {
                 sonarqube {
                     properties {
                         if (new File("${project.buildDir.absolutePath}/lcov/coverage.xml").exists()) {
-                            property 'sonar.cxx.coverage.reportPath',
-                                     "${project.buildDir.absolutePath}/lcov/coverage.xml"
+                            property 'sonar.cxx.coverage.reportPath',"${project.buildDir.absolutePath}/lcov/coverage.xml"
                         }
 
-                        if (new File("${project.buildDir.absolutePath}/test-results/mainTest/linux_x86_64/report.xml").
-                                exists()) {
+                        if (new File("${project.buildDir.absolutePath}/test-results/mainTest/linux_x86_64/report.xml").exists()) {
                             property 'sonar.cxx.xunit.reportPath',
                                      "${project.buildDir.absolutePath}/test-results/mainTest/linux_x86_64/report.xml"
                         }
@@ -195,7 +213,7 @@ class SeasideCppParentPlugin extends AbstractProjectPlugin {
                     args "--gtest_output=xml:report.xml"
                 }
 
-                taskResolver.findTask('createDistributionZip').archiveName = "${project.name}-${project.version}.zip"
+                taskResolver.findTask(CREATE_DISTRIBUTION_ZIP_TASK_NAME).archiveName = "${project.name}-${project.version}.zip"
 
                 taskResolver.findTask('copySharedLib').onlyIf {
                     new File("${project.buildDir}/libs/main/shared").isDirectory()
@@ -316,7 +334,7 @@ class SeasideCppParentPlugin extends AbstractProjectPlugin {
         def copyExportedHeadersTask = taskResolver.findTask("copyExportedHeaders")
         def copySharedLibTask = taskResolver.findTask("copySharedLib")
         def copyStaticLibTask = taskResolver.findTask("copyStaticLib")
-        project.task('createDistributionZip', type: Zip,
+        project.task(CREATE_DISTRIBUTION_ZIP_TASK_NAME, type: Zip,
                      dependsOn: [copyExportedHeadersTask, copySharedLibTask, copyStaticLibTask]) {
             from { "${project.distsDir}/${project.group}.${project.name}-${project.version}" }
         }

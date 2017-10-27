@@ -1,5 +1,5 @@
 plugins {
-    id 'com.ngc.seaside.cpp.parent'
+    id 'com.ngc.seaside.cpp.celix'
     id 'com.ngc.seaside.cpp.coverage'
 }
 
