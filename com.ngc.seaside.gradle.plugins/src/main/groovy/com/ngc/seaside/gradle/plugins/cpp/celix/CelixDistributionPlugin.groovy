@@ -1,11 +1,10 @@
 package com.ngc.seaside.gradle.plugins.cpp.celix
 
+import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.cpp.celix.CelixDistributionExtension
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
-import com.ngc.seaside.gradle.plugins.util.TaskResolver
 import com.ngc.seaside.gradle.tasks.cpp.celix.CreateCelixRunScriptTask
 import org.apache.commons.io.FilenameUtils
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
@@ -16,7 +15,7 @@ import org.gradle.api.tasks.bundling.Zip
  * application out of the box.  This plugin is typically applied to projects that only produce a ZIP file; these
  * projects usually don't have code.
  */
-class CelixDistributionPlugin implements Plugin<Project> {
+class CelixDistributionPlugin extends AbstractProjectPlugin {
 
     public static final String BUILD_TASK_NAME = "build"
     public static final String ASSEMBLE_TASK_NAME = "assemble"
@@ -36,7 +35,7 @@ class CelixDistributionPlugin implements Plugin<Project> {
     private CelixDistributionExtension extension
 
     @Override
-    void apply(Project p) {
+    void doApply(Project p) {
         p.configure(p) {
             // Make sure that all required properties are set.
             doRequiredGradleProperties(p,
@@ -60,11 +59,11 @@ class CelixDistributionPlugin implements Plugin<Project> {
                     }
                 }
 
-                postEvaluateConfigureTasks(p)
-                configureTaskDependencies(p)
+                postEvaluateConfigureTasks()
+                configureTaskDependencies()
 
                 artifacts {
-                    archives TaskResolver.findTask(p, CREATE_DISTRIBUTION_ZIP_TASK_NAME)
+                    archives taskResolver.findTask(p, CREATE_DISTRIBUTION_ZIP_TASK_NAME)
                 }
             }
         }
@@ -142,25 +141,25 @@ class CelixDistributionPlugin implements Plugin<Project> {
 
     }
 
-    protected void postEvaluateConfigureTasks(Project project) {
-        TaskResolver.findTask(project, CREATE_RUN_SCRIPT_TASK_NAME).scriptFile = extension.runScript
-        TaskResolver.findTask(project, CREATE_DISTRIBUTION_ZIP_TASK_NAME).from(extension.distributionDir)
+    protected void postEvaluateConfigureTasks() {
+        taskResolver.findTask(CREATE_RUN_SCRIPT_TASK_NAME).scriptFile = extension.runScript
+        taskResolver.findTask(CREATE_DISTRIBUTION_ZIP_TASK_NAME).from(extension.distributionDir)
     }
 
-    protected void configureTaskDependencies(Project project) {
-        def distroTask = TaskResolver.findTask(project, CREATE_DISTRIBUTION_ZIP_TASK_NAME)
+    protected void configureTaskDependencies() {
+        def distroTask = taskResolver.findTask(CREATE_DISTRIBUTION_ZIP_TASK_NAME)
 
-        TaskResolver.findTask(project, UNPACK_CELIX_TASK_NAME).dependsOn(
-              TaskResolver.findTask(project, COPY_CELIX_TASK_NAME))
+        taskResolver.findTask(UNPACK_CELIX_TASK_NAME).dependsOn(
+                taskResolver.findTask(COPY_CELIX_TASK_NAME))
 
-        TaskResolver.findTask(project, CREATE_RUN_SCRIPT_TASK_NAME).dependsOn(
-              TaskResolver.findTask(project, UNPACK_CELIX_TASK_NAME))
+        taskResolver.findTask(CREATE_RUN_SCRIPT_TASK_NAME).dependsOn(
+                taskResolver.findTask(UNPACK_CELIX_TASK_NAME))
 
-        distroTask.dependsOn(TaskResolver.findTask(project, CREATE_RUN_SCRIPT_TASK_NAME),
-                             TaskResolver.findTask(project, COPY_BUNDLES_TASK_NAME))
+        distroTask.dependsOn(taskResolver.findTask(CREATE_RUN_SCRIPT_TASK_NAME),
+                             taskResolver.findTask(COPY_BUNDLES_TASK_NAME))
 
-        TaskResolver.findTask(project, BUILD_TASK_NAME).dependsOn(distroTask)
-        TaskResolver.findTask(project, ASSEMBLE_TASK_NAME).dependsOn(distroTask)
+        taskResolver.findTask(BUILD_TASK_NAME).dependsOn(distroTask)
+        taskResolver.findTask(ASSEMBLE_TASK_NAME).dependsOn(distroTask)
     }
 
 }
