@@ -40,7 +40,7 @@ public class PropertyUtils {
       String[] names = propertyNames.split(PROPERTY_NAME_DELIMITER);
       String[] values = propertyValues.split(PROPERTY_VALUE_DELIMITER);
       Preconditions.checkArgument(names.length == values.length,
-                                  "must have same number of names and values, got %d names and %d values!",
+                                  "must have same number of names and values, got %s names and %s values!",
                                   names.length,
                                   values.length);
 
