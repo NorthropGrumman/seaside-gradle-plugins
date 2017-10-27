@@ -12,8 +12,6 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
 
-import java.util.concurrent.atomic.AtomicBoolean
-
 /**
  * The seaside parent plugin provides calls to common tasks, sets up the default dependencies for BLoCS and OSGi along
  * with providing nexus repository deployment settings.
@@ -41,8 +39,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
     public static final String CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
     public static final String LOCAL_TAG = 'local-'
     public static String REMOTE_TAG = ''
-
-    private static final AtomicBoolean havePrintedVersion = new AtomicBoolean(false)
 
     @Override
     void doApply(Project project) {
@@ -335,7 +331,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
     private static void configurePropertyDisplay(Project project) {
         project.afterEvaluate {
             String displayPropertyName = System.getProperty(DISPLAY_PROPERTY_NAME)
-            if (displayPropertyName != null && !havePrintedVersion.getAndSet(true)) {
+            if (displayPropertyName != null) {
                 PropertyUtils.getProperties(project, displayPropertyName).forEach({ v ->
                     project.logger.quiet(v.toString())
                 })
