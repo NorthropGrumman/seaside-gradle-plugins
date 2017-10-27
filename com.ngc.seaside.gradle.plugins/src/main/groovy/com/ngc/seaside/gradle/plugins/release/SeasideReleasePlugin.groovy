@@ -27,10 +27,10 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
     @Override
     void doApply(Project project) {
         project.configure(project) {
-            // This has to be done in this closure else, the scope is lost
-            project.logger.info(String.format("Initializing extensions for %s", project.name))
             releaseExtension = project.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension)
+            project.logger.info(String.format("Initializing extensions for %s", project.name))
 
+            // This has to be done in this closure else, the scope is lost
             if (Boolean.parseBoolean(dryRun)) {
                 releaseExtension.push = false
                 releaseExtension.commitChanges = false

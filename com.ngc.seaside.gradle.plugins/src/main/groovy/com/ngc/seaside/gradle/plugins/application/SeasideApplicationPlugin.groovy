@@ -16,7 +16,7 @@ class SeasideApplicationPlugin extends AbstractProjectPlugin {
 
     public static final String COPY_APP_RESOURCE_TASKNAME = "copyApplicationResources"
     SeasideApplicationExtension applicationExtension
-    final Instantiator instantiator;
+    final Instantiator instantiator
 
     @Inject
     SeasideApplicationPlugin(Instantiator instantiator) {

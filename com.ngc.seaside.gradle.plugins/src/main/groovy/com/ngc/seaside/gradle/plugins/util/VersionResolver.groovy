@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.util
 
+import com.ngc.seaside.gradle.api.IResolver
 import com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy
 import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory
 import org.gradle.api.GradleException
@@ -9,7 +10,7 @@ import org.gradle.api.logging.Logger
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class VersionResolver {
+class VersionResolver implements IResolver {
    public static final String RELEASE_TASK_NAME = "release"
    public static final String VERSION_SUFFIX = "-SNAPSHOT"
    public static final String RELEASE_MAJOR_VERSION_TASK_NAME = "releaseMajorVersion"

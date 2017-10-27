@@ -23,14 +23,9 @@ abstract class AbstractProjectPlugin implements IProjectPlugin {
         this.taskResolver = new TaskResolver(project)
         this.versionResolver = new VersionResolver(project)
         project.configure(project) {
-            project.afterEvaluate {
-                project.version = versionResolver.getProjectVersion()
-                taskResolver.findTask('build') {
-                    project.version = versionResolver.getProjectVersion()
-                }
-            }
-            doApply(project)
+            project.version = versionResolver.getProjectVersion()
         }
+        doApply(project)
     }
 
     @Override
