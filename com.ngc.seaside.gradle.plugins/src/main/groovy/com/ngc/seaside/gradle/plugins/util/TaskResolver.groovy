@@ -21,10 +21,10 @@ class TaskResolver implements IResolver{
     }
 
     Task findTask(String taskName, Closure closure) {
-        return this.project.tasks.getByName(taskName)
+        return this.project.tasks.getByName(taskName, closure)
     }
 
     static Task findTask(Project project, String taskName, Closure closure) {
-        return project.tasks.getByName(taskName)
+        return project.tasks.getByName(taskName, closure)
     }
 }
