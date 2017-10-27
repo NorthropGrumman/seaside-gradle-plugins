@@ -4,13 +4,15 @@ import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
+import com.ngc.seaside.gradle.plugins.util.PropertyUtils
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
-import com.ngc.seaside.gradle.tasks.properties.DisplayPropertyTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
+
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The seaside parent plugin provides calls to common tasks, sets up the default dependencies for BLoCS and OSGi along
@@ -40,6 +42,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
     public static final String LOCAL_TAG = 'local-'
     public static String REMOTE_TAG = ''
 
+    private static final AtomicBoolean havePrintedVersion = new AtomicBoolean(false)
 
     @Override
     void doApply(Project project) {
@@ -55,10 +58,11 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                                       'nexusPassword')
             doRequireSystemProperties(project)
             createTasks(project)
+            configureForCi(project)
 
             project.afterEvaluate {
                 project.logger.
-                        lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
+                      lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
                 /**
                  * Ensure to add the doclint option to the javadoc task if using Java 8.
                  */
@@ -286,7 +290,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         project.task(DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {}
         taskResolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
         taskResolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription(
-                'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.')
+              'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.')
 
         /**
          * cleanupDependencies task
@@ -296,7 +300,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
             doLast {
                 ext.actualRepository = project.downloadDependencies.localRepository ?
                                        project.downloadDependencies.localRepository : project.file(
-                        [project.buildDir, 'dependencies'].join(File.separator))
+                      [project.buildDir, 'dependencies'].join(File.separator))
 
                 logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to " +
                             "${actualRepository.absolutePath}.")
@@ -310,7 +314,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         }
         taskResolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
         taskResolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME).
-                setDescription('Remove unused dependencies from dependencies folder.')
+              setDescription('Remove unused dependencies from dependencies folder.')
 
         /**
          * dependencyReport task
@@ -318,6 +322,38 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         project.task(DEPENDENCY_REPORT_TASK_NAME, type: DependencyReportTask,
                      description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies')
 
-        project.task('property', type: DisplayPropertyTask)
     }
+
+    protected void configureForCi(Project project) {
+        // TODO TH: update this
+        project.task('nothing')//.setEnabled()
+
+        configurePropertyDisplay(project)
+        configurePropertyUpdate(project)
+    }
+
+    private static void configurePropertyDisplay(Project project) {
+        project.afterEvaluate {
+            String displayPropertyName = System.getProperty(DISPLAY_PROPERTY_NAME)
+            if (displayPropertyName != null && !havePrintedVersion.getAndSet(true)) {
+                PropertyUtils.getProperties(project, displayPropertyName).forEach({ v ->
+                    project.logger.quiet(v.toString())
+                })
+            }
+        }
+    }
+
+    private static void configurePropertyUpdate(Project project) {
+        project.beforeEvaluate {
+            String updatePropertyName = System.getProperty(UPDATE_PROPERTY_NAME)
+            String updatePropertyValue = System.getProperty(UPDATE_PROPERTY_VALUE)
+            if (updatePropertyName != null && updatePropertyValue != null) {
+                PropertyUtils.setProperties(project, updatePropertyName, updatePropertyValue)
+            }
+        }
+    }
+
+    private final static String DISPLAY_PROPERTY_NAME = 'display.property.name'
+    private final static String UPDATE_PROPERTY_NAME = 'update.property.name'
+    private final static String UPDATE_PROPERTY_VALUE = 'update.property.value'
 }
