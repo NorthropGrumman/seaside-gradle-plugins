@@ -7,6 +7,7 @@ import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
+import com.ngc.seaside.gradle.tasks.properties.DisplayPropertyTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
@@ -316,5 +317,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
          */
         project.task(DEPENDENCY_REPORT_TASK_NAME, type: DependencyReportTask,
                      description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies')
+
+        project.task('property', type: DisplayPropertyTask)
     }
 }
