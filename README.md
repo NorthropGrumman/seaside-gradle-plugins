@@ -2,12 +2,26 @@
 `com.ngc.seaside.gradle.plugins` contains the core Seaside plugins used by many Gradle builds.  All core plugins are
 contained in a single JAR and versioned together to make them easier to use.
 
+## Prerequisites
+* perl-Digest-MD5
+    * Install with: `sudo yum install -y perl-Digest-MD5`
+    * This is a dependency for `lcov`
+* pygments
+    * Install with: `sudo pip install pygments`
+    * You may need to install `pip`, if it's not already available
+        * Install with: `sudo yum install -y python2-pip`
+    * This is a dependency for `cppcheck`
+    * If pip fails to connect, you call install pygments with 
+    ```
+    curl http://10.207.42.137/resources/pygments-2.2.0.tar.gz > pygments-2.2.0.tar.gz && sudo pip install --no-index --find-links . pygments
+    ```
+    
 ## Notes on building this project
 * To build, you can run: `./gradlew build`
 * If you want to see which Gradle tasks are available for you to run, execute: `./gradlew tasks [--all]`
 * You can always skip a part of the build process by passing the `-x` option
     * For example, if you don't want to wait for all of the functional tests to pass: `./gradlew build -xfunctionalTest`
-* NB: if you're using Windows, use `gradlew` instead of `./gradlew`
+* NB: if you're using Windows, use `gradlew.bat` instead of `./gradlew`
 
 # com.ngc.seaside:seaside.parent
 The seaside gradle parent plugin provides a base gradle build for all seaside projects. This plugin will ensure your
