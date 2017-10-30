@@ -20,7 +20,7 @@ class ExtractCoverageToolsTask extends DefaultTask {
         def lcovCoberturaFiles = extractTheReleaseArchive(pathToTheLcovCoberturaReleaseArchive())
         def cppCheckFiles = extractTheReleaseArchive(pathToTheCppCheckReleaseArchive())
         def ratsFiles = extractTheReleaseArchive(pathToTheRatsReleaseArchive())
-        def pygmentsFiles = extractTheReleaseArchive(pathToTheDirectoryWithPygmentFiles())
+        def pygmentsFiles = extractTheReleaseArchive(pathToThePygmentsReleaseArchive())
 
         copyTheFiles(lcovFiles, pathToTheDirectoryWithLcovFiles())
         copyTheFiles(lcovCoberturaFiles, pathToTheDirectoryWithLcovCoberturaFiles())
