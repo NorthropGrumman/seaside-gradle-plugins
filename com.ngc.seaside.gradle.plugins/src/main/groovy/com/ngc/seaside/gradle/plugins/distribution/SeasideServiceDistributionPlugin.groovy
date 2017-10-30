@@ -27,7 +27,7 @@ import org.gradle.api.tasks.bundling.Zip
  *}*}*
  *        dependencies {*             classpath 'com.ngc.seaside:seaside.distribution:1.1-SNAPSHOT'
  *}*}*
- *      apply plugin: 'com.ngc.seaside.distribution'
+ *      apply plugin: 'com.ngc.seaside.service-distribution'
  * </pre>
  */
 class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
@@ -115,7 +115,7 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
         project.afterEvaluate {
             taskResolver.findTask('tar') { tar ->
                 archiveName = "${distributionExtension.distributionName}.tar.gz"
-                destinationDir = file("${distributionExtension.distributionDestDir}")
+                destinationDir = new File("${distributionExtension.distributionDestDir}")
             }
 
             taskResolver.findTask('zip') { zip ->

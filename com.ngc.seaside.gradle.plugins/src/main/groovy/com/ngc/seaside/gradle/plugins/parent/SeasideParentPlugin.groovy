@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
+import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.util.GradleUtil
 import com.ngc.seaside.gradle.plugins.util.Versions
@@ -39,7 +40,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
     public static final String LOCAL_TAG = 'local-'
     public static String REMOTE_TAG = ''
 
-
     @Override
     void doApply(Project project) {
         project.configure(project) {
@@ -57,12 +57,12 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
 
             project.afterEvaluate {
                 project.logger.
-                        lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
+                      lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
                 /**
                  * Ensure to add the doclint option to the javadoc task if using Java 8.
                  */
                 if (JavaVersion.current().isJava8Compatible()) {
-                    taskResolver.findTask('javadoc') { doc ->
+                    taskResolver.findTask('javadoc') {
                         options.addStringOption('Xdoclint:none', '-quiet')
                     }
                 }
@@ -239,6 +239,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         project.getPlugins().apply('com.github.ben-manes.versions')
         project.getPlugins().apply('com.github.ksoichiro.console.reporter')
         project.getPlugins().apply(SeasideReleasePlugin)
+        project.getPlugins().apply(SeasideCiPlugin)
     }
 
     /**
@@ -285,7 +286,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         project.task(DOWNLOAD_DEPENDENCIES_TASK_NAME, type: DownloadDependenciesTask) {}
         taskResolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
         taskResolver.findTask(DOWNLOAD_DEPENDENCIES_TASK_NAME).setDescription(
-                'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.')
+              'Downloads all dependencies into the build/dependencies/ folder using maven2 layout.')
 
         /**
          * cleanupDependencies task
@@ -295,7 +296,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
             doLast {
                 ext.actualRepository = project.downloadDependencies.localRepository ?
                                        project.downloadDependencies.localRepository : project.file(
-                        [project.buildDir, 'dependencies'].join(File.separator))
+                      [project.buildDir, 'dependencies'].join(File.separator))
 
                 logger.info("Moving cleaned up repository from ${localRepository.absolutePath} to " +
                             "${actualRepository.absolutePath}.")
@@ -309,12 +310,13 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         }
         taskResolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
         taskResolver.findTask(CLEANUP_DEPENDENCIES_TASK_NAME).
-                setDescription('Remove unused dependencies from dependencies folder.')
+              setDescription('Remove unused dependencies from dependencies folder.')
 
         /**
          * dependencyReport task
          */
         project.task(DEPENDENCY_REPORT_TASK_NAME, type: DependencyReportTask,
                      description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies')
+
     }
 }
