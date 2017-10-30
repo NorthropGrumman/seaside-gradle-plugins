@@ -9,9 +9,10 @@ import org.gradle.api.tasks.TaskAction
 import java.nio.file.Paths
 
 class ExtractCoverageToolsTask extends DefaultTask {
+
     private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
-                   .findByType(SeasideCppCoverageExtension.class)
+                    .findByType(SeasideCppCoverageExtension.class)
 
     @TaskAction
     def extractLcov() {
@@ -19,11 +20,13 @@ class ExtractCoverageToolsTask extends DefaultTask {
         def lcovCoberturaFiles = extractTheReleaseArchive(pathToTheLcovCoberturaReleaseArchive())
         def cppCheckFiles = extractTheReleaseArchive(pathToTheCppCheckReleaseArchive())
         def ratsFiles = extractTheReleaseArchive(pathToTheRatsReleaseArchive())
+        def pygmentsFiles = extractTheReleaseArchive(pathToTheDirectoryWithPygmentFiles())
 
         copyTheFiles(lcovFiles, pathToTheDirectoryWithLcovFiles())
         copyTheFiles(lcovCoberturaFiles, pathToTheDirectoryWithLcovCoberturaFiles())
         copyTheFiles(cppCheckFiles, pathToTheDirectoryWithCppCheckFiles())
         copyTheFiles(ratsFiles, pathToTheDirectoryWithRatsFiles())
+        copyTheFiles(pygmentsFiles, pathToTheDirectoryWithPygmentFiles())
     }
 
     private FileTree extractTheReleaseArchive(String releaseArchive) {
@@ -44,6 +47,10 @@ class ExtractCoverageToolsTask extends DefaultTask {
 
     private String pathToTheRatsReleaseArchive() {
         return Paths.get(findTheReleaseArchiveFile(cppCoverageExtension.RATS_FILENAME))
+    }
+
+    private String pathToThePygmentsReleaseArchive() {
+        return Paths.get(findTheReleaseArchiveFile(cppCoverageExtension.PYGMENTS_FILENAME))
     }
 
     private String findTheReleaseArchiveFile(String filename) {
@@ -74,7 +81,7 @@ class ExtractCoverageToolsTask extends DefaultTask {
     }
 
     private String pathToTheDirectoryWithPygmentFiles() {
-        return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_CPPCHECK
+        return cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_PYGMENTS
     }
 
     private String pathToTheDirectoryWithCppCheckFiles() {

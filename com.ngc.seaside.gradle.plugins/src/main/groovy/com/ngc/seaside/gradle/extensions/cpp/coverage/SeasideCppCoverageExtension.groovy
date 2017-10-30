@@ -45,6 +45,7 @@ class SeasideCppCoverageExtension {
         final String PATH_TO_THE_DIRECTORY_WITH_LCOV_COBERTURA
         final String PATH_TO_THE_DIRECTORY_WITH_CPPCHECK
         final String PATH_TO_THE_DIRECTORY_WITH_RATS
+        final String PATH_TO_THE_DIRECTORY_WITH_PYGMENTS
         final String PATH_TO_THE_LCOV_EXECUTABLE
         final String PATH_TO_THE_CPPCHECK_EXECUTABLE
         final String PATH_TO_THE_GENHTML_EXECUTABLE
@@ -80,6 +81,11 @@ class SeasideCppCoverageExtension {
                     p.buildDir.name,
                     "tmp",
                     "rats")
+
+            PATH_TO_THE_DIRECTORY_WITH_PYGMENTS = toPath(
+                    p.buildDir.name,
+                    "tmp",
+                    "pygments")
 
             PATH_TO_THE_LCOV_EXECUTABLE = toPath(
                     PATH_TO_THE_DIRECTORY_WITH_LCOV,
