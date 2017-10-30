@@ -95,7 +95,7 @@ public class UnpackCppDistributionsTask extends DefaultTask {
             String destFileName = zip.getName().substring(0, zip.getName().length() - 4);
             File dest = new File(zip.getParentFile(), destFileName);
 
-            Copy unzipTask = project.getTasks().create("unzip" + destFileName, Copy.class);
+            Copy unzipTask = project.getTasks().create("unzip" + getName() + "_" + destFileName, Copy.class);
             unzipTask.into(dest);
             unzipTask.from(project.zipTree(zip));
             unzipTask.execute();
