@@ -59,14 +59,14 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
         project.configure(project) {
             createTasks(project)
 
-            // Configure the build to handle the system properties for updating the properties of the build.
-            // Note the display property work could be done in task but the update property work cannot be (easily) done in
-            // a task.  To be consistent, we don't do any of the work in a task.
-            configurePropertyDisplay(project)
             // This work is not done in a task because we what to do the property replacement before any actual work is
             // done, including dependency resolution.  Ensuring that a task gets run before anything else can be difficult,
             // so we do this work in a "beforeEvaluate" project callback.
             configurePropertyUpdate(project)
+            // Configure the build to handle the system properties for updating the properties of the build.
+            // Note the display property work could be done in task but the update property work cannot be (easily) done in
+            // a task.  To be consistent, we don't do any of the work in a task.
+            configurePropertyDisplay(project)
         }
     }
 
