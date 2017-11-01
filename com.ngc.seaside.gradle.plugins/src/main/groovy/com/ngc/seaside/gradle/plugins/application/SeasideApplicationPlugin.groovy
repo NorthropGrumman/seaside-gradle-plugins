@@ -103,7 +103,7 @@ class SeasideApplicationPlugin extends AbstractProjectPlugin {
                     // Add system properties set by user
                     if (applicationExtension.appSystemProperties != null) {
                         applicationExtension.appSystemProperties.each { key, value ->
-                            String systemProp = "\"-D $key=$value\""
+                            String systemProp = "\"-D${key}=${value}\""
                             project.getLogger().info("Adding $systemProp to DEFAULT_JVM_OPTS")
 
                             // Adds system property to start scripts
