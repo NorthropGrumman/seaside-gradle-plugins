@@ -1,10 +1,14 @@
 package com.ngc.seaside.gradle.tasks.cpp.coverage
 
 import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
+import com.ngc.seaside.gradle.util.FileUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class GenerateCoverageDataTask extends DefaultTask {
+
+    private final String LCOV_EXECUTABLE_PATH = FileUtil.toPath(project.buildDir.absolutePath, "tmp", "lcov")
+
     private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions
                     .findByType(SeasideCppCoverageExtension.class)
@@ -37,7 +41,8 @@ class GenerateCoverageDataTask extends DefaultTask {
     }
 
     private static void deleteCoverageFileIfEmpty(File coverageFile) {
-        if (coverageFile.text.trim().empty)
+        if (coverageFile.text.trim().empty) {
             coverageFile.delete()
+        }
     }
 }

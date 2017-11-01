@@ -1,20 +1,13 @@
 package com.ngc.seaside.gradle.plugins.bats
 
-import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
-import org.apache.commons.io.FileUtils
+import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
 
 class SeasideBatsPluginFT {

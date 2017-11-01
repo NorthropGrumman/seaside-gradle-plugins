@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.util
+package com.ngc.seaside.gradle.util
 
 import com.ngc.seaside.gradle.api.IResolver
 import org.gradle.api.Project

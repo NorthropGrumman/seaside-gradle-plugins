@@ -1,8 +1,7 @@
-package com.ngc.seaside.gradle.plugins.util
+package com.ngc.seaside.gradle.util
 
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import org.apache.commons.io.FileUtils
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert

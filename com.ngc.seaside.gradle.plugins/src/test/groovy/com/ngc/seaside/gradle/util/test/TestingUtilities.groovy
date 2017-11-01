@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.util.test
+package com.ngc.seaside.gradle.util.test
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome

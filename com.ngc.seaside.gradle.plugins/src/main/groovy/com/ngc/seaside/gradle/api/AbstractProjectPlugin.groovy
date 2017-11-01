@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.api
 
-import com.ngc.seaside.gradle.plugins.util.TaskResolver
-import com.ngc.seaside.gradle.plugins.util.VersionResolver
+import com.ngc.seaside.gradle.util.TaskResolver
+import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.Project
 
 /**

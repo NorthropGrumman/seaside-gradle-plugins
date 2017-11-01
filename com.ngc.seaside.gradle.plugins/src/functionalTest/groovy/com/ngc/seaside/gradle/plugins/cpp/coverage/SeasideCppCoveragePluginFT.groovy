@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.plugins.cpp.coverage
 
 import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
-import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
+import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner

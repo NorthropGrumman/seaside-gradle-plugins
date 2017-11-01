@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.cpp.coverage
 
-import com.ngc.seaside.gradle.plugins.util.TaskResolver
+import com.ngc.seaside.gradle.util.TaskResolver
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder

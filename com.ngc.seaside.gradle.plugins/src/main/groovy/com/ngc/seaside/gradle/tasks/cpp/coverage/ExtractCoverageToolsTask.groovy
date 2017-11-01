@@ -55,7 +55,7 @@ class ExtractCoverageToolsTask extends DefaultTask {
 
     private String findTheReleaseArchiveFile(String filename) {
         return projectClasspathConfiguration().filter { file ->
-            return file.name.contains(filename)
+            return file.name.endsWith(filename)
         }.getAsPath()
     }
 

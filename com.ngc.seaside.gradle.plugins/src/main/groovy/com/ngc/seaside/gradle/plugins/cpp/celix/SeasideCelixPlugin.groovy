@@ -2,7 +2,7 @@ package com.ngc.seaside.gradle.plugins.cpp.celix
 
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.cpp.parent.SeasideCppParentPlugin
-import com.ngc.seaside.gradle.plugins.util.Versions
+import com.ngc.seaside.gradle.util.Versions
 import com.ngc.seaside.gradle.tasks.cpp.celix.CelixManifestTask
 import org.gradle.api.Project
 

@@ -2,7 +2,7 @@ package com.ngc.seaside.gradle.plugins.distribution
 
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.distribution.SeasideServiceDistributionExtension
-import com.ngc.seaside.gradle.plugins.util.GradleUtil
+import com.ngc.seaside.gradle.util.GradleUtil
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Compression
@@ -187,7 +187,8 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
             from project.configurations.getByName("bundles") {
                 rename { name ->
                     def artifacts = project.configurations.bundles.resolvedConfiguration.resolvedArtifacts
-                    def artifact = artifacts.find { it.file.name == name }
+                    def artifact = artifacts.find { it.file
+                                                            .name == name }
                     "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
                 }
             }

@@ -1,13 +1,10 @@
 package com.ngc.seaside.gradle.plugins.cpp.celix
 
-import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
+import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 

@@ -2,7 +2,7 @@ package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
-import com.ngc.seaside.gradle.plugins.util.TaskResolver
+import com.ngc.seaside.gradle.util.TaskResolver
 import com.ngc.seaside.gradle.tasks.release.ReleaseTask
 import org.gradle.api.Project
 

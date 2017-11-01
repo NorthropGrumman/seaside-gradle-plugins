@@ -2,7 +2,7 @@ package com.ngc.seaside.gradle.plugins.cpp.celix
 
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.cpp.celix.CelixDistributionExtension
-import com.ngc.seaside.gradle.plugins.util.GradleUtil
+import com.ngc.seaside.gradle.util.GradleUtil
 import com.ngc.seaside.gradle.tasks.cpp.celix.CreateCelixRunScriptTask
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.Project

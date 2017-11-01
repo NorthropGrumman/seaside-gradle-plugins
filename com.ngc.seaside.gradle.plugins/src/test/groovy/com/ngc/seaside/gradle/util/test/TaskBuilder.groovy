@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.util.test
+package com.ngc.seaside.gradle.util.test
 
 import org.gradle.api.internal.AbstractTask
 import org.gradle.api.internal.project.ProjectInternal

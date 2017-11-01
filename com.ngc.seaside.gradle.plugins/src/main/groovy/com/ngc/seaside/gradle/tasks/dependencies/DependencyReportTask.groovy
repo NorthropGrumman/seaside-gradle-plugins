@@ -4,8 +4,8 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
-import com.ngc.seaside.gradle.plugins.util.TreeNode
-import com.ngc.seaside.gradle.plugins.util.TreePath
+import com.ngc.seaside.gradle.util.TreeNode
+import com.ngc.seaside.gradle.util.TreePath
 
 /**
  * Gradle-Task that downloads all dependencies into a local directory based repository.

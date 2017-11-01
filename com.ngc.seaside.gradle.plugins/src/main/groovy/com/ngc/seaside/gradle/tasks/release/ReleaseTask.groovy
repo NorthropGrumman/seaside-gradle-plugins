@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.tasks.release
 
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
-import com.ngc.seaside.gradle.plugins.util.VersionResolver
+import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 

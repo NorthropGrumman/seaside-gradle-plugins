@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.util;
+package com.ngc.seaside.gradle.util;
 
 import groovy.lang.Closure;
 

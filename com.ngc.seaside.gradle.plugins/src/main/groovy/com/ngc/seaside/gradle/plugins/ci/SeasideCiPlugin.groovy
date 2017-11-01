@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.plugins.ci
 
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
-import com.ngc.seaside.gradle.plugins.util.PropertyUtils
+import com.ngc.seaside.gradle.util.PropertyUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
 
