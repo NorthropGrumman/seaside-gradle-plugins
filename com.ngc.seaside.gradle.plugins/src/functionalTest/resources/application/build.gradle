@@ -1,0 +1,22 @@
+plugins {
+    id 'com.ngc.seaside.application'
+}
+
+group = 'com.ngc.seaside'
+version = '1.0.0-SNAPSHOT'
+
+seasideApplication {
+    mainClassName = "com.ngc.seaside.application.Foo"
+    includeDistributionDirs = ['src/main/resources/']
+    appHomeVarName = 'appHome'
+    appSystemProperties = [MY_PROP: "APP_HOME_VAR"]
+    distributionName = "${project.name}-${project.version}"
+    installationDir = "build/distributions/${project.name}-${project.version}"
+
+    windows {
+        appHomeCmd = "%~dp0.."
+    }
+    unix {
+        appHomeCmd = "pwd -P"
+    }
+}
