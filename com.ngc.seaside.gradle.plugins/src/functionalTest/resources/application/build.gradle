@@ -20,21 +20,3 @@ seasideApplication {
         appHomeCmd = "pwd -P"
     }
 }
-
-group = 'com.ngc.seaside'
-
-seasideApplication {
-    mainClassName = "com.ngc.seaside.application.Foo"
-    includeDistributionDirs = ['src/main/resources/']
-    appHomeVarName = 'appHome'
-    appSystemProperties = [MY_PROP: "APP_HOME_VAR"]
-    distributionName = "${project.name}-${project.version}"
-    installationDir = "build/distributions/${project.name}-${project.version}"
-
-    windows {
-        appHomeCmd = "%~dp0.."
-    }
-    unix {
-        appHomeCmd = "pwd -P"
-    }
-}
