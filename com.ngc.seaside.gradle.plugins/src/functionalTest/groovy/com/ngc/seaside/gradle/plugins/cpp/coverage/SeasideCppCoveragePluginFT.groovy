@@ -72,16 +72,11 @@ class SeasideCppCoveragePluginFT {
     }
 
     private static File sourceDirectoryWithTheTestProject() {
-        return TestingUtilities.turnListIntoPath(
-                "src", "functionalTest", "resources", "pipeline-test-cpp"
-        )
+        return TestingUtilities.turnListIntoPath("src", "functionalTest", "resources", "pipeline-test-cpp")
     }
 
     private static File pathToTheDestinationProjectDirectory() {
-        return TestingUtilities.turnListIntoPath(
-                "build", "functionalTest",
-                "cpp", "coverage", "pipeline-test-cpp"
-        )
+        return TestingUtilities.turnListIntoPath("build", "functionalTest", "cpp", "coverage", "pipeline-test-cpp")
     }
 
     private void checkForTaskSuccess(String taskName) {
