@@ -11,8 +11,7 @@ import java.nio.file.Paths
 class ExtractCoverageToolsTask extends DefaultTask {
 
     private SeasideCppCoverageExtension cppCoverageExtension =
-            project.extensions
-                    .findByType(SeasideCppCoverageExtension.class)
+            project.extensions.findByType(SeasideCppCoverageExtension.class)
 
     @TaskAction
     def extractLcov() {
@@ -29,7 +28,6 @@ class ExtractCoverageToolsTask extends DefaultTask {
     private String pathToTheRatsReleaseArchive() {
         return Paths.get(findTheReleaseArchiveFile(cppCoverageExtension.RATS_FILENAME))
     }
-
 
 
     private String findTheReleaseArchiveFile(String filename) {

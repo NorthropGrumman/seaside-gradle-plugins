@@ -7,23 +7,18 @@ import com.ngc.seaside.gradle.util.FileUtil
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.TaskAction
 
-import java.nio.file.Paths
-
 class GenerateCppCheckReportsTask extends AbstractCoverageTask {
 
     private SeasideCppCoverageExtension cppCoverageExtension =
             project.extensions.findByType(SeasideCppCoverageExtension.class)
 
-    private final String CPPCHECK_DIRECTORY_PATH = FileUtil.toPath(project.buildDir.name, "tmp", "cppcheck")
-    private final String CPPCHECK_EXECUTABLE = FileUtil.toPath(CPPCHECK_DIRECTORY_PATH,
-                                                               "cppcheck-$cppCoverageExtension.CPPCHECK_VERSION",
-                                                               "cppcheck")
-    private final String CPPCHECK_HTML_EXECUTABLE = FileUtil.toPath(CPPCHECK_DIRECTORY_PATH,
-                                                                    "cppcheck-$cppCoverageExtension.CPPCHECK_VERSION",
-                                                                    "htmlreport", "cppcheck-htmlreport")
-    private final String CPPCHECK_HTML_DIR = FileUtil.toPath(project.buildDir.absolutePath, "reports", "cppcheck",
-                                                             "html")
-    private final String PYGMENTS_DIRECTORY_PATH = FileUtil.toPath(project.buildDir.name, "tmp", "pygments")
+    private final String cppcheckDirectoryPath = FileUtil.toPath(project.buildDir.name, "tmp", "cppcheck")
+    private final String cppcheckFolder = FileUtil.toPath(cppcheckDirectoryPath,
+                                                          "cppcheck-$cppCoverageExtension.CPPCHECK_VERSION")
+    private final String cppcheckExecutable = FileUtil.toPath(cppcheckFolder, "cppcheck")
+    private final String cppcheckHtmlExecutable = FileUtil.toPath(cppcheckFolder, "htmlreport", "cppcheck-htmlreport")
+    private final String cppcheckHtmlDir = FileUtil.toPath(project.buildDir.absolutePath, "reports", "cppcheck", "html")
+    private final String pygmentsDirectoryPath = FileUtil.toPath(project.buildDir.name, "tmp", "pygments")
 
     @TaskAction
     def generateCppCheckReports() {
@@ -42,7 +37,7 @@ class GenerateCppCheckReportsTask extends AbstractCoverageTask {
 
 
 
-        String cppcheck = CPPCHECK_EXECUTABLE
+        String cppcheck = cppcheckExecutable
         File cppcheckXmlFile = createCppCheckXmlFile()
 
         def arguments = [
@@ -64,7 +59,7 @@ class GenerateCppCheckReportsTask extends AbstractCoverageTask {
     private void genCppCheckHtml(File cppcheckXmlFile) {
         Preconditions.checkState(cppcheckXmlFile.exists(), "$cppcheckXmlFile.absolutePath does not exist!")
         extractPygments()
-        String cppcheckHtml = CPPCHECK_HTML_EXECUTABLE
+        String cppcheckHtml = cppcheckHtmlExecutable
         File cppcheckHtmlDir = createCppCheckHtmlFile()
 
         def arguments = [
@@ -87,26 +82,20 @@ class GenerateCppCheckReportsTask extends AbstractCoverageTask {
     }
 
     private File createCppCheckHtmlFile() {
-        def f = new File(CPPCHECK_HTML_DIR)
+        def f = new File(cppcheckHtmlDir)
         f.parentFile.mkdirs()
         return f
     }
 
     private void extractPygments() {
-        FileTree pygmentFiles = FileUtil.extractZipfile(project, pathToThePygmentsReleaseArchive())
-        FileUtil.copyFileTreeToDest(project, pygmentFiles, PYGMENTS_DIRECTORY_PATH)
+        String archivePath = findTheReleaseArchiveFile(cppCoverageExtension.PYGMENTS_FILENAME)
+        FileTree pygmentFiles = FileUtil.extractZipfile(project, archivePath)
+        FileUtil.copyFileTreeToDest(project, pygmentFiles, pygmentsDirectoryPath)
     }
 
     private void extractCppCheckTool() {
-        FileTree cppcheckFiles = FileUtil.extractZipfile(project, pathToTheCppCheckReleaseArchive())
-        FileUtil.copyFileTreeToDest(project, cppcheckFiles, CPPCHECK_DIRECTORY_PATH)
-    }
-
-    private String pathToThePygmentsReleaseArchive() {
-        return Paths.get(findTheReleaseArchiveFile(cppCoverageExtension.PYGMENTS_FILENAME))
-    }
-
-    private String pathToTheCppCheckReleaseArchive() {
-        return Paths.get(findTheReleaseArchiveFile(cppCoverageExtension.CPPCHECK_FILENAME))
+        String archivePath = findTheReleaseArchiveFile(cppCoverageExtension.CPPCHECK_FILENAME)
+        FileTree cppcheckFiles = FileUtil.extractZipfile(project, archivePath)
+        FileUtil.copyFileTreeToDest(project, cppcheckFiles, cppcheckDirectoryPath)
     }
 }

@@ -47,7 +47,6 @@ class SeasideCppCoverageExtension {
         final String PATH_TO_THE_DIRECTORY_WITH_RATS
         final String PATH_TO_THE_RATS_EXECUTABLE
         final String PATH_TO_RATS_XML
-        final String PATH_TO_THE_RATS_DATABASE
         final String PATH_TO_RATS_HTML
 
         CppCoveragePaths(Project p) {
@@ -61,11 +60,6 @@ class SeasideCppCoverageExtension {
                     PATH_TO_THE_DIRECTORY_WITH_RATS,
                     "rats-$RATS_VERSION",
                     "rats")
-
-            PATH_TO_THE_RATS_DATABASE = toPath(
-                    PATH_TO_THE_DIRECTORY_WITH_RATS,
-                    "rats-$RATS_VERSION",
-                    "rats-c.xml")
 
             PATH_TO_RATS_HTML = toPath(
                     p.buildDir.absolutePath,

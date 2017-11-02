@@ -13,15 +13,11 @@ class GenerateCoverageDataTask extends AbstractCoverageTask {
     private SeasideCppCoverageExtension cppCoverageExtension = project.extensions
             .findByType(SeasideCppCoverageExtension.class)
 
-    private final String LCOV_DIRECTORY_PATH = FileUtil.toPath(project.buildDir.absolutePath, "tmp", "lcov")
-
-    private final String LCOV_EXECUTABLE_PATH = FileUtil.toPath(LCOV_DIRECTORY_PATH,
-                                                                "lcov-$cppCoverageExtension.LCOV_VERSION", "bin",
-                                                                "lcov")
-    private final String GENHTML_EXECUTABLE_PATH = FileUtil.toPath(LCOV_DIRECTORY_PATH,
-                                                                   "lcov-$cppCoverageExtension.LCOV_VERSION",
-                                                                   "bin", "genhtml")
-    private final String COVERAGE_HTML_DIR = FileUtil.toPath(project.buildDir.absolutePath, "reports", "lcov", "html")
+    private final String lcovDirectoryPath = FileUtil.toPath(project.buildDir.absolutePath, "tmp", "lcov")
+    private final String lcovFolder = FileUtil.toPath(lcovDirectoryPath, "lcov-$cppCoverageExtension.LCOV_VERSION")
+    private final String lcovExecutablePath = FileUtil.toPath(lcovFolder, "bin", "lcov")
+    private final String genHtmlExecutablePath = FileUtil.toPath(lcovFolder, "bin", "genhtml")
+    private final String coverageHtmlDir = FileUtil.toPath(project.buildDir.absolutePath, "reports", "lcov", "html")
 
     /**
      * Generate and filter coverage data then store in the specified directory
@@ -38,7 +34,6 @@ class GenerateCoverageDataTask extends AbstractCoverageTask {
         }
     }
 
-
     /**
      * Generates lcov coverage (trace) files assuming the project contains cpp files.
      * If a coverage was generated, it will proceed to call the {@code filterCoverageData} method
@@ -47,7 +42,7 @@ class GenerateCoverageDataTask extends AbstractCoverageTask {
      */
     private boolean doGenerateFilteredCoverageData(File coverageFile) {
         String dir = project.projectDir.absolutePath
-        String lcov = LCOV_EXECUTABLE_PATH
+        String lcov = lcovExecutablePath
 
         def arguments = [
                 "--no-external",
@@ -78,7 +73,7 @@ class GenerateCoverageDataTask extends AbstractCoverageTask {
     private boolean filterCoverageData(File coverageFile) {
         Preconditions.checkState(coverageFile.exists(), "$coverageFile.absolutePath does not exist!")
 
-        String lcov = LCOV_EXECUTABLE_PATH
+        String lcov = lcovExecutablePath
 
         def arguments = [
                 "-r", coverageFile,
@@ -100,9 +95,9 @@ class GenerateCoverageDataTask extends AbstractCoverageTask {
      */
     private void generateHtmlReport(File coverageFile) {
         Preconditions.checkState(coverageFile.exists(), "$coverageFile.absolutePath does not exist!")
-        File coverageHtmlDir = new File(COVERAGE_HTML_DIR)
+        File coverageHtmlDir = new File(coverageHtmlDir)
 
-        String genHtml = GENHTML_EXECUTABLE_PATH
+        String genHtml = genHtmlExecutablePath
 
         def arguments = [
                 "-o", coverageHtmlDir.absolutePath,
@@ -120,7 +115,6 @@ class GenerateCoverageDataTask extends AbstractCoverageTask {
             process.args(arguments)
         }.assertNormalExitValue()
     }
-
 
     /**
      * Creates coverage file directories
@@ -149,15 +143,8 @@ class GenerateCoverageDataTask extends AbstractCoverageTask {
      * Extracts the downloaded lcov tool zip to a location where it will be ran from.
      */
     private void extractLcovTool() {
-        FileTree lcovFiles = FileUtil.extractZipfile(project, pathToTheLcovReleaseArchive())
-        FileUtil.copyFileTreeToDest(project, lcovFiles, LCOV_DIRECTORY_PATH)
-    }
-
-    /**
-     * Finds the lcov archive location within the project classpath
-     * @return path to archive file
-     */
-    private String pathToTheLcovReleaseArchive() {
-        return findTheReleaseArchiveFile(cppCoverageExtension.LCOV_FILENAME)
+        String archivePath = findTheReleaseArchiveFile(cppCoverageExtension.LCOV_FILENAME)
+        FileTree lcovFiles = FileUtil.extractZipfile(project, archivePath)
+        FileUtil.copyFileTreeToDest(project, lcovFiles, lcovDirectoryPath)
     }
 }
