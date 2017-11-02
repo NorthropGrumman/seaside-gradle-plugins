@@ -30,8 +30,8 @@ class GenerateRatsReportsTask extends AbstractCoverageTask {
 
     private void doGenRatsXml(String dir) {
         String rats = ratsExecutable
-        def ratsXmlFile = createRatsXmlFile()
         String ratsCommand = "$rats --database $ratsDatabasePath $dir"
+        File ratsXmlFile = createRatsXmlFile()
 
         def arguments = [
                 "-c", ratsCommand + " --xml > $ratsXmlFile"
@@ -40,25 +40,22 @@ class GenerateRatsReportsTask extends AbstractCoverageTask {
         project.exec { process ->
             process.executable("bash")
             process.args(arguments)
-        }
-
-        arguments = [
-                "-c", ratsCommand + " --html > $ratsHtmlFile"
-        ]
-
-        project.exec {
-            executable "bash"
-            args arguments
-        }
+        }.assertNormalExitValue()
     }
 
     private void doGenRatsHtml(String dir) {
         String rats = ratsExecutable
-
         String ratsCommand = "$rats --database $ratsDatabasePath $dir"
-        def ratsHtmlFile = createRatsHtmlFile()
+        File ratsHtmlFile = createRatsHtmlFile()
 
+        def arguments = [
+                "-c", ratsCommand + " --html > $ratsHtmlFile"
+        ]
 
+        project.exec { process ->
+            process.executable("bash")
+            process.args(arguments)
+        }.assertNormalExitValue()
     }
 
     private File createRatsXmlFile() {
@@ -75,7 +72,7 @@ class GenerateRatsReportsTask extends AbstractCoverageTask {
 
     private void extractRatsTool() {
         String archivePath = findTheReleaseArchiveFile(cppCoverageExtension.RATS_FILENAME)
-        FileTree cppcheckFiles = FileUtil.extractZipfile(project, archivePath)
-        FileUtil.copyFileTreeToDest(project, cppcheckFiles, ratsDirectoryPath)
+        FileTree ratsFiles = FileUtil.extractZipfile(project, archivePath)
+        FileUtil.copyFileTreeToDest(project, ratsFiles, ratsDirectoryPath)
     }
 }
