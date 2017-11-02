@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.application
 
-import com.ngc.seaside.gradle.plugins.util.test.TestingUtilities
+import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder

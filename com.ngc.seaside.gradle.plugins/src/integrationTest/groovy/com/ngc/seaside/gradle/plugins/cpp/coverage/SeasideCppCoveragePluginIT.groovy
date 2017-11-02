@@ -29,12 +29,8 @@ class SeasideCppCoveragePluginIT {
       Assert.assertNotNull(project.extensions.findByName(SeasideCppCoveragePlugin.CPP_COVERAGE_EXTENSION_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.EXTRACT_COVERAGE_TOOLS_TASK_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_COVERAGE_DATA_TASK_NAME))
-      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.FILTER_COVERAGE_DATA_TASK_NAME))
-      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.COVERAGE_TASK_NAME))
-      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_COVERAGE_HTML_TASK_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_CPPCHECK_REPORT_TASK_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_RATS_REPORT_TASK_NAME))
-      Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_COVERAGE_XML_TASK_NAME))
       Assert.assertNotNull(TaskResolver.findTask(project, SeasideCppCoveragePlugin.GENERATE_FULL_COVERAGE_REPORT_TASK_NAME))
    }
 

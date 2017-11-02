@@ -20,46 +20,13 @@ class SeasideCppCoverageExtensionTest {
    }
 
    @Test
-   void cppCoveragePathsFieldIsNotNull() {
-      Assert.assertNotNull(extension.CPP_COVERAGE_PATHS)
-   }
-
-   @Test
-   void cppCoveragePathIsSetToDefault() {
-      Assert.assertEquals(extension.coverageFilePath, extension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_FILE)
-   }
-
-   @Test
-   void returnsCorrectPathToLcovExecutable() {
-      def expected = [
-            project.buildDir.absolutePath,
-            "tmp",
-            "lcov",
-            "lcov-${extension.LCOV_VERSION}",
-            "bin",
-            "lcov"
-      ].join(File.separator)
-      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_THE_LCOV_EXECUTABLE)
-   }
-
-   @Test
-   void returnsCorrectPathToTheDirectoryWithLcov() {
-      def expected = [
-            project.buildDir.absolutePath,
-            "tmp",
-            "lcov"
-      ].join(File.separator)
-      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_THE_DIRECTORY_WITH_LCOV)
-   }
-
-   @Test
    void returnsCorrectPathToDefaultCoverageFile() {
       def expected = [
             project.buildDir.absolutePath,
             "lcov",
             "coverage.info"
       ].join(File.separator)
-      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_FILE)
+      Assert.assertEquals(expected, extension.coverageFilePath)
    }
 
    @Test
@@ -69,7 +36,7 @@ class SeasideCppCoverageExtensionTest {
               "cppcheck",
               "cppcheck.xml"
       ].join(File.separator)
-      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_CPPCHECK_XML)
+      Assert.assertEquals(expected, extension.cppCheckXmlPath)
    }
 
    @Test
@@ -101,17 +68,6 @@ class SeasideCppCoverageExtensionTest {
               "lcov",
               "coverage.xml"
       ].join(File.separator)
-      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_LCOV_COBERTURA_XML)
-   }
-
-   @Test
-   void returnsCorrectPathToDefaultLcovHtmlDir() {
-      def expected = [
-              project.buildDir.absolutePath,
-              "reports",
-              "lcov",
-              "html"
-      ].join(File.separator)
-      Assert.assertEquals(expected, extension.CPP_COVERAGE_PATHS.PATH_TO_THE_COVERAGE_HTML_DIR)
+      Assert.assertEquals(expected, extension.coverageXmlPath)
    }
 }

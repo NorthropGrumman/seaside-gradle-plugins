@@ -1,39 +1,74 @@
 package com.ngc.seaside.gradle.tasks.cpp.coverage.reports
 
+import com.google.common.base.Preconditions
 import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
+import com.ngc.seaside.gradle.util.FileUtil
+import org.gradle.api.Project
+import org.gradle.api.file.FileTree
+
+class GenerateCoverageXmlTask {
 
 
-class GenerateCoverageXmlTask extends DefaultTask {
-    private SeasideCppCoverageExtension cppCoverageExtension =
-            project.extensions
-                   .findByType(SeasideCppCoverageExtension.class)
+    def static generateLcovXml(Project project) {
+        SeasideCppCoverageExtension extension = project.extensions.findByType(SeasideCppCoverageExtension.class)
+        String coverageFilePath = extension.coverageFilePath
+        Preconditions.checkState(new File(coverageFilePath).exists(), "$coverageFilePath does not exist!")
 
-    @TaskAction
-    def generateLcovXml() {
-        def lcovCobertura = cppCoverageExtension.CPP_COVERAGE_PATHS.PATH_TO_THE_LCOV_COBERTURA_SCRIPT
-        def coverageFilePath = cppCoverageExtension.coverageFilePath
-        def coverageXmlPath = createCoverageXmlFile()
+
+        String coberturaDirectoryPath = FileUtil.toPath(project.buildDir.name, "tmp", "lcov-cobertura")
+        String lcovCobertura = FileUtil.toPath(coberturaDirectoryPath,
+                                               "lcov-to-cobertura-xml-${extension.LCOV_COBERTURA_VERSION}",
+                                               "lcov_cobertura", "lcov_cobertura.py")
+
+        String archivePath = pathToTheCoberturaReleaseArchive(project, extension)
+        FileTree coberturaFiles = FileUtil.extractZipfile(project, archivePath)
+        copyFileTreeToDest(project, coberturaFiles, coberturaDirectoryPath)
+
+        File coverageXmlPath = createCoverageXmlFile(extension)
         def arguments = [
-              lcovCobertura,
-              coverageFilePath,
-              "--demangle",
-              "--output",
-              coverageXmlPath
+                lcovCobertura,
+                coverageFilePath,
+                "--demangle",
+                "--output",
+                coverageXmlPath
         ]
 
-        if (new File(coverageFilePath).exists()) {
-            project.exec {
-                executable "python"
-                args arguments
-            }
-        }
+        project.exec { process ->
+            process.executable("python")
+            process.args(arguments)
+        }.assertNormalExitValue()
     }
 
-    private File createCoverageXmlFile() {
-        def f = new File(cppCoverageExtension.coverageXmlPath)
+    /**
+     * Creates coverage xml file directories
+     * @param extension extension container of coverageXmlPath
+     * @return File handler to coverage xml file
+     */
+    private static File createCoverageXmlFile(SeasideCppCoverageExtension extension) {
+        def f = new File(extension.coverageXmlPath)
         f.parentFile.mkdirs()
         return f
+    }
+
+    /**
+     * Copies the extracted cobertura tool files to a location where it will be ran from.
+     * @param project the project to run this task from
+     * @param coberturaFiles {@link FileTree} containing extracted cobertura files
+     * @param coberturaDirectoryPath destination where files will be placed
+     */
+    private static void copyFileTreeToDest(Project project, FileTree coberturaFiles, String coberturaDirectoryPath) {
+        FileUtil.copyFileTreeToDest(project, coberturaFiles, coberturaDirectoryPath)
+    }
+
+    /**
+     * Retrieves the path to the archive file
+     * @param project the project to run this task from
+     * @param extension extension container of coverageXmlPath
+     * @return path to cobertura archive
+     */
+    private static String pathToTheCoberturaReleaseArchive(Project project, SeasideCppCoverageExtension extension) {
+        return project.configurations.getByName("compile").filter { file ->
+            return file.name.endsWith(extension.LCOV_COBERTURA_FILENAME)
+        }.getAsPath()
     }
 }
