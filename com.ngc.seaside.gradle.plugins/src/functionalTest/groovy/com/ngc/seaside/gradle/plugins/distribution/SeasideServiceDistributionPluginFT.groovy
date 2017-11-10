@@ -38,11 +38,17 @@ class SeasideServiceDistributionPluginFT {
     @Test
     void doesRunGradleBuildWithSuccess() {
         BuildResult result = GradleRunner.create().withProjectDir(project.projectDir)
-                .withPluginClasspath(pluginClasspath)
-                .forwardOutput()
-                .withArguments("clean", "build")
-                .build()
+              .withPluginClasspath(pluginClasspath)
+              .forwardOutput()
+              .withArguments("clean", "build")
+              .build()
 
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":build").getOutcome())
+
+        Assert.assertTrue("did not create ZIP!",
+                          Files.isRegularFile(projectDir.toPath().resolve(Paths.get(
+                                "build",
+                                "distribution",
+                                "com.ngc.seaside.example.distribution-1.0-SNAPSHOT.zip"))))
     }
 }
