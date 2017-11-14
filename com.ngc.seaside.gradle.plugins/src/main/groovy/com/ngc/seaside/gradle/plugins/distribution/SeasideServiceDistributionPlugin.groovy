@@ -115,12 +115,12 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
         project.afterEvaluate {
             taskResolver.findTask('tar') { tar ->
                 archiveName = "${distributionExtension.distributionName}.tar.gz"
-                destinationDir = new File("${distributionExtension.distributionDestDir}")
+                destinationDir = project.file("${distributionExtension.distributionDestDir}")
             }
 
             taskResolver.findTask('zip') { zip ->
                 archiveName = "${distributionExtension.distributionName}.zip"
-                destinationDir = new File("${distributionExtension.distributionDestDir}")
+                destinationDir = project.file("${distributionExtension.distributionDestDir}")
             }
         }
     }
