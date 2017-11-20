@@ -22,7 +22,7 @@ subprojects {
     apply plugin: 'maven'
 
     group = 'com.ngc.seaside'
-    version = '2.1.1-SNAPSHOT'
+    version = '2.1.1'
 
     ext {
         junitVersion = '4.12'
