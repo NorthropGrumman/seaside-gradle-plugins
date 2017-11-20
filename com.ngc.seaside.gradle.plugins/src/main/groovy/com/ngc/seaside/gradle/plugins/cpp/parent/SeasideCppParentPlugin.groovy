@@ -193,7 +193,7 @@ class SeasideCppParentPlugin extends AbstractProjectPlugin {
                                      "${project.buildDir.absolutePath}/rats/rats-report.xml"
                         }
 
-                        property 'sonar.branch', SeasideParentPlugin.getBranchName()
+                        property 'sonar.branch.name', SeasideParentPlugin.getBranchName()
 
                         if (new File("${project.projectDir}/src/main/cpp").exists()) {
                             property 'sonar.sources', "${project.projectDir}/src/main/cpp"
