@@ -76,6 +76,10 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
 
                     maven {
                         url nexusConsolidated
+                        credentials {
+                            nexusUsername
+                            nexusPassword
+                        }
                     }
                 }
 
