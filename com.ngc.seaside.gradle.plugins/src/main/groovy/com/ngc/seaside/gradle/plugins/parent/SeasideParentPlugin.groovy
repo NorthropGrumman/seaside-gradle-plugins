@@ -75,11 +75,11 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                     mavenLocal()
 
                     maven {
-                        url nexusConsolidated
                         credentials {
-                            nexusUsername
-                            nexusPassword
+                            username nexusUsername
+                            password nexusPassword
                         }
+                        url nexusConsolidated
                     }
                 }
 
