@@ -165,7 +165,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                             property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
                         }
                         property 'sonar.projectName', "${bundleName}"
-                        property 'sonar.branch.name', getBranchName()
+                        property 'sonar.branch', getBranchName()
                     }
                 }
             }
