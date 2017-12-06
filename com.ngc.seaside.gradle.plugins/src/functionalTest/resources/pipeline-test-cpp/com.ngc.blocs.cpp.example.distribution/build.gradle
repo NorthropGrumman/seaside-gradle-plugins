@@ -9,7 +9,7 @@ ext {
 celixDistribution {
     distributionName = "${group}.${project.name}-${version}"
     distributionDir = "${project.distsDir}/${group}.${project.name}-${version}"
-    runScript = "${distributionDir}/run.sh"
+    runScript = "${distributionDir}/bin/start.sh"
 }
 
 dependencies {
