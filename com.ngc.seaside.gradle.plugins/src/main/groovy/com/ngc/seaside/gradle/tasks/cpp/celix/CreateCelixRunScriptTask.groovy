@@ -21,19 +21,21 @@ class CreateCelixRunScriptTask extends DefaultTask {
     String scriptTemplate = '''
 #!/bin/sh
 
-export LD_LIBRARY_PATH=$(pwd)/lib/linux_x86_64:${LD_LIBRARY_PATH}
+export BASE_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+export LD_LIBRARY_PATH=$BASE_DIRECTORY/lib/linux_x86_64:${LD_LIBRARY_PATH}
 
 rm -rf .cache
 
 # Generate the configuration for config.properties.
-echo -n 'cosgi.auto.start.1=' > config.properties
+echo -n 'cosgi.auto.start.1=' > $BASE_DIRECTORY/config.properties
 shopt -s nullglob
-for b in bundles/*.zip
+for b in $BASE_DIRECTORY/bundles/*.zip
 do
-    echo -n "$(pwd)/$b " >> config.properties
+    echo -n "$b " >> $BASE_DIRECTORY/config.properties
 done
 
-$(pwd)/bin/celix $@
+$BASE_DIRECTORY/bin/celix $BASE_DIRECTORY/config.properties $@
 '''
 
     @TaskAction

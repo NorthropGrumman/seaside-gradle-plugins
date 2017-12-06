@@ -51,11 +51,11 @@ class CelixDistributionPluginFT {
         assertTrue("did not create distribution ZIP!",
                    Files.exists(distributionDir.resolve("example.distribution-1.0-SNAPSHOT.zip")))
         assertTrue("did not create run script!",
-                   Files.exists(distributionDir.resolve("com.ngc.blocs.cpp.example.distribution-1.0-SNAPSHOT/run.sh")))
+                   Files.exists(distributionDir.resolve("com.ngc.blocs.cpp.example.distribution-1.0-SNAPSHOT/bin/start.sh")))
         assertTrue("did not include default bundles!",
                    Files.exists(distributionDir.resolve(
                          "com.ngc.blocs.cpp.example.distribution-1.0-SNAPSHOT/bundles/shell.zip")))
-        assertTrue("did not include extra bundles!",
+        assertTrue("did not include logservice bundle!",
                    Files.exists(distributionDir.resolve(
                          "com.ngc.blocs.cpp.example.distribution-1.0-SNAPSHOT/bundles/service.log.impl.logservice-1.0-SNAPSHOT.zip")))
     }
