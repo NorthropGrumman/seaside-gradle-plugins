@@ -22,7 +22,7 @@ class ReleaseTask extends DefaultTask {
         if (!isReleaseVersionSet()) {
             def currentProjectVersion = resolver.getProjectVersion()
             def newReleaseVersion = getTheReleaseVersion(currentProjectVersion)
-            setTheNewReleaseVersion(currentProjectVersion, newReleaseVersion)
+            setTheNewReleaseVersion(newReleaseVersion)
             setTheReleaseVersionProjectProperty(newReleaseVersion)
         }
     }
@@ -39,8 +39,9 @@ class ReleaseTask extends DefaultTask {
         return newReleaseVersion
     }
 
-    private void setTheNewReleaseVersion(String currentProjectVersion, String newReleaseVersion) {
-        if (!isDryRun() && currentProjectVersion != newReleaseVersion) {
+    private void setTheNewReleaseVersion(String newReleaseVersion) {
+        if (!isDryRun()) {
+            project.logger.lifecycle("Setting version in root build.gradle to $newReleaseVersion")
             resolver.setProjectVersionOnFile(newReleaseVersion)
         } else {
             project.logger.lifecycle("Dry Run >> Would have set version in root build.gradle to $newReleaseVersion")

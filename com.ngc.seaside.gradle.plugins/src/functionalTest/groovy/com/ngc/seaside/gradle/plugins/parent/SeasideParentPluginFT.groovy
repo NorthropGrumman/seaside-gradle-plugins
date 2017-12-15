@@ -9,7 +9,6 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 import java.nio.file.Files
@@ -46,7 +45,6 @@ class SeasideParentPluginFT {
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:build").getOutcome())
     }
 
-    @Ignore
     @Test
     void doesRunGradleAnalyzeBuildWithSuccess() {
 

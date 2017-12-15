@@ -20,7 +20,6 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'groovy'
     apply plugin: 'maven'
-
     group = 'com.ngc.seaside'
     version = '2.1.4-SNAPSHOT'
 
