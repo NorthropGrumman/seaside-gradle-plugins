@@ -149,13 +149,17 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                     }
                 }
 
-                /*
-             * Ensure we call the 2 new tasks for generating the javadoc and sources artifact jars.
-             */
-//                artifacts {
-//                    archives taskResolver.findTask(SOURCE_JAR_TASK_NAME)
-//                    archives taskResolver.findTask(JAVADOC_JAR_TASK_NAME)
-//                }
+                /**
+                 * Configure artifacts to be uploaded to Nexus.  We only configure these if the upload task is run.
+                 * This saves some time on the build.
+                 */
+                def taskNames = project.gradle.startParameter.taskNames
+                if (taskNames.contains('upload') || taskNames.contains('uploadArchives')) {
+                    project.artifacts {
+                        archives taskResolver.findTask(SOURCE_JAR_TASK_NAME)
+                        archives taskResolver.findTask(JAVADOC_JAR_TASK_NAME)
+                    }
+                }
 
                 /**
                  * Configure Sonarqube to use the Jacoco code coverage reports.
