@@ -4,10 +4,10 @@ import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
-import com.ngc.seaside.gradle.util.GradleUtil
-import com.ngc.seaside.gradle.util.Versions
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
+import com.ngc.seaside.gradle.util.GradleUtil
+import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
@@ -37,6 +37,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
     public static final String DEPENDENCY_UPDATES_TASK_NAME = 'dependencyUpdates'
     public static final String DEPENDENCY_REPORT_TASK_NAME = 'dependencyReport'
     public static final String CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
+    public static final String ALL_TASK_NAME = 'all'
     public static final String LOCAL_TAG = 'local-'
     public static String REMOTE_TAG = ''
 
@@ -151,10 +152,10 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                 /*
              * Ensure we call the 2 new tasks for generating the javadoc and sources artifact jars.
              */
-                artifacts {
-                    archives taskResolver.findTask(SOURCE_JAR_TASK_NAME)
-                    archives taskResolver.findTask(JAVADOC_JAR_TASK_NAME)
-                }
+//                artifacts {
+//                    archives taskResolver.findTask(SOURCE_JAR_TASK_NAME)
+//                    archives taskResolver.findTask(JAVADOC_JAR_TASK_NAME)
+//                }
 
                 /**
                  * Configure Sonarqube to use the Jacoco code coverage reports.
@@ -322,5 +323,14 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         project.task(DEPENDENCY_REPORT_TASK_NAME, type: DependencyReportTask,
                      description: 'Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies')
 
+        /**
+         * Configure a task that does everything.
+         */
+        def javadocJarTask = taskResolver.findTask(JAVADOC_JAR_TASK_NAME)
+        def sourceJarTask = taskResolver.findTask(SOURCE_JAR_TASK_NAME)
+        project.task(ALL_TASK_NAME,
+                     dependsOn: [buildTask, javadocJarTask, sourceJarTask],
+                     description: 'Performs a full build and generates all artifacts including Javadoc and source JARs.')
+        taskResolver.findTask(ALL_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
     }
 }
