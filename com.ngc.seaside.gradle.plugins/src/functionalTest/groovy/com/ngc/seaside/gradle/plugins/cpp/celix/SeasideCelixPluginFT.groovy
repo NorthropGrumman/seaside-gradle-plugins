@@ -15,6 +15,7 @@ import java.util.jar.Manifest
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
+import static org.junit.Assume.assumeFalse
 
 class SeasideCelixPluginFT {
 
@@ -24,6 +25,10 @@ class SeasideCelixPluginFT {
 
     @Before
     void before() {
+        // This test only works on Linux.
+        assumeFalse("Current OS is Windows, skipping test.",
+                    System.getProperty("os.name").toLowerCase().startsWith("win"))
+
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
 
         File source = Paths.get("src/functionalTest/resources/pipeline-test-cpp").toFile()
