@@ -14,6 +14,7 @@ import java.nio.file.Paths
 
 import static org.gradle.internal.impldep.junit.framework.TestCase.assertTrue
 import static org.junit.Assert.assertEquals
+import static org.junit.Assume.assumeFalse
 
 class CelixDistributionPluginFT {
 
@@ -23,6 +24,10 @@ class CelixDistributionPluginFT {
 
     @Before
     void before() {
+        // This test only works on Linux.
+        assumeFalse("Current OS is Windows, skipping test.",
+                    System.getProperty("os.name").toLowerCase().startsWith("win"))
+
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
 
         File source = Paths.get("src/functionalTest/resources/pipeline-test-cpp").toFile()

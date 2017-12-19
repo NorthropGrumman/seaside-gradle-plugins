@@ -10,6 +10,8 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.attribute.PosixFilePermission
 
+import static org.junit.Assume.assumeFalse
+
 class SeasideBatsPluginFT {
     private File projectDir
     private Project project
@@ -17,6 +19,10 @@ class SeasideBatsPluginFT {
 
     @Before
     void before() {
+        // This test only works on Linux.
+        assumeFalse("Current OS is Windows, skipping test.",
+                    System.getProperty("os.name").toLowerCase().startsWith("win"))
+
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
         projectDir = TestingUtilities.setUpTheTestProjectDirectory(
               sourceDirectoryWithTheTestProject(),

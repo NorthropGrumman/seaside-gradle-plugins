@@ -10,6 +10,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
+import static org.junit.Assume.assumeFalse
+
 class SeasideCppCoveragePluginFT {
 
     private final String SUBPROJECT_DIR_PREFIX = "com.ngc.blocs.cpp."
@@ -30,6 +32,10 @@ class SeasideCppCoveragePluginFT {
 
     @Before
     void before() {
+        // This test only works on Linux.
+        assumeFalse("Current OS is Windows, skipping test.",
+                    System.getProperty("os.name").toLowerCase().startsWith("win"))
+
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
         testProjectDir = TestingUtilities.setUpTheTestProjectDirectory(
                 sourceDirectoryWithTheTestProject(),
