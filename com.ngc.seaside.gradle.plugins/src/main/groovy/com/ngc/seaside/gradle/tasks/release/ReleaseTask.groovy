@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
+import com.google.common.base.Preconditions
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
@@ -11,18 +12,22 @@ class ReleaseTask extends DefaultTask {
 
     private SeasideReleaseExtension releaseExtension = project.extensions.getByType(SeasideReleaseExtension.class)
 
-    boolean firstPass = false
+    private ReleaseType releaseType
 
-    ReleaseType releaseType
+    def prepareForRelease(ReleaseType releaseType) {
+        project.logger.error("RUNNING PREPARE FOR RELEASE")
+        this.releaseType = releaseType
+        createNewReleaseVersionIfNecessary()
+        project.version = project.rootProject.releaseVersion
+        project.logger.error("project version = " + project.version)
+    }
 
     @TaskAction
     def release() {
-        if(firstPass) {
-            createNewReleaseVersionIfNecessary()
-            project.version = project.rootProject.releaseVersion
-        } else {
-            releaseAllProjectsIfNecessary()
-        }
+        Preconditions.checkState(
+              isReleaseVersionSet(),
+              "Release task executing but prepareForRelease() not invoked during configuration phase!")
+        releaseAllProjectsIfNecessary()
     }
 
     private void createNewReleaseVersionIfNecessary() {
@@ -88,7 +93,7 @@ class ReleaseTask extends DefaultTask {
 
     private void commitVersionFileWithMessage(String msg) {
         if (releaseExtension.commitChanges) {
-            git "commit", "-m", "\"$msg\"", ":/$resolver.versionFile.name"
+            git "commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath"
             project.logger.info("Committed version file: $msg")
         }
 

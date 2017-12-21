@@ -13,10 +13,7 @@ import java.util.regex.Pattern
 
 class VersionResolver implements IResolver {
 
-    public static final String RELEASE_TASK_NAME = "release"
     public static final String VERSION_SUFFIX = "-SNAPSHOT"
-    public static final String RELEASE_MAJOR_VERSION_TASK_NAME = "releaseMajorVersion"
-    public static final String RELEASE_MINOR_VERSION_TASK_NAME = "releaseMinorVersion"
 
     private static final Pattern PATTERN =
           Pattern.compile(
@@ -32,7 +29,6 @@ class VersionResolver implements IResolver {
     VersionResolver(Project p) {
         project = p
         versionFile = project.rootProject.buildFile
-        //versionFile = new File([project.rootProject.projectDir, 'build.gradle'].join(File.separator))
         logger = project.logger
     }
 
