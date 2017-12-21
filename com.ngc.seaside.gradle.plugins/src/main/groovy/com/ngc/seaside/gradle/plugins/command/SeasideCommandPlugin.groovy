@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.command
 
-import com.ngc.seaside.gradle.api.AbstractProjectPlugin
+import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Zip
 

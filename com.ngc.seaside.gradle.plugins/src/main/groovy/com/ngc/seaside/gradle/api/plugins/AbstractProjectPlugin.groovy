@@ -1,5 +1,6 @@
-package com.ngc.seaside.gradle.api
+package com.ngc.seaside.gradle.api.plugins
 
+import com.ngc.seaside.gradle.tasks.release.ReleaseType
 import com.ngc.seaside.gradle.util.TaskResolver
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.Project
@@ -22,8 +23,9 @@ abstract class AbstractProjectPlugin implements IProjectPlugin {
     final void apply(Project project) {
         this.taskResolver = new TaskResolver(project)
         this.versionResolver = new VersionResolver(project)
+        this.versionResolver.setEnforceVersionSuffix(false)
         project.configure(project) {
-            project.version = versionResolver.getProjectVersion()
+            project.version = versionResolver.getProjectVersion(ReleaseType.SNAPSHOT)
         }
         doApply(project)
     }

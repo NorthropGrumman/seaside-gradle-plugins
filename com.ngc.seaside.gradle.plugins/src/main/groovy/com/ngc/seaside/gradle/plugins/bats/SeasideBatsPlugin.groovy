@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.bats
 
-import com.ngc.seaside.gradle.api.AbstractProjectPlugin
+import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.bats.SeasideBatsExtension
 import com.ngc.seaside.gradle.tasks.bats.ExtractBatsTask
 import com.ngc.seaside.gradle.tasks.bats.RunBatsTask

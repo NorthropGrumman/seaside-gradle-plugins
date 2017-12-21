@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.release
 
-import com.ngc.seaside.gradle.api.AbstractProjectPlugin
+import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.ReleaseTask
 import com.ngc.seaside.gradle.tasks.release.ReleaseType
@@ -23,7 +23,6 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
     String versionSuffix
     String commitChanges
     String dryRun = "false"
-
 
     @Override
     void doApply(Project project) {
@@ -53,27 +52,17 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
             createTasks(project)
 
             project.afterEvaluate {
-                TaskResolver.findTask(project, RELEASE_TASK_NAME) {
-                    if (releaseExtension.uploadArtifacts) {
+                if (releaseExtension.uploadArtifacts) {
+                    TaskResolver.findTask(project, RELEASE_TASK_NAME) {
+                        it.dependsOn(taskResolver.findTask("uploadArchives"))
+                    }
+                    TaskResolver.findTask(project, RELEASE_MINOR_VERSION_TASK_NAME) {
+                        it.dependsOn(taskResolver.findTask("uploadArchives"))
+                    }
+                    TaskResolver.findTask(project, RELEASE_MAJOR_VERSION_TASK_NAME) {
                         it.dependsOn(taskResolver.findTask("uploadArchives"))
                     }
                 }
-//
-//                TaskResolver.findTask(project, RELEASE_MINOR_VERSION_TASK_NAME) {
-//                    if (releaseExtension.uploadArtifacts) {
-//                        finalizedBy {
-//                            taskResolver.findTask("uploadArchives")
-//                        }
-//                    }
-//                }
-//
-//                TaskResolver.findTask(project, RELEASE_MINOR_VERSION_TASK_NAME) {
-//                    if (releaseExtension.uploadArtifacts) {
-//                        finalizedBy {
-//                            taskResolver.findTask("uploadArchives")
-//                        }
-//                    }
-//                }
             }
         }
     }
@@ -88,14 +77,7 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
                      type: ReleaseTask,
                      group: RELEASE_TASK_GROUP_NAME,
                      description: 'Creates a tagged non-SNAPSHOT release.') {
-            def isTaskInvoked = project.gradle.startParameter.taskNames.contains(RELEASE_TASK_NAME)
-
-            enabled = isTaskInvoked
-
-            if (isTaskInvoked) {
-                prepareForRelease(ReleaseType.PATCH)
-            }
-
+            prepareForReleaseIfNeeded(ReleaseType.PATCH)
             dependsOn {
                 project.rootProject.subprojects.collect { subproject ->
                     taskResolver.findTask(subproject, "build")
@@ -103,29 +85,29 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
             }
         }
 
-//        project.task(RELEASE_MAJOR_VERSION_TASK_NAME,
-//                     type: ReleaseTask,
-//                     group: RELEASE_TASK_GROUP_NAME,
-//                     description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
-//            releaseType = ReleaseType.MAJOR
-//            dependsOn {
-//                project.rootProject.subprojects.collect { subproject ->
-//                    taskResolver.findTask(subproject, "build")
-//                }
-//            }
-//        }
-//
-//        project.task(RELEASE_MINOR_VERSION_TASK_NAME,
-//                     type: ReleaseTask,
-//                     group: RELEASE_TASK_GROUP_NAME,
-//                     description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
-//            releaseType = ReleaseType.MINOR
-//            dependsOn {
-//                project.rootProject.subprojects.collect { subproject ->
-//                    taskResolver.findTask(subproject, "build")
-//                }
-//            }
-//        }
+        project.task(RELEASE_MAJOR_VERSION_TASK_NAME,
+                     type: ReleaseTask,
+                     group: RELEASE_TASK_GROUP_NAME,
+                     description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
+            prepareForReleaseIfNeeded(ReleaseType.MAJOR)
+            dependsOn {
+                project.rootProject.subprojects.collect { subproject ->
+                    taskResolver.findTask(subproject, "build")
+                }
+            }
+        }
+
+        project.task(RELEASE_MINOR_VERSION_TASK_NAME,
+                     type: ReleaseTask,
+                     group: RELEASE_TASK_GROUP_NAME,
+                     description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
+            prepareForReleaseIfNeeded(ReleaseType.MINOR)
+            dependsOn {
+                project.rootProject.subprojects.collect { subproject ->
+                    taskResolver.findTask(subproject, "build")
+                }
+            }
+        }
     }
 }
 

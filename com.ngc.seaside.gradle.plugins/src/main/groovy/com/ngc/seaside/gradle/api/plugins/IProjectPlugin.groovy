@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.api
+package com.ngc.seaside.gradle.api.plugins
 
 import com.ngc.seaside.gradle.util.TaskResolver
 import com.ngc.seaside.gradle.util.VersionResolver
