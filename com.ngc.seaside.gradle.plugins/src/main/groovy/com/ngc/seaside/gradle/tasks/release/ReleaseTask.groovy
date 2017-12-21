@@ -11,16 +11,23 @@ class ReleaseTask extends DefaultTask {
 
     private SeasideReleaseExtension releaseExtension = project.extensions.getByType(SeasideReleaseExtension.class)
 
+    boolean firstPass = false
+
+    ReleaseType releaseType
+
     @TaskAction
     def release() {
-        createNewReleaseVersionIfNecessary()
-        project.version = project.rootProject.releaseVersion
-        releaseAllProjectsIfNecessary()
+        if(firstPass) {
+            createNewReleaseVersionIfNecessary()
+            project.version = project.rootProject.releaseVersion
+        } else {
+            releaseAllProjectsIfNecessary()
+        }
     }
 
     private void createNewReleaseVersionIfNecessary() {
         if (!isReleaseVersionSet()) {
-            def currentProjectVersion = resolver.getProjectVersion()
+            def currentProjectVersion = resolver.getProjectVersion(releaseType)
             def newReleaseVersion = getTheReleaseVersion(currentProjectVersion)
             setTheNewReleaseVersion(newReleaseVersion)
             setTheReleaseVersionProjectProperty(newReleaseVersion)
@@ -32,8 +39,7 @@ class ReleaseTask extends DefaultTask {
     }
 
     private String getTheReleaseVersion(String currentProjectVersion) {
-        def taskNames = project.gradle.startParameter.taskNames
-        def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(taskNames)
+        def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
         String newReleaseVersion = upgradeStrategy.getVersion(currentProjectVersion)
         project.logger.info("Using release version '$newReleaseVersion'")
         return newReleaseVersion

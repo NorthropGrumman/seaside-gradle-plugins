@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
+import com.ngc.seaside.gradle.tasks.release.ReleaseType
 import com.ngc.seaside.gradle.util.TaskResolver
 import com.ngc.seaside.gradle.tasks.release.ReleaseTask
 import org.gradle.api.Project
@@ -84,6 +85,7 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
         project.logger.info(String.format("Creating tasks for %s", project.name))
         project.task(RELEASE_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                      description: 'Creates a tagged non-SNAPSHOT release.') {
+            releaseType = ReleaseType.PATCH
             dependsOn {
                 project.rootProject.subprojects.collect { subproject ->
                     taskResolver.findTask(subproject, "build")
@@ -93,6 +95,7 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
 
         project.task(RELEASE_MAJOR_VERSION_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                      description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
+            releaseType = ReleaseType.MAJOR
             dependsOn {
                 project.rootProject.subprojects.collect { subproject ->
                     taskResolver.findTask(subproject, "build")
@@ -102,6 +105,7 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
 
         project.task(RELEASE_MINOR_VERSION_TASK_NAME, type: ReleaseTask, group: RELEASE_TASK_GROUP_NAME,
                      description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
+            releaseType = ReleaseType.MINOR
             dependsOn {
                 project.rootProject.subprojects.collect { subproject ->
                     taskResolver.findTask(subproject, "build")

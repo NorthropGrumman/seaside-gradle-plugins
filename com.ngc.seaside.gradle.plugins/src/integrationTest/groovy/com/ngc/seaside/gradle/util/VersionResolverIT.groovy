@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.util
 
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
+import com.ngc.seaside.gradle.tasks.release.ReleaseType
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -28,6 +29,7 @@ class VersionResolverIT {
       project = ProjectBuilder.builder().withProjectDir(projectDir).build()
 
       resolver = new VersionResolver(project)
+      resolver.enforceVersionSuffix = false
 
       plugin = new SeasideReleasePlugin()
       plugin.apply(project)
@@ -37,10 +39,10 @@ class VersionResolverIT {
    void doesSetProjectVersionOnFile() {
       def version = "4.5.6"
       resolver.setProjectVersionOnFile(version)
-      Assert.assertEquals(version, resolver.getProjectVersion())
+      Assert.assertEquals(version, resolver.getProjectVersion(ReleaseType.PATCH))
 
       version = "4.5.6-SUFFIX"
       resolver.setProjectVersionOnFile(version)
-      Assert.assertEquals(version, resolver.getProjectVersion())
+      Assert.assertEquals(version, resolver.getProjectVersion(ReleaseType.SNAPSHOT))
    }
 }
