@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
+import com.google.common.base.Preconditions
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
@@ -7,20 +8,55 @@ import org.gradle.api.tasks.TaskAction
 
 class ReleaseTask extends DefaultTask {
 
-    private VersionResolver resolver = new VersionResolver(project)
+    private VersionResolver resolver
 
-    private SeasideReleaseExtension releaseExtension = project.extensions.getByType(SeasideReleaseExtension.class)
+    private SeasideReleaseExtension releaseExtension
+
+    /**
+     * Defines the type of release this instance of the task is configured to perform.
+     */
+    private ReleaseType releaseType
+
+    ReleaseTask() {
+        resolver = new VersionResolver(project)
+        resolver.enforceVersionSuffix = true
+        releaseExtension = project.extensions.getByType(SeasideReleaseExtension.class)
+    }
+/**
+     * Sets the type of release to perform and prepares for a release by updating the version number if the this task
+     * was invoked when Gradle was started.  This method should be invoked during the configuration phase before
+     * {@link #release()} is invoked during the execution phase.
+     */
+    def prepareForReleaseIfNeeded(ReleaseType releaseType) {
+        // TODO TH: This makes it harder to reuse this task.
+        def isTaskInvoked = project.gradle.startParameter.taskNames.contains(name)
+        // Disable this task if the task was not actually executed.
+        enabled = isTaskInvoked
+
+        // If the task was invoked, update the version number before the build actually executes.  This ensures that
+        // tasks which do not use lazy property evaluation are configured correctly before they are executed.  If we
+        // waited to do this during the execution phase, tasks would be configured to execute with the wrong the wrong
+        // version.
+        if (isTaskInvoked) {
+            project.logger.info("Preparing for a $releaseType release.")
+            this.releaseType = releaseType
+            createNewReleaseVersionIfNecessary()
+            project.version = project.rootProject.releaseVersion
+        }
+    }
 
     @TaskAction
     def release() {
-        createNewReleaseVersionIfNecessary()
-        project.version = project.rootProject.releaseVersion
+        // Perform the actually release.  Require the plugin be configured before executing.
+        Preconditions.checkState(
+              isReleaseVersionSet(),
+              "Release task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
         releaseAllProjectsIfNecessary()
     }
 
     private void createNewReleaseVersionIfNecessary() {
         if (!isReleaseVersionSet()) {
-            def currentProjectVersion = resolver.getProjectVersion()
+            def currentProjectVersion = resolver.getProjectVersion(releaseType)
             def newReleaseVersion = getTheReleaseVersion(currentProjectVersion)
             setTheNewReleaseVersion(newReleaseVersion)
             setTheReleaseVersionProjectProperty(newReleaseVersion)
@@ -32,8 +68,7 @@ class ReleaseTask extends DefaultTask {
     }
 
     private String getTheReleaseVersion(String currentProjectVersion) {
-        def taskNames = project.gradle.startParameter.taskNames
-        def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(taskNames)
+        def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
         String newReleaseVersion = upgradeStrategy.getVersion(currentProjectVersion)
         project.logger.info("Using release version '$newReleaseVersion'")
         return newReleaseVersion
@@ -82,7 +117,7 @@ class ReleaseTask extends DefaultTask {
 
     private void commitVersionFileWithMessage(String msg) {
         if (releaseExtension.commitChanges) {
-            git "commit", "-m", "\"$msg\"", ":/$resolver.versionFile.name"
+            git "commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath"
             project.logger.info("Committed version file: $msg")
         }
 

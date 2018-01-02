@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.distribution
 
-import com.ngc.seaside.gradle.api.AbstractProjectPlugin
+import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.distribution.SeasideServiceDistributionExtension
 import com.ngc.seaside.gradle.util.GradleUtil
 import org.gradle.api.Project

@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.cpp.coverage
 
-import com.ngc.seaside.gradle.api.AbstractProjectPlugin
+import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
 import com.ngc.seaside.gradle.tasks.cpp.coverage.GenerateCoverageDataTask
 import com.ngc.seaside.gradle.tasks.cpp.coverage.reports.GenerateCppCheckReportsTask

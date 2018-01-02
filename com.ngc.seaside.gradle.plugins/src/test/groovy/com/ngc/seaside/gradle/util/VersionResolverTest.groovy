@@ -19,7 +19,7 @@ class VersionResolverTest {
       Mockito.when(project.version).thenReturn("1.2.3.DEV")
       Mockito.when(project.rootProject).thenReturn(rootProject)
       Mockito.when(project.getLogger()).thenReturn(logger)
-      Mockito.when(rootProject.projectDir).thenReturn(file)
+      Mockito.when(rootProject.buildFile).thenReturn(file)
       resolver = new VersionResolver(project)
    }
 
@@ -35,7 +35,7 @@ class VersionResolverTest {
    @Test
    void doesGetVersionFileName() {
       Assert.assertNotNull(resolver.versionFile)
-      Assert.assertEquals('build.gradle', resolver.versionFile.getName())
+      Assert.assertEquals(file, resolver.versionFile)
    }
 
    @Test

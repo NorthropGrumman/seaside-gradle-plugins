@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.plugins.cpp.parent
 
-import com.ngc.seaside.gradle.api.AbstractProjectPlugin
+import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.cpp.coverage.SeasideCppCoveragePlugin
 import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin

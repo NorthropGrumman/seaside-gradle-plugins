@@ -40,6 +40,7 @@ public class TaskResolverTest {
    @Test
    public void testDoesApplyClosure() throws Throwable {
       String taskName = "foo";
+      @SuppressWarnings({"unchecked"})
       Closure<Task> closure = mock(Closure.class);
       when(taskContainer.getByName(taskName, closure)).thenReturn(task);
 
@@ -52,6 +53,7 @@ public class TaskResolverTest {
    @Test
    public void testDoesApplyClosureWhenInvokedStatically() throws Throwable {
       String taskName = "foo";
+      @SuppressWarnings({"unchecked"})
       Closure<Task> closure = mock(Closure.class);
       when(taskContainer.getByName(taskName, closure)).thenReturn(task);
 
