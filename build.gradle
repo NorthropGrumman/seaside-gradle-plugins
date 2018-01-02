@@ -21,7 +21,7 @@ subprojects {
     apply plugin: 'groovy'
     apply plugin: 'maven'
     group = 'com.ngc.seaside'
-    version = '2.1.5-SNAPSHOT'
+    version = '2.1.5'
 
     ext {
         junitVersion = '4.12'
