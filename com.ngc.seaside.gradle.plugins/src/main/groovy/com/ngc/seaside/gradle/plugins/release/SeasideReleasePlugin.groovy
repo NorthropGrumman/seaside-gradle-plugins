@@ -71,24 +71,24 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
                                       String description,
                                       ReleaseType releaseType,
                                       boolean isDryRun) {
-        def task = project.task(name,
-                                type: ReleaseTask,
-                                group: RELEASE_TASK_GROUP_NAME,
-                                description: description) {
-            commitChanges = releaseExtension.commitChanges
-            push = releaseExtension.push
-            tagPrefix = releaseExtension.tagPrefix
-            versionSuffix = releaseExtension.versionSuffix
-            dryRun = isDryRun
-            prepareForReleaseIfNeeded(releaseType)
-            dependsOn {
-                project.rootProject.subprojects.collect { subproject ->
-                    taskResolver.findTask(subproject, "build")
+        project.afterEvaluate {
+            def task = project.task(name,
+                                    type: ReleaseTask,
+                                    group: RELEASE_TASK_GROUP_NAME,
+                                    description: description) {
+                commitChanges = releaseExtension.commitChanges
+                push = releaseExtension.push
+                tagPrefix = releaseExtension.tagPrefix
+                versionSuffix = releaseExtension.versionSuffix
+                dryRun = isDryRun
+                prepareForReleaseIfNeeded(releaseType)
+                dependsOn {
+                    project.rootProject.subprojects.collect { subproject ->
+                        taskResolver.findTask(subproject, "build")
+                    }
                 }
             }
-        }
 
-        project.afterEvaluate {
             if (releaseExtension.uploadArtifacts && !isDryRun) {
                 task.dependsOn(taskResolver.findTask("uploadArchives"))
             }

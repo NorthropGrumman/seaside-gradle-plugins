@@ -8,7 +8,7 @@ import org.junit.Test
 import org.mockito.Mockito
 
 class VersionResolverTest {
-   private Project project = Mockito.mock(Project)
+   private Project project = Mockito.mock(Project, Mockito.RETURNS_DEEP_STUBS)
    private Project rootProject = Mockito.mock(Project)
    private Logger logger = Mockito.mock(Logger)
    private VersionResolver resolver
@@ -18,6 +18,7 @@ class VersionResolverTest {
    void before() {
       Mockito.when(project.version).thenReturn("1.2.3.DEV")
       Mockito.when(project.rootProject).thenReturn(rootProject)
+      Mockito.when(project.extensions.findByName(Mockito.any())).thenReturn(null)
       Mockito.when(project.getLogger()).thenReturn(logger)
       Mockito.when(rootProject.buildFile).thenReturn(file)
       resolver = new VersionResolver(project)
