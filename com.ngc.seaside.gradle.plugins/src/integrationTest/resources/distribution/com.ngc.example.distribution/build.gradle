@@ -18,11 +18,11 @@ group = 'com.ngc.seaside'
 version = '1.0-SNAPSHOT'
 
 ext {
-    blocsCoreVersion = '2.0'
-    blocsAuthorizationServiceVersion = '2.0'
-    blocsScenarioServiceVersion = '2.0'
-    blocsAuthenticationServiceVersion = '2.0'
-    blocsAutoLoginServiceVersion = '2.0'
+    blocsCoreVersion = '2.1'
+    blocsAuthorizationServiceVersion = '2.1'
+    blocsScenarioServiceVersion = '2.1'
+    blocsAuthenticationServiceVersion = '2.1'
+    blocsAutoLoginServiceVersion = '2.1'
 }
 
 seasideDistribution {

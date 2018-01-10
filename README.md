@@ -240,8 +240,19 @@ releases and snapshots
 
 ## Using this plugin
 To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
-An example is below. Note: a newer version may exist. Check the Nexus repository for the latest version.
+An example is below. Note: a newer version may exist. Check the Nexus repository for the latest version. If you want to
+execute a Dry Run you can either 
+1. invoke Gradle with one of the release dry runs tasks: `releaseDryRun`, `releaseMinorDryRun`, `releaseMajorDryRun`
+1. or configure the build.gradle so the following properties are set to false inside the seasideRelease section:
+```
+ seasideRelease {
+      push = false
+      commitChanges = false
+      uploadArtifacts = false
+     }
+```
 
+Below is an example of applying the plugin.
 ```java
 buildscript {
     repositories {
@@ -268,8 +279,9 @@ subprojects {
     
     seasideRelease {
             dependsOn subprojects*.build
-            uploadArtifacts = true //'false' would be useful if you don't want to publish release to nexus
-            push = true //'false' would be useful when triggering the release task on a local repository
+            uploadArtifacts = true //'false' would be useful if you don't want to publish release to nexus also false for dry runs
+            push = true //'false' would be useful when triggering the release task on a local repository also false for dry runs
+            commitChanges = true // false also false for dry runs
             versionSuffix = '-SNAPSHOT' // '.DEV' or '' (empty) could be useful alternatives
             tagPrefix = 'v' // 'r' or '' (empty) could be useful alternatives
     }

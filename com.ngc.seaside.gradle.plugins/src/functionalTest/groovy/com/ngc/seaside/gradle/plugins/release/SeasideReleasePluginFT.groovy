@@ -40,12 +40,12 @@ class SeasideReleasePluginFT {
                 .withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
-                .withArguments("-PuploadArtifacts=false", "-PcommitChanges=false", "-Ppush=false", "clean", "build", "release")
+                .withArguments("clean", "build", "releaseDryRun")
                 .build()
 
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:release").getOutcome())
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:release").getOutcome())
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:release").getOutcome())
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:releaseDryRun").getOutcome())
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:releaseDryRun").getOutcome())
+        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:releaseDryRun").getOutcome())
     }
 
     @Test
@@ -63,12 +63,12 @@ class SeasideReleasePluginFT {
                 .withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
-                .withArguments("-PuploadArtifacts=false", "-PcommitChanges=false", "-Ppush=false", "clean", "build", "release")
+                .withArguments("clean", "build", "releaseDryRun")
                 .buildAndFail()
 
         Assert.assertNull(result.task(":clean"))
         Assert.assertNull(result.task(":build"))
-        Assert.assertNull(result.task(":release"))
+        Assert.assertNull(result.task(":releaseDryRun"))
     }
 
     @Test
