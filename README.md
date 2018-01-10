@@ -241,13 +241,18 @@ releases and snapshots
 ## Using this plugin
 To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
 An example is below. Note: a newer version may exist. Check the Nexus repository for the latest version. If you want to
-execute a Dry Run you will need to set the following to false inside the seasideRelease section:
+execute a Dry Run you can either 
+1. invoke Gradle with one of the release dry runs tasks: `releaseDryRun`, `releaseMinorDryRun`, `releaseMajorDryRun`
+1. or configure the build.gradle so the following properties are set to false inside the seasideRelease section:
+```
  seasideRelease {
       push = false
       commitChanges = false
       uploadArtifacts = false
      }
+```
 
+Below is an example of applying the plugin.
 ```java
 buildscript {
     repositories {
