@@ -4,7 +4,6 @@ import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.ReleaseTask
 import com.ngc.seaside.gradle.tasks.release.ReleaseType
-import com.ngc.seaside.gradle.util.TaskResolver
 import org.gradle.api.Project
 
 class SeasideReleasePlugin extends AbstractProjectPlugin {
@@ -14,56 +13,16 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
     public static final String RELEASE_MAJOR_VERSION_TASK_NAME = 'releaseMajorVersion'
     public static final String RELEASE_MINOR_VERSION_TASK_NAME = 'releaseMinorVersion'
     public static final String RELEASE_EXTENSION_NAME = 'seasideRelease'
+    private static final String DRY_RUN_TASK_NAME_SUFFIX = 'DryRun'
 
     private SeasideReleaseExtension releaseExtension
-
-    String uploadArtifacts
-    String push
-    String tagPrefix
-    String versionSuffix
-    String commitChanges
-    String dryRun = "false"
 
     @Override
     void doApply(Project project) {
         project.configure(project) {
             releaseExtension = project.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension)
             project.logger.info(String.format("Initializing release extensions for %s", project.name))
-
-            // This has to be done in this closure else the visibility for the -P & -D is lost
-            if (Boolean.parseBoolean(dryRun)) {
-                releaseExtension.push = false
-                releaseExtension.commitChanges = false
-                releaseExtension.uploadArtifacts = false
-            } else {
-                // Pass properties set with -D or -P to override the extension
-                releaseExtension.uploadArtifacts = (uploadArtifacts) ? Boolean.parseBoolean(uploadArtifacts)
-                                                                     : releaseExtension.uploadArtifacts
-                releaseExtension.push = (push) ? Boolean.parseBoolean(push)
-                                               : releaseExtension.push
-                releaseExtension.tagPrefix = (tagPrefix) ? tagPrefix
-                                                         : releaseExtension.tagPrefix
-                releaseExtension.versionSuffix = (versionSuffix) ? versionSuffix
-                                                                 : releaseExtension.versionSuffix
-                releaseExtension.commitChanges = (commitChanges) ? Boolean.parseBoolean(commitChanges)
-                                                                 : releaseExtension.commitChanges
-            }
-
             createTasks(project)
-
-            project.afterEvaluate {
-                if (releaseExtension.uploadArtifacts) {
-                    TaskResolver.findTask(project, RELEASE_TASK_NAME) {
-                        it.dependsOn(taskResolver.findTask("uploadArchives"))
-                    }
-                    TaskResolver.findTask(project, RELEASE_MINOR_VERSION_TASK_NAME) {
-                        it.dependsOn(taskResolver.findTask("uploadArchives"))
-                    }
-                    TaskResolver.findTask(project, RELEASE_MAJOR_VERSION_TASK_NAME) {
-                        it.dependsOn(taskResolver.findTask("uploadArchives"))
-                    }
-                }
-            }
         }
     }
 
@@ -71,13 +30,57 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
      * Create project tasks for this plugin
      * @param project
      */
-    void createTasks(Project project) {
+    private void createTasks(Project project) {
         project.logger.info(String.format("Creating release tasks for %s", project.name))
-        project.task(RELEASE_TASK_NAME,
-                     type: ReleaseTask,
-                     group: RELEASE_TASK_GROUP_NAME,
-                     description: 'Creates a tagged non-SNAPSHOT release.') {
-            prepareForReleaseIfNeeded(ReleaseType.PATCH)
+        configureReleaseTask(project,
+                             RELEASE_TASK_NAME,
+                             'Creates a tagged non-SNAPSHOT release.',
+                             ReleaseType.PATCH,
+                             false)
+        configureReleaseTask(project,
+                             RELEASE_TASK_NAME + DRY_RUN_TASK_NAME_SUFFIX,
+                             'Performs a dry run of a non-SNAPSHOT release.',
+                             ReleaseType.PATCH,
+                             true)
+
+        configureReleaseTask(project,
+                             RELEASE_MAJOR_VERSION_TASK_NAME,
+                             'Upgrades to next major version & creates a tagged non-SNAPSHOT release.',
+                             ReleaseType.MAJOR,
+                             false)
+        configureReleaseTask(project,
+                             RELEASE_MAJOR_VERSION_TASK_NAME + DRY_RUN_TASK_NAME_SUFFIX,
+                             'Performs a dry run of an upgrade to the next major version and a non-SNAPSHOT release.',
+                             ReleaseType.MAJOR,
+                             true)
+
+        configureReleaseTask(project,
+                             RELEASE_MINOR_VERSION_TASK_NAME,
+                             'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.',
+                             ReleaseType.MINOR,
+                             false)
+        configureReleaseTask(project,
+                             RELEASE_MINOR_VERSION_TASK_NAME + DRY_RUN_TASK_NAME_SUFFIX,
+                             'Performs a dry run of an upgrade to next minor version and a non-SNAPSHOT release.',
+                             ReleaseType.MINOR,
+                             true)
+    }
+
+    private void configureReleaseTask(Project project,
+                                      String name,
+                                      String description,
+                                      ReleaseType releaseType,
+                                      boolean isDryRun) {
+        def task = project.task(name,
+                                type: ReleaseTask,
+                                group: RELEASE_TASK_GROUP_NAME,
+                                description: description) {
+            commitChanges = releaseExtension.commitChanges
+            push = releaseExtension.push
+            tagPrefix = releaseExtension.tagPrefix
+            versionSuffix = releaseExtension.versionSuffix
+            dryRun = isDryRun
+            prepareForReleaseIfNeeded(releaseType)
             dependsOn {
                 project.rootProject.subprojects.collect { subproject ->
                     taskResolver.findTask(subproject, "build")
@@ -85,27 +88,9 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
             }
         }
 
-        project.task(RELEASE_MAJOR_VERSION_TASK_NAME,
-                     type: ReleaseTask,
-                     group: RELEASE_TASK_GROUP_NAME,
-                     description: 'Upgrades to next major version & creates a tagged non-SNAPSHOT release.') {
-            prepareForReleaseIfNeeded(ReleaseType.MAJOR)
-            dependsOn {
-                project.rootProject.subprojects.collect { subproject ->
-                    taskResolver.findTask(subproject, "build")
-                }
-            }
-        }
-
-        project.task(RELEASE_MINOR_VERSION_TASK_NAME,
-                     type: ReleaseTask,
-                     group: RELEASE_TASK_GROUP_NAME,
-                     description: 'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.') {
-            prepareForReleaseIfNeeded(ReleaseType.MINOR)
-            dependsOn {
-                project.rootProject.subprojects.collect { subproject ->
-                    taskResolver.findTask(subproject, "build")
-                }
+        project.afterEvaluate {
+            if (releaseExtension.uploadArtifacts && !isDryRun) {
+                task.dependsOn(taskResolver.findTask("uploadArchives"))
             }
         }
     }

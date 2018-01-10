@@ -1,7 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
 import com.google.common.base.Preconditions
-import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -10,19 +9,27 @@ class ReleaseTask extends DefaultTask {
 
     private VersionResolver resolver
 
-    private SeasideReleaseExtension releaseExtension
-
     /**
      * Defines the type of release this instance of the task is configured to perform.
      */
     private ReleaseType releaseType
 
+    boolean dryRun
+
+    boolean commitChanges
+
+    boolean push
+
+    String tagPrefix
+
+    String versionSuffix
+
     ReleaseTask() {
         resolver = new VersionResolver(project)
         resolver.enforceVersionSuffix = true
-        releaseExtension = project.extensions.getByType(SeasideReleaseExtension.class)
     }
-/**
+
+    /**
      * Sets the type of release to perform and prepares for a release by updating the version number if the this task
      * was invoked when Gradle was started.  This method should be invoked during the configuration phase before
      * {@link #release()} is invoked during the execution phase.
@@ -75,7 +82,7 @@ class ReleaseTask extends DefaultTask {
     }
 
     private void setTheNewReleaseVersion(String newReleaseVersion) {
-        if (!isDryRun()) {
+        if (!dryRun) {
             project.logger.lifecycle("Setting version in root build.gradle to $newReleaseVersion")
             resolver.setProjectVersionOnFile(newReleaseVersion)
         } else {
@@ -83,22 +90,18 @@ class ReleaseTask extends DefaultTask {
         }
     }
 
-    private boolean isDryRun() {
-        return !(releaseExtension.push && releaseExtension.commitChanges && releaseExtension.uploadArtifacts)
-    }
-
     private void setTheReleaseVersionProjectProperty(String newReleaseVersion) {
         project.rootProject.ext.set("releaseVersion", newReleaseVersion)
 
-        String dryRunHeader = (isDryRun()) ? "Dry Run >>" : ""
+        String dryRunHeader = (dryRun) ? "Dry Run >>" : ""
         project.logger.lifecycle("$dryRunHeader Set project version to '$newReleaseVersion'")
     }
 
     private void releaseAllProjectsIfNecessary() {
-        String dryRunHeader = (isDryRun()) ? "Dry Run >>" : ""
+        String dryRunHeader = (dryRun) ? "Dry Run >>" : ""
         if (!areAllProjectsReleased()) {
             project.logger.lifecycle("$dryRunHeader Beginning the release task for " +
-                                     "${releaseExtension.tagPrefix}${project.version}")
+                                     "${tagPrefix}${project.version}")
             tagTheRelease()
             persistTheNewProjectVersion()
             pushTheChangesIfNecessary()
@@ -112,16 +115,16 @@ class ReleaseTask extends DefaultTask {
 
     private void tagTheRelease() {
         commitVersionFileWithMessage("Release of version v$project.version")
-        createReleaseTag(resolver.getTagName(releaseExtension.tagPrefix, releaseExtension.versionSuffix))
+        createReleaseTag(resolver.getTagName(tagPrefix, versionSuffix))
     }
 
     private void commitVersionFileWithMessage(String msg) {
-        if (releaseExtension.commitChanges) {
+        if (commitChanges && !dryRun) {
             git "commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath"
             project.logger.info("Committed version file: $msg")
         }
 
-        if (isDryRun()) {
+        if (dryRun) {
             project.logger.lifecycle("Dry Run >> Would have committed version file: $msg")
         }
     }
@@ -144,12 +147,12 @@ class ReleaseTask extends DefaultTask {
     }
 
     private void createReleaseTag(String tagName) {
-        if (releaseExtension.commitChanges) {
+        if (commitChanges && !dryRun) {
             git "tag", "-a", tagName, "-m Release of $tagName"
             project.logger.debug("Created release tag: $tagName")
         }
 
-        if (isDryRun()) {
+        if (dryRun) {
             project.logger.lifecycle("Dry Run >> Would have created release tag: $tagName")
         }
     }
@@ -157,7 +160,7 @@ class ReleaseTask extends DefaultTask {
     private void persistTheNewProjectVersion() {
         String nextVersion = getNextVersion()
         String dryRunHeader = (isDryRun()) ? "Dry Run >>" : ""
-        if (!isDryRun()) {
+        if (!dryRun) {
             resolver.setProjectVersionOnFile(nextVersion)
         }
         commitVersionFileWithMessage("Creating new $nextVersion version after release")
@@ -166,21 +169,21 @@ class ReleaseTask extends DefaultTask {
 
     private String getNextVersion() {
         def (major, minor, patch) = calculateNextVersion()
-        return "${major}.${minor}.${patch}${releaseExtension.versionSuffix}".toString()
+        return "${major}.${minor}.${patch}${versionSuffix}".toString()
     }
 
     private List<Integer> calculateNextVersion() {
-        String versionWithoutSuffix = project.version.toString() - releaseExtension.versionSuffix
+        String versionWithoutSuffix = project.version.toString() - versionSuffix
         def version = VersionUpgradeStrategyFactory.parseVersionInfo(versionWithoutSuffix)
         return [version.major, version.minor, version.patch + 1]
     }
 
     private void pushTheChangesIfNecessary() {
-        if (releaseExtension.push) {
-            pushChanges(resolver.getTagName(releaseExtension.tagPrefix, releaseExtension.versionSuffix))
+        if (push && !dryRun) {
+            pushChanges(resolver.getTagName(tagPrefix, versionSuffix))
         }
 
-        if (isDryRun()) {
+        if (dryRun) {
             project.logger.lifecycle("Dry Run >> Would have pushed changes to remote")
         }
     }
