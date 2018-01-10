@@ -1,11 +1,11 @@
 pipeline {
-   agent {
+    agent {
         label {
             label ""
             customWorkspace "${JENKINS_HOME}/workspace/${JOB_NAME}"
         }
     }
-    
+
     stages {
         stage('Build') {
             steps {
@@ -17,12 +17,12 @@ pipeline {
             steps {
                 sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
             }
-			
-			post {
-				always {
-					junit '**/build/test-results/test/*.xml'
-				}
-			}
+
+            post {
+                always {
+                    junit '**/build/test-results/test/*.xml'
+                }
+            }
 
         }
 
@@ -30,54 +30,41 @@ pipeline {
             steps {
                 sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest'
             }
-			post {
-				always {
-					junit '**/build/test-results/integrationTest/*.xml'
-				}
-			}
+            post {
+                always {
+                    junit '**/build/test-results/integrationTest/*.xml'
+                }
+            }
         }
 
         stage('Functional Test') {
             steps {
                 sh './gradlew functionalTest -PtestIgnoreFailures=true'
             }
-			post {
+            post {
                 always {
-					junit '**/build/test-results/functionalTest/*.xml'
-				}
-			}
+                    junit '**/build/test-results/functionalTest/*.xml'
+                }
+            }
         }
-		
-		stage('Upload & Archive') {
-		    failFast true
-			parallel {
-				stage("Archive Artifacts") {
-					steps {
-						archiveArtifacts allowEmptyArchive: true,
-							artifacts: 'com.ngc.seaside.gradle.plugins/build/libs/*.jar',
-							caseSensitive: false,
-							defaultExcludes: false,
-							onlyIfSuccessful: true
-					}
-				}
-				stage("Upload Artifiacts"){
-					when { 
-						branch 'master' 
-					}
-					steps {
-						sh './gradlew upload'
-					}
-				}
-			}					
+
+        stage('Release') {
+            when {
+                branch 'master'
+            }
+            steps {
+                sh './gradlew clean prepareForRelease'
+                sh './gradlew release -x integrationTest -x functionalTest -x test'
+            }
         }
     }
-    
-   // The options directive is for configuration that applies to the whole job.
+
+    // The options directive is for configuration that applies to the whole job.
     options {
         // For example, we'd like to make sure we only keep 10 builds at a time, so
         // we don't fill up our storage!
-        buildDiscarder(logRotator(numToKeepStr:'5'))
-    
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+
         // And we'd really like to be sure that this build doesn't hang forever, so
         // let's time it out after an hour.
         timeout(time: 60, unit: 'MINUTES')
