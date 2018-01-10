@@ -20,3 +20,18 @@ dependencies {
 }
 
 apply plugin: 'com.github.ksoichiro.console.reporter'
+
+task copyPlugin(type: Copy) {
+    from jar
+    into "$bootstrapDirectory"
+}
+
+task copyDependencies(type: Copy) {
+    from configurations.compile
+    into "$bootstrapDirectory"
+}
+
+task prepareForRelease(description: 'Prepares this project for a release.',
+                       dependsOn: [copyPlugin, copyDependencies]) {
+
+}
