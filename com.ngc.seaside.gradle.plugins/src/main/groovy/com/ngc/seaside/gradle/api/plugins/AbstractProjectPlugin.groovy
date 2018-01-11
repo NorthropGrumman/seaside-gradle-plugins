@@ -12,6 +12,8 @@ import org.gradle.api.Project
  */
 abstract class AbstractProjectPlugin implements IProjectPlugin {
 
+    static final String VERSION_SETTINGS_CONVENTION_NAME = 'versionSettings'
+
     private VersionResolver versionResolver
     private TaskResolver taskResolver
 
@@ -22,11 +24,13 @@ abstract class AbstractProjectPlugin implements IProjectPlugin {
     @Override
     final void apply(Project project) {
         this.taskResolver = new TaskResolver(project)
-        this.versionResolver = new VersionResolver(project)
-        this.versionResolver.setEnforceVersionSuffix(false)
-        project.configure(project) {
-            project.version = versionResolver.getProjectVersion(ReleaseType.SNAPSHOT)
+        if (project.extensions.findByName(VERSION_SETTINGS_CONVENTION_NAME) == null) {
+            this.versionResolver = project.extensions.create(VERSION_SETTINGS_CONVENTION_NAME, VersionResolver, project)
+        } else {
+            this.versionResolver = project.extensions.findByName(VERSION_SETTINGS_CONVENTION_NAME)
         }
+        this.versionResolver.setEnforceVersionSuffix(false)
+        project.version = "${-> versionResolver.getProjectVersion(ReleaseType.SNAPSHOT)}"
         doApply(project)
     }
 
