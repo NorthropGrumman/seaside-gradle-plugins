@@ -13,18 +13,18 @@ pipeline {
             }
         }
 
-        stage('Unit Test') {
-            steps {
-                sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
-            }
-
-            post {
-                always {
-                    junit '**/build/test-results/test/*.xml'
-                }
-            }
-
-        }
+//        stage('Unit Test') {
+//            steps {
+//                sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
+//            }
+//
+//           post {
+//                always {
+//                    junit '**/build/test-results/test/*.xml'
+//                }
+//            }
+//
+//        }
 
 //        stage('Integration Test') {
 //            steps {
@@ -50,7 +50,7 @@ pipeline {
 
         stage('Release') {
             when {
-                branch 'master'
+                branch 'experimental-pipeline'
             }
             steps {
                 sh './gradlew clean prepareForRelease'
