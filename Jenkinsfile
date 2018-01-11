@@ -26,27 +26,27 @@ pipeline {
 
         }
 
-        stage('Integration Test') {
-            steps {
-                sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest'
-            }
-            post {
-                always {
-                    junit '**/build/test-results/integrationTest/*.xml'
-                }
-            }
-        }
+//        stage('Integration Test') {
+//            steps {
+//                sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest'
+//            }
+//            post {
+//                always {
+//                    junit '**/build/test-results/integrationTest/*.xml'
+//                }
+//            }
+//        }
 
-        stage('Functional Test') {
-            steps {
-                sh './gradlew functionalTest -PtestIgnoreFailures=true'
-            }
-            post {
-                always {
-                    junit '**/build/test-results/functionalTest/*.xml'
-                }
-            }
-        }
+//        stage('Functional Test') {
+//            steps {
+//                sh './gradlew functionalTest -PtestIgnoreFailures=true'
+//            }
+//            post {
+//                always {
+//                    junit '**/build/test-results/functionalTest/*.xml'
+//                }
+//            }
+//        }
 
         stage('Release') {
             when {
@@ -54,7 +54,18 @@ pipeline {
             }
             steps {
                 sh './gradlew clean prepareForRelease'
-                sh './gradlew release -x integrationTest -x functionalTest -x test'
+                withCredentials([usernamePassword(credentialsId: 'ngc-github-pipelines',
+                                                  passwordVariable: 'gitPassword',
+                                                  usernameVariable: 'gitUsername')]) {
+                    try {
+                        sh "git config credential.username $gitUsername"
+                        sh "git config credential.helper 'echo password=$gitPassword; echo'"
+                        sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
+                    } finally {
+                        sh 'git config --unset credential.username'
+                        sh 'git config --unset credential.helper'
+                    }
+                }
             }
         }
     }
