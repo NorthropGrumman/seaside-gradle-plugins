@@ -53,12 +53,21 @@ pipeline {
                 branch 'experimental-pipeline'
             }
             steps {
-                sh 'echo $GIT_ASKPASS'
                 sh './gradlew clean prepareForRelease'
-                sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
-//                withCredentials([usernamePassword(credentialsId: 'ngc-github-pipelines',
-//                                                  passwordVariable: 'gitPassword',
-//                                                  usernameVariable: 'gitUsername')]) {
+                //sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
+
+                script {
+                    try {
+                        withCredentials([usernamePassword(credentialsId: 'ngc-github-pipelines',
+                                                          passwordVariable: 'gitPassword',
+                                                          usernameVariable: 'gitUsername')]) {
+                            sh "git config credential.helper '!echo password=\$gitPassword; echo username=\$gitUsername; echo'"
+                            sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
+                        }
+                    } finally {
+                        sh 'git config --unset credential.helper'
+                    }
+                }
 //                    try {
 //                        sh "git config credential.username $gitUsername"
 //                        sh "git config credential.helper 'echo password=$gitPassword; echo'"
