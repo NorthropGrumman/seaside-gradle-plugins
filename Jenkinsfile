@@ -2,7 +2,7 @@ pipeline {
     agent {
         label {
             label ""
-            customWorkspace "${JENKINS_HOME}/workspace/${JOB_NAME}"
+            customWorkspace "${JENKINS_HOME}/workspace/seaside-gradle-plugins/${JOB_NAME}"
         }
     }
 
@@ -54,17 +54,18 @@ pipeline {
             }
             steps {
                 sh './gradlew clean prepareForRelease'
-                withCredentials([usernamePassword(credentialsId: 'ngc-github-pipelines',
-                                                  passwordVariable: 'gitPassword',
-                                                  usernameVariable: 'gitUsername')]) {
-                    try {
-                        sh "git config credential.username $gitUsername"
-                        sh "git config credential.helper 'echo password=$gitPassword; echo'"
-                        sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
-                    } finally {
-                        sh 'git config --unset credential.username'
-                        sh 'git config --unset credential.helper'
-                    }
+                sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
+//                withCredentials([usernamePassword(credentialsId: 'ngc-github-pipelines',
+//                                                  passwordVariable: 'gitPassword',
+//                                                  usernameVariable: 'gitUsername')]) {
+//                    try {
+//                        sh "git config credential.username $gitUsername"
+//                        sh "git config credential.helper 'echo password=$gitPassword; echo'"
+//                        sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
+//                    } finally {
+//                        sh 'git config --unset credential.username'
+//                        sh 'git config --unset credential.helper'
+//                    }
                 }
             }
         }
