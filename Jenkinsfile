@@ -6,6 +6,8 @@ pipeline {
         }
     }
 
+    checkout scm
+
     stages {
         stage('Build') {
             steps {
@@ -53,6 +55,7 @@ pipeline {
                 branch 'experimental-pipeline'
             }
             steps {
+                sh 'echo $GIT_ASKPASS'
                 sh './gradlew clean prepareForRelease'
                 sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
 //                withCredentials([usernamePassword(credentialsId: 'ngc-github-pipelines',
