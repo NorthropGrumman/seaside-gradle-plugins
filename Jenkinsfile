@@ -2,7 +2,7 @@ pipeline {
     agent {
         label {
             label ""
-            customWorkspace "${JENKINS_HOME}/workspace/${JOB_NAME}"
+            customWorkspace "${JENKINS_HOME}/workspace/seaside-gradle-plugins/${JOB_NAME}"
         }
     }
 
@@ -18,7 +18,7 @@ pipeline {
                 sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
             }
 
-            post {
+           post {
                 always {
                     junit '**/build/test-results/test/*.xml'
                 }
@@ -54,7 +54,24 @@ pipeline {
             }
             steps {
                 sh './gradlew clean prepareForRelease'
-                sh './gradlew release -x integrationTest -x functionalTest -x test'
+
+                script {
+                    try {
+                        // This allows us to run Git commands with the credentials from Jenkins.  See
+                        // https://groups.google.com/forum/#!topic/jenkinsci-users/BPdw6EOP0fQ
+                        // and https://stackoverflow.com/questions/33570075/tag-a-repo-from-a-jenkins-workflow-script
+                        // for more information.
+                        withCredentials([usernamePassword(credentialsId: 'ngc-github-pipelines',
+                                                          passwordVariable: 'gitPassword',
+                                                          usernameVariable: 'gitUsername')]) {
+                            // This allows use to use a custom credential helper that uses the values from Jenkins.
+                            sh "git config credential.helper '!echo password=\$gitPassword; echo username=\$gitUsername; echo'"
+                            sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
+                        }
+                    } finally {
+                        sh 'git config --unset credential.helper'
+                    }
+                }
             }
         }
     }
