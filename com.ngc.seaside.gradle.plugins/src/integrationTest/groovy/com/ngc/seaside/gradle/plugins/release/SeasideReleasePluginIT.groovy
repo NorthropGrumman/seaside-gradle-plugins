@@ -1,5 +1,7 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
+import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.util.TaskResolver
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
@@ -31,12 +33,26 @@ class SeasideReleasePluginIT {
 
         plugin = new SeasideReleasePlugin()
         plugin.apply(project)
+        project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME).uploadArtifacts = false
     }
 
     @Test
     void doesApplyPlugin() {
+        project.evaluate()
         TaskResolver resolver = new TaskResolver(project)
-        Assert.assertEquals(TEST_VERSION_NUMBER.trim(), project.version)
+        Assert.assertEquals(TEST_VERSION_NUMBER.trim(), project.version.toString())
+        Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME))
+    }
+
+    @Test
+    void doesApplyPluginFromDifferentVersionFile() {
+        project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME).versionFile = Paths.get("src/integrationTest/resources/sealion-java-hello-world/versions.gradle").toFile()
+        project.evaluate()
+        TaskResolver resolver = new TaskResolver(project)
+        Assert.assertEquals('1.2.4-SNAPSHOT', project.version.toString())
         Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME))
