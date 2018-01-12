@@ -13,40 +13,40 @@ pipeline {
             }
         }
 
-//        stage('Unit Test') {
-//            steps {
-//                sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
-//            }
-//
-//           post {
-//                always {
-//                    junit '**/build/test-results/test/*.xml'
-//                }
-//            }
-//
-//        }
+        stage('Unit Test') {
+            steps {
+                sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
+            }
 
-//        stage('Integration Test') {
-//            steps {
-//                sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest'
-//            }
-//            post {
-//                always {
-//                    junit '**/build/test-results/integrationTest/*.xml'
-//                }
-//            }
-//        }
+           post {
+                always {
+                    junit '**/build/test-results/test/*.xml'
+                }
+            }
 
-//        stage('Functional Test') {
-//            steps {
-//                sh './gradlew functionalTest -PtestIgnoreFailures=true'
-//            }
-//            post {
-//                always {
-//                    junit '**/build/test-results/functionalTest/*.xml'
-//                }
-//            }
-//        }
+        }
+
+        stage('Integration Test') {
+            steps {
+                sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest'
+            }
+            post {
+                always {
+                    junit '**/build/test-results/integrationTest/*.xml'
+                }
+            }
+        }
+
+        stage('Functional Test') {
+            steps {
+                sh './gradlew functionalTest -PtestIgnoreFailures=true'
+            }
+            post {
+                always {
+                    junit '**/build/test-results/functionalTest/*.xml'
+                }
+            }
+        }
 
         stage('Release') {
             when {
