@@ -2,17 +2,28 @@ package com.ngc.seaside.gradle.tasks.dependencies;
 
 import com.google.common.base.Preconditions;
 
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResolutionException;
+import org.eclipse.aether.resolution.DependencyResult;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.eclipse.aether.util.repository.AuthenticationBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
@@ -24,9 +35,11 @@ import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public class PopulateMaven2Repository extends DefaultTask {
 
@@ -34,6 +47,12 @@ public class PopulateMaven2Repository extends DefaultTask {
          Arrays.asList(null, "sources", "tests"));
 
    private final static String DEFAULT_EXTENSION = "jar";
+
+   private RepositorySystem repositorySystem;
+
+   private RepositorySystemSession session;
+
+   private final List<RemoteRepository> remoteRepositories = new ArrayList<>();
 
    private File outputDirectory;
 
@@ -46,8 +65,8 @@ public class PopulateMaven2Repository extends DefaultTask {
       Preconditions.checkState(outputDirectory != null, "outputDirectory is not set!");
       Preconditions.checkState(repositoryConfiguration != null, "repositoryConfiguration not set!");
 
-      RepositorySystem repositorySystem = newRepositorySystem();
-      RepositorySystemSession session = newSession(repositorySystem);
+      repositorySystem = newRepositorySystem();
+      session = newSession(repositorySystem);
 
       Collection<Configuration> configs = getConfigurations();
       for (Configuration config : configs) {
@@ -78,6 +97,17 @@ public class PopulateMaven2Repository extends DefaultTask {
                session,
                new LocalRepository(localMavenRepo)));
       }
+
+      // TODO TH: what if no remote repository is configured.
+      remoteRepositories.add(
+            new RemoteRepository.Builder("remote", "default", repositoryConfiguration.getRemoteRepositoryUrl())
+//                  .setAuthentication(new AuthenticationBuilder()
+//                                           .addUsername(repositoryConfiguration.getRemoteRepositoryUsername())
+//                                           .addPassword(repositoryConfiguration.getRemoteRepositoryPassword())
+//                                           .build())
+                  .build()
+      );
+
       return session;
    }
 
@@ -85,9 +115,9 @@ public class PopulateMaven2Repository extends DefaultTask {
                                   RepositorySystem repositorySystem,
                                   RepositorySystemSession session) {
       if (dependency instanceof ModuleDependency) {
-         doResolveDependency((ModuleDependency) dependency, repositorySystem, session);
+         doResolveDependency((ModuleDependency) dependency);
       } else {
-         doResolveDependency(dependency, repositorySystem, session);
+         doResolveDependency(dependency);
       }
    }
 
@@ -128,9 +158,7 @@ public class PopulateMaven2Repository extends DefaultTask {
       return configs;
    }
 
-   private void doResolveDependency(Dependency dependency,
-                                    RepositorySystem repositorySystem,
-                                    RepositorySystemSession session) {
+   private void doResolveDependency(Dependency dependency) {
       getLogger().lifecycle("Attempting to resolve artifacts for '{}:{}:{}'.",
                             dependency.getGroup(),
                             dependency.getName(),
@@ -141,17 +169,13 @@ public class PopulateMaven2Repository extends DefaultTask {
                         dependency.getName(),
                         dependency.getVersion(),
                         classifier,
-                        DEFAULT_EXTENSION,
-                        repositorySystem,
-                        session);
+                        DEFAULT_EXTENSION);
       }
    }
 
-   private void doResolveDependency(ModuleDependency dependency,
-                                    RepositorySystem repositorySystem,
-                                    RepositorySystemSession session) {
+   private void doResolveDependency(ModuleDependency dependency) {
       if (dependency.getArtifacts().isEmpty()) {
-         doResolveDependency((Dependency) dependency, repositorySystem, session);
+         doResolveDependency((Dependency) dependency);
       } else {
          getLogger().lifecycle("Attempting to resolve artifacts for '{}:{}:{}'.",
                                dependency.getGroup(),
@@ -162,9 +186,7 @@ public class PopulateMaven2Repository extends DefaultTask {
                            dependency.getName(),
                            dependency.getVersion(),
                            artifact.getClassifier(),
-                           artifact.getExtension(),
-                           repositorySystem,
-                           session);
+                           artifact.getExtension());
          }
       }
    }
@@ -173,18 +195,36 @@ public class PopulateMaven2Repository extends DefaultTask {
                                String artifactId,
                                String version,
                                String classifier,
-                               String extension,
-                               RepositorySystem repositorySystem,
-                               RepositorySystemSession session) {
-      String logMsg = String.format("Downloading '%s:%s:%s%s@%s ...",
+                               String extension) {
+      String logMsg = String.format("%s:%s:%s%s@%s",
                                     groupId,
                                     artifactId,
                                     version,
                                     classifier == null ? "" : ":" + classifier,
                                     extension);
-      getLogger().lifecycle(logMsg);
+      getLogger().lifecycle("Retrieving (download may be necessary) '{}'...", logMsg);
 
+      CollectRequest request = new CollectRequest();
+      Artifact baseArtifact = classifier == null
+                              ? new DefaultArtifact(groupId, artifactId, extension, version)
+                              : new DefaultArtifact(groupId, artifactId, classifier, extension, version);
+      request.setRoot(new org.eclipse.aether.graph.Dependency(baseArtifact, null));
+      request.setRepositories(remoteRepositories);
 
+      DependencyRequest dependencyRequest = new DependencyRequest(request, null);
+      try {
+         DependencyResult result = repositorySystem.resolveDependencies(session, dependencyRequest);
+         for(ArtifactResult localArtifact : result.getArtifactResults()) {
+            getLogger().lifecycle("Located {}.", localArtifact.getArtifact().getFile());
+         }
+      } catch (DependencyResolutionException e) {
+         if(e.getCause() instanceof ArtifactResolutionException) {
+            getLogger().lifecycle("Did not find artifact '" + logMsg + "'.", e);
+            getLogger().debug("Exception was:", e);
+         } else {
+            getLogger().error("Error while resolving '" + logMsg + "'.", e);
+         }
+      }
 
       return null;
    }
