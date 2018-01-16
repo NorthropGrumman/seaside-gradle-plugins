@@ -16,6 +16,7 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.DependencyArtifact;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
@@ -23,10 +24,16 @@ import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
 public class PopulateMaven2Repository extends DefaultTask {
+
+   private final static Collection<String> DEFAULT_CLASSIFIERS = Collections.unmodifiableCollection(
+         Arrays.asList(null, "sources", "tests"));
+
+   private final static String DEFAULT_EXTENSION = "jar";
 
    private File outputDirectory;
 
@@ -62,6 +69,9 @@ public class PopulateMaven2Repository extends DefaultTask {
    protected RepositorySystemSession newSession(RepositorySystem repositorySystem) {
       DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
       File localMavenRepo = repositoryConfiguration.getLocalMavenRepository().toFile();
+//      Preconditions.checkState(!localMavenRepo.isFile() || localMavenRepo.isDirectory(),
+//                               "%s is a file, cannot create directory");
+      // TODO TH: what if repo does not exists?
       if (localMavenRepo.isDirectory()) {
          getLogger().debug("Using local maven repository {}.", localMavenRepo);
          session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(
@@ -125,28 +135,58 @@ public class PopulateMaven2Repository extends DefaultTask {
                             dependency.getGroup(),
                             dependency.getName(),
                             dependency.getVersion());
+
+      for (String classifier : DEFAULT_CLASSIFIERS) {
+         getLocalPathTo(dependency.getGroup(),
+                        dependency.getName(),
+                        dependency.getVersion(),
+                        classifier,
+                        DEFAULT_EXTENSION,
+                        repositorySystem,
+                        session);
+      }
    }
 
    private void doResolveDependency(ModuleDependency dependency,
                                     RepositorySystem repositorySystem,
                                     RepositorySystemSession session) {
-      getLogger().lifecycle("Attempting to resolve artifacts for '{}:{}:{}'.",
-                            dependency.getGroup(),
-                            dependency.getName(),
-                            dependency.getVersion());
+      if (dependency.getArtifacts().isEmpty()) {
+         doResolveDependency((Dependency) dependency, repositorySystem, session);
+      } else {
+         getLogger().lifecycle("Attempting to resolve artifacts for '{}:{}:{}'.",
+                               dependency.getGroup(),
+                               dependency.getName(),
+                               dependency.getVersion());
+         for (DependencyArtifact artifact : dependency.getArtifacts()) {
+            getLocalPathTo(dependency.getGroup(),
+                           dependency.getName(),
+                           dependency.getVersion(),
+                           artifact.getClassifier(),
+                           artifact.getExtension(),
+                           repositorySystem,
+                           session);
+         }
+      }
    }
 
    private Path getLocalPathTo(String groupId,
                                String artifactId,
                                String version,
                                String classifier,
-                               String extension) {
+                               String extension,
+                               RepositorySystem repositorySystem,
+                               RepositorySystemSession session) {
+      String logMsg = String.format("Downloading '%s:%s:%s%s@%s ...",
+                                    groupId,
+                                    artifactId,
+                                    version,
+                                    classifier == null ? "" : ":" + classifier,
+                                    extension);
+      getLogger().lifecycle(logMsg);
+
+
+
       return null;
    }
 
-   private Path getLocalPathTo(String groupId,
-                               String artifactId,
-                               String version) {
-      return null;
-   }
 }
