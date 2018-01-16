@@ -1,4 +1,7 @@
 import com.ngc.seaside.gradle.tasks.dependencies.PopulateMaven2Repository
+import com.ngc.seaside.gradle.tasks.dependencies.DefaultRepositoryConfiguration
+
+import java.nio.file.Paths
 
 plugins {
     id 'com.ngc.seaside.service-distribution'
@@ -80,4 +83,7 @@ dependencies {
 }
 
 task m2repo(type: PopulateMaven2Repository) {
+    outputDirectory = project.file("${project.buildDir}/m2")
+    repositoryConfiguration = new DefaultRepositoryConfiguration()
+        .setLocalMavenRepository(Paths.get('C:', 'Tools', 'maven', 'repo'))
 }
