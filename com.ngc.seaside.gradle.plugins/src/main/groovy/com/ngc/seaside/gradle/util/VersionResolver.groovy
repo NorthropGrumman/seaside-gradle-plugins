@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.util
 
 import com.ngc.seaside.gradle.api.IResolver
+import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.tasks.release.IVersionUpgradeStrategy
 import com.ngc.seaside.gradle.tasks.release.ReleaseType
 import com.ngc.seaside.gradle.tasks.release.VersionUpgradeStrategyFactory
@@ -28,7 +29,11 @@ class VersionResolver implements IResolver {
 
     VersionResolver(Project p) {
         project = p
-        versionFile = project.rootProject.buildFile
+        if (project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME) == null) {
+            versionFile = project.rootProject.buildFile
+        } else {
+            versionFile = project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME).versionFile
+        }
         logger = project.logger
     }
 
@@ -76,6 +81,9 @@ class VersionResolver implements IResolver {
         return versionFile
     }
 
+    void setVersionFile(File file) {
+        versionFile = file
+    }
 
     static IVersionUpgradeStrategy resolveVersionUpgradeStrategy(ReleaseType releaseType) {
         switch (releaseType) {

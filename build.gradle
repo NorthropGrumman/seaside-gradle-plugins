@@ -1,16 +1,62 @@
 buildscript {
+    ext {
+        bootstrapDirectory = "${project.buildDir}/bootstrapping"
+        releaseInProgress = project.gradle.startParameter.taskNames.contains('release')
+
+        pluginName = { ->
+            // Don't use project.file since we want to configure the error message if the file is not found.
+            def dir = new File("$bootstrapDirectory")
+            if (!dir.isDirectory() || dir.list().length == 0) {
+                throw new IllegalStateException(
+                      "Cannot perform a release because project has not already been built, please run 'gradle prepareForRelease' first!")
+            }
+            def fileName = project.file("$bootstrapDirectory")
+                  .list()
+                  .toList()
+                  .find { it.startsWith 'com.ngc.seaside.gradle.plugins' }
+            // Remove .jar extension.
+            return fileName.substring(0, fileName.length() - 4) // 4 = '.jar'.length()
+        }
+
+        getSelfDependencies = { ->
+            // Put all files on in the bootstrapDirectory on the build classpath.
+            // Don't use project.file since we want to configure the error message if the file is not found.
+            def dir = new File("$bootstrapDirectory")
+            if (!dir.isDirectory() || dir.list().length == 0) {
+                throw new IllegalStateException(
+                      "Cannot perform a release because project has not already been built, please run 'gradle prepareForRelease' first!")
+            }
+
+            project.file("$bootstrapDirectory")
+                  .list()
+                  .toList()
+                   // Remove .jar extension.
+                  .collect { it.substring(0, it.length() - 4) } // 4 = '.jar'.length()
+        }
+    }
+
     repositories {
         mavenLocal()
 
         maven {
             url nexusConsolidated
         }
+
+        // Allows the build to reference its own artifact from a previous build.
+        flatDir {
+            dirs "${bootstrapDirectory}"
+        }
     }
+
     dependencies {
         classpath 'com.github.ksoichiro:gradle-console-reporter:0.5.0'
+        if (releaseInProgress) {
+            getSelfDependencies().each { name ->
+                classpath name: "$name"
+            }
+        }
     }
 }
-
 
 /**
  * Project level build for the seaside-gradle-parent gradle plugin.
@@ -20,8 +66,13 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'groovy'
     apply plugin: 'maven'
+
+    if (releaseInProgress) {
+        apply plugin: 'com.ngc.seaside.release'
+    }
+
     group = 'com.ngc.seaside'
-    version = '2.1.6-SNAPSHOT'
+	version = '2.2.0-SNAPSHOT'
 
     ext {
         junitVersion = '4.12'
@@ -43,7 +94,6 @@ subprojects {
             url nexusConsolidated
         }
     }
-
 
     //Augment the name of the jar to prepend the group.
     jar {
@@ -153,3 +203,6 @@ subprojects {
     check.dependsOn(integrationTest, functionalTest)
 }
 
+task clean() {
+    delete "${project.buildDir}"
+}
