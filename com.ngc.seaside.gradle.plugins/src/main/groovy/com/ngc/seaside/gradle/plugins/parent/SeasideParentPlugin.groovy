@@ -80,6 +80,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                             username nexusUsername
                             password nexusPassword
                         }
+                        name 'nexusConsolidated'
                         url nexusConsolidated
                     }
                 }

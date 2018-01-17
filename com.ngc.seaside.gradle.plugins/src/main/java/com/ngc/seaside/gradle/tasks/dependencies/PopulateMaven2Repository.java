@@ -202,7 +202,7 @@ public class PopulateMaven2Repository extends DefaultTask {
                                     version,
                                     classifier == null ? "" : ":" + classifier,
                                     extension);
-      getLogger().lifecycle("Retrieving (download may be necessary) '{}'...", logMsg);
+      getLogger().lifecycle("Retrieving '{}' and its dependencies (download may be necessary) ...", logMsg);
 
       CollectRequest request = new CollectRequest();
       Artifact baseArtifact = classifier == null
@@ -219,8 +219,8 @@ public class PopulateMaven2Repository extends DefaultTask {
          }
       } catch (DependencyResolutionException e) {
          if(e.getCause() instanceof ArtifactResolutionException) {
-            getLogger().lifecycle("Did not find artifact '" + logMsg + "'.", e);
-            getLogger().debug("Exception was:", e);
+            getLogger().lifecycle("Did not find artifact '" + logMsg + "'.");
+            //getLogger().debug("Exception was:", e);
          } else {
             getLogger().error("Error while resolving '" + logMsg + "'.", e);
          }

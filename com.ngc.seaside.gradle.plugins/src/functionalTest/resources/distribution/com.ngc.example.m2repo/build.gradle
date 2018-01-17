@@ -85,6 +85,6 @@ dependencies {
 task m2repo(type: PopulateMaven2Repository) {
     outputDirectory = project.file("${project.buildDir}/m2")
     repositoryConfiguration = new DefaultRepositoryConfiguration()
-        .setLocalMavenRepository(Paths.get('C:', 'Tools', 'maven', 'repo-test'))
+        .setLocalMavenRepository(Paths.get('C:', 'tools', 'maven', 'repo-test'))
         .setRemoteRepositoryUrl("http://10.207.42.137/nexus/repository/maven-public")
 }
