@@ -1,5 +1,4 @@
 import com.ngc.seaside.gradle.tasks.dependencies.PopulateMaven2Repository
-import com.ngc.seaside.gradle.tasks.dependencies.DefaultRepositoryConfiguration
 
 import java.nio.file.Paths
 
@@ -83,8 +82,12 @@ dependencies {
 }
 
 task m2repo(type: PopulateMaven2Repository) {
+    project.repositories.each { println it.name  }
+
     outputDirectory = project.file("${project.buildDir}/m2")
-    repositoryConfiguration = new DefaultRepositoryConfiguration()
-        .setLocalMavenRepository(Paths.get('C:', 'tools', 'maven', 'repo-test'))
-        .setRemoteRepositoryUrl("http://10.207.42.137/nexus/repository/maven-public")
+    remoteRepository = project.repositories.getByName('NexusConsolidated')
+    localRepository = maven { url = Paths.get('C:', 'tools', 'maven', 'repo-test').toFile() }
+//    repositoryConfiguration = new DefaultRepositoryConfiguration()
+//        .setLocalMavenRepository(Paths.get('C:', 'tools', 'maven', 'repo-test'))
+//        .setRemoteRepositoryUrl("http://10.207.42.137/nexus/repository/maven-public")
 }

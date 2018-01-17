@@ -37,7 +37,7 @@ class PopulateMaven2RepositoryFT {
         BuildResult result = GradleRunner.create().withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()
-              .withArguments("clean", "m2repo")
+              .withArguments("clean", "m2repo", "--stacktrace")
               .build()
 
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":m2repo").getOutcome())
