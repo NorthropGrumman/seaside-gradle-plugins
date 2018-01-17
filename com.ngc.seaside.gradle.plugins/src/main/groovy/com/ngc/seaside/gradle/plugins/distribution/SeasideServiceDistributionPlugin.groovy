@@ -53,6 +53,15 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
             configureAfterEvaluate(project)
             createTasks(project)
 
+            repositories {
+                mavenLocal()
+
+                maven {
+                    name 'nexusConsolidated'
+                    url nexusConsolidated
+                }
+            }
+
             // Configure the maven related tasks here because we can't move it into a closure
             uploadArchives {
                 repositories {
@@ -72,14 +81,6 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
             }
 
             project.afterEvaluate {
-                repositories {
-                    mavenLocal()
-
-                    maven {
-                        url nexusConsolidated
-                    }
-                }
-
                 artifacts {
                     archives taskResolver.findTask("tar")
                     archives taskResolver.findTask("zip")

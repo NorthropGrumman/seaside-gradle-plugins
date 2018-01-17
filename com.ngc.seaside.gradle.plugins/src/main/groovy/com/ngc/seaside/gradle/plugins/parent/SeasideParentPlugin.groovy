@@ -56,6 +56,23 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
             doRequireSystemProperties(project)
             createTasks(project)
 
+            /**
+             * Add the standard repositories. All of the seaside content should be downloaded from
+             * the nexus consolidated repository.
+             */
+            repositories {
+                mavenLocal()
+
+                maven {
+                    credentials {
+                        username nexusUsername
+                        password nexusPassword
+                    }
+                    name 'nexusConsolidated'
+                    url nexusConsolidated
+                }
+            }
+
             project.afterEvaluate {
                 project.logger.
                       lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
@@ -65,23 +82,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                 if (JavaVersion.current().isJava8Compatible()) {
                     taskResolver.findTask('javadoc') {
                         options.addStringOption('Xdoclint:none', '-quiet')
-                    }
-                }
-
-                /**
-                 * Add the standard repositories. All of the seaside content should be downloaded from
-                 * the nexus consolidated repository.
-                 */
-                repositories {
-                    mavenLocal()
-
-                    maven {
-                        credentials {
-                            username nexusUsername
-                            password nexusPassword
-                        }
-                        name 'nexusConsolidated'
-                        url nexusConsolidated
                     }
                 }
 
