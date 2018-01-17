@@ -29,6 +29,7 @@ import org.gradle.api.tasks.bundling.Jar
  */
 class SeasideParentPlugin extends AbstractProjectPlugin {
 
+    public static final String REMOTE_MAVEN_REPOSITORY_NAME = 'NexusConsolidated'
     public static final String PARENT_TASK_GROUP_NAME = 'parent'
     public static final String SOURCE_JAR_TASK_NAME = 'sourcesJar'
     public static final String JAVADOC_JAR_TASK_NAME = 'javadocJar'
@@ -68,7 +69,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                         username nexusUsername
                         password nexusPassword
                     }
-                    name 'nexusConsolidated'
+                    name REMOTE_MAVEN_REPOSITORY_NAME
                     url nexusConsolidated
                 }
             }
