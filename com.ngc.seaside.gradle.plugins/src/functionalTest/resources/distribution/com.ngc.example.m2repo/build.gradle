@@ -84,6 +84,6 @@ dependencies {
 task m2repo(type: PopulateMaven2Repository) {
     outputDirectory = project.file("${project.buildDir}/m2")
     remoteRepository = project.repositories.getByName('NexusConsolidated')
-    localRepository = maven { url = Paths.get('C:', 'tools', 'maven', 'repo-test').toFile() }
+    localRepository = mavenLocal()
     configuration = project.configurations.getByName('thirdParty')
 }
