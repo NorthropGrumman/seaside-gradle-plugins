@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 
 import groovy.lang.Closure;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
@@ -53,9 +54,18 @@ import javax.inject.Inject;
 
 public class PopulateMaven2Repository extends DefaultTask {
 
+   /**
+    * The default classifiers to use when attempting to resolve a dependency.  This includes {@code null}, "sources",
+    * and "tests".  Note {@code null} indicates that the "real" artifact of the dependency (ie, the actual JAR file)
+    * should attempt to be resolved.
+    */
    private final static Collection<String> DEFAULT_CLASSIFIERS = Collections.unmodifiableCollection(
          Arrays.asList(null, "sources", "tests"));
 
+   /**
+    * The default extension to use when using the default classifiers.  We need this in case the build uses the defaults
+    * and does not specific the classifiers or extensions directly.
+    */
    private final static String DEFAULT_EXTENSION = "jar";
 
    /**
@@ -103,10 +113,14 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    private MavenArtifactRepository localRepository;
 
+   /**
+    * If true, the dependency will be resolved (and downloaded to the local repository) but they won't actually be
+    * copied to the output directory.  The default is false.
+    */
    private boolean populateLocalRepoOnly = false;
 
    /**
-    * Used to create instances of {@coce MavenArtifactRepository} for ease of user configuration.  Provided by Gradle at
+    * Used to create instances of {@code MavenArtifactRepository} for ease of user configuration.  Provided by Gradle at
     * runtime.
     */
    private final BaseRepositoryFactory baseRepositoryFactory;
@@ -131,8 +145,6 @@ public class PopulateMaven2Repository extends DefaultTask {
       session = newSession(repositorySystem);
       remoteRepositories = createRemoteRepositories();
 
-      //prepareOutputDirectory();
-
       // Get the configurations for which we must retrieve dependencies for.
       Collection<Configuration> configs = getConfigurations();
       // Add helpful logging about progress.
@@ -150,57 +162,112 @@ public class PopulateMaven2Repository extends DefaultTask {
       }
    }
 
+   /**
+    * Creates a new Maven repository and allows an action to configure it.  This enables DSL syntax in the task
+    * configuration to configure a custom remote or local repository.
+    *
+    * @param action the action to apply to the repository
+    * @return the repository
+    */
    public MavenArtifactRepository maven(Action<? super MavenArtifactRepository> action) {
       MavenArtifactRepository repo = baseRepositoryFactory.createMavenRepository();
       action.execute(repo);
       return repo;
    }
 
+   /**
+    * Creates a new Maven repository and allows an closure to configure it.  This enables DSL syntax in the task
+    * configuration to configure a custom remote or local repository.
+    *
+    * @param closure the closure to apply to the repository
+    * @return the repository
+    */
    public MavenArtifactRepository maven(Closure closure) {
       return maven(ConfigureUtil.configureUsing(closure));
    }
 
+   /**
+    * Creates a new Maven local repository.  This enables DSL syntax in the task configuration to configure a local
+    * repository.  The repository location is resolved using the standard rules.  IE, read $M2_HOME/conf/settings.xml,
+    * try $USER/.m2, etc.
+    */
    public MavenArtifactRepository mavenLocal() {
       return baseRepositoryFactory.createMavenLocalRepository();
    }
 
+   /**
+    * Gets the output directory configured for use with the task.  Dependencies will be copied to this directory in an
+    * M2 layout.
+    */
    @OutputDirectory
    public File getOutputDirectory() {
       return outputDirectory;
    }
 
+   /**
+    * Sets the output directory configured for use with the task.  Dependencies will be copied to this directory in an
+    * M2 layout.
+    */
    public void setOutputDirectory(File outputDirectory) {
       this.outputDirectory = Preconditions.checkNotNull(outputDirectory, "outputDirectory may not be null!");
    }
 
+   /**
+    * Gets the configuration to retrieve dependencies for.  If this value is {@code null}, dependencies will be
+    * retrieved for all configurations used by the project.
+    */
    public Configuration getConfiguration() {
       return configuration;
    }
 
+   /**
+    * Sets the configuration to retrieve dependencies for.  If this value is {@code null}, dependencies will be
+    * retrieved for all configurations used by the project.
+    */
    public void setConfiguration(Configuration configuration) {
       this.configuration = configuration;
    }
 
+   /**
+    * Gets the remove Maven repository to use to resolve dependencies.
+    */
    public MavenArtifactRepository getRemoteRepository() {
       return remoteRepository;
    }
 
+   /**
+    * Sets the remove Maven repository to use to resolve dependencies.
+    */
    public void setRemoteRepository(MavenArtifactRepository remoteRepository) {
       this.remoteRepository = remoteRepository;
    }
 
+   /**
+    * Gets the local Maven repository to use to cache downloaded files.
+    */
    public MavenArtifactRepository getLocalRepository() {
       return localRepository;
    }
 
+   /**
+    * Sets the local Maven repository to use to cache downloaded files.
+    */
    public void setLocalRepository(MavenArtifactRepository localRepository) {
       this.localRepository = localRepository;
    }
 
+   /**
+    * If true, only the local Maven repository will be populated with downloaded files and no artifacts will be
+    * copied to {@code outputDirectory}.
+    */
    public boolean isPopulateLocalRepoOnly() {
       return populateLocalRepoOnly;
    }
 
+   /**
+    * If true, only the local Maven repository will be populated with downloaded files and no artifacts will be
+    * copied to {@code outputDirectory}.
+    */
    public void setPopulateLocalRepoOnly(boolean populateLocalRepoOnly) {
       this.populateLocalRepoOnly = populateLocalRepoOnly;
    }
@@ -259,14 +326,10 @@ public class PopulateMaven2Repository extends DefaultTask {
       return repos;
    }
 
-   private void prepareOutputDirectory() {
-      if (!outputDirectory.exists()) {
-         outputDirectory.mkdirs();
-      } else if (!outputDirectory.isDirectory()) {
-         throw new IllegalStateException(outputDirectory + " is a normal file, not a directory!");
-      }
-   }
-
+   /**
+    * Gets the configurations whose dependencies should be resolved.
+    * @return
+    */
    private Collection<Configuration> getConfigurations() {
       Collection<Configuration> configs;
       if (configuration != null) {
@@ -286,6 +349,10 @@ public class PopulateMaven2Repository extends DefaultTask {
       totalDependenciesRetrieved++;
    }
 
+   /**
+    * Resolves the given {@code Dependency}.  The artifacts for the {@link #DEFAULT_CLASSIFIERS} will also be resolved
+    * if they exists.
+    */
    private void doResolveDependency(Dependency dependency) {
       getLogger().lifecycle("[{}/{}] Attempting to resolve artifacts for '{}:{}:{}'.",
                             totalDependenciesRetrieved + 1,
@@ -304,10 +371,17 @@ public class PopulateMaven2Repository extends DefaultTask {
       }
    }
 
+   /**
+    * Resolves the given {@code ModuleDependency}.
+    */
    private void doResolveDependency(ModuleDependency dependency) {
+      // If the dependency has no artifacts, we need to resolve the dependency directly and try to find the default
+      // artifacts/classifiers.
       if (dependency.getArtifacts().isEmpty()) {
          doResolveDependency((Dependency) dependency);
       } else {
+         // Otherwise, the build has specified the particular artifacts of the dependency that are required.
+         // Print progress.
          getLogger().lifecycle("[{}/{}] Attempting to resolve artifacts for '{}:{}:{}'.",
                                totalDependenciesRetrieved + 1,
                                totalDependenciesRequired,
@@ -315,6 +389,7 @@ public class PopulateMaven2Repository extends DefaultTask {
                                dependency.getName(),
                                dependency.getVersion());
          for (DependencyArtifact artifact : dependency.getArtifacts()) {
+            // Get the dependency and handle the result if we were able to resolve it successfully.
             getDependencyResult(dependency.getGroup(),
                                 dependency.getName(),
                                 dependency.getVersion(),
@@ -325,6 +400,11 @@ public class PopulateMaven2Repository extends DefaultTask {
       }
    }
 
+   /**
+    * Attempt to resolve the given dependency.
+    *
+    * @return an optional containing the result; if the dependency could not be resolved the optional is empty
+    */
    private Optional<DependencyResult> getDependencyResult(String groupId,
                                                           String artifactId,
                                                           String version,
@@ -332,6 +412,7 @@ public class PopulateMaven2Repository extends DefaultTask {
                                                           String extension) {
       DependencyResult result = null;
 
+      // The pretty form of the dependency (used for logging).
       String prettyGave = String.format("%s:%s:%s%s@%s",
                                         groupId,
                                         artifactId,
@@ -342,6 +423,7 @@ public class PopulateMaven2Repository extends DefaultTask {
                                                      : "download may be required";
       getLogger().lifecycle("Retrieving '{}' and its dependencies ({}) ...", prettyGave, remoteLogMsg);
 
+      // Make API stuff.
       CollectRequest request = new CollectRequest();
       Artifact baseArtifact = classifier == null
                               ? new DefaultArtifact(groupId, artifactId, extension, version)
@@ -351,6 +433,8 @@ public class PopulateMaven2Repository extends DefaultTask {
 
       DependencyRequest dependencyRequest = new DependencyRequest(request, null);
       try {
+         // Resolve the dependency, including transitive dependencies.  This will not return until they are resovled or
+         // an error happens.
          result = repositorySystem.resolveDependencies(session, dependencyRequest);
       } catch (DependencyResolutionException e) {
          handleResolutionException(e,
@@ -365,38 +449,62 @@ public class PopulateMaven2Repository extends DefaultTask {
       return Optional.ofNullable(result);
    }
 
+   /**
+    * Handles the result of resolving artifacts.  If {@code populateLocalRepoOnly} is false, the artifacts are
+    * copied to {@code outputDirectory}.
+    */
    private void handleDependencyResult(DependencyResult result) {
       for (ArtifactResult localArtifact : result.getArtifactResults()) {
          getLogger().lifecycle("Located {}.", localArtifact.getArtifact().getFile());
 
          if (!populateLocalRepoOnly) {
-            // The path to the local repository.
-            Path localRepo = Paths.get(localRepository.getUrl()).toAbsolutePath();
-            // The path to the artifact inside the local repository.
-            Path artifact = localArtifact.getArtifact().getFile().toPath().toAbsolutePath();
-            // The path to the artifact inside the local repository that is relative to the local repository.  This
-            // gives us the path that starts the group ID, then the artifact ID, then the version, etc.
-            Path relativeArtifactPath = localRepo.relativize(artifact);
-            // The destination file.  This is the relative path resolved against the output directory.  Only copy the
-            // file if needed.
-            Path dest = outputDirectory.toPath().resolve(relativeArtifactPath);
-            if (!Files.exists(dest)) {
-               // Create the directory structure if needed.
-               Path parent = dest.getParent();
-               try {
-                  if (parent != null) {
-                     // Note this is safe even if the directory already exists.
-                     Files.createDirectories(parent);
-                  }
-                  Files.copy(artifact, dest);
-               } catch (IOException e) {
-                  getLogger().error("Unexpected error while copying {} to {}.", artifact, dest, e);
-               }
+            File artifact = localArtifact.getArtifact().getFile();
+            copyFileToOutputDirectory(artifact.toPath());
+
+            // Find and copy any POM files directly since the API does not expose POMs.
+            if (artifact.getParentFile() != null) {
+               FileUtils.listFiles(artifact.getParentFile(), new String[]{"pom"}, false)
+                     .forEach(f -> copyFileToOutputDirectory(f.toPath()));
             }
          }
       }
    }
 
+   /**
+    * Copies a file that resides in the local repository to the output directory, maintaining the directory structure of
+    * the file relative to the local repository location.  IE, this keeps the groupId/artifactId/version/ directory
+    * structure for Maven M2 layouts.
+    */
+   private void copyFileToOutputDirectory(Path path) {
+      // The path to the artifact inside the local repository.
+      path = path.toAbsolutePath();
+      // The path to the local repository.
+      Path localRepo = Paths.get(localRepository.getUrl()).toAbsolutePath();
+      // The path to the artifact inside the local repository that is relative to the local repository.  This
+      // gives us the path that starts the group ID, then the artifact ID, then the version, etc.
+      Path relativeArtifactPath = localRepo.relativize(path);
+      // The destination file.  This is the relative path resolved against the output directory.  Only copy the
+      // file if needed.
+      Path dest = outputDirectory.toPath().resolve(relativeArtifactPath);
+      if (!Files.exists(dest)) {
+         // Create the directory structure if needed.
+         Path parent = dest.getParent();
+         try {
+            if (parent != null) {
+               // Note this is safe even if the directory already exists.
+               Files.createDirectories(parent);
+            }
+            Files.copy(path, dest);
+         } catch (IOException e) {
+            getLogger().error("Unexpected error while copying {} to {}.", path, dest, e);
+         }
+      }
+   }
+
+   /**
+    * Handles an exception that was encountered while resolving dependencies.  Simply logs the exception if the exception
+    * if on concern.
+    */
    private void handleResolutionException(DependencyResolutionException e,
                                           String groupId,
                                           String artifactId,
@@ -405,14 +513,18 @@ public class PopulateMaven2Repository extends DefaultTask {
                                           String extension,
                                           String prettyGave) {
       if (e.getCause() instanceof ArtifactResolutionException) {
+         // If the artifact was not resolved and it is one of the default classifiers (ie, sources or tests), it's
+         // no big deal if that artifact wasn't found.  Just let the user know not to worry.
          if (DEFAULT_CLASSIFIERS.contains(classifier)) {
             getLogger().lifecycle("Did not resolve '{}' but that is okay since that artifact is only {}.",
                                   prettyGave,
                                   classifier);
          } else {
+            // Otherwise, we didn't find something that may actually be important.
             getLogger().warn("Failed to resolve '{}' (this artifact may be required).", prettyGave);
          }
       } else {
+         // This means something else failed.
          getLogger().error("Encountered unexpected error while resolving '{}'.", prettyGave, e);
       }
    }
