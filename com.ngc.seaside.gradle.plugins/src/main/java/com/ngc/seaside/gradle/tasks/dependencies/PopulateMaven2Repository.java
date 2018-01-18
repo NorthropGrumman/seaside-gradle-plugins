@@ -38,6 +38,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.ConfigureUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -69,17 +71,17 @@ public class PopulateMaven2Repository extends DefaultTask {
    /**
     * The remove repositories to connect to make requests.
     */
-   private final List<RemoteRepository> remoteRepositories = new ArrayList<>();
-
-   private long totalDependenciesRequired = 0;
-
-   private long totalDependenciesRetrieved = 0;
+   private List<RemoteRepository> remoteRepositories = new ArrayList<>();
 
    /**
-    * Used to create instances of {@coce MavenArtifactRepository} for ease of user configuration.  Provided by Gradle at
-    * runtime.
+    * The total number of dependencies that are required.  This does not include transitive dependencies.
     */
-   private final BaseRepositoryFactory baseRepositoryFactory;
+   private long totalDependenciesRequired = 0;
+
+   /**
+    * The total dependencies resolved thus far (not including transitive dependencies.
+    */
+   private long totalDependenciesRetrieved = 0;
 
    /**
     * The user configured output directory to populate.
@@ -101,6 +103,14 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    private MavenArtifactRepository localRepository;
 
+   private boolean populateLocalRepoOnly = false;
+
+   /**
+    * Used to create instances of {@coce MavenArtifactRepository} for ease of user configuration.  Provided by Gradle at
+    * runtime.
+    */
+   private final BaseRepositoryFactory baseRepositoryFactory;
+
    @Inject
    public PopulateMaven2Repository(BaseRepositoryFactory baseRepositoryFactory) {
       this.baseRepositoryFactory = baseRepositoryFactory;
@@ -108,21 +118,30 @@ public class PopulateMaven2Repository extends DefaultTask {
 
    @TaskAction
    public void populateRepository() {
-      Preconditions.checkState(outputDirectory != null, "outputDirectory is not set!");
-      Preconditions.checkState(localRepository != null, "local repository not set!");
+      Preconditions.checkState(populateLocalRepoOnly || outputDirectory != null,
+                               "outputDirectory must be set if populateLocalRepoOnly is false!");
+      Preconditions.checkState(localRepository != null,
+                               "local repository not set!");
       Preconditions.checkState(remoteRepository != null || Files.isDirectory(Paths.get(localRepository.getUrl())),
                                "since local repository %s is not a directory a remote repository must be configured!",
                                localRepository.getUrl());
 
+      // Initialize the Maven API.
       repositorySystem = newRepositorySystem();
       session = newSession(repositorySystem);
+      remoteRepositories = createRemoteRepositories();
 
+      //prepareOutputDirectory();
+
+      // Get the configurations for which we must retrieve dependencies for.
       Collection<Configuration> configs = getConfigurations();
+      // Add helpful logging about progress.
       totalDependenciesRequired = configs.stream()
             .mapToLong(c -> c.getDependencies().size())
             .sum();
       getLogger().lifecycle("{} dependencies must be resolved.", totalDependenciesRequired);
 
+      // Resolve each dependency.
       for (Configuration config : configs) {
          getLogger().lifecycle("Resolving dependencies for configuration {}.", config.getName());
          for (Dependency dependency : config.getDependencies()) {
@@ -178,6 +197,17 @@ public class PopulateMaven2Repository extends DefaultTask {
       this.localRepository = localRepository;
    }
 
+   public boolean isPopulateLocalRepoOnly() {
+      return populateLocalRepoOnly;
+   }
+
+   public void setPopulateLocalRepoOnly(boolean populateLocalRepoOnly) {
+      this.populateLocalRepoOnly = populateLocalRepoOnly;
+   }
+
+   /**
+    * Creates a new {@code RepositorySystem} that can be used to make requests.
+    */
    protected RepositorySystem newRepositorySystem() {
       DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
       locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
@@ -186,6 +216,10 @@ public class PopulateMaven2Repository extends DefaultTask {
       return locator.getService(RepositorySystem.class);
    }
 
+   /**
+    * Creates a new {@code RepositorySystemSession} which can be used to resolve artifacts.  {@code localRepository}
+    * must be set before invoking this method.
+    */
    protected RepositorySystemSession newSession(RepositorySystem repositorySystem) {
       DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
 
@@ -194,6 +228,14 @@ public class PopulateMaven2Repository extends DefaultTask {
             session,
             new LocalRepository(localMavenRepo)));
 
+      return session;
+   }
+
+   /**
+    * Creates the remote repositories to resolve artifacts from.
+    */
+   protected List<RemoteRepository> createRemoteRepositories() {
+      List<RemoteRepository> repos = new ArrayList<>();
       if (remoteRepository != null) {
          RemoteRepository.Builder repoBuilder = new RemoteRepository.Builder(
                remoteRepository.getName(),
@@ -209,12 +251,20 @@ public class PopulateMaven2Repository extends DefaultTask {
                                                 .build());
          }
 
-         remoteRepositories.add(repoBuilder.build());
+         repos.add(repoBuilder.build());
       } else {
          getLogger().lifecycle("No remote repository configured, downloads will not be attempted.");
       }
 
-      return session;
+      return repos;
+   }
+
+   private void prepareOutputDirectory() {
+      if (!outputDirectory.exists()) {
+         outputDirectory.mkdirs();
+      } else if (!outputDirectory.isDirectory()) {
+         throw new IllegalStateException(outputDirectory + " is a normal file, not a directory!");
+      }
    }
 
    private Collection<Configuration> getConfigurations() {
@@ -245,11 +295,12 @@ public class PopulateMaven2Repository extends DefaultTask {
                             dependency.getVersion());
 
       for (String classifier : DEFAULT_CLASSIFIERS) {
-         getLocalPathTo(dependency.getGroup(),
-                        dependency.getName(),
-                        dependency.getVersion(),
-                        classifier,
-                        DEFAULT_EXTENSION);
+         getDependencyResult(dependency.getGroup(),
+                             dependency.getName(),
+                             dependency.getVersion(),
+                             classifier,
+                             DEFAULT_EXTENSION)
+               .ifPresent(this::handleDependencyResult);
       }
    }
 
@@ -264,20 +315,23 @@ public class PopulateMaven2Repository extends DefaultTask {
                                dependency.getName(),
                                dependency.getVersion());
          for (DependencyArtifact artifact : dependency.getArtifacts()) {
-            getLocalPathTo(dependency.getGroup(),
-                           dependency.getName(),
-                           dependency.getVersion(),
-                           artifact.getClassifier(),
-                           artifact.getExtension());
+            getDependencyResult(dependency.getGroup(),
+                                dependency.getName(),
+                                dependency.getVersion(),
+                                artifact.getClassifier(),
+                                artifact.getExtension())
+                  .ifPresent(this::handleDependencyResult);
          }
       }
    }
 
-   private Path getLocalPathTo(String groupId,
-                               String artifactId,
-                               String version,
-                               String classifier,
-                               String extension) {
+   private Optional<DependencyResult> getDependencyResult(String groupId,
+                                                          String artifactId,
+                                                          String version,
+                                                          String classifier,
+                                                          String extension) {
+      DependencyResult result = null;
+
       String prettyGave = String.format("%s:%s:%s%s@%s",
                                         groupId,
                                         artifactId,
@@ -297,10 +351,7 @@ public class PopulateMaven2Repository extends DefaultTask {
 
       DependencyRequest dependencyRequest = new DependencyRequest(request, null);
       try {
-         DependencyResult result = repositorySystem.resolveDependencies(session, dependencyRequest);
-         for (ArtifactResult localArtifact : result.getArtifactResults()) {
-            getLogger().lifecycle("Located {}.", localArtifact.getArtifact().getFile());
-         }
+         result = repositorySystem.resolveDependencies(session, dependencyRequest);
       } catch (DependencyResolutionException e) {
          handleResolutionException(e,
                                    groupId,
@@ -311,7 +362,39 @@ public class PopulateMaven2Repository extends DefaultTask {
                                    prettyGave);
       }
 
-      return null;
+      return Optional.ofNullable(result);
+   }
+
+   private void handleDependencyResult(DependencyResult result) {
+      for (ArtifactResult localArtifact : result.getArtifactResults()) {
+         getLogger().lifecycle("Located {}.", localArtifact.getArtifact().getFile());
+
+         if (!populateLocalRepoOnly) {
+            // The path to the local repository.
+            Path localRepo = Paths.get(localRepository.getUrl()).toAbsolutePath();
+            // The path to the artifact inside the local repository.
+            Path artifact = localArtifact.getArtifact().getFile().toPath().toAbsolutePath();
+            // The path to the artifact inside the local repository that is relative to the local repository.  This
+            // gives us the path that starts the group ID, then the artifact ID, then the version, etc.
+            Path relativeArtifactPath = localRepo.relativize(artifact);
+            // The destination file.  This is the relative path resolved against the output directory.  Only copy the
+            // file if needed.
+            Path dest = outputDirectory.toPath().resolve(relativeArtifactPath);
+            if (!Files.exists(dest)) {
+               // Create the directory structure if needed.
+               Path parent = dest.getParent();
+               try {
+                  if (parent != null) {
+                     // Note this is safe even if the directory already exists.
+                     Files.createDirectories(parent);
+                  }
+                  Files.copy(artifact, dest);
+               } catch (IOException e) {
+                  getLogger().error("Unexpected error while copying {} to {}.", artifact, dest, e);
+               }
+            }
+         }
+      }
    }
 
    private void handleResolutionException(DependencyResolutionException e,
@@ -327,7 +410,7 @@ public class PopulateMaven2Repository extends DefaultTask {
                                   prettyGave,
                                   classifier);
          } else {
-            getLogger().warn("Failed to resolve '{}' (this artifact may be required by the build).", prettyGave);
+            getLogger().warn("Failed to resolve '{}' (this artifact may be required).", prettyGave);
          }
       } else {
          getLogger().error("Encountered unexpected error while resolving '{}'.", prettyGave, e);
