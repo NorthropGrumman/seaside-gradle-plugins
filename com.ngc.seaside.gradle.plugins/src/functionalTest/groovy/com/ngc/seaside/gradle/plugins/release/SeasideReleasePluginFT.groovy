@@ -42,9 +42,9 @@ class SeasideReleasePluginFT {
                 .withArguments("clean", "build", "releaseDryRun")
                 .build()
 
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:releaseDryRun").getOutcome())
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:releaseDryRun").getOutcome())
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:releaseDryRun").getOutcome())
+        TestingUtilities.assertTaskSuccess(result, "service.bonjourlemonde", "releaseDryRun")
+        TestingUtilities.assertTaskSuccess(result, "service.helloworld", "releaseDryRun")
+        TestingUtilities.assertTaskSuccess(result, "service.holamundo", "releaseDryRun")
     }
 
     @Test
@@ -85,9 +85,9 @@ class SeasideReleasePluginFT {
                 .withArguments("clean", "build", "install")
                 .build()
 
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:install").getOutcome())
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:install").getOutcome())
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:install").getOutcome())
+        TestingUtilities.assertTaskSuccess(result, "service.bonjourlemonde", "install")
+        TestingUtilities.assertTaskSuccess(result, "service.helloworld", "install")
+        TestingUtilities.assertTaskSuccess(result, "service.holamundo", "install")
     }
 
     @Test
@@ -99,9 +99,9 @@ class SeasideReleasePluginFT {
                 .withArguments("clean", "build", "install")
                 .build()
 
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:install").getOutcome())
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:install").getOutcome())
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:install").getOutcome())
+        TestingUtilities.assertTaskSuccess(result, "service.bonjourlemonde", "install")
+        TestingUtilities.assertTaskSuccess(result, "service.helloworld", "install")
+        TestingUtilities.assertTaskSuccess(result, "service.holamundo", "install")
     }
 
     private static File sourceDirectoryWithTheTestProject() {
