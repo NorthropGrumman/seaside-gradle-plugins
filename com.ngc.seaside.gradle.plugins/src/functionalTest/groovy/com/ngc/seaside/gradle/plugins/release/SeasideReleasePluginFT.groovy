@@ -6,13 +6,10 @@ import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
-import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 
 class SeasideReleasePluginFT {
@@ -50,9 +47,8 @@ class SeasideReleasePluginFT {
     @Test
     void doesFailWhenReleasingAndSnapshotIsNotSpecified() {
         FileUtils.copyFile(
-                Paths.get("src/functionalTest/resources/sealion-java-hello-world/build-without-snapshot.gradle").
-                        toFile(),
-                Paths.get("build/functionalTest/release/sealion-java-hello-world/build.gradle").toFile()
+            Paths.get(sourceDirectoryWithTheTestProject().toString(), "build-without-snapshot.gradle").toFile(),
+            Paths.get(pathToTheDestinationProjectDirectory().toString(), "build.gradle").toFile()
         )
 
         SeasideReleasePlugin plugin = new SeasideReleasePlugin()
@@ -73,9 +69,8 @@ class SeasideReleasePluginFT {
     @Test
     void doesNotFailBuildWhenSnapshotMissingAndReleaseTaskNotStated() {
         FileUtils.copyFile(
-                Paths.get("src/functionalTest/resources/sealion-java-hello-world/build-without-snapshot.gradle").
-                        toFile(),
-                Paths.get("build/functionalTest/release/sealion-java-hello-world/build.gradle").toFile()
+            Paths.get(sourceDirectoryWithTheTestProject().toString(), "build-without-snapshot.gradle").toFile(),
+            Paths.get(pathToTheDestinationProjectDirectory().toString(), "build.gradle").toFile()
         )
 
         BuildResult result = GradleRunner.create()
