@@ -52,6 +52,23 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+/**
+ * This task will create a directory in a maven2 layout for the dependencies of a project.  By default, it resolves all
+ * dependencies of all configurations declared in the project.  This can be overridden by specifying the configuration
+ * to use directly via {@link #setConfiguration(Configuration)}.  A typical usage of this task looks like this:
+ * <pre>
+ * {@code
+ * task m2repo(type: PopulateMaven2Repository) {
+ *   // This is the directory to save the repo to.
+ *   outputDirectory = project.file("${project.buildDir}/m2")
+ *   // Use the remote Nexus repo we have already configured as part of the parent plugin.
+ *   remoteRepository = project.repositories.getByName('NexusConsolidated')
+ *   // Use the default maven local repository.  This will respect the $M2_HOME/conf/settings.xml configuration.
+ *   localRepository = mavenLocal()
+ * }
+ * }
+ * </pre>
+ */
 public class PopulateMaven2Repository extends DefaultTask {
 
    /**
@@ -328,7 +345,6 @@ public class PopulateMaven2Repository extends DefaultTask {
 
    /**
     * Gets the configurations whose dependencies should be resolved.
-    * @return
     */
    private Collection<Configuration> getConfigurations() {
       Collection<Configuration> configs;
