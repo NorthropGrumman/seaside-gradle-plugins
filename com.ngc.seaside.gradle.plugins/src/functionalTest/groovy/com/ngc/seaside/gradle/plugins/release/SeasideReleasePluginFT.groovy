@@ -16,7 +16,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class SeasideReleasePluginFT {
-
     private File projectDir
     private Project project
     private List<File> pluginClasspath
@@ -24,11 +23,11 @@ class SeasideReleasePluginFT {
     @Before
     void before() {
         pluginClasspath = TestingUtilities.getTestClassPath(getClass())
-        File source = Paths.get("src/functionalTest/resources/sealion-java-hello-world").toFile()
-        Path targetPath = Paths.get("build/functionalTest/release/sealion-java-hello-world")
-        projectDir = Files.createDirectories(targetPath).toFile()
-        FileUtils.copyDirectory(source, projectDir)
-        project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+        projectDir = TestingUtilities.setUpTheTestProjectDirectory(
+            sourceDirectoryWithTheTestProject(),
+            pathToTheDestinationProjectDirectory()
+        );
+        project = TestingUtilities.createTheTestProjectWith(projectDir)
     }
 
     @Test
@@ -103,5 +102,17 @@ class SeasideReleasePluginFT {
         Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.bonjourlemonde:install").getOutcome())
         Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.helloworld:install").getOutcome())
         Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":service.holamundo:install").getOutcome())
+    }
+
+    private static File sourceDirectoryWithTheTestProject() {
+        return TestingUtilities.turnListIntoPath(
+            "src", "functionalTest", "resources", "sealion-java-hello-world"
+        );
+    }
+
+    private static File pathToTheDestinationProjectDirectory() {
+        return TestingUtilities.turnListIntoPath(
+            "build", "functionalTest", "release", "sealion-java-hello-world"
+        );
     }
 }
