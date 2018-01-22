@@ -6,7 +6,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class ReleaseTask extends DefaultTask {
-
     private VersionResolver resolver
 
     /**
@@ -159,7 +158,7 @@ class ReleaseTask extends DefaultTask {
 
     private void persistTheNewProjectVersion() {
         String nextVersion = getNextVersion()
-        String dryRunHeader = (isDryRun()) ? "Dry Run >>" : ""
+        String dryRunHeader = (dryRun) ? "Dry Run >>" : ""
         if (!dryRun) {
             resolver.setProjectVersionOnFile(nextVersion)
         }

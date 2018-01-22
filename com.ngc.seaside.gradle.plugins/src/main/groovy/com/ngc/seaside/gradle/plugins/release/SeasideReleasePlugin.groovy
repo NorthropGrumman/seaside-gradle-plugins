@@ -7,7 +7,6 @@ import com.ngc.seaside.gradle.tasks.release.ReleaseType
 import org.gradle.api.Project
 
 class SeasideReleasePlugin extends AbstractProjectPlugin {
-
     public static final String RELEASE_TASK_GROUP_NAME = 'Release'
     public static final String RELEASE_TASK_NAME = 'release'
     public static final String RELEASE_MAJOR_VERSION_TASK_NAME = 'releaseMajorVersion'
@@ -95,4 +94,3 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
         }
     }
 }
-
