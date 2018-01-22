@@ -29,6 +29,7 @@ import org.gradle.api.tasks.bundling.Jar
  */
 class SeasideParentPlugin extends AbstractProjectPlugin {
 
+    public static final String REMOTE_MAVEN_REPOSITORY_NAME = 'NexusConsolidated'
     public static final String PARENT_TASK_GROUP_NAME = 'parent'
     public static final String SOURCE_JAR_TASK_NAME = 'sourcesJar'
     public static final String JAVADOC_JAR_TASK_NAME = 'javadocJar'
@@ -56,6 +57,23 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
             doRequireSystemProperties(project)
             createTasks(project)
 
+            /**
+             * Add the standard repositories. All of the seaside content should be downloaded from
+             * the nexus consolidated repository.
+             */
+            repositories {
+                mavenLocal()
+
+                maven {
+                    credentials {
+                        username nexusUsername
+                        password nexusPassword
+                    }
+                    name REMOTE_MAVEN_REPOSITORY_NAME
+                    url nexusConsolidated
+                }
+            }
+
             project.afterEvaluate {
                 project.logger.
                       lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
@@ -65,22 +83,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                 if (JavaVersion.current().isJava8Compatible()) {
                     taskResolver.findTask('javadoc') {
                         options.addStringOption('Xdoclint:none', '-quiet')
-                    }
-                }
-
-                /**
-                 * Add the standard repositories. All of the seaside content should be downloaded from
-                 * the nexus consolidated repository.
-                 */
-                repositories {
-                    mavenLocal()
-
-                    maven {
-                        credentials {
-                            username nexusUsername
-                            password nexusPassword
-                        }
-                        url nexusConsolidated
                     }
                 }
 

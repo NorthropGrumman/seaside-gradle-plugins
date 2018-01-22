@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.distribution
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.distribution.SeasideServiceDistributionExtension
+import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
 import com.ngc.seaside.gradle.util.GradleUtil
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
@@ -53,6 +54,15 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
             configureAfterEvaluate(project)
             createTasks(project)
 
+            repositories {
+                mavenLocal()
+
+                maven {
+                    name SeasideParentPlugin.REMOTE_MAVEN_REPOSITORY_NAME
+                    url nexusConsolidated
+                }
+            }
+
             // Configure the maven related tasks here because we can't move it into a closure
             uploadArchives {
                 repositories {
@@ -72,14 +82,6 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
             }
 
             project.afterEvaluate {
-                repositories {
-                    mavenLocal()
-
-                    maven {
-                        url nexusConsolidated
-                    }
-                }
-
                 artifacts {
                     archives taskResolver.findTask("tar")
                     archives taskResolver.findTask("zip")
