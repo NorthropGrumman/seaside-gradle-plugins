@@ -32,7 +32,10 @@ class SeasideReleasePluginIT {
 
         plugin = new SeasideReleasePlugin()
         plugin.apply(project)
-        project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME).uploadArtifacts = false
+
+        project.extensions
+               .findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
+               .uploadArtifacts = false
     }
 
     @Test
@@ -48,7 +51,10 @@ class SeasideReleasePluginIT {
 
     @Test
     void doesApplyPluginFromDifferentVersionFile() {
-        project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME).versionFile = Paths.get("src/integrationTest/resources/sealion-java-hello-world/versions.gradle").toFile()
+        project.extensions
+               .findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME)
+               .versionFile = Paths.get(sourceDirectoryWithTheTestProject().toString(), "versions.gradle").toFile()
+
         project.evaluate()
         TaskResolver resolver = new TaskResolver(project)
         Assert.assertEquals('1.2.4-SNAPSHOT', project.version.toString())
