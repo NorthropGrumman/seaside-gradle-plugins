@@ -3,21 +3,6 @@ buildscript {
         bootstrapDirectory = "${project.buildDir}/bootstrapping"
         releaseInProgress = project.gradle.startParameter.taskNames.contains('release')
 
-        pluginName = { ->
-            // Don't use project.file since we want to configure the error message if the file is not found.
-            def dir = new File("$bootstrapDirectory")
-            if (!dir.isDirectory() || dir.list().length == 0) {
-                throw new IllegalStateException(
-                      "Cannot perform a release because project has not already been built, please run 'gradle prepareForRelease' first!")
-            }
-            def fileName = project.file("$bootstrapDirectory")
-                  .list()
-                  .toList()
-                  .find { it.startsWith 'com.ngc.seaside.gradle.plugins' }
-            // Remove .jar extension.
-            return fileName.substring(0, fileName.length() - 4) // 4 = '.jar'.length()
-        }
-
         getSelfDependencies = { ->
             // Put all files on in the bootstrapDirectory on the build classpath.
             // Don't use project.file since we want to configure the error message if the file is not found.
