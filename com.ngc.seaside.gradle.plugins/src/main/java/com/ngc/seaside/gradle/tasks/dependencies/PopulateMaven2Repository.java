@@ -36,6 +36,7 @@ import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.artifacts.BaseRepositoryFactory;
+import org.gradle.api.internal.tasks.options.Option;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.ConfigureUtil;
@@ -241,6 +242,18 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    public void setOutputDirectory(File outputDirectory) {
       this.outputDirectory = Preconditions.checkNotNull(outputDirectory, "outputDirectory may not be null!");
+   }
+
+   /**
+    * Sets the output directory configured for use with the task.  Dependencies will be copied to this directory in an
+    * M2 layout.  This method allows a user to specify the output directory as a command line option.
+    */
+   @Option(option = "outputDirectory",
+         description = "The directory to place the dependencies of the project in maven2 layout.")
+   public void setOutputDirectory(String outputDirectory) {
+      Preconditions.checkNotNull(outputDirectory, "outputDirectory may not be null!");
+      Preconditions.checkArgument(!outputDirectory.trim().isEmpty(), "outputDirectory may not be null!");
+      setOutputDirectory(new File(outputDirectory));
    }
 
    /**
