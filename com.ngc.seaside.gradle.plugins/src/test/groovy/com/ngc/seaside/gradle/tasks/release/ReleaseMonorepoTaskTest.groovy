@@ -5,6 +5,7 @@ import org.gradle.api.Project
 import java.io.File
 
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 
 import org.mockito.Mockito
