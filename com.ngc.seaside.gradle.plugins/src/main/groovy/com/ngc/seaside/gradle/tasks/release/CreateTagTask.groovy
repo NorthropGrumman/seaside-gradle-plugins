@@ -1,28 +1,24 @@
 package com.ngc.seaside.gradle.tasks.release
 
+import org.gradle.api.Project
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project;
+import org.gradle.api.tasks.TaskAction
 
 /**
  * Used to create the tags for builds
  * */
-public class CreateTagTask extends DefaultTask {
+class CreateTagTask extends DefaultTask {
 
    private static final DEFAULT_TAG_PREFIX = 'v'
 
-   private Project project
    private String tagName
 
-   String versionSuffix
+   CreateTagTask(){
+   }
 
-
-   /**
-    *
-    * @param currentProject
-    */
-   CreateTagTask(Project currentProject) {
-      project = currentProject
-      tagName = DEFAULT_TAG_PREFIX + "$project.version" - versionSuffix
+   @TaskAction
+   def createTag() {
+    createReleaseTag()
    }
 
    /**
@@ -39,7 +35,7 @@ public class CreateTagTask extends DefaultTask {
     *
     * @param tagName
     */
-   void createReleaseTag() {
+   private void createReleaseTag() {
       tag
       if (commitChanges && !dryRun) {
          git "tag", "-a", tagName, "-m Release of $tagName"

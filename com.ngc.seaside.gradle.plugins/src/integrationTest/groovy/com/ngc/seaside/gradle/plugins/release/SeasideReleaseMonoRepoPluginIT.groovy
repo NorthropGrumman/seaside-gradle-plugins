@@ -29,6 +29,8 @@ class SeasideReleaseMonoRepoPluginIT {
     void doesApplyPlugin() {
         project.evaluate()
         TaskResolver resolver = new TaskResolver(project)
+
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseMonoRepoPlugin.CREATE_TAG_TASK))
     }
 
     private static File sourceDirectoryWithTheTestProject() {
