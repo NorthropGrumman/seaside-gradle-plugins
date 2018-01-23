@@ -15,4 +15,9 @@ class ReleaseMonorepoTaskTest {
     void doesNotReleaseWhenAnySubprojectFailsToBeReleased() {
         Assert.fail("implement me!")
     }
+
+    @Test
+    void doesNotAllowReleaseWhenInsideSubprojectDirectory() {
+        Assert.fail("implement me!")
+    }
 }
