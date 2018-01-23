@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.release.monorepo
+package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
@@ -44,6 +44,7 @@ class SeasideReleaseMonoRepoPluginIT {
         Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_EXTENSION_NAME))
 
         Assert.assertNotNull(resolver.findTask(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME))
     }
 
     @Test
@@ -60,6 +61,7 @@ class SeasideReleaseMonoRepoPluginIT {
         Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_EXTENSION_NAME))
 
         Assert.assertNotNull(resolver.findTask(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME))
     }
 
     private static File sourceDirectoryWithTheTestProject() {

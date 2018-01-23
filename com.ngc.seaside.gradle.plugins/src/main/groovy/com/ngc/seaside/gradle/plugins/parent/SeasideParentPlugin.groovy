@@ -4,7 +4,7 @@ import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
-import com.ngc.seaside.gradle.plugins.release.monorepo.SeasideReleaseMonoRepoPlugin
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
 import com.ngc.seaside.gradle.util.GradleUtil
