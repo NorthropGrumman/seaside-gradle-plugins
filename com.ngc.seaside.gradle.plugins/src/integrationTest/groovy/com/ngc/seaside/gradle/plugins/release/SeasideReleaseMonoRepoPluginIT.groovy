@@ -1,13 +1,19 @@
 package com.ngc.seaside.gradle.plugins.release
 
-import com.ngc.seaside.gradle.util.TaskResolver
 import com.ngc.seaside.gradle.util.test.TestingUtilities
+import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
+import com.ngc.seaside.gradle.util.TaskResolver
 import org.gradle.api.Project
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
+import java.nio.file.Paths
+
 class SeasideReleaseMonoRepoPluginIT {
+    private static final String BUILD_GRADLE_TEST_VERSION_NUMBER = "1.2.3-SNAPSHOT"
+    private static final String VERSIONS_GRADLE_TEST_VERSION_NUMBER = "1.2.4-SNAPSHOT"
+
     private File projectDir
     private Project project
     private SeasideReleaseMonoRepoPlugin plugin
@@ -22,13 +28,38 @@ class SeasideReleaseMonoRepoPluginIT {
 
         plugin = new SeasideReleaseMonoRepoPlugin()
         plugin.apply(project)
-    }
 
+        project.extensions
+               .findByName(SeasideReleaseMonoRepoPlugin.RELEASE_EXTENSION_NAME)
+               .uploadArtifacts = false
+    }
 
     @Test
     void doesApplyPlugin() {
         project.evaluate()
         TaskResolver resolver = new TaskResolver(project)
+
+        Assert.assertEquals(BUILD_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
+
+        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_EXTENSION_NAME))
+
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME))
+    }
+
+    @Test
+    void desApplyPluginUsingDifferentVersionFile() {
+        project.extensions
+               .findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME)
+               .versionFile = Paths.get(sourceDirectoryWithTheTestProject().toString(), "versions.gradle").toFile()
+
+        project.evaluate()
+        TaskResolver resolver = new TaskResolver(project)
+
+        Assert.assertEquals(VERSIONS_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
+
+        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_EXTENSION_NAME))
+
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME))
     }
 
     private static File sourceDirectoryWithTheTestProject() {
