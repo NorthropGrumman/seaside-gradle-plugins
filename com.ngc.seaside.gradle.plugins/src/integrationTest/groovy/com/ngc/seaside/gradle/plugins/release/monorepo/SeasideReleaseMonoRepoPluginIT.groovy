@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.plugins.release
+package com.ngc.seaside.gradle.plugins.release.monorepo
 
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
