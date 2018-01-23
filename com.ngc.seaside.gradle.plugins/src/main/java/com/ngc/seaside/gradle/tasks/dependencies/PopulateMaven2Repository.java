@@ -16,6 +16,7 @@ import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
@@ -32,6 +33,7 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencyArtifact;
 import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.artifacts.BaseRepositoryFactory;
 import org.gradle.api.tasks.OutputDirectory;
@@ -137,6 +139,17 @@ public class PopulateMaven2Repository extends DefaultTask {
    private boolean populateLocalRepoOnly = false;
 
    /**
+    * If true, repositories that are listed in the POM of dependencies will be ignored when attempting to resolve
+    * missing items.
+    */
+   private boolean ignoreArtifactDescriptorRepositories = true;
+
+   /**
+    * The update policy to use when resolving dependencies.
+    */
+   private String repositoryUpdatePolicy = RepositoryPolicy.UPDATE_POLICY_NEVER;
+
+   /**
     * Used to create instances of {@code MavenArtifactRepository} for ease of user configuration.  Provided by Gradle at
     * runtime.
     */
@@ -164,6 +177,7 @@ public class PopulateMaven2Repository extends DefaultTask {
 
       // Get the configurations for which we must retrieve dependencies for.
       Collection<Configuration> configs = getConfigurations();
+
       // Add helpful logging about progress.
       totalDependenciesRequired = configs.stream()
             .mapToLong(c -> c.getDependencies().size())
@@ -274,19 +288,52 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * If true, only the local Maven repository will be populated with downloaded files and no artifacts will be
-    * copied to {@code outputDirectory}.
+    * If true, only the local Maven repository will be populated with downloaded files and no artifacts will be copied
+    * to {@code outputDirectory}.
     */
    public boolean isPopulateLocalRepoOnly() {
       return populateLocalRepoOnly;
    }
 
    /**
-    * If true, only the local Maven repository will be populated with downloaded files and no artifacts will be
-    * copied to {@code outputDirectory}.
+    * If true, only the local Maven repository will be populated with downloaded files and no artifacts will be copied
+    * to {@code outputDirectory}.
     */
    public void setPopulateLocalRepoOnly(boolean populateLocalRepoOnly) {
       this.populateLocalRepoOnly = populateLocalRepoOnly;
+   }
+
+   /**
+    * If true, repositories that are listed in the POM of dependencies will be ignored when attempting to resolve
+    * missing items.
+    */
+   public boolean isIgnoreArtifactDescriptorRepositories() {
+      return ignoreArtifactDescriptorRepositories;
+   }
+
+   /**
+    * If true, repositories that are listed in the POM of dependencies will be ignored when attempting to resolve
+    * missing items.
+    */
+   public PopulateMaven2Repository setIgnoreArtifactDescriptorRepositories(
+         boolean ignoreArtifactDescriptorRepositories) {
+      this.ignoreArtifactDescriptorRepositories = ignoreArtifactDescriptorRepositories;
+      return this;
+   }
+
+   /**
+    * The update policy to use when resolving dependencies.
+    */
+   public String getRepositoryUpdatePolicy() {
+      return repositoryUpdatePolicy;
+   }
+
+   /**
+    * The update policy to use when resolving dependencies.
+    */
+   public PopulateMaven2Repository setRepositoryUpdatePolicy(String repositoryUpdatePolicy) {
+      this.repositoryUpdatePolicy = repositoryUpdatePolicy;
+      return this;
    }
 
    /**
@@ -311,6 +358,15 @@ public class PopulateMaven2Repository extends DefaultTask {
       session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(
             session,
             new LocalRepository(localMavenRepo)));
+
+      // Most of the time, we want this value to be true.  This prevents Maven/Gradle from reaching out
+      // to other repositories.
+      session.setIgnoreArtifactDescriptorRepositories(ignoreArtifactDescriptorRepositories);
+      // Most of the time, we want to set this value to UPDATE_POLICY_NEVER.  Otherwise, Maven may change for updates
+      // for artifacts that use version ranges.  This can *really* slow down the build.  This can happen if transitive
+      // dependencies use a version range.  A new version of the artifact will be checked on every build unless the
+      // policy is set to never.
+      session.setUpdatePolicy(repositoryUpdatePolicy);
 
       return session;
    }
@@ -357,7 +413,30 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    private void resolveDependency(Dependency dependency) {
-      if (dependency instanceof ModuleDependency) {
+      // A self resolving dependency is a dependency that can be resolved without a repository.  Dependencies on
+      // projects (ie, compile project(":name")) take this form.  Also, dependencies on flat directories on the
+      // file system take this form.  If this is the case, we don't want to put these dependencies with a maven2
+      // layout because we may not have a POM to go with it.
+      if (dependency instanceof SelfResolvingDependency) {
+         // Basically ignore this dependency.
+         getLogger().lifecycle("[{}/{}] Dependency '{}:{}:{}' is self resolving (it's probably a dependency directly"
+                               + " on a project), ignoring it.",
+                               totalDependenciesRetrieved + 1,
+                               totalDependenciesRequired,
+                               dependency.getGroup(),
+                               dependency.getName(),
+                               dependency.getVersion());
+      } else if (dependency.getGroup() == null || dependency.getGroup().trim().isEmpty()) {
+         // Sometimes, the group can be empty.  This usually means the dependency is declared as a file located in
+         // some directory.  In that case, we ignore it since there is POM file with it.
+         getLogger().lifecycle("[{}/{}] Dependency '{}:{}:{}' has no group ID (it's probably a dependency directly"
+                               + " on a file), ignoring it.",
+                               totalDependenciesRetrieved + 1,
+                               totalDependenciesRequired,
+                               dependency.getGroup(),
+                               dependency.getName(),
+                               dependency.getVersion());
+      } else if (dependency instanceof ModuleDependency) {
          doResolveDependency((ModuleDependency) dependency);
       } else {
          doResolveDependency(dependency);
@@ -466,8 +545,8 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * Handles the result of resolving artifacts.  If {@code populateLocalRepoOnly} is false, the artifacts are
-    * copied to {@code outputDirectory}.
+    * Handles the result of resolving artifacts.  If {@code populateLocalRepoOnly} is false, the artifacts are copied to
+    * {@code outputDirectory}.
     */
    private void handleDependencyResult(DependencyResult result) {
       for (ArtifactResult localArtifact : result.getArtifactResults()) {
@@ -518,8 +597,8 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * Handles an exception that was encountered while resolving dependencies.  Simply logs the exception if the exception
-    * if on concern.
+    * Handles an exception that was encountered while resolving dependencies.  Simply logs the exception if the
+    * exception if on concern.
     */
    private void handleResolutionException(DependencyResolutionException e,
                                           String groupId,
