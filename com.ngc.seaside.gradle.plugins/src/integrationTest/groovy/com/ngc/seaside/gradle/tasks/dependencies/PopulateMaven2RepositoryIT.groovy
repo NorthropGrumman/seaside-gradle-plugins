@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue
 import static org.mockito.ArgumentMatchers.any
 import static org.mockito.ArgumentMatchers.eq
 import static org.mockito.Mockito.mock
-import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -149,13 +148,32 @@ class PopulateMaven2RepositoryIT {
         task.populateRepository()
 
         assertFalse("should not have copied JAR file!",
-                   new File(outputDirectory.getRoot(), "a/b/1.0/b-1.0.jar").exists())
+                    new File(outputDirectory.getRoot(), "a/b/1.0/b-1.0.jar").exists())
         assertFalse("should not have copied sources file!",
-                   new File(outputDirectory.getRoot(), "a/b/1.0/b-1.0-sources.jar").exists())
+                    new File(outputDirectory.getRoot(), "a/b/1.0/b-1.0-sources.jar").exists())
         assertFalse("should not have copied tests file!",
                     new File(outputDirectory.getRoot(), "a/b/1.0/b-1.0-tests.jar").exists())
         assertFalse("should not have copied POM file!",
-                   new File(outputDirectory.getRoot(), "a/b/1.0/b-1.0.pom").exists())
+                    new File(outputDirectory.getRoot(), "a/b/1.0/b-1.0.pom").exists())
+    }
+
+    @Test
+    void doesNotCopyFilesWithRelativePaths() {
+        config.getDependencies().add(newDependency("a", "b", "1.0"))
+
+        DependencyResult jarResult = newDependencyResult(new File(localRepositoryDirectory.getRoot(), ".."))
+        when(repositorySystem.resolveDependencies(eq(session), any(DependencyRequest)))
+              .thenReturn(jarResult)
+              .thenThrow(newNotFoundException())
+              .thenThrow(newNotFoundException())
+
+        task.setOutputDirectory(outputDirectory.getRoot())
+        task.setConfiguration(config)
+        task.setLocalRepository(newLocalMavenRepo(localRepositoryDirectory.getRoot()))
+        task.populateRepository()
+
+        assertFalse("should not copy JAR file!",
+                    new File(outputDirectory.getRoot(), "a/b/1.0/b-1.0.jar").exists())
     }
 
     private static Dependency newDependency(String group, String artifact, String version) {

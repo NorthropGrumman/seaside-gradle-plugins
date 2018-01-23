@@ -552,7 +552,9 @@ public class PopulateMaven2Repository extends DefaultTask {
       for (ArtifactResult localArtifact : result.getArtifactResults()) {
          getLogger().lifecycle("Located {}.", localArtifact.getArtifact().getFile());
 
-         if (!populateLocalRepoOnly) {
+         // If the dependency has a scope of "system", the file path may be relative.
+         // If that is the case, we want to ignore the file.
+         if (!populateLocalRepoOnly && !localArtifact.getArtifact().getFile().toString().contains("..")) {
             File artifact = localArtifact.getArtifact().getFile();
             copyFileToOutputDirectory(artifact.toPath());
 
@@ -581,6 +583,7 @@ public class PopulateMaven2Repository extends DefaultTask {
       // The destination file.  This is the relative path resolved against the output directory.  Only copy the
       // file if needed.
       Path dest = outputDirectory.toPath().resolve(relativeArtifactPath);
+
       if (!Files.exists(dest)) {
          // Create the directory structure if needed.
          Path parent = dest.getParent();
