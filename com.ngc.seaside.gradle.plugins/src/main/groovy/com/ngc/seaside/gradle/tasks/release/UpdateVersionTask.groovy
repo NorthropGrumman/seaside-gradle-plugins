@@ -1,4 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
-class UpdateVersionTask {
+import org.gradle.api.DefaultTask
+
+class UpdateVersionTask extends DefaultTask {
 }
