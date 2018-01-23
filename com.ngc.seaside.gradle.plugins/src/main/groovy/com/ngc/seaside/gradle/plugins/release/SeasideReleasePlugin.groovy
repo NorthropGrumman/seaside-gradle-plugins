@@ -34,42 +34,36 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
         configureReleaseTask(project,
                              RELEASE_TASK_NAME,
                              'Creates a tagged non-SNAPSHOT release.',
-                             ReleaseType.PATCH,
-                             false)
+                             ReleaseType.PATCH)
         configureReleaseTask(project,
                              RELEASE_TASK_NAME + DRY_RUN_TASK_NAME_SUFFIX,
                              'Performs a dry run of a non-SNAPSHOT release.',
-                             ReleaseType.PATCH,
-                             true)
-
-        configureReleaseTask(project,
-                             RELEASE_MAJOR_VERSION_TASK_NAME,
-                             'Upgrades to next major version & creates a tagged non-SNAPSHOT release.',
-                             ReleaseType.MAJOR,
-                             false)
-        configureReleaseTask(project,
-                             RELEASE_MAJOR_VERSION_TASK_NAME + DRY_RUN_TASK_NAME_SUFFIX,
-                             'Performs a dry run of an upgrade to the next major version and a non-SNAPSHOT release.',
-                             ReleaseType.MAJOR,
-                             true)
+                             ReleaseType.PATCH)
 
         configureReleaseTask(project,
                              RELEASE_MINOR_VERSION_TASK_NAME,
                              'Upgrades to next minor version & creates a tagged non-SNAPSHOT release.',
-                             ReleaseType.MINOR,
-                             false)
+                             ReleaseType.MINOR)
         configureReleaseTask(project,
                              RELEASE_MINOR_VERSION_TASK_NAME + DRY_RUN_TASK_NAME_SUFFIX,
                              'Performs a dry run of an upgrade to next minor version and a non-SNAPSHOT release.',
-                             ReleaseType.MINOR,
-                             true)
+                             ReleaseType.MINOR)
+
+        configureReleaseTask(project,
+                             RELEASE_MAJOR_VERSION_TASK_NAME,
+                             'Upgrades to next major version & creates a tagged non-SNAPSHOT release.',
+                             ReleaseType.MAJOR)
+        configureReleaseTask(project,
+                             RELEASE_MAJOR_VERSION_TASK_NAME + DRY_RUN_TASK_NAME_SUFFIX,
+                             'Performs a dry run of an upgrade to the next major version and a non-SNAPSHOT release.',
+                             ReleaseType.MAJOR)
     }
 
     private void configureReleaseTask(Project project,
                                       String name,
                                       String description,
-                                      ReleaseType releaseType,
-                                      boolean isDryRun) {
+                                      ReleaseType releaseType) {
+        boolean isDryRun = name.endsWith(DRY_RUN_TASK_NAME_SUFFIX)
         project.afterEvaluate {
             def task = project.task(name,
                                     type: ReleaseTask,
