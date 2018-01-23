@@ -2,7 +2,6 @@ package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
-import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.util.TaskResolver
 import org.gradle.api.Project
 import org.junit.Assert
@@ -12,7 +11,8 @@ import org.junit.Test
 import java.nio.file.Paths
 
 class SeasideReleasePluginIT {
-    private static final String TEST_VERSION_NUMBER = " 1.2.3-SNAPSHOT     "
+    private static final String BUILD_GRADLE_TEST_VERSION_NUMBER = "1.2.3-SNAPSHOT"
+    private static final String VERSIONS_GRADLE_TEST_VERSION_NUMBER = "1.2.4-SNAPSHOT"
 
     private File projectDir
     private Project project
@@ -39,7 +39,7 @@ class SeasideReleasePluginIT {
         project.evaluate()
         TaskResolver resolver = new TaskResolver(project)
 
-        Assert.assertEquals(TEST_VERSION_NUMBER.trim(), project.version.toString())
+        Assert.assertEquals(BUILD_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
 
         Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME))
@@ -60,7 +60,7 @@ class SeasideReleasePluginIT {
         project.evaluate()
         TaskResolver resolver = new TaskResolver(project)
 
-        Assert.assertEquals('1.2.4-SNAPSHOT', project.version.toString())
+        Assert.assertEquals(VERSIONS_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
 
         Assert.assertNotNull(project.extensions.findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME))
