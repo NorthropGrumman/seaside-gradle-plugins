@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.distribution
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.distribution.SeasideServiceDistributionExtension
+import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
 import com.ngc.seaside.gradle.util.GradleUtil
 import org.gradle.api.Project
@@ -215,6 +216,7 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
         project.logger.info(String.format("Applying plugins for %s", project.name))
         project.getPlugins().apply('java')
         project.getPlugins().apply('maven')
+        project.getPlugins().apply(SeasideCiPlugin)
     }
 
 }
