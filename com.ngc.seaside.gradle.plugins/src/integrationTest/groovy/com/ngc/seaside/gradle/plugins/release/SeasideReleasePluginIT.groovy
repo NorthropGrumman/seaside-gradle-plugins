@@ -45,7 +45,6 @@ class SeasideReleasePluginIT {
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME))
-        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_UPDATE_VERSION_TASK_NAME))
 
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
@@ -67,7 +66,6 @@ class SeasideReleasePluginIT {
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME))
-        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_UPDATE_VERSION_TASK_NAME))
 
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
