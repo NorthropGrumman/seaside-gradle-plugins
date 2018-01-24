@@ -30,38 +30,12 @@ class SeasideReleaseMonoRepoPluginFT {
 
     @Test
     void doesUpdateReleaseVersion() {
-        SeasideReleaseMonoRepoPlugin plugin = new SeasideReleaseMonoRepoPlugin()
-        plugin.apply(project)
-
-        def taskName = SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME
-        BuildResult result = GradleRunner.create()
-                .withProjectDir(projectDir)
-                .withPluginClasspath(pluginClasspath)
-                .forwardOutput()
-                .withArguments("clean", "build", taskName)
-                .build()
-
-        subprojectNames.each { subprojectName ->
-            TestingUtilities.assertTaskSuccess(result, subprojectName, taskName)
-        }
+        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME)
     }
 
     @Test
     void doesCreateTag() {
-        SeasideReleaseMonoRepoPlugin plugin = new SeasideReleaseMonoRepoPlugin()
-        plugin.apply(project)
-
-        def taskName = SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME
-        BuildResult result = GradleRunner.create()
-                .withProjectDir(projectDir)
-                .withPluginClasspath(pluginClasspath)
-                .forwardOutput()
-                .withArguments("clean", "build", taskName)
-                .build()
-
-        subprojectNames.each { subprojectName ->
-            TestingUtilities.assertTaskSuccess(result, subprojectName, taskName)
-        }
+        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
     }
 
     private static File sourceDirectoryWithTheTestProject() {
@@ -74,5 +48,18 @@ class SeasideReleaseMonoRepoPluginFT {
         return TestingUtilities.turnListIntoPath(
             "build", "functionalTest", "release", "sealion-java-hello-world"
         )
+    }
+
+    private void checkForTaskSuccess(String taskName) {
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("clean", "build", taskName)
+                .build()
+
+        subprojectNames.each { subprojectName ->
+            TestingUtilities.assertTaskSuccess(result, subprojectName, taskName)
+        }
     }
 }
