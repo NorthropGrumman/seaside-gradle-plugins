@@ -22,8 +22,10 @@ class CreateTagTask extends DefaultTask {
 
    @TaskAction
    def createReleaseTag() {
+
     tagName = DEFAULT_TAG_PREFIX + "$project.version"
     createTag(commitChanges, dryRun)
+
    }
 
    /**
@@ -33,7 +35,9 @@ class CreateTagTask extends DefaultTask {
     * @return
     */
    String getTagName() {
+
       return tagName
+
    }
 
    /**
@@ -41,6 +45,7 @@ class CreateTagTask extends DefaultTask {
     * @param tagName
     */
    private void createTag(boolean commitChanges, boolean dryRun) {
+
       if (commitChanges && !dryRun) {
          git "tag", "-a", tagName, "-m Release of $tagName"
          project.logger.debug("Created release tag: $tagName")
@@ -55,7 +60,7 @@ class CreateTagTask extends DefaultTask {
     * @param arguments
     */
    private void git(Object[] arguments) {
-      project.logger.debug("Will run: git $arguments")
+
       def output = new ByteArrayOutputStream()
 
       project.exec {
