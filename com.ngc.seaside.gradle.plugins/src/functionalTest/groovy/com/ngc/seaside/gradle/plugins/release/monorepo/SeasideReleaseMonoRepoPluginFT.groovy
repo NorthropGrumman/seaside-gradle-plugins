@@ -36,6 +36,20 @@ class SeasideReleaseMonoRepoPluginFT {
                 .build()
     }
 
+    @Test
+    void doesCreateTag() {
+        SeasideReleaseMonoRepoPlugin plugin = new SeasideReleaseMonoRepoPlugin()
+        plugin.apply(project)
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("clean", "build",
+                    SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
+                .build()
+    }
+
     private static File sourceDirectoryWithTheTestProject() {
         return TestingUtilities.turnListIntoPath(
             "src", "functionalTest", "resources", "sealion-java-hello-world"
