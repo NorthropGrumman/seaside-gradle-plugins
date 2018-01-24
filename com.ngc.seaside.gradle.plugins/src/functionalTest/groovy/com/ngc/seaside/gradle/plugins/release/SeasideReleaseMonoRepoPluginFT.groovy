@@ -11,6 +11,12 @@ class SeasideReleaseMonoRepoPluginFT {
     private File projectDir
     private Project project
     private List<File> pluginClasspath
+    private List<String> subprojectNames = [
+            "service.bonjourlemonde",
+            "service.helloworld",
+            "service.holamundo",
+            "service.konnichiwamojuru"
+    ]
 
     @Before
     void before() {
@@ -24,40 +30,12 @@ class SeasideReleaseMonoRepoPluginFT {
 
     @Test
     void doesUpdateReleaseVersion() {
-        SeasideReleaseMonoRepoPlugin plugin = new SeasideReleaseMonoRepoPlugin()
-        plugin.apply(project)
-
-        BuildResult result = GradleRunner.create()
-                .withProjectDir(projectDir)
-                .withPluginClasspath(pluginClasspath)
-                .forwardOutput()
-                .withArguments("clean", "build",
-                    SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME)
-                .build()
+        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME)
     }
 
     @Test
     void doesCreateTag() {
-        SeasideReleaseMonoRepoPlugin plugin = new SeasideReleaseMonoRepoPlugin()
-        plugin.apply(project)
-
-        BuildResult result = GradleRunner.create()
-                .withProjectDir(projectDir)
-                .withPluginClasspath(pluginClasspath)
-                .forwardOutput()
-                .withArguments("clean", "build",
-                    SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
-                .build()
-
-        TestingUtilities.assertTaskSuccess(result,
-                "service.bonjourlemonde",
-                SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
-        TestingUtilities.assertTaskSuccess(result,
-                "service.helloworld",
-                SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
-        TestingUtilities.assertTaskSuccess(result,
-                "service.holamundo",
-                SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
+        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
     }
 
     private static File sourceDirectoryWithTheTestProject() {
@@ -70,5 +48,18 @@ class SeasideReleaseMonoRepoPluginFT {
         return TestingUtilities.turnListIntoPath(
             "build", "functionalTest", "release", "sealion-java-hello-world"
         )
+    }
+
+    private void checkForTaskSuccess(String taskName) {
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath(pluginClasspath)
+                .forwardOutput()
+                .withArguments("clean", "build", taskName)
+                .build()
+
+        subprojectNames.each { subprojectName ->
+            TestingUtilities.assertTaskSuccess(result, subprojectName, taskName)
+        }
     }
 }

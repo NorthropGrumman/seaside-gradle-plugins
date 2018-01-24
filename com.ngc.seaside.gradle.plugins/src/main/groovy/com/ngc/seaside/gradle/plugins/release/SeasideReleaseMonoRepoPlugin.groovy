@@ -31,7 +31,7 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      *
      * @param project The project for which the tasks are to be created.
      */
-    private void createTasks(Project project) {
+    private static void createTasks(Project project) {
         createMonoTask(project,
             RELEASE_UPDATE_VERSION_TASK_NAME,
             UpdateVersionTask,
@@ -46,7 +46,6 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
     }
 
     /**
-     *
      * Attach Task to this project and group
      *
      * @param project The project to which the task should be attached.
@@ -55,7 +54,11 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      * @param group The task group to which the task belongs.
      * @param descriptiton A brief description of what the task does.
      */
-    private void createMonoTask(Project project, String name, Class type, String group, String description) {
-        project.task(name, type: type, group: group, description: description)
+    private static void createMonoTask(Project project, String name, Class type, String group, String description) {
+        project.task(
+                name,
+                type: type,
+                group: group,
+                description: description)
     }
 }
