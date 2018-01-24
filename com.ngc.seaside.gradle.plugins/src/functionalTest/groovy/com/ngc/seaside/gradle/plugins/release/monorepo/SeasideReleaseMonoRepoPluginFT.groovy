@@ -31,7 +31,8 @@ class SeasideReleaseMonoRepoPluginFT {
                 .withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
-                .withArguments("clean", "build", "updateReleaseVersion")
+                .withArguments("clean", "build",
+                    SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME)
                 .build()
     }
 
