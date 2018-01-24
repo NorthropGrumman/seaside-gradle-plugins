@@ -48,6 +48,16 @@ class SeasideReleaseMonoRepoPluginFT {
                 .withArguments("clean", "build",
                     SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
                 .build()
+
+        TestingUtilities.assertTaskSuccess(result,
+                "service.bonjourlemonde",
+                SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
+        TestingUtilities.assertTaskSuccess(result,
+                "service.helloworld",
+                SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
+        TestingUtilities.assertTaskSuccess(result,
+                "service.holamundo",
+                SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
     }
 
     private static File sourceDirectoryWithTheTestProject() {
