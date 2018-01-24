@@ -15,8 +15,9 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
     private SeasideReleaseExtension releaseExtension
 
     /**
+     * Perform the necessary actions for applying the plugin.
      *
-     * @param project
+     * @param project The project on which the plugin should be applied.
      */
     @Override
     void doApply(Project project) {
@@ -27,7 +28,8 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
 
     /**
      * Create project tasks for this plugin
-     * @param project
+     *
+     * @param project The project for which the tasks are to be created.
      */
     private void createTasks(Project project) {
         createMonoTask(project,
