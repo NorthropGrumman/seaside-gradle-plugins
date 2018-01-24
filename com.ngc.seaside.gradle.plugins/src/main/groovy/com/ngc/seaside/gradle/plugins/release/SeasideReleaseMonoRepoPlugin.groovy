@@ -23,7 +23,7 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
             RELEASE_UPDATE_VERSION_TASK_NAME,
             type: UpdateVersionTask,
             group: RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            description: 'Define a release version (i.e. remove a -SNAPSHOT) and commit it.') {}
+            description: 'Define a release version (i.e. remove -SNAPSHOT) and commit it.') {}
 
         project.task(
             RELEASE_CREATE_TAG_TASK_NAME,
