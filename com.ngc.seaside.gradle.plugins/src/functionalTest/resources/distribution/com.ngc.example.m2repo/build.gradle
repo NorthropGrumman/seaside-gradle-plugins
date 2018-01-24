@@ -81,7 +81,7 @@ dependencies {
     platform "org.eclipse.equinox:equinox-osgi:3.10.0"
 }
 
-task m2repo(type: PopulateMaven2Repository) {
+task testM2repo(type: PopulateMaven2Repository) {
     outputDirectory = project.file("${project.buildDir}/m2")
     remoteRepository = project.repositories.getByName('NexusConsolidated')
     localRepository = mavenLocal()
