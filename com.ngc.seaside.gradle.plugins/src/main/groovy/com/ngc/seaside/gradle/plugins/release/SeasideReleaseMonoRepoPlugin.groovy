@@ -7,7 +7,6 @@ import com.ngc.seaside.gradle.tasks.release.CreateTagTask
 import org.gradle.api.Project
 
 class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
-
     public static final String RELEASE_MONO_REPO_TASK_GROUP_NAME = 'Mono Repo Release'
     public static final String RELEASE_EXTENSION_NAME = 'seasideReleaseMonoRepo'
     public static final String RELEASE_UPDATE_VERSION_TASK_NAME = 'updateReleaseVersion'
@@ -31,7 +30,6 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      * @param project
      */
     private void createTasks(Project project) {
-
         createMonoTask(project,
             RELEASE_UPDATE_VERSION_TASK_NAME,
             UpdateVersionTask,
@@ -49,13 +47,13 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      *
      * Attach Task to this project and group
      *
-     * @param project
-     * @param name
-     * @param type
-     * @param group
-     * @param descriptiton
+     * @param project The project to which the task should be attached.
+     * @param name The name of the task.
+     * @param type The type of task being added.
+     * @param group The task group to which the task belongs.
+     * @param descriptiton A brief description of what the task does.
      */
     private void createMonoTask(Project project, String name, Class type, String group, String description) {
-        project.task(name, type: type, group: group, description: description){}
+        project.task(name, type: type, group: group, description: description)
     }
 }
