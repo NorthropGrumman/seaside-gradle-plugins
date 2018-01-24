@@ -46,7 +46,6 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
     }
 
     /**
-     *
      * Attach Task to this project and group
      *
      * @param project The project to which the task should be attached.
@@ -56,6 +55,10 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      * @param descriptiton A brief description of what the task does.
      */
     private void createMonoTask(Project project, String name, Class type, String group, String description) {
-        project.task(name, type: type, group: group, description: description)
+        project.task(
+                name,
+                type: type,
+                group: group,
+                description: description)
     }
 }
