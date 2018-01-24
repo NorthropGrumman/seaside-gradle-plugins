@@ -39,12 +39,12 @@ class SeasideReleaseMonoRepoPluginFT {
     private static File sourceDirectoryWithTheTestProject() {
         return TestingUtilities.turnListIntoPath(
             "src", "functionalTest", "resources", "sealion-java-hello-world"
-        );
+        )
     }
 
     private static File pathToTheDestinationProjectDirectory() {
         return TestingUtilities.turnListIntoPath(
             "build", "functionalTest", "release", "sealion-java-hello-world"
-        );
+        )
     }
 }
