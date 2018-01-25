@@ -6,6 +6,7 @@ import com.ngc.seaside.gradle.tasks.dependencies.PopulateMaven2Repository
 import com.ngc.seaside.gradle.util.PropertyUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.bundling.Zip
 
 /**
  * This plugin is applied to projects to make CI easier.
@@ -43,7 +44,13 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
     public static final String JENKINS_TASK_GROUP_NAME = 'Jenkins'
     public static final String AUDITING_TASK_GROUP_NAME = 'Auditing'
     public static final String NOTHING_TASK_NAME = 'nothing'
-    public static final String CREATE_M2_REPO_TASK_NAME = 'm2repo'
+    public static final String POPULATE_M2_REPO_TASK_NAME = 'populateM2repo'
+    public static final String CREATE_M2_REPO_ARCHIVE_TASK_NAME = 'm2repo'
+
+    /**
+     * The default name of the directory that will contain the m2 dependencies.
+     */
+    final static String DEFAULT_M2_OUTPUT_DIRECTORY_NAME = 'dependencies-m2'
 
     /**
      * The name of the system property used when printing the value of a property.
@@ -82,7 +89,7 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             // a task.  To be consistent, we don't do any of the work in a task.
             configurePropertyDisplay(project)
             // Configure the m2 repo task from values of the extension.
-            configureCreateM2RepoTask(project)
+            configureAuditingTasks(project)
         }
     }
 
@@ -90,17 +97,27 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
      * Adds additional CI based tasks.
      */
     protected void createTasks(Project project) {
-        Task task = project.task(NOTHING_TASK_NAME)
-        task.enabled = false
-        task.group = JENKINS_TASK_GROUP_NAME
-        task.description = 'Does nothing.  This task is useful when invoked from a Jenkins script since it allows scripts to capture the values of build script properties without doing actual work.'
+        Task doNothing = project.task(NOTHING_TASK_NAME)
+        doNothing.enabled = false
+        doNothing.group = JENKINS_TASK_GROUP_NAME
+        doNothing.description =
+              'Does nothing.  This task is useful when invoked from a Jenkins script since it allows scripts to capture the values of build script properties without doing actual work.'
 
-        project.task(CREATE_M2_REPO_TASK_NAME,
-                     type: PopulateMaven2Repository,
-                     group: AUDITING_TASK_GROUP_NAME,
-                     description: 'Creates a directory which contains all dependencies in a maven2 layout which can be used for offline use.') {
+        Task populateM2Repo = project.task(
+              POPULATE_M2_REPO_TASK_NAME,
+              type: PopulateMaven2Repository,
+              group: AUDITING_TASK_GROUP_NAME,
+              description: 'Creates a directory which contains all dependencies in a maven2 layout which can be used for offline use.') {
             localRepository = mavenLocal()
         }
+
+        project.task(
+              CREATE_M2_REPO_ARCHIVE_TASK_NAME,
+              dependsOn: populateM2Repo,
+              type: Zip,
+              group: AUDITING_TASK_GROUP_NAME,
+              description: 'Creates a ZIP archive of the populated m2 repository.'
+        )
     }
 
     /**
@@ -112,20 +129,29 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
     }
 
     /**
-     * Configures the task to create the M2 repository.  Applies the configuration after the project has been evaluated
+     * Configures the tasks related to auditing and security.  Applies the configuration after the project has been evaluated
      * so the user has a chance to set the extensions.
      */
-    private void configureCreateM2RepoTask(Project project) {
+    private void configureAuditingTasks(Project project) {
         // Configure the task with values from the extension after the project is evaluated so the user has a chance
         // to override the settings.
         project.afterEvaluate {
-            getTaskResolver().findTask(CREATE_M2_REPO_TASK_NAME) {
+            File m2Directory = ciExtension.m2OutputDirectory ?: new File(project.buildDir,
+                                                                         DEFAULT_M2_OUTPUT_DIRECTORY_NAME)
+
+            getTaskResolver().findTask(POPULATE_M2_REPO_TASK_NAME) {
                 // Note findByName returns null if the repo could not be found.  It is okay if the repo is not
                 // defined.  In this case, the task will just resolve dependencies from the local maven repository
                 // directory.
                 remoteRepository = project.repositories.findByName(ciExtension.remoteM2RepositoryName)
                 // Configure the output directory using $buildDir/m2 as the default.
-                outputDirectory = ciExtension.m2OutputDirectory ?: new File(project.buildDir, 'm2')
+                outputDirectory = m2Directory
+            }
+
+            getTaskResolver().findTask(CREATE_M2_REPO_ARCHIVE_TASK_NAME) {
+                from m2Directory
+                destinationDir = ciExtension.m2ArchiveOutputDirectory ?: project.buildDir
+                archiveName = ciExtension.m2ArchiveName
             }
         }
     }

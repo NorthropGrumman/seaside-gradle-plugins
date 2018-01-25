@@ -1,11 +1,13 @@
 package com.ngc.seaside.gradle.plugins.ci
 
+import com.ngc.seaside.gradle.extensions.ci.SeasideCiExtension
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Before
 import org.junit.Test
 
@@ -13,7 +15,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
 
 class SeasideCiPluginFT {
 
@@ -58,5 +61,34 @@ class SeasideCiPluginFT {
               .build()
 
         // No (easy) asserts here :(
+    }
+
+    @Test
+    void doesCreateM2Repo() {
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+              .withPluginClasspath(pluginClasspath)
+              .forwardOutput()
+              .withArguments("-q",
+                             ":service.konnichiwamojuru:clean",
+                             ":service.konnichiwamojuru:m2repo")
+              .build()
+
+        assertEquals("m2repo task was not successful!",
+                     TaskOutcome.SUCCESS,
+                     result.task(":service.konnichiwamojuru:m2repo").getOutcome())
+
+        File m2Directory = new File(
+              projectDir,
+              "com.ngc.seaside.service.konnichiwamojuru/build/" + SeasideCiPlugin.DEFAULT_M2_OUTPUT_DIRECTORY_NAME)
+        assertTrue("m2 directory not created!",
+                   m2Directory.isDirectory())
+        assertTrue("m2 directory not populated!",
+                   m2Directory.listFiles().length > 0)
+
+        File m2Archive = new File(
+              projectDir,
+              "com.ngc.seaside.service.konnichiwamojuru/build/" + SeasideCiExtension.DEFAULT_M2_ARCHIVE_NAME)
+        assertTrue("m2 archive not created!",
+                   m2Archive.isFile())
     }
 }
