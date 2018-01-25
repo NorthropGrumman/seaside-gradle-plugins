@@ -41,7 +41,7 @@ class ReleaseTask extends DefaultTask {
 
         // If the task was invoked, update the version number before the build actually executes.  This ensures that
         // tasks which do not use lazy property evaluation are configured correctly before they are executed.  If we
-        // waited to do this during the execution phase, tasks would be configured to execute with the wrong the wrong
+        // waited to do this during the execution phase, tasks would bte configured to execute with the wrong the wrong
         // version.
         if (isTaskInvoked) {
             project.logger.info("Preparing for a $releaseType release.")
@@ -49,15 +49,6 @@ class ReleaseTask extends DefaultTask {
             createNewReleaseVersionIfNecessary()
             project.version = project.rootProject.releaseVersion
         }
-    }
-
-    @TaskAction
-    def release() {
-        // Perform the actual release.  Require the plugin be configured before executing.
-        Preconditions.checkState(
-              isReleaseVersionSet(),
-              "Release task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
-        releaseAllProjectsIfNecessary()
     }
 
     private void createNewReleaseVersionIfNecessary() {
@@ -94,6 +85,15 @@ class ReleaseTask extends DefaultTask {
 
         String dryRunHeader = (dryRun) ? "Dry Run >>" : ""
         project.logger.lifecycle("$dryRunHeader Set project version to '$newReleaseVersion'")
+    }
+
+    @TaskAction
+    def release() {
+        // Perform the actual release.  Require the plugin be configured before executing.
+        Preconditions.checkState(
+              isReleaseVersionSet(),
+              "Release task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
+        releaseAllProjectsIfNecessary()
     }
 
     private void releaseAllProjectsIfNecessary() {
