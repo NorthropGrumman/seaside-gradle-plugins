@@ -18,7 +18,7 @@ import java.nio.file.Paths
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
 
-//@Ignore("This test can take a long time and requires network access.")
+@Ignore("This test can take a long time and requires network access.")
 class PopulateMaven2RepositoryFT {
     private File projectDir
     private Project project
@@ -48,7 +48,7 @@ class PopulateMaven2RepositoryFT {
                      TaskOutcome.valueOf("SUCCESS"),
                      result.task(":testM2repo").getOutcome())
 
-        File m2repo = new File(projectDir, "build/m2")
+        File m2repo = new File(projectDir, "build/dependencies-m2")
         assertTrue("m2 repo not created!",
                    m2repo.exists())
         assertTrue("m2 repo is empty!",

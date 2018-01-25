@@ -41,6 +41,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Resolves dependencies using the Maven Aether API.
+ */
 public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2Repository> {
 
    /**

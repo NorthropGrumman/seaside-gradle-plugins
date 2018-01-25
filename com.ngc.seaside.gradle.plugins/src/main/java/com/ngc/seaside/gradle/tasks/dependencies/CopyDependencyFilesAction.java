@@ -17,6 +17,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 
+/**
+ * Copies files from a local maven repository to directory.
+ */
 public class CopyDependencyFilesAction extends DefaultTaskAction<PopulateMaven2Repository> {
 
    /**
@@ -28,7 +31,6 @@ public class CopyDependencyFilesAction extends DefaultTaskAction<PopulateMaven2R
    public void validate(PopulateMaven2Repository task) throws InvalidUserDataException {
       GradleUtil.checkUserData(task.isPopulateLocalRepoOnly() || task.getOutputDirectory() != null,
                                "outputDirectory must be set if populateLocalRe2poOnly is false!");
-      GradleUtil.checkUserData(dependencyResults != null, "dependencyResults must be set!");
    }
 
    /**
@@ -43,6 +45,8 @@ public class CopyDependencyFilesAction extends DefaultTaskAction<PopulateMaven2R
    @Override
    protected void doExecute() {
       if (!task.isPopulateLocalRepoOnly()) {
+         Preconditions.checkState(dependencyResults != null, "dependencyResults must be set!");
+
          logger.lifecycle("Copying files to output directory {}.", task.getOutputDirectory());
          for (DependencyResult result : dependencyResults) {
             for (ArtifactResult localArtifact : result.getArtifactResults()) {

@@ -41,11 +41,6 @@ import javax.inject.Inject;
 public class PopulateMaven2Repository extends DefaultTask {
 
    /**
-    * Contains all the resolved artifacts thus far.
-    */
-   private ArtifactResultStore store;
-
-   /**
     * The user configured output directory to populate.
     */
    private File outputDirectory;
@@ -100,8 +95,8 @@ public class PopulateMaven2Repository extends DefaultTask {
 
    @TaskAction
    public void populateRepository() {
-      ResolveDependenciesAction resolveDependencies = new ResolveDependenciesAction();
-      CopyDependencyFilesAction copyDependencyFiles = new CopyDependencyFilesAction();
+      ResolveDependenciesAction resolveDependencies = newResolveDependenciesAction();
+      CopyDependencyFilesAction copyDependencyFiles = newCopyDependencyFilesAction();
 
       resolveDependencies.validate(this);
       copyDependencyFiles.validate(this);
@@ -294,5 +289,19 @@ public class PopulateMaven2Repository extends DefaultTask {
    public PopulateMaven2Repository setRepositoryUpdatePolicy(String repositoryUpdatePolicy) {
       this.repositoryUpdatePolicy = repositoryUpdatePolicy;
       return this;
+   }
+
+   /**
+    * Factory method to create a new instance of {@code ResolveDependenciesAction}.  Useful for testing.
+    */
+   protected ResolveDependenciesAction newResolveDependenciesAction() {
+      return new ResolveDependenciesAction();
+   }
+
+   /**
+    * Factory method to create a new instance of {@code ResolveDependenciesAction}.  Useful for testing.
+    */
+   protected CopyDependencyFilesAction newCopyDependencyFilesAction() {
+      return new CopyDependencyFilesAction();
    }
 }
