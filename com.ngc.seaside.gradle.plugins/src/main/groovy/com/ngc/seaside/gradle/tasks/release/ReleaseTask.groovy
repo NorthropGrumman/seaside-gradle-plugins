@@ -1,6 +1,8 @@
 package com.ngc.seaside.gradle.tasks.release
 
 import com.google.common.base.Preconditions
+import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
+import com.ngc.seaside.gradle.util.ProjectUtil
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -41,7 +43,7 @@ class ReleaseTask extends DefaultTask {
 
         // If the task was invoked, update the version number before the build actually executes.  This ensures that
         // tasks which do not use lazy property evaluation are configured correctly before they are executed.  If we
-        // waited to do this during the execution phase, tasks would be configured to execute with the wrong the wrong
+        // waited to do this during the execution phase, tasks would be configured to execute with the wrong
         // version.
         if (isTaskInvoked) {
             project.logger.info("Preparing for a $releaseType release.")
@@ -55,22 +57,20 @@ class ReleaseTask extends DefaultTask {
     def release() {
         // Perform the actually release.  Require the plugin be configured before executing.
         Preconditions.checkState(
-              isReleaseVersionSet(),
+              ProjectUtil.isExtensionSet(project),
               "Release task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
+        // Grabing Release extension settings
+        getReleaseExtensionSettings()
         releaseAllProjectsIfNecessary()
     }
 
     private void createNewReleaseVersionIfNecessary() {
-        if (!isReleaseVersionSet()) {
+        if (!ProjectUtil.isExtensionSet(project)) {
             def currentProjectVersion = resolver.getProjectVersion(releaseType)
             def newReleaseVersion = getTheReleaseVersion(currentProjectVersion)
             setTheNewReleaseVersion(newReleaseVersion)
             setTheReleaseVersionProjectProperty(newReleaseVersion)
         }
-    }
-
-    private boolean isReleaseVersionSet() {
-        return project.rootProject.hasProperty("releaseVersion")
     }
 
     private String getTheReleaseVersion(String currentProjectVersion) {
@@ -194,5 +194,11 @@ class ReleaseTask extends DefaultTask {
 
     private void setThePublishedProjectsProjectProperty() {
         project.rootProject.ext.set("publishedProjects", true)
+    }
+
+    private void getReleaseExtensionSettings() {
+        commitChanges = ProjectUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).commitChanges
+        push = ProjectUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).push
+        versionSuffix = ProjectUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).versionSuffix
     }
 }

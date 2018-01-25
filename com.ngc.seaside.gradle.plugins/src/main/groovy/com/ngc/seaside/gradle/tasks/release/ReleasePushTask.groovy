@@ -8,10 +8,16 @@ import org.gradle.api.tasks.TaskAction
  */
 class ReleasePushTask extends DefaultTask {
 
+   boolean dryRun
+
    /**
     * CTOR
     */
    ReleasePushTask() {}
+
+   def prepareForReleaseIfNeeded(ReleaseType releaseType) {
+      project.gradle.startParameter.taskNames.contains(name)
+   }
 
    /**
     * function required to be a task within the gradle framework
@@ -47,7 +53,7 @@ class ReleasePushTask extends DefaultTask {
       }
       output = output.toString().trim()
       if (!output.isEmpty()) {
-         project.logger.debug(output)
+         logger.debug(output)
       }
 
       return output

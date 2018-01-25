@@ -38,7 +38,7 @@ class SeasideReleaseMonoRepoPluginIT {
         plugin.apply(project)
 
         project.extensions
-               .findByName(SeasideReleaseMonoRepoPlugin.RELEASE_EXTENSION_NAME)
+               .findByName(SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME)
                .uploadArtifacts = false
         resolver = new TaskResolver(project)
     }
@@ -49,7 +49,7 @@ class SeasideReleaseMonoRepoPluginIT {
 
         Assert.assertEquals(BUILD_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
 
-        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_EXTENSION_NAME))
+        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME))
 
         checkForTask()
     }
@@ -64,7 +64,7 @@ class SeasideReleaseMonoRepoPluginIT {
 
         Assert.assertEquals(VERSIONS_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
 
-        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_EXTENSION_NAME))
+        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME))
 
         checkForTask()
     }

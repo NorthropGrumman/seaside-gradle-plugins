@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import com.ngc.seaside.gradle.util.ProjectUtil
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.util.TaskResolver
@@ -46,9 +47,9 @@ class SeasideReleasePluginIT {
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME))
 
-        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
-        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
-        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
+        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME + ProjectUtil.DRY_RUN_TASK_NAME_SUFFIX))
+        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME + ProjectUtil.DRY_RUN_TASK_NAME_SUFFIX))
+        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME + ProjectUtil.DRY_RUN_TASK_NAME_SUFFIX))
     }
 
     @Test
@@ -67,9 +68,9 @@ class SeasideReleasePluginIT {
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME))
 
-        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
-        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
-        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME + SeasideReleasePlugin.DRY_RUN_TASK_NAME_SUFFIX))
+        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_TASK_NAME + ProjectUtil.DRY_RUN_TASK_NAME_SUFFIX))
+        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MAJOR_VERSION_TASK_NAME + ProjectUtil.DRY_RUN_TASK_NAME_SUFFIX))
+        Assert.assertNotNull(resolver.findTask(SeasideReleasePlugin.RELEASE_MINOR_VERSION_TASK_NAME + ProjectUtil.DRY_RUN_TASK_NAME_SUFFIX))
     }
 
     private static File sourceDirectoryWithTheTestProject() {

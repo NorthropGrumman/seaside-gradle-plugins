@@ -1,16 +1,19 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import aQute.maven.api.Release
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.BumpVersionTask
 import com.ngc.seaside.gradle.tasks.release.ReleasePushTask
+import com.ngc.seaside.gradle.tasks.release.ReleaseType
 import com.ngc.seaside.gradle.tasks.release.UpdateVersionTask
 import com.ngc.seaside.gradle.tasks.release.CreateTagTask
+import com.ngc.seaside.gradle.util.ProjectUtil
 import org.gradle.api.Project
 
 class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
     public static final String RELEASE_MONO_REPO_TASK_GROUP_NAME = 'Mono Repo Release'
-    public static final String RELEASE_EXTENSION_NAME = 'seasideReleaseMonoRepo'
+    public static final String RELEASE_MONO_EXTENSION_NAME = 'seasideReleaseMonoRepo'
     public static final String RELEASE_UPDATE_VERSION_TASK_NAME = 'updateReleaseVersion'
     public static final String RELEASE_CREATE_TAG_TASK_NAME = 'createReleaseTag'
     public static final String RELEASE_PUSH_TASK_NAME = 'releasePush'
@@ -25,7 +28,7 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      */
     @Override
     void doApply(Project project) {
-        releaseExtension = project.extensions.create(RELEASE_EXTENSION_NAME, SeasideReleaseExtension)
+        releaseExtension = project.extensions.create(RELEASE_MONO_EXTENSION_NAME, SeasideReleaseExtension)
         project.logger.info(String.format("Initializing release extensions for %s", project.name))
         createTasks(project)
     }
@@ -35,46 +38,41 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      *
      * @param project The project for which the tasks are to be created.
      */
-    private static void createTasks(Project project) {
-        createMonoTask(project,
-            RELEASE_UPDATE_VERSION_TASK_NAME,
+    private void createTasks(Project project) {
+
+        ProjectUtil.configureTask(project,
             UpdateVersionTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            'Define a release version (i.e. remove -SNAPSHOT) and commit it.')
+            RELEASE_UPDATE_VERSION_TASK_NAME,
+            'Define a release version (i.e. remove -SNAPSHOT) and commit it.',
+            ReleaseType.SNAPSHOT,
+            releaseExtension)
 
-        createMonoTask(project,
-            RELEASE_CREATE_TAG_TASK_NAME,
+        ProjectUtil.configureTask(project,
             CreateTagTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            'Create the version tag used by GitHub')
+            RELEASE_CREATE_TAG_TASK_NAME,
+            'Create the version tag used by GitHub',
+            ReleaseType.SNAPSHOT,
+            releaseExtension)
 
-        createMonoTask(project,
-            RELEASE_PUSH_TASK_NAME,
+        ProjectUtil.configureTask(project,
             ReleasePushTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            'Push the project to GitHub')
+            RELEASE_PUSH_TASK_NAME,
+            'Push the project to GitHub',
+            ReleaseType.SNAPSHOT,
+            releaseExtension)
 
-        createMonoTask(project,
-            RELEASE_BUMP_VERSION_TASK_NAME,
+        ProjectUtil.configureTask(project,
             BumpVersionTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            "Will bump ths version in the build gradle file")
+            RELEASE_BUMP_VERSION_TASK_NAME,
+            "Will bump ths version in the build gradle file",
+            ReleaseType.SNAPSHOT,
+            releaseExtension)
+
     }
 
-    /**
-     * Attach Task to this project and group
-     *
-     * @param project The project to which the task should be attached.
-     * @param name The name of the task.
-     * @param type The type of task being added.
-     * @param group The task group to which the task belongs.
-     * @param descriptiton A brief description of what the task does.
-     */
-    private static void createMonoTask(Project project, String name, Class type, String group, String description) {
-        project.task(
-                name,
-                type: type,
-                group: group,
-                description: description)
-    }
+
 }

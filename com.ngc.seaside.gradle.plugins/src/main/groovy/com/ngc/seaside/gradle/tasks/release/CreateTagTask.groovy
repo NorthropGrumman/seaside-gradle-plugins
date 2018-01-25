@@ -1,6 +1,8 @@
 package com.ngc.seaside.gradle.tasks.release
 
-import org.gradle.api.Project
+import com.google.common.base.Preconditions
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
+import com.ngc.seaside.gradle.util.ProjectUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -9,8 +11,8 @@ import org.gradle.api.tasks.TaskAction
  * */
 class CreateTagTask extends DefaultTask {
 
-   private static final DEFAULT_TAG_PREFIX = 'v'
 
+   private String tagPrefix
    private String tagName
 
    boolean dryRun
@@ -20,23 +22,30 @@ class CreateTagTask extends DefaultTask {
    CreateTagTask(){
    }
 
+   def prepareForReleaseIfNeeded(ReleaseType releaseType) {
+     project.gradle.startParameter.taskNames.contains(name)
+   }
+
    /**
     * function required to be a task within the gradle framework
     * @return
     */
    @TaskAction
    def createReleaseTag() {
-
-    tagName = DEFAULT_TAG_PREFIX + "$project.version"
-    createTag(commitChanges, dryRun)
+//      Preconditions.checkState(
+//        ProjectUtil.isExtensionSet(project),
+//        "createReleaseTag task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
+      getReleaseExtensionSettings()
+      tagName = tagPrefix + "$project.version"
+      ProjectUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag = tagName
+      createTag(commitChanges, dryRun)
 
    }
 
    /**
     *
-    * @param tagPrefix
-    * @param versionSuffix
-    * @return
+    * @return The string of the version of the tag that was
+    *    pushed to gitHub for this release
     */
    String getTagName() {
 
@@ -46,17 +55,18 @@ class CreateTagTask extends DefaultTask {
 
    /**
     *
-    * @param tagName
+    * @param commit Changes to really push the changes or not
+    * @param dryRun Not actually creating the tag
     */
    private void createTag(boolean commitChanges, boolean dryRun) {
 
       if (commitChanges && !dryRun) {
          git "tag", "-a", tagName, "-m Release of $tagName"
-         project.logger.debug("Created release tag: $tagName")
+         logger.debug("Created release tag: $tagName")
       }
 
       if (dryRun) {
-         project.logger.lifecycle("Dry Run >> Would have created release tag: $tagName")
+         logger.lifecycle("Dry Run >> Would have created release tag: $tagName")
       }
    }
 
@@ -79,5 +89,10 @@ class CreateTagTask extends DefaultTask {
       if (!output.isEmpty()) {
          project.logger.debug(output)
       }
+   }
+
+   private void getReleaseExtensionSettings() {
+      commitChanges = ProjectUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).commitChanges
+      tagPrefix = ProjectUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tagPrefix
    }
 }
