@@ -15,6 +15,7 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.logging.Logger;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -61,8 +62,14 @@ public class ResolveDependenciesActionTest {
 
    @Before
    public void setup() throws Throwable {
-
+      Logger logger = mock(Logger.class);
       when(task.getProject()).thenReturn(project);
+      when(task.getLogger()).thenReturn(logger);
+
+      MavenArtifactRepository local = newLocalMavenRepo(localRepositoryDirectory.getRoot());
+      when(task.getOutputDirectory()).thenReturn(outputDirectory.getRoot());
+      when(task.getConfiguration()).thenReturn(config);
+      when(task.getLocalRepository()).thenReturn(local);
 
       action = new ResolveDependenciesAction() {
          @Override
@@ -78,7 +85,7 @@ public class ResolveDependenciesActionTest {
    }
 
    @Test
-   void doesResolveAndCopyDependencies() throws Throwable {
+   public void doesResolveDependencies() throws Throwable {
       config.getDependencies().add(newDependency("a", "b", "1.0"));
 
       DependencyResult jarResult = newDependencyResult();
@@ -88,11 +95,6 @@ public class ResolveDependenciesActionTest {
             .thenReturn(jarResult)
             .thenReturn(sourcesResult)
             .thenReturn(testsResult);
-
-      MavenArtifactRepository local = newLocalMavenRepo(localRepositoryDirectory.getRoot());
-      when(task.getOutputDirectory()).thenReturn(outputDirectory.getRoot());
-      when(task.getConfiguration()).thenReturn(config);
-      when(task.getLocalRepository()).thenReturn(local);
 
       action.execute(task);
       Collection<DependencyResult> results = action.getDependencyResults();
@@ -106,6 +108,30 @@ public class ResolveDependenciesActionTest {
                  results.contains(testsResult));
       assertEquals("contains extra results!",
                    3,
+                   results.size());
+   }
+
+   @Test
+   public void doesSkipMissingSourcesAndTests() throws Throwable {
+      config.getDependencies().add(newDependency("a", "b", "1.0"));
+
+      DependencyResult jarResult = newDependencyResult();
+      DependencyResult sourcesResult = newDependencyResult();
+      when(repositorySystem.resolveDependencies(eq(session), any(DependencyRequest.class)))
+            .thenReturn(jarResult)
+            .thenReturn(sourcesResult)
+            .thenThrow(newNotFoundException());
+
+      action.execute(task);
+      Collection<DependencyResult> results = action.getDependencyResults();
+      assertFalse("no results returned!",
+                  results.isEmpty());
+      assertTrue("missing main JAR result!",
+                 results.contains(jarResult));
+      assertTrue("missing sources result!",
+                 results.contains(sourcesResult));
+      assertEquals("contains extra results!",
+                   2,
                    results.size());
    }
 
