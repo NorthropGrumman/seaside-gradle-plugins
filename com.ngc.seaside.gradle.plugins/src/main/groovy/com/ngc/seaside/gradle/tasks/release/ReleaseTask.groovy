@@ -53,7 +53,7 @@ class ReleaseTask extends DefaultTask {
 
     @TaskAction
     def release() {
-        // Perform the actually release.  Require the plugin be configured before executing.
+        // Perform the actual release.  Require the plugin be configured before executing.
         Preconditions.checkState(
               isReleaseVersionSet(),
               "Release task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
