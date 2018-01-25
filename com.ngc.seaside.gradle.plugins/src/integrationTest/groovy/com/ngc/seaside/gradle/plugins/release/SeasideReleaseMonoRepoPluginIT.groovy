@@ -22,7 +22,8 @@ class SeasideReleaseMonoRepoPluginIT {
     private List<String> taskNames = [
             SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME,
             SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME,
-            SeasideReleaseMonoRepoPlugin.RELEASE_PUSH_TASK_NAME
+            SeasideReleaseMonoRepoPlugin.RELEASE_PUSH_TASK_NAME,
+            SeasideReleaseMonoRepoPlugin.RELEASE_BUMP_VERSION_TASK_NAME
     ]
 
     @Before

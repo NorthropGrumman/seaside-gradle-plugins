@@ -20,6 +20,10 @@ class CreateTagTask extends DefaultTask {
    CreateTagTask(){
    }
 
+   /**
+    * function required to be a task within the gradle framework
+    * @return
+    */
    @TaskAction
    def createReleaseTag() {
 

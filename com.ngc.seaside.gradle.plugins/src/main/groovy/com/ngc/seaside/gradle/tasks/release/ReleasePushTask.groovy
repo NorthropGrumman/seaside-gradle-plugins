@@ -15,7 +15,6 @@ class ReleasePushTask extends DefaultTask {
 
    /**
     * function required to be a task within the gradle framework
-    * @return
     */
     @TaskAction
     def releasePush() {

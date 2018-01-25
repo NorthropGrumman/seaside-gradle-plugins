@@ -43,6 +43,11 @@ class SeasideReleaseMonoRepoPluginFT {
         checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_PUSH_TASK_NAME)
     }
 
+    @Test
+    void doesBumpVersion() {
+        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
+    }
+
     private static File sourceDirectoryWithTheTestProject() {
         return TestingUtilities.turnListIntoPath(
             "src", "functionalTest", "resources", "sealion-java-hello-world"
