@@ -2,6 +2,8 @@ package com.ngc.seaside.gradle.tasks.dependencies;
 
 import com.google.common.base.Preconditions;
 
+import com.ngc.seaside.gradle.tasks.DefaultTaskAction;
+
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
@@ -41,7 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class ResolveDependenciesAction implements Action<PopulateMaven2Repository> {
+public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2Repository> {
 
    /**
     * The default classifiers to use when attempting to resolve a dependency.  This includes {@code null}, "sources",
@@ -88,23 +90,12 @@ public class ResolveDependenciesAction implements Action<PopulateMaven2Repositor
     */
    private long totalDependenciesRetrieved = 0;
 
-   /**
-    * The task that is configured to use this action.
-    */
-   private PopulateMaven2Repository task;
-
-   /**
-    * A logger this task can use.
-    */
-   private Logger logger;
+   public Collection<DependencyResult> getDependencyResults() {
+      return dependencyResults;
+   }
 
    @Override
-   public void execute(PopulateMaven2Repository task) {
-      this.task = Preconditions.checkNotNull(task, "task may not be null!");
-      this.logger = this.task.getLogger();
-
-      Preconditions.checkState(task.isPopulateLocalRepoOnly() || task.getOutputDirectory() != null,
-                               "outputDirectory must be set if populateLocalRepoOnly is false!");
+   protected void doExecute() {
       Preconditions.checkState(task.getLocalRepository() != null,
                                "local repository not set!");
       Preconditions.checkState(
@@ -133,10 +124,6 @@ public class ResolveDependenciesAction implements Action<PopulateMaven2Repositor
             resolveDependency(dependency);
          }
       }
-   }
-
-   public Collection<DependencyResult> getDependencyResults() {
-      return dependencyResults;
    }
 
    /**

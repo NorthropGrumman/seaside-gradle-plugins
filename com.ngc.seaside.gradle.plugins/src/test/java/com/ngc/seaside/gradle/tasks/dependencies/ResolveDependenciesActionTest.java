@@ -4,15 +4,9 @@ import com.ngc.seaside.gradle.util.test.GradleMocks;
 
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.Artifact;
-import org.eclipse.aether.resolution.ArtifactRequest;
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
-import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.logging.Logger;
@@ -24,10 +18,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.File;
 import java.util.Collection;
-import java.util.Collections;
 
+import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newDependency;
+import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newDependencyResult;
+import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newLocalMavenRepo;
+import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newNotFoundException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -133,40 +129,5 @@ public class ResolveDependenciesActionTest {
       assertEquals("contains extra results!",
                    2,
                    results.size());
-   }
-
-   private static Dependency newDependency(String group, String artifact, String version) {
-      Dependency dependency = mock(Dependency.class);
-      when(dependency.getGroup()).thenReturn(group);
-      when(dependency.getName()).thenReturn(artifact);
-      when(dependency.getVersion()).thenReturn(version);
-      return dependency;
-   }
-
-   private static MavenArtifactRepository newLocalMavenRepo(File directory) {
-      MavenArtifactRepository repo = mock(MavenArtifactRepository.class);
-      when(repo.getUrl()).thenReturn(directory.toURI());
-      return repo;
-   }
-
-   private static DependencyResult newDependencyResult() {
-      return newDependencyResult(null);
-   }
-
-   private static DependencyResult newDependencyResult(File file) {
-      Artifact artifact = mock(Artifact.class);
-      when(artifact.getFile()).thenReturn(file);
-
-      ArtifactResult artifactResult = new ArtifactResult(new ArtifactRequest());
-      artifactResult.setArtifact(artifact);
-
-      DependencyResult dependencyResult = new DependencyResult(new DependencyRequest());
-      dependencyResult.setArtifactResults(Collections.singletonList(artifactResult));
-      return dependencyResult;
-   }
-
-   private static DependencyResolutionException newNotFoundException() {
-      ArtifactResolutionException cause = new ArtifactResolutionException(Collections.emptyList());
-      return new DependencyResolutionException(null, cause);
    }
 }
