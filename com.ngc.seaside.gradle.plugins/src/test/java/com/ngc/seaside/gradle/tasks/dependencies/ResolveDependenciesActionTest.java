@@ -57,7 +57,7 @@ public class ResolveDependenciesActionTest {
    public TemporaryFolder outputDirectory = new TemporaryFolder();
 
    @Before
-   public void setup() throws Throwable {
+   public void setup() {
       Logger logger = mock(Logger.class);
       when(task.getProject()).thenReturn(project);
       when(task.getLogger()).thenReturn(logger);

@@ -3,10 +3,12 @@ package com.ngc.seaside.gradle.tasks.dependencies;
 import com.google.common.base.Preconditions;
 
 import com.ngc.seaside.gradle.tasks.DefaultTaskAction;
+import com.ngc.seaside.gradle.util.GradleUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyResult;
+import org.gradle.api.InvalidUserDataException;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +24,13 @@ public class CopyDependencyFilesAction extends DefaultTaskAction<PopulateMaven2R
     */
    private Collection<DependencyResult> dependencyResults;
 
+   @Override
+   public void validate(PopulateMaven2Repository task) throws InvalidUserDataException {
+      GradleUtil.checkUserData(task.isPopulateLocalRepoOnly() || task.getOutputDirectory() != null,
+                               "outputDirectory must be set if populateLocalRe2poOnly is false!");
+      GradleUtil.checkUserData(dependencyResults != null, "dependencyResults must be set!");
+   }
+
    /**
     * Sets the dependency results which will be used to copy files.
     */
@@ -33,10 +42,6 @@ public class CopyDependencyFilesAction extends DefaultTaskAction<PopulateMaven2R
 
    @Override
    protected void doExecute() {
-      Preconditions.checkState(task.isPopulateLocalRepoOnly() || task.getOutputDirectory() != null,
-                               "outputDirectory must be set if populateLocalRe2poOnly is false!");
-      Preconditions.checkState(dependencyResults != null, "dependencyResults must be set!");
-
       if (!task.isPopulateLocalRepoOnly()) {
          logger.lifecycle("Copying files to output directory {}.", task.getOutputDirectory());
          for (DependencyResult result : dependencyResults) {

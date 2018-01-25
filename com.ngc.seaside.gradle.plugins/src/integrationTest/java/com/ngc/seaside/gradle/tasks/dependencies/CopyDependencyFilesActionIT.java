@@ -3,7 +3,6 @@ package com.ngc.seaside.gradle.tasks.dependencies;
 import com.ngc.seaside.gradle.util.test.GradleMocks;
 
 import org.eclipse.aether.resolution.DependencyResult;
-import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.logging.Logger;
@@ -32,8 +31,6 @@ public class CopyDependencyFilesActionIT {
    private CopyDependencyFilesAction action;
 
    private ProjectInternal project = GradleMocks.newProjectMock();
-
-   private Configuration config = GradleMocks.newConfiguration("test");
 
    @Mock
    private PopulateMaven2Repository task;

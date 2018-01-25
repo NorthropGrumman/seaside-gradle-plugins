@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.tasks;
 import com.google.common.base.Preconditions;
 
 import org.gradle.api.Action;
+import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Task;
 import org.gradle.api.logging.Logger;
 
@@ -19,10 +20,14 @@ public abstract class DefaultTaskAction<T extends Task> implements Action<T> {
    protected Logger logger;
 
    @Override
-   public void execute(T t) {
-      preExecute(t);
+   public void execute(T task) {
+      preExecute(task);
       doExecute();
       postExecute();
+   }
+
+   public void validate(T task) throws InvalidUserDataException {
+      // Default behavior is to do nothing.
    }
 
    protected abstract void doExecute();

@@ -1,8 +1,7 @@
 package com.ngc.seaside.gradle.tasks.dependencies;
 
-import com.google.common.base.Preconditions;
-
 import com.ngc.seaside.gradle.tasks.DefaultTaskAction;
+import com.ngc.seaside.gradle.util.GradleUtil;
 
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
@@ -25,13 +24,12 @@ import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.repository.AuthenticationBuilder;
-import org.gradle.api.Action;
+import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencyArtifact;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
-import org.gradle.api.logging.Logger;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -90,19 +88,22 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
     */
    private long totalDependenciesRetrieved = 0;
 
+   @Override
+   public void validate(PopulateMaven2Repository task) throws InvalidUserDataException {
+      GradleUtil.checkUserData(task.getLocalRepository() != null,
+                               "local repository not set!");
+      GradleUtil.checkUserData(
+            task.getRemoteRepository() != null || Files.isDirectory(Paths.get(task.getLocalRepository().getUrl())),
+            "since local repository %s is not a directory a remote repository must be configured!",
+            task.getLocalRepository().getUrl());
+   }
+
    public Collection<DependencyResult> getDependencyResults() {
       return dependencyResults;
    }
 
    @Override
    protected void doExecute() {
-      Preconditions.checkState(task.getLocalRepository() != null,
-                               "local repository not set!");
-      Preconditions.checkState(
-            task.getRemoteRepository() != null || Files.isDirectory(Paths.get(task.getLocalRepository().getUrl())),
-            "since local repository %s is not a directory a remote repository must be configured!",
-            task.getLocalRepository().getUrl());
-
       // Initialize the Maven API.
       repositorySystem = newRepositorySystem();
       session = newSession(repositorySystem);
