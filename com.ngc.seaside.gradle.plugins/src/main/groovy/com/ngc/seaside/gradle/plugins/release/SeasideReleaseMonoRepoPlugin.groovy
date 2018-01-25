@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
+import com.ngc.seaside.gradle.tasks.release.ReleasePushTask
 import com.ngc.seaside.gradle.tasks.release.UpdateVersionTask
 import com.ngc.seaside.gradle.tasks.release.CreateTagTask
 import org.gradle.api.Project
@@ -11,6 +12,7 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
     public static final String RELEASE_EXTENSION_NAME = 'seasideReleaseMonoRepo'
     public static final String RELEASE_UPDATE_VERSION_TASK_NAME = 'updateReleaseVersion'
     public static final String RELEASE_CREATE_TAG_TASK_NAME = 'createReleaseTag'
+    public static final String RELEASE_PUSH_TASK_NAME = 'releasePush'
 
     private SeasideReleaseExtension releaseExtension
 
@@ -43,6 +45,12 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
             CreateTagTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             'Create the version tag used by GitHub')
+
+        createMonoTask(project,
+            RELEASE_PUSH_TASK_NAME,
+            ReleasePushTask,
+            RELEASE_MONO_REPO_TASK_GROUP_NAME,
+            'Push the project to GitHub')
     }
 
     /**

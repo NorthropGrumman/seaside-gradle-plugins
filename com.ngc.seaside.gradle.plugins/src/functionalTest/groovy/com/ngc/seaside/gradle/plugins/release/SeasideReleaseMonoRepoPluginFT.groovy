@@ -38,6 +38,11 @@ class SeasideReleaseMonoRepoPluginFT {
         checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
     }
 
+    @Test
+    void doesReleasePush() {
+        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_PUSH_TASK_NAME)
+    }
+
     private static File sourceDirectoryWithTheTestProject() {
         return TestingUtilities.turnListIntoPath(
             "src", "functionalTest", "resources", "sealion-java-hello-world"

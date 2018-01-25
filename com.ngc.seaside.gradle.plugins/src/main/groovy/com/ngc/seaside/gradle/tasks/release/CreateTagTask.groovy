@@ -55,6 +55,7 @@ class CreateTagTask extends DefaultTask {
          project.logger.lifecycle("Dry Run >> Would have created release tag: $tagName")
       }
    }
+
    /**
     *
     * @param arguments
