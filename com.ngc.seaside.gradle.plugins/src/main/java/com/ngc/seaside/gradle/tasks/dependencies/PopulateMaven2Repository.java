@@ -38,6 +38,7 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.artifacts.BaseRepositoryFactory;
 import org.gradle.api.internal.tasks.options.Option;
 import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.ConfigureUtil;
 
@@ -114,9 +115,19 @@ public class PopulateMaven2Repository extends DefaultTask {
    private long totalDependenciesRetrieved = 0;
 
    /**
+    * Contains all the resolved artifacts thus far.
+    */
+   private ArtifactResultStore store;
+
+   /**
     * The user configured output directory to populate.
     */
    private File outputDirectory;
+
+   /**
+    * The file that will be written that contains the dependency info in CSV form.
+    */
+   private File dependencyInfoCsvFile;
 
    /**
     * The configuration to resolve dependencies for.  If not set, dependencies for all configurations will be resolved.
@@ -170,6 +181,8 @@ public class PopulateMaven2Repository extends DefaultTask {
       Preconditions.checkState(remoteRepository != null || Files.isDirectory(Paths.get(localRepository.getUrl())),
                                "since local repository %s is not a directory a remote repository must be configured!",
                                localRepository.getUrl());
+
+      store = new ArtifactResultStore(Paths.get(localRepository.getUrl()));
 
       // Initialize the Maven API.
       repositorySystem = newRepositorySystem();
@@ -254,6 +267,35 @@ public class PopulateMaven2Repository extends DefaultTask {
       Preconditions.checkNotNull(outputDirectory, "outputDirectory may not be null!");
       Preconditions.checkArgument(!outputDirectory.trim().isEmpty(), "outputDirectory may not be null!");
       setOutputDirectory(new File(outputDirectory));
+   }
+
+   /**
+    * Gets the file that will be written that contains the dependency info in CSV form.
+    */
+   @OutputFile
+   @org.gradle.api.tasks.Optional
+   public File getDependencyInfoCsvFile() {
+      return dependencyInfoCsvFile;
+   }
+
+   /**
+    * Sets file that will be written that contains the dependency info in CSV form.
+    */
+   public void setDependencyInfoCsvFile(File dependencyInfoCsvFile) {
+      this.dependencyInfoCsvFile = Preconditions.checkNotNull(dependencyInfoCsvFile,
+                                                              "dependencyInfoCsvFile may not be null!");
+   }
+
+   /**
+    * Sets file that will be written that contains the dependency info in CSV form.  This method allows a user to
+    * specify the output CSV file as a command line option.
+    */
+   @Option(option = "dependencyInfoCsvFile",
+         description = "The CSV file to output which contains the dependency information.")
+   public void setDependencyInfoCsvFile(String dependencyInfoCsvFile) {
+      Preconditions.checkNotNull(dependencyInfoCsvFile, "dependencyInfoCsvFile may not be null!");
+      Preconditions.checkArgument(!dependencyInfoCsvFile.trim().isEmpty(), "dependencyInfoCsvFile may not be null!");
+      setDependencyInfoCsvFile(new File(dependencyInfoCsvFile));
    }
 
    /**
@@ -541,7 +583,7 @@ public class PopulateMaven2Repository extends DefaultTask {
 
       DependencyRequest dependencyRequest = new DependencyRequest(request, null);
       try {
-         // Resolve the dependency, including transitive dependencies.  This will not return until they are resovled or
+         // Resolve the dependency, including transitive dependencies.  This will not return until they are resoled or
          // an error happens.
          result = repositorySystem.resolveDependencies(session, dependencyRequest);
       } catch (DependencyResolutionException e) {
@@ -565,6 +607,9 @@ public class PopulateMaven2Repository extends DefaultTask {
       for (ArtifactResult localArtifact : result.getArtifactResults()) {
          getLogger().lifecycle("Located {}.", localArtifact.getArtifact().getFile());
 
+         // Find the POM file.
+
+
          // If the dependency has a scope of "system", the file path may be relative.
          // If that is the case, we want to ignore the file.
          if (!populateLocalRepoOnly && !localArtifact.getArtifact().getFile().toString().contains("..")) {
@@ -584,8 +629,10 @@ public class PopulateMaven2Repository extends DefaultTask {
     * Copies a file that resides in the local repository to the output directory, maintaining the directory structure of
     * the file relative to the local repository location.  IE, this keeps the groupId/artifactId/version/ directory
     * structure for Maven M2 layouts.
+    *
+    * @return the relative path to the file inside the directory
     */
-   private void copyFileToOutputDirectory(Path path) {
+   private Path copyFileToOutputDirectory(Path path) {
       // The path to the artifact inside the local repository.
       path = path.toAbsolutePath();
       // The path to the local repository.
@@ -610,6 +657,8 @@ public class PopulateMaven2Repository extends DefaultTask {
             getLogger().error("Unexpected error while copying {} to {}.", path, dest, e);
          }
       }
+
+      return relativeArtifactPath;
    }
 
    /**

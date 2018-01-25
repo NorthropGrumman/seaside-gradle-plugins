@@ -160,7 +160,6 @@ subprojects {
         }
     }
 
-    // Integration Dependencies
     dependencies {
         integrationTestCompile sourceSets.main.output
         integrationTestCompile configurations.testCompile

@@ -46,7 +46,7 @@ class PopulateMaven2RepositoryFT {
 
         assertEquals("gradle task was not successful",
                      TaskOutcome.valueOf("SUCCESS"),
-                     result.task(":m2repo").getOutcome())
+                     result.task(":testM2repo").getOutcome())
 
         File m2repo = new File(projectDir, "build/m2")
         assertTrue("m2 repo not created!",
