@@ -43,8 +43,22 @@ public class AetherMocks {
    }
 
    public static DependencyResult newDependencyResult(File file) {
+      return newDependencyResult(null, null, null, null, null, file);
+   }
+
+   public static DependencyResult newDependencyResult(String groupId,
+                                                      String artifactId,
+                                                      String version,
+                                                      String classifier,
+                                                      String extension,
+                                                      File file) {
       Artifact artifact = mock(Artifact.class);
       when(artifact.getFile()).thenReturn(file);
+      when(artifact.getGroupId()).thenReturn(groupId);
+      when(artifact.getArtifactId()).thenReturn(artifactId);
+      when(artifact.getVersion()).thenReturn(version);
+      when(artifact.getClassifier()).thenReturn(classifier == null ? "" : classifier);
+      when(artifact.getExtension()).thenReturn(extension);
 
       ArtifactResult artifactResult = new ArtifactResult(new ArtifactRequest());
       artifactResult.setArtifact(artifact);

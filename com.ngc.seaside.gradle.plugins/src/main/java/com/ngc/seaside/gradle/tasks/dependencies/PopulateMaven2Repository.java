@@ -78,6 +78,11 @@ public class PopulateMaven2Repository extends DefaultTask {
    private boolean ignoreArtifactDescriptorRepositories = true;
 
    /**
+    * If true, a CSV will be created.
+    */
+   private boolean createCsvFile = true;
+
+   /**
     * The update policy to use when resolving dependencies.
     */
    private String repositoryUpdatePolicy = RepositoryPolicy.UPDATE_POLICY_NEVER;
@@ -273,6 +278,21 @@ public class PopulateMaven2Repository extends DefaultTask {
    public PopulateMaven2Repository setIgnoreArtifactDescriptorRepositories(
          boolean ignoreArtifactDescriptorRepositories) {
       this.ignoreArtifactDescriptorRepositories = ignoreArtifactDescriptorRepositories;
+      return this;
+   }
+
+   /**
+    * If true, a CSV file with dependency information will be created.
+    */
+   public boolean isCreateCsvFile() {
+      return createCsvFile;
+   }
+
+   /**
+    * Sets if a CSV file with dependency information will be created.
+    */
+   public PopulateMaven2Repository setCreateCsvFile(boolean createCsvFile) {
+      this.createCsvFile = createCsvFile;
       return this;
    }
 

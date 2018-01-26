@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 
 /**
- * Copies files from a local maven repository to directory.
+ * Copies files from a local maven repository to a directory.
  */
 public class CopyDependencyFilesAction extends DefaultTaskAction<PopulateMaven2Repository> {
 
