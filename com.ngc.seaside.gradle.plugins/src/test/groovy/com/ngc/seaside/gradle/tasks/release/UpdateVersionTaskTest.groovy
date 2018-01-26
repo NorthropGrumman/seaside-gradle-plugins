@@ -12,6 +12,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
+import static org.mockito.Mockito.any
 import static org.mockito.Mockito.when
 import static org.mockito.Mockito.verify
 
@@ -39,12 +40,8 @@ class UpdateVersionTaskTest {
         when(testProject.rootProject).thenReturn(testProject)
         when(testProject.rootProject.hasProperty("releaseVersion")).thenReturn(true)
 
-        // TODO(Cameron): Figure out how to make this a single line
-        // i.e. I want to be able to pass any argument and it will always return the same TEST_UPGRADE_VERSION string
+        when(resolver.getProjectVersion(any())).thenReturn(TEST_UPGRADE_VERSION)
         when(resolver.getProjectVersion(ReleaseType.SNAPSHOT)).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
-        when(resolver.getProjectVersion(ReleaseType.PATCH)).thenReturn(TEST_UPGRADE_VERSION)
-        when(resolver.getProjectVersion(ReleaseType.MINOR)).thenReturn(TEST_UPGRADE_VERSION)
-        when(resolver.getProjectVersion(ReleaseType.MAJOR)).thenReturn(TEST_UPGRADE_VERSION)
     }
 
     @Test(expected = IllegalStateException.class)

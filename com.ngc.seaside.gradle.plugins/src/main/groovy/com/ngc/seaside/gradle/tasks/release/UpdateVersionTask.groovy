@@ -26,7 +26,6 @@ class UpdateVersionTask extends DefaultTask {
               "Must call prepareForReleaseIfNeeded() during configuration phase."
         )
         def newReleaseVersion = getVersionForRelease()
-        println("the new release version will be: $newReleaseVersion")
     }
 
     boolean isReleaseVersionSet() {
