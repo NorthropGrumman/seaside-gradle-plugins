@@ -43,8 +43,7 @@ class ReleaseTask extends DefaultTask {
 
         // If the task was invoked, update the version number before the build actually executes.  This ensures that
         // tasks which do not use lazy property evaluation are configured correctly before they are executed.  If we
-        // waited to do this during the execution phase, tasks would be configured to execute with the wrong
-        // version.
+        // waited to do this during the execution phase, tasks would be configured to execute with the wrong version.
         if (isTaskInvoked) {
             project.logger.info("Preparing for a $releaseType release.")
             this.releaseType = releaseType

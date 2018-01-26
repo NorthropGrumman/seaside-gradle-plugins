@@ -1,31 +1,49 @@
 package com.ngc.seaside.gradle.tasks.release
 
+import com.google.common.base.Preconditions
+import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class UpdateVersionTask extends DefaultTask {
 
-    boolean dryRun
+    private final VersionResolver resolver
+    private ReleaseType typeOfRelease
 
-    UpdateVersionTask() {}
-
-    def prepareForReleaseIfNeeded(ReleaseType releaseType) {
-        project.gradle.startParameter.taskNames.contains(name)
+    UpdateVersionTask() {
+        this.resolver = new VersionResolver(project)
+        this.typeOfRelease = ReleaseType.PATCH
     }
 
-    /**
-     * function required to be a task within the
-     * gradle framework and is the entry point for
-     * gradle
-     *
-     * @return
-     */
+    UpdateVersionTask(VersionResolver resolver, ReleaseType typeOfRelease = ReleaseType.PATCH) {
+        this.resolver = Preconditions.checkNotNull(resolver, "resolver may not be null!")
+        this.typeOfRelease = typeOfRelease
+    }
+
     @TaskAction
-    def bumpTheVersion() {
-//        Preconditions.checkState(
-//                ReleaseUtil.isExtensionSet(project),
-//                "Release task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
-//        getReleaseExtensionSettings()
+    def updateReleaseVersion() {
+        Preconditions.checkState(
+              isReleaseVersionSet(),
+              "Must call prepareForReleaseIfNeeded() during configuration phase."
+        )
+        def newReleaseVersion = getVersionForRelease()
+    }
+
+    boolean isReleaseVersionSet() {
+        return project.rootProject.hasProperty("releaseVersion")
+    }
+
+    String getVersionForRelease() {
+        def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
+        return upgradeStrategy.getVersion(getCurrentVersion())
+    }
+
+    String getCurrentVersion() {
+        return resolver.getProjectVersion(releaseType)
+    }
+
+    ReleaseType getReleaseType() {
+        return typeOfRelease
     }
 
     private void getReleaseExtensionSettings() {}

@@ -39,13 +39,13 @@ class SeasideReleaseMonoRepoPluginFT {
     }
 
     @Test
-    void doesReleasePush() {
-        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_PUSH_TASK_NAME)
+    void doesBumpVersion() {
+        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
     }
 
     @Test
-    void doesBumpVersion() {
-        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
+    void doesReleasePush() {
+        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_PUSH_TASK_NAME)
     }
 
     private static File sourceDirectoryWithTheTestProject() {

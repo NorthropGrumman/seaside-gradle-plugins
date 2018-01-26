@@ -15,8 +15,8 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
     public static final String RELEASE_MONO_EXTENSION_NAME = 'seasideReleaseMonoRepo'
     public static final String RELEASE_UPDATE_VERSION_TASK_NAME = 'updateReleaseVersion'
     public static final String RELEASE_CREATE_TAG_TASK_NAME = 'createReleaseTag'
-    public static final String RELEASE_PUSH_TASK_NAME = 'releasePush'
     public static final String RELEASE_BUMP_VERSION_TASK_NAME = 'bumpTheVersion'
+    public static final String RELEASE_PUSH_TASK_NAME = 'releasePush'
 
     private SeasideReleaseExtension releaseExtension
 
