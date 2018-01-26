@@ -1,8 +1,7 @@
 package com.ngc.seaside.gradle.tasks.release
 
-import com.google.common.base.Preconditions
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
-import com.ngc.seaside.gradle.util.ProjectUtil
+import com.ngc.seaside.gradle.util.ReleaseUtil
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -39,7 +38,7 @@ class BumpVersionTask extends DefaultTask {
    @TaskAction
    def bumpTheVersion() {
 //      Preconditions.checkState(
-//              ProjectUtil.isExtensionSet(project),
+//              ReleaseUtil.isExtensionSet(project),
 //              "Release task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
        getReleaseExtensionSettings()
        //bumpVersion()
@@ -182,9 +181,9 @@ class BumpVersionTask extends DefaultTask {
 //   }
 
    private void getReleaseExtensionSettings() {
-      commitChanges = ProjectUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).commitChanges
-      push = ProjectUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).push
-      versionSuffix = ProjectUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).versionSuffix
+      commitChanges = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).commitChanges
+      push = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).push
+      versionSuffix = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).versionSuffix
    }
 
 }

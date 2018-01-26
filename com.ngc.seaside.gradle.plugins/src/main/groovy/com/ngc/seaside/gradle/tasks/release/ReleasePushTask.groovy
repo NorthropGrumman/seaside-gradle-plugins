@@ -1,5 +1,7 @@
 package com.ngc.seaside.gradle.tasks.release
 
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
+import com.ngc.seaside.gradle.util.ReleaseUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -31,7 +33,7 @@ class ReleasePushTask extends DefaultTask {
     * This will grab the last created tag and then push changes to gitHub
     */
    private void pushChanges() {
-        def tag = git("describe", "--abbrev=0", "--tags")
+        def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag
         git("push", "origin", tag)
         git("push", "origin", "HEAD")
     }

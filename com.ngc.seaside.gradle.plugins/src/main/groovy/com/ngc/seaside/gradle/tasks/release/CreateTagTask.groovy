@@ -1,8 +1,7 @@
 package com.ngc.seaside.gradle.tasks.release
 
-import com.google.common.base.Preconditions
 import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
-import com.ngc.seaside.gradle.util.ProjectUtil
+import com.ngc.seaside.gradle.util.ReleaseUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -33,11 +32,11 @@ class CreateTagTask extends DefaultTask {
    @TaskAction
    def createReleaseTag() {
 //      Preconditions.checkState(
-//        ProjectUtil.isExtensionSet(project),
+//        ReleaseUtil.isExtensionSet(project),
 //        "createReleaseTag task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
       getReleaseExtensionSettings()
       tagName = tagPrefix + "$project.version"
-      ProjectUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag = tagName
+      ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag = tagName
       createTag(commitChanges, dryRun)
 
    }
@@ -92,7 +91,7 @@ class CreateTagTask extends DefaultTask {
    }
 
    private void getReleaseExtensionSettings() {
-      commitChanges = ProjectUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).commitChanges
-      tagPrefix = ProjectUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tagPrefix
+      commitChanges = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).commitChanges
+      tagPrefix = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tagPrefix
    }
 }

@@ -1,6 +1,5 @@
 package com.ngc.seaside.gradle.plugins.release
 
-import aQute.maven.api.Release
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.BumpVersionTask
@@ -8,7 +7,7 @@ import com.ngc.seaside.gradle.tasks.release.ReleasePushTask
 import com.ngc.seaside.gradle.tasks.release.ReleaseType
 import com.ngc.seaside.gradle.tasks.release.UpdateVersionTask
 import com.ngc.seaside.gradle.tasks.release.CreateTagTask
-import com.ngc.seaside.gradle.util.ProjectUtil
+import com.ngc.seaside.gradle.util.ReleaseUtil
 import org.gradle.api.Project
 
 class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
@@ -40,7 +39,7 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      */
     private void createTasks(Project project) {
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             UpdateVersionTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             RELEASE_UPDATE_VERSION_TASK_NAME,
@@ -48,7 +47,7 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
             ReleaseType.SNAPSHOT,
             releaseExtension)
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             CreateTagTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             RELEASE_CREATE_TAG_TASK_NAME,
@@ -56,7 +55,7 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
             ReleaseType.SNAPSHOT,
             releaseExtension)
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             ReleasePushTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             RELEASE_PUSH_TASK_NAME,
@@ -64,7 +63,7 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
             ReleaseType.SNAPSHOT,
             releaseExtension)
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             BumpVersionTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             RELEASE_BUMP_VERSION_TASK_NAME,

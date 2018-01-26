@@ -4,7 +4,7 @@ import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.ReleaseTask
 import com.ngc.seaside.gradle.tasks.release.ReleaseType
-import com.ngc.seaside.gradle.util.ProjectUtil
+import com.ngc.seaside.gradle.util.ReleaseUtil
 import org.gradle.api.Project
 
 class SeasideReleasePlugin extends AbstractProjectPlugin {
@@ -33,7 +33,7 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
 
         project.logger.info(String.format("Creating release tasks for %s", project.name))
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             ReleaseTask,
             RELEASE_TASK_GROUP_NAME,
             RELEASE_TASK_NAME,
@@ -41,15 +41,15 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
             ReleaseType.PATCH,
             releaseExtension)
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             ReleaseTask,
             RELEASE_TASK_GROUP_NAME,
-            RELEASE_TASK_NAME + ProjectUtil.DRY_RUN_TASK_NAME_SUFFIX,
+            RELEASE_TASK_NAME + ReleaseUtil.DRY_RUN_TASK_NAME_SUFFIX,
             'Performs a dry run of a non-SNAPSHOT release.',
             ReleaseType.PATCH,
             releaseExtension)
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             ReleaseTask,
             RELEASE_TASK_GROUP_NAME,
             RELEASE_MINOR_VERSION_TASK_NAME,
@@ -57,15 +57,15 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
             ReleaseType.MINOR,
             releaseExtension)
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             ReleaseTask,
             RELEASE_TASK_GROUP_NAME,
-            RELEASE_MINOR_VERSION_TASK_NAME + ProjectUtil.DRY_RUN_TASK_NAME_SUFFIX,
+            RELEASE_MINOR_VERSION_TASK_NAME + ReleaseUtil.DRY_RUN_TASK_NAME_SUFFIX,
             'Performs a dry run of an upgrade to next minor version and a non-SNAPSHOT release.',
             ReleaseType.MINOR,
             releaseExtension)
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             ReleaseTask,
             RELEASE_TASK_GROUP_NAME,
             RELEASE_MAJOR_VERSION_TASK_NAME,
@@ -73,10 +73,10 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
             ReleaseType.MAJOR,
             releaseExtension)
 
-        ProjectUtil.configureTask(project,
+        ReleaseUtil.configureTask(project,
             ReleaseTask,
             RELEASE_TASK_GROUP_NAME,
-            RELEASE_MAJOR_VERSION_TASK_NAME + ProjectUtil.DRY_RUN_TASK_NAME_SUFFIX,
+            RELEASE_MAJOR_VERSION_TASK_NAME + ReleaseUtil.DRY_RUN_TASK_NAME_SUFFIX,
             'Performs a dry run of an upgrade to the next major version and a non-SNAPSHOT release.',
             ReleaseType.MAJOR,
             releaseExtension)

@@ -4,12 +4,12 @@ import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.ReleaseType
 import org.gradle.api.Project
 
-class ProjectUtil {
+class ReleaseUtil {
 
    private static final String DRY_RUN_TASK_NAME_SUFFIX = 'DryRun'
    private static final String RELEASE_VERSION = 'releaseVersion'
    
-   private ProjectUtil(){}
+   private ReleaseUtil(){}
    
    static boolean isExtensionSet(Project project) {
       return project.rootProject.hasProperty(RELEASE_VERSION)
