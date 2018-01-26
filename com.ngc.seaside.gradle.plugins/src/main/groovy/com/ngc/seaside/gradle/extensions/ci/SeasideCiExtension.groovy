@@ -37,4 +37,16 @@ class SeasideCiExtension {
      * Configures the default name of the archive of the m2 directory.
      */
     String m2ArchiveName = DEFAULT_M2_ARCHIVE_NAME
+
+    /**
+     * Configures the output file of CSV dependency report.  If not defined a default value of
+     * {@link com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin#DEFAULT_CSV_FILE_NAME} inside the
+     * @code $project.buildDir} directory is used.
+     */
+    File dependencyInfoCsvFile
+
+    /**
+     * If true, a dependencies report in CSV format will be generated.
+     */
+    boolean createCsvFile = true
 }

@@ -53,6 +53,11 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
     final static String DEFAULT_M2_OUTPUT_DIRECTORY_NAME = 'dependencies-m2'
 
     /**
+     * The default name of the CSV dependencies report file.
+     */
+    final static String DEFAULT_CSV_FILE_NAME = 'dependencies.csv'
+
+    /**
      * The name of the system property used when printing the value of a property.
      */
     private final static String DISPLAY_PROPERTY_NAME = 'display.property.name'
@@ -146,6 +151,10 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
                 remoteRepository = project.repositories.findByName(ciExtension.remoteM2RepositoryName)
                 // Configure the output directory using $buildDir/m2 as the default.
                 outputDirectory = m2Directory
+                // Configure the CSV dependencies report.
+                createCsvFile = ciExtension.createCsvFile
+                dependencyInfoCsvFile = ciExtension.dependencyInfoCsvFile ?:
+                                        new File(project.buildDir, DEFAULT_CSV_FILE_NAME)
             }
 
             getTaskResolver().findTask(CREATE_M2_REPO_ARCHIVE_TASK_NAME) {
