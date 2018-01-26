@@ -13,8 +13,8 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
     public static final String RELEASE_EXTENSION_NAME = 'seasideReleaseMonoRepo'
     public static final String RELEASE_UPDATE_VERSION_TASK_NAME = 'updateReleaseVersion'
     public static final String RELEASE_CREATE_TAG_TASK_NAME = 'createReleaseTag'
-    public static final String RELEASE_PUSH_TASK_NAME = 'releasePush'
     public static final String RELEASE_BUMP_VERSION_TASK_NAME = 'bumpTheVersion'
+    public static final String RELEASE_PUSH_TASK_NAME = 'releasePush'
 
     private SeasideReleaseExtension releaseExtension
 
@@ -46,19 +46,19 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
             RELEASE_CREATE_TAG_TASK_NAME,
             CreateTagTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            'Create the version tag used by GitHub')
+            'Create the version tag used by GitHub.')
 
         createMonoTask(project,
             RELEASE_PUSH_TASK_NAME,
             ReleasePushTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            'Push the project to GitHub')
+            'Push the project to GitHub.')
 
         createMonoTask(project,
             RELEASE_BUMP_VERSION_TASK_NAME,
             BumpVersionTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            "Will bump ths version in the build gradle file")
+            'Bump the version in the file containing the project version.')
     }
 
     /**
