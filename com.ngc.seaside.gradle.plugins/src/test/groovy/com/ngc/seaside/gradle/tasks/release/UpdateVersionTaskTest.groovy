@@ -44,13 +44,6 @@ class UpdateVersionTaskTest {
         when(resolver.getProjectVersion(ReleaseType.SNAPSHOT)).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
     }
 
-    @Test(expected = IllegalStateException.class)
-    void doesFailIfReleaseVersionPropertyIsNotSetOnProject() {
-        when(testProject.rootProject.hasProperty("releaseVersion")).thenReturn(false)
-        task = createTaskWithReleaseType(ReleaseType.PATCH)
-        task.updateReleaseVersion()
-    }
-
     @Test
     void doesNotUpgradeVersionForSnapshotRelease() {
         confirmVersionUpgradeForReleaseType(ReleaseType.SNAPSHOT, TEST_RELEASE_SNAPSHOT_VERSION)

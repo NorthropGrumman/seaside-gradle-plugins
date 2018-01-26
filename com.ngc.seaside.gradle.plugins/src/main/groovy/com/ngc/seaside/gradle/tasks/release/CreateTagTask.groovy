@@ -21,9 +21,6 @@ class CreateTagTask extends DefaultTask {
    CreateTagTask(){
    }
 
-   def prepareForReleaseIfNeeded(ReleaseType releaseType) {
-     project.gradle.startParameter.taskNames.contains(name)
-   }
 
    /**
     * function required to be a task within the gradle framework
@@ -31,9 +28,6 @@ class CreateTagTask extends DefaultTask {
     */
    @TaskAction
    def createReleaseTag() {
-//      Preconditions.checkState(
-//        ReleaseUtil.isExtensionSet(project),
-//        "createReleaseTag task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
       getReleaseExtensionSettings()
       tagName = tagPrefix + "$project.version"
       ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag = tagName

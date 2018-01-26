@@ -24,10 +24,6 @@ class BumpVersionTask extends DefaultTask {
       resolver.enforceVersionSuffix = true
    }
 
-   def prepareForReleaseIfNeeded(ReleaseType releaseType) {
-      project.gradle.startParameter.taskNames.contains(name)
-   }
-
    /**
     * function required to be a task within the
     * gradle framework and is the entry point for

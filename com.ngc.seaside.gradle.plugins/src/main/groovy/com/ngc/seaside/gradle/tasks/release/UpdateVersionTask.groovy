@@ -5,14 +5,18 @@ import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+import javax.inject.Inject
+
 class UpdateVersionTask extends DefaultTask {
 
+    boolean dryRun
     private final VersionResolver resolver
     private ReleaseType typeOfRelease
 
+    @Inject
     UpdateVersionTask() {
         this.resolver = new VersionResolver(project)
-        this.typeOfRelease = ReleaseType.PATCH
+        this.typeOfRelease = ReleaseType.MINOR
     }
 
     UpdateVersionTask(VersionResolver resolver, ReleaseType typeOfRelease = ReleaseType.PATCH) {
@@ -22,10 +26,6 @@ class UpdateVersionTask extends DefaultTask {
 
     @TaskAction
     def updateReleaseVersion() {
-        Preconditions.checkState(
-              isReleaseVersionSet(),
-              "Must call prepareForReleaseIfNeeded() during configuration phase."
-        )
         def newReleaseVersion = getVersionForRelease()
     }
 
@@ -45,6 +45,4 @@ class UpdateVersionTask extends DefaultTask {
     ReleaseType getReleaseType() {
         return typeOfRelease
     }
-
-    private void getReleaseExtensionSettings() {}
 }

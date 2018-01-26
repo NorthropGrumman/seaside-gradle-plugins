@@ -17,10 +17,6 @@ class ReleasePushTask extends DefaultTask {
     */
    ReleasePushTask() {}
 
-   def prepareForReleaseIfNeeded(ReleaseType releaseType) {
-      project.gradle.startParameter.taskNames.contains(name)
-   }
-
    /**
     * function required to be a task within the gradle framework
     */

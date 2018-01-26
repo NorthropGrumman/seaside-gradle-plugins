@@ -1,13 +1,12 @@
 package com.ngc.seaside.gradle.util
 
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
-import com.ngc.seaside.gradle.tasks.release.ReleaseType
 import org.gradle.api.Project
 
 class ReleaseUtil {
 
-   private static final String DRY_RUN_TASK_NAME_SUFFIX = 'DryRun'
-   private static final String RELEASE_VERSION = 'releaseVersion'
+   static final String DRY_RUN_TASK_NAME_SUFFIX = 'DryRun'
+   static final String RELEASE_VERSION = 'releaseVersion'
    
    private ReleaseUtil(){}
    
@@ -20,7 +19,6 @@ class ReleaseUtil {
                               String group,
                               String name,
                               String description,
-                              ReleaseType releaseType,
                               SeasideReleaseExtension releaseExtension) {
       boolean isDryRun = name.endsWith(DRY_RUN_TASK_NAME_SUFFIX)
       project.afterEvaluate {
@@ -29,7 +27,6 @@ class ReleaseUtil {
                  group: group,
                  description: description) {
             dryRun = isDryRun
-            prepareForReleaseIfNeeded(releaseType)
             dependsOn {
                project.rootProject.subprojects.collect { subproject ->
                   TaskResolver.findTask(subproject, "build")
