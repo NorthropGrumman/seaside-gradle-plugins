@@ -28,12 +28,12 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
     * The format for the columns in the file.  This format is {@code groupId, artifactId, version, file, pom,
     * classifier, extension}.
     */
-   private final static String COLUMN_FORMAT = "%s,%s,%s,%s,%s,%s,%s";
+   final static String COLUMN_FORMAT = "%s,%s,%s,%s,%s,%s,%s";
 
    /**
     * The column headers.
     */
-   private final static String COLUMN_HEADERS =
+   final static String COLUMN_HEADERS =
          "Group ID, Artifact ID, Version, File, POM File, Classifier (optional), Extension (optional)";
 
    private Collection<DependencyResult> dependencyResults;
@@ -84,7 +84,7 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
    }
 
    private void createReport() {
-      Set<String> lines = new TreeSet<>();
+      Set<String> lines = readExistingReportIfAny();
 
       for (DependencyResult dependencyResult : dependencyResults) {
          for (ArtifactResult artifactResult : dependencyResult.getArtifactResults()) {
@@ -108,6 +108,27 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
       }
 
       writeLines(lines);
+   }
+
+   private Set<String> readExistingReportIfAny() {
+      // Use a tree set which sorts the output.
+      Set<String> lines = new TreeSet<>();
+
+      Path csvFile = task.getDependencyInfoCsvFile().toPath();
+      if (Files.isRegularFile(csvFile)) {
+         try {
+            lines.addAll(Files.readAllLines(csvFile));
+            // Remove the previous header because we will right it again.
+            lines.remove(COLUMN_HEADERS);
+         } catch (IOException e) {
+            logger.error("Unexpected exception while reading existing CSV dependency report; the current report will"
+                         + " be overwritten.",
+                         e,
+                         csvFile);
+         }
+      }
+
+      return lines;
    }
 
    private void writeLines(Set<String> lines) {
@@ -134,7 +155,7 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
 
    private static Path relativizeToParentOf(Path path, Path other) {
       Path relative = other;
-      if(path.getParent() != null) {
+      if (path.getParent() != null) {
          relative = path.getParent().relativize(other);
       }
       return relative;

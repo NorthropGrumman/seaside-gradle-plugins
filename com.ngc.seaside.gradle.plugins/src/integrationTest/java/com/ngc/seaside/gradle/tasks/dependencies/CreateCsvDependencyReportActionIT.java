@@ -27,6 +27,7 @@ import java.util.List;
 import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newDependencyResult;
 import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newLocalMavenRepo;
 import static com.ngc.seaside.gradle.tasks.dependencies.CreateCsvDependencyReportAction.formatLine;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -104,7 +105,6 @@ public class CreateCsvDependencyReportActionIT {
       assertTrue("did not create CSV file!",
                  csvFile.exists());
       List<String> lines = Files.readAllLines(csvFile.toPath());
-      lines.forEach(System.out::println); // TODO TH: remove
       assertTrue("missing jar dependency from report!",
                  lines.contains(formatLine(jar.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
       assertTrue("missing sources dependency from report!",
@@ -115,6 +115,11 @@ public class CreateCsvDependencyReportActionIT {
 
    @Test
    public void testDoesAppendToExistingCsvFile() throws Throwable {
+      // Create an existing file.
+      Files.write(csvFile.toPath(),
+                  Arrays.asList(CreateCsvDependencyReportAction.COLUMN_HEADERS,
+                                formatLine(tests.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+
       when(task.isCreateCsvFile()).thenReturn(true);
       when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
       action.setDependencyResults(Arrays.asList(jar, sources));
@@ -124,7 +129,6 @@ public class CreateCsvDependencyReportActionIT {
       assertTrue("did not create CSV file!",
                  csvFile.exists());
       List<String> lines = Files.readAllLines(csvFile.toPath());
-      lines.forEach(System.out::println); // TODO TH: remove
       assertTrue("missing jar dependency from report!",
                  lines.contains(formatLine(jar.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
       assertTrue("missing sources dependency from report!",
@@ -135,7 +139,27 @@ public class CreateCsvDependencyReportActionIT {
 
    @Test
    public void testDoesNotInsertDuplicatesIntoCsvFile() throws Throwable {
-      fail("not implemented");
+      // Create an existing file.
+      Files.write(csvFile.toPath(),
+                  Arrays.asList(CreateCsvDependencyReportAction.COLUMN_HEADERS,
+                                formatLine(tests.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+
+      when(task.isCreateCsvFile()).thenReturn(true);
+      when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
+      action.setDependencyResults(Arrays.asList(jar, sources, tests));
+
+      action.execute(task);
+
+      assertTrue("did not create CSV file!",
+                 csvFile.exists());
+      List<String> lines = Files.readAllLines(csvFile.toPath());
+
+      String duplicateLine = formatLine(tests.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath());
+      assertEquals("report contains duplicate lines!",
+                   1,
+                   lines.stream()
+                         .filter(l -> l.equals(duplicateLine))
+                         .count());
    }
 
    @Test
