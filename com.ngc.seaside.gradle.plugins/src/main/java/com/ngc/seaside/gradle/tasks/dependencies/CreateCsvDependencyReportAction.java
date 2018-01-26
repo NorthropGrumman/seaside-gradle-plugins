@@ -50,7 +50,6 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
    protected void doExecute() {
       if (task.isCreateCsvFile()) {
          Preconditions.checkState(store != null, "store must be set!");
-         logger.lifecycle("Creating CSV dependency report.");
          createReport();
       }
    }
@@ -117,6 +116,7 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
 
       Path csvFile = task.getDependencyInfoCsvFile().toPath();
       if (Files.isRegularFile(csvFile)) {
+         logger.lifecycle("Updating CSV dependency report {}.", csvFile.toAbsolutePath());
          try {
             lines.addAll(Files.readAllLines(csvFile));
             // Remove the previous header because we will right it again.
@@ -127,6 +127,8 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
                          e,
                          csvFile);
          }
+      } else {
+         logger.lifecycle("Creating CSV dependency report {}.", csvFile.toAbsolutePath());
       }
 
       return lines;
