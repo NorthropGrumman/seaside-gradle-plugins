@@ -82,7 +82,8 @@ final class VersionUpgradeStrategyFactory {
         return new IVersionUpgradeStrategy() {
             @Override
             String getVersion(String currentVersion) {
-                currentVersion - versionSuffix
+                VersionInfo info = parseVersionInfo(currentVersion - versionSuffix)
+                "$info.major." + "$info.minor." + (info.patch + 1)
             }
         }
     }
