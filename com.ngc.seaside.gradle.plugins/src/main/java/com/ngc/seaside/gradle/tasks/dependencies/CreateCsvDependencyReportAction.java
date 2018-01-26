@@ -21,16 +21,17 @@ import java.util.TreeSet;
 public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateMaven2Repository> {
 
    /**
-    * The format for the columns in the file.  This format is {@code groupId, artifactId, version, file, pom,
-    * classifier, extension}.
-    */
-   final static String COLUMN_FORMAT = "%s,%s,%s,%s,%s,%s,%s";
-
-   /**
     * The column headers.
     */
    final static String COLUMN_HEADERS =
          "Group ID, Artifact ID, Version, File, POM File, Classifier (optional), Extension (optional)";
+
+   /**
+    * The format for the columns in the file.  This format is {@code groupId, artifactId, version, file, pom,
+    * classifier, extension}.
+    */
+   private final static String COLUMN_FORMAT = "%s,%s,%s,%s,%s,%s,%s";
+
 
    private ArtifactResultStore store;
 
@@ -44,32 +45,6 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
       this.store = Preconditions.checkNotNull(store, "store may not be null!");
       return this;
    }
-//
-//   static String formatLine(Artifact artifact, Path file, Path pom, Path csvFile) {
-//      String line;
-//      Path artifactRepositoryRelativePath = localMavenRepositoryPath.relativize(artifact.getFile().toPath());
-//      Path pomRepositoryRelativePath = localMavenRepositoryPath.relativize(pom);
-//      if ("".equals(artifact.getClassifier())) {
-//         line = String.format(COLUMN_FORMAT,
-//                              artifact.getGroupId(),
-//                              artifact.getArtifactId(),
-//                              artifact.getVersion(),
-//                              relativizeToParentOf(csvFile, artifactRepositoryRelativePath),
-//                              relativizeToParentOf(csvFile, pomRepositoryRelativePath),
-//                              "",
-//                              "");
-//      } else {
-//         line = String.format(COLUMN_FORMAT,
-//                              artifact.getGroupId(),
-//                              artifact.getArtifactId(),
-//                              artifact.getVersion(),
-//                              relativizeToParentOf(csvFile, artifactRepositoryRelativePath),
-//                              relativizeToParentOf(csvFile, pomRepositoryRelativePath),
-//                              artifact.getClassifier(),
-//                              artifact.getExtension());
-//      }
-//      return line;
-//   }
 
    @Override
    protected void doExecute() {
@@ -133,29 +108,6 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
          }
       }
 
-//
-//      for (DependencyResult dependencyResult : dependencyResults) {
-//         for (ArtifactResult artifactResult : dependencyResult.getArtifactResults()) {
-//            Optional<Path> pom = findPom(artifactResult);
-//            if (pom.isPresent()) {
-//               lines.add(formatLine(artifactResult.getArtifact(),
-//                                    localRepositoryPath,
-//                                    pom.get(),
-//                                    task.getDependencyInfoCsvFile().toPath()));
-//            } else {
-//               String prettyGave = String.format(
-//                     "%s:%s:%s%s@%s",
-//                     artifactResult.getArtifact().getGroupId(),
-//                     artifactResult.getArtifact().getArtifactId(),
-//                     artifactResult.getArtifact().getVersion(),
-//                     artifactResult.getArtifact().getClassifier() == null ? "" : ":" + artifactResult.getArtifact()
-//                           .getClassifier(),
-//                     artifactResult.getArtifact().getExtension());
-//               logger.warn("POM file not found for {}, artifact will not be included in CSV report.", prettyGave);
-//            }
-//         }
-//      }
-
       writeLines(lines);
    }
 
@@ -209,18 +161,4 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
       }
       return relative;
    }
-
-//   private static Optional<Path> findPom(ArtifactResult artifactResult) {
-//      Optional<Path> path = Optional.empty();
-//      File artifact = artifactResult.getArtifact().getFile();
-//      if (artifact.getParentFile() != null) {
-//         Path pom = FileUtils.listFiles(artifact.getParentFile(), new String[]{"pom"}, false)
-//               .stream()
-//               .map(File::toPath)
-//               .findAny()
-//               .orElse(null);
-//         path = Optional.ofNullable(pom);
-//      }
-//      return path;
-//   }
 }

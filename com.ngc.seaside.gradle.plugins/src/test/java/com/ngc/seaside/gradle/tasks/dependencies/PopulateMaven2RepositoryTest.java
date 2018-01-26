@@ -4,6 +4,7 @@ import com.ngc.seaside.gradle.util.test.GradleMocks;
 import com.ngc.seaside.gradle.util.test.TaskBuilder;
 
 import org.eclipse.aether.resolution.DependencyResult;
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.artifacts.BaseRepositoryFactory;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.junit.Before;
@@ -12,9 +13,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +28,9 @@ public class PopulateMaven2RepositoryTest {
    private PopulateMaven2Repository task;
 
    private ProjectInternal project = GradleMocks.newProjectMock();
+
+   @Mock
+   private MavenArtifactRepository localRepository;
 
    @Mock
    private ResolveDependenciesAction resolveDependenciesAction;
@@ -39,6 +46,8 @@ public class PopulateMaven2RepositoryTest {
 
    @Before
    public void setup() {
+      when(localRepository.getUrl()).thenReturn(Paths.get("m2repo").toUri());
+
       task = new TaskBuilder<>(PopulateMaven2Repository.class)
             .setSupplier(() -> new PopulateMaven2Repository(baseRepositoryFactory) {
                @Override
@@ -58,11 +67,14 @@ public class PopulateMaven2RepositoryTest {
             })
             .setProject(project)
             .create();
+
+      task.setOutputDirectory(new File("output"));
+      task.setLocalRepository(localRepository);
    }
 
    @Test
    public void testDoesCallActions() {
-      Collection<DependencyResult> results = Collections.singletonList(AetherMocks.newDependencyResult());
+      Collection<DependencyResult> results = Collections.emptyList();
       when(resolveDependenciesAction.getDependencyResults()).thenReturn(results);
 
       task.populateRepository();
@@ -74,8 +86,8 @@ public class PopulateMaven2RepositoryTest {
       verify(resolveDependenciesAction).execute(task);
       verify(copyDependencyFilesAction).setDependencyResults(results);
       verify(copyDependencyFilesAction).execute(task);
-      // TODO TH: fix this
-      //verify(createCsvDependencyReportAction).setDependencyResults(results);
+
+      verify(createCsvDependencyReportAction).setStore(any(ArtifactResultStore.class));
       verify(createCsvDependencyReportAction).execute(task);
    }
 }

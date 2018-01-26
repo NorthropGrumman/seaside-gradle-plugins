@@ -4,20 +4,26 @@ import com.google.common.base.Preconditions;
 
 import groovy.lang.Closure;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.aether.repository.RepositoryPolicy;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.DependencyResult;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.artifacts.BaseRepositoryFactory;
 import org.gradle.api.internal.tasks.options.Option;
-import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.ConfigureUtil;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -109,12 +115,16 @@ public class PopulateMaven2Repository extends DefaultTask {
       createCsvDependencyReport.validate(this);
 
       resolveDependencies.execute(this);
+
       copyDependencyFiles.setDependencyResults(resolveDependencies.getDependencyResults());
       copyDependencyFiles.execute(this);
-      // TODO TH: fix this.
-      //createCsvDependencyReport.setDependencyResults(resolveDependencies.getDependencyResults());
-      createCsvDependencyReport.execute(this);
 
+      // We can't generate scripts if populateLocalRepoOnly is true.
+      if (!populateLocalRepoOnly) {
+         ArtifactResultStore store = createStore(resolveDependencies.getDependencyResults());
+         createCsvDependencyReport.setStore(store);
+         createCsvDependencyReport.execute(this);
+      }
    }
 
    /**
@@ -183,7 +193,7 @@ public class PopulateMaven2Repository extends DefaultTask {
     * Gets the file that will be written that contains the dependency info in CSV form.
     */
    @OutputFile
-   @Optional
+   @org.gradle.api.tasks.Optional
    public File getDependencyInfoCsvFile() {
       return dependencyInfoCsvFile;
    }
@@ -335,5 +345,51 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    protected CreateCsvDependencyReportAction newCreateCsvDependencyReportAction() {
       return new CreateCsvDependencyReportAction();
+   }
+
+   /**
+    * Creates an artifact store for all resolved dependencies.  This data structure makes it easier to generate scripts
+    * and reports from the dependency data.
+    */
+   private ArtifactResultStore createStore(Collection<DependencyResult> dependencyResults) {
+      ArtifactResultStore store = new ArtifactResultStore(Paths.get(localRepository.getUrl()),
+                                                          outputDirectory.toPath());
+      for (DependencyResult dependencyResult : dependencyResults) {
+         for (ArtifactResult artifactResult : dependencyResult.getArtifactResults()) {
+            Optional<Path> pom = findPom(artifactResult);
+            if (pom.isPresent()) {
+               store.addResult(artifactResult, pom.get());
+            } else {
+               String prettyGave = String.format(
+                     "%s:%s:%s%s@%s",
+                     artifactResult.getArtifact().getGroupId(),
+                     artifactResult.getArtifact().getArtifactId(),
+                     artifactResult.getArtifact().getVersion(),
+                     artifactResult.getArtifact().getClassifier() == null ? "" : ":" + artifactResult.getArtifact()
+                           .getClassifier(),
+                     artifactResult.getArtifact().getExtension());
+               getLogger().warn("POM file not found for {}, artifact will not be included in reports or scripts.",
+                                prettyGave);
+            }
+         }
+      }
+      return store;
+   }
+
+   /**
+    * Finds the POM on disk for the given artifact.
+    */
+   private static Optional<Path> findPom(ArtifactResult artifactResult) {
+      Optional<Path> path = Optional.empty();
+      File artifact = artifactResult.getArtifact().getFile();
+      if (artifact.getParentFile() != null) {
+         Path pom = FileUtils.listFiles(artifact.getParentFile(), new String[]{"pom"}, false)
+               .stream()
+               .map(File::toPath)
+               .findAny()
+               .orElse(null);
+         path = Optional.ofNullable(pom);
+      }
+      return path;
    }
 }
