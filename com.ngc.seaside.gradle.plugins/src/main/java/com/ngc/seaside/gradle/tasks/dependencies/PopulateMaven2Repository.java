@@ -111,7 +111,8 @@ public class PopulateMaven2Repository extends DefaultTask {
       resolveDependencies.execute(this);
       copyDependencyFiles.setDependencyResults(resolveDependencies.getDependencyResults());
       copyDependencyFiles.execute(this);
-      createCsvDependencyReport.setDependencyResults(resolveDependencies.getDependencyResults());
+      // TODO TH: fix this.
+      //createCsvDependencyReport.setDependencyResults(resolveDependencies.getDependencyResults());
       createCsvDependencyReport.execute(this);
 
    }

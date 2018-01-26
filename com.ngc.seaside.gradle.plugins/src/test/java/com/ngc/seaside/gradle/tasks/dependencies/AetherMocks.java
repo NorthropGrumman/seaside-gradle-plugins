@@ -52,6 +52,22 @@ public class AetherMocks {
                                                       String classifier,
                                                       String extension,
                                                       File file) {
+      DependencyResult dependencyResult = new DependencyResult(new DependencyRequest());
+      dependencyResult.setArtifactResults(Collections.singletonList(newArtifactResult(groupId,
+                                                                                      artifactId,
+                                                                                      version,
+                                                                                      classifier,
+                                                                                      extension,
+                                                                                      file)));
+      return dependencyResult;
+   }
+
+   public static ArtifactResult newArtifactResult(String groupId,
+                                                  String artifactId,
+                                                  String version,
+                                                  String classifier,
+                                                  String extension,
+                                                  File file) {
       Artifact artifact = mock(Artifact.class);
       when(artifact.getFile()).thenReturn(file);
       when(artifact.getGroupId()).thenReturn(groupId);
@@ -62,10 +78,7 @@ public class AetherMocks {
 
       ArtifactResult artifactResult = new ArtifactResult(new ArtifactRequest());
       artifactResult.setArtifact(artifact);
-
-      DependencyResult dependencyResult = new DependencyResult(new DependencyRequest());
-      dependencyResult.setArtifactResults(Collections.singletonList(artifactResult));
-      return dependencyResult;
+      return artifactResult;
    }
 
    public static DependencyResolutionException newNotFoundException() {

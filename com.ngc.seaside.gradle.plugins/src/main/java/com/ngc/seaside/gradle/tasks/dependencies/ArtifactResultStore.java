@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -16,9 +17,11 @@ public class ArtifactResultStore {
 
    private final Map<ArtifactKey, ArtifactResultRecord> mainResults = new HashMap<>();
    private final Path localRepositoryPath;
+   private final Path outputDirectoryPath;
 
-   public ArtifactResultStore(Path localRepositoryPath) {
+   public ArtifactResultStore(Path localRepositoryPath, Path outputDirectoryPath) {
       this.localRepositoryPath = localRepositoryPath;
+      this.outputDirectoryPath = outputDirectoryPath;
    }
 
    public ArtifactResultStore addResult(ArtifactResult result, Path pom) {
@@ -36,7 +39,7 @@ public class ArtifactResultStore {
       return this;
    }
 
-   public Collection<ArtifactResult> getMainResults() {
+   public List<ArtifactResult> getMainResults() {
       return mainResults.values()
             .stream()
             .filter(r -> r.mainArtifact != null)
@@ -46,25 +49,26 @@ public class ArtifactResultStore {
 
    public Path getRelativePathToMainArtifact(ArtifactResult result) {
       Preconditions.checkNotNull(result, "result may not be null!");
-      return repositoryRelativePath(result);
+      return outputRelativePath(result);
    }
 
-   public Collection<Path> getRelativePathsToOtherClassifiers(ArtifactResult result) {
+   public List<Path> getRelativePathsToOtherClassifiers(ArtifactResult result) {
       Preconditions.checkNotNull(result, "result may not be null!");
       return mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD)
             .additionalClassifiers
             .stream()
-            .map(this::repositoryRelativePath)
+            .map(this::outputRelativePath)
             .collect(Collectors.toList());
    }
 
    public Path getRelativePathToPom(ArtifactResult result) {
       Preconditions.checkNotNull(result, "result may not be null!");
       Path pom = mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD).pom;
-      return pom == null ? null : localRepositoryPath.relativize(pom);
+      Preconditions.checkState(pom != null, "unable to find POM for %s!", result.getArtifact().getFile());
+      return outputRelativePath(pom);
    }
 
-   public Collection<String> getOtherClassifiers(ArtifactResult result) {
+   public List<String> getOtherClassifiers(ArtifactResult result) {
       Preconditions.checkNotNull(result, "result may not be null!");
       return mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD)
             .additionalClassifiers
@@ -73,7 +77,7 @@ public class ArtifactResultStore {
             .collect(Collectors.toList());
    }
 
-   public Collection<String> getOtherExtensions(ArtifactResult result) {
+   public List<String> getOtherExtensions(ArtifactResult result) {
       Preconditions.checkNotNull(result, "result may not be null!");
       return mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD)
             .additionalClassifiers
@@ -89,8 +93,13 @@ public class ArtifactResultStore {
             .isEmpty();
    }
 
-   private Path repositoryRelativePath(ArtifactResult result) {
-      return localRepositoryPath.relativize(result.getArtifact().getFile().toPath());
+   Path outputRelativePath(Path file) {
+      Path repoRelativePath = localRepositoryPath.relativize(file);
+      return outputDirectoryPath.resolve(repoRelativePath);
+   }
+
+   private Path outputRelativePath(ArtifactResult result) {
+      return outputRelativePath(result.getArtifact().getFile().toPath());
    }
 
    private static boolean isMainArtifact(ArtifactResult result) {

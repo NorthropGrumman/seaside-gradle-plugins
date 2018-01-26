@@ -3,7 +3,7 @@ package com.ngc.seaside.gradle.tasks.dependencies;
 import com.ngc.seaside.gradle.util.test.GradleMocks;
 
 import org.eclipse.aether.artifact.Artifact;
-import org.eclipse.aether.resolution.DependencyResult;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.project.ProjectInternal;
@@ -21,12 +21,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newDependencyResult;
+import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newArtifactResult;
 import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newLocalMavenRepo;
-import static com.ngc.seaside.gradle.tasks.dependencies.CreateCsvDependencyReportAction.formatLine;
+import static com.ngc.seaside.gradle.tasks.dependencies.CreateCsvDependencyReportAction.formatLineForClassifier;
+import static com.ngc.seaside.gradle.tasks.dependencies.CreateCsvDependencyReportAction.formatLineForMainArtifact;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -45,11 +45,13 @@ public class CreateCsvDependencyReportActionIT {
 
    private File outputDirectory;
 
-   private DependencyResult jar;
+   private ArtifactResultStore store;
 
-   private DependencyResult sources;
+   private ArtifactResult jar;
 
-   private DependencyResult tests;
+   private ArtifactResult sources;
+
+   private ArtifactResult tests;
 
    private Path pom;
 
@@ -67,25 +69,25 @@ public class CreateCsvDependencyReportActionIT {
       localMavenRepo = temp.newFolder("local", "m2repo");
       outputDirectory = temp.newFolder("dependencies-m2");
 
-      jar = newDependencyResult("group",
-                                "artifact",
-                                "1.0",
-                                null,
-                                "jar",
-                                new File(localMavenRepo, "group/artifact/1.0/artifact-1.0.jar"));
-      sources = newDependencyResult("group",
-                                    "artifact",
-                                    "1.0",
-                                    "sources",
-                                    "jar",
-                                    new File(localMavenRepo, "group/artifact/1.0/artifact-1.0-sources.jar"));
-      tests = newDependencyResult("group",
+      jar = newArtifactResult("group",
+                              "artifact",
+                              "1.0",
+                              null,
+                              "jar",
+                              new File(localMavenRepo, "group/artifact/1.0/artifact-1.0.jar"));
+      sources = newArtifactResult("group",
                                   "artifact",
                                   "1.0",
-                                  "tests",
+                                  "sources",
                                   "jar",
-                                  new File(localMavenRepo, "group/artifact/1.0/artifact-1.0-tests.jar"));
-      pom = createPomFor(jar.getArtifactResults().get(0).getArtifact());
+                                  new File(localMavenRepo, "group/artifact/1.0/artifact-1.0-sources.jar"));
+      tests = newArtifactResult("group",
+                                "artifact",
+                                "1.0",
+                                "tests",
+                                "jar",
+                                new File(localMavenRepo, "group/artifact/1.0/artifact-1.0-tests.jar"));
+      pom = createPomFor(jar.getArtifact());
 
       Logger logger = mock(Logger.class);
       when(task.getProject()).thenReturn(project);
@@ -94,6 +96,7 @@ public class CreateCsvDependencyReportActionIT {
       MavenArtifactRepository local = newLocalMavenRepo(localMavenRepo);
       when(task.getLocalRepository()).thenReturn(local);
 
+      store = new ArtifactResultStore(localMavenRepo.toPath(), outputDirectory.toPath());
       action = new CreateCsvDependencyReportAction();
    }
 
@@ -101,32 +104,48 @@ public class CreateCsvDependencyReportActionIT {
    public void testDoesGenerateCsvFile() throws Throwable {
       when(task.isCreateCsvFile()).thenReturn(true);
       when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
-      action.setDependencyResults(Arrays.asList(jar, sources, tests));
+      action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom));
 
       action.execute(task);
 
       assertTrue("did not create CSV file!",
                  csvFile.exists());
       List<String> lines = Files.readAllLines(csvFile.toPath());
-      lines.forEach(System.out::println); // TODO TH: remove
       assertTrue("missing jar dependency from report!",
-                 lines.contains(formatLine(jar.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
+                 lines.contains(formatLineForMainArtifact(jar, store, csvFile.toPath())));
       assertTrue("missing sources dependency from report!",
-                 lines.contains(formatLine(sources.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
+                 lines.contains(formatLineForClassifier(
+                       sources,
+                       store,
+                       "sources",
+                       "jar",
+                       store.outputRelativePath(sources.getArtifact().getFile().toPath()),
+                       csvFile.toPath())));
       assertTrue("missing tests dependency from report!",
-                 lines.contains(formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
+                 lines.contains(formatLineForClassifier(
+                       tests,
+                       store,
+                       "tests",
+                       "jar",
+                       store.outputRelativePath(tests.getArtifact().getFile().toPath()),
+                       csvFile.toPath())));
    }
 
    @Test
    public void testDoesAppendToExistingCsvFile() throws Throwable {
-      // Create an existing file.
-      Files.write(csvFile.toPath(),
-                  Arrays.asList(CreateCsvDependencyReportAction.COLUMN_HEADERS,
-                                formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
-
       when(task.isCreateCsvFile()).thenReturn(true);
       when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
-      action.setDependencyResults(Arrays.asList(jar, sources));
+      action.setStore(store.addResult(jar, pom).addResult(sources, pom));
+
+      // Create an existing file.
+      Files.write(csvFile.toPath(), Arrays.asList(
+            CreateCsvDependencyReportAction.COLUMN_HEADERS,
+            formatLineForClassifier(tests,
+                                    store,
+                                    "tests",
+                                    "jar",
+                                    store.outputRelativePath(tests.getArtifact().getFile().toPath()),
+                                    csvFile.toPath())));
 
       action.execute(task);
 
@@ -134,31 +153,56 @@ public class CreateCsvDependencyReportActionIT {
                  csvFile.exists());
       List<String> lines = Files.readAllLines(csvFile.toPath());
       assertTrue("missing jar dependency from report!",
-                 lines.contains(formatLine(jar.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
+                 lines.contains(formatLineForMainArtifact(jar, store, csvFile.toPath())));
       assertTrue("missing sources dependency from report!",
-                 lines.contains(formatLine(sources.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
+                 lines.contains(formatLineForClassifier(
+                       sources,
+                       store,
+                       "sources",
+                       "jar",
+                       store.outputRelativePath(sources.getArtifact().getFile().toPath()),
+                       csvFile.toPath())));
       assertTrue("missing tests dependency from report!",
-                 lines.contains(formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
+                 lines.contains(formatLineForClassifier(
+                       tests,
+                       store,
+                       "tests",
+                       "jar",
+                       store.outputRelativePath(tests.getArtifact().getFile().toPath()),
+                       csvFile.toPath())));
    }
 
    @Test
    public void testDoesNotInsertDuplicatesIntoCsvFile() throws Throwable {
-      // Create an existing file.
-      Files.write(csvFile.toPath(),
-                  Arrays.asList(CreateCsvDependencyReportAction.COLUMN_HEADERS,
-                                formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
-
       when(task.isCreateCsvFile()).thenReturn(true);
       when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
-      action.setDependencyResults(Arrays.asList(jar, sources, tests));
+      action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom));
+
+      // Create an existing file.
+      Files.write(csvFile.toPath(), Arrays.asList(
+            CreateCsvDependencyReportAction.COLUMN_HEADERS,
+            formatLineForClassifier(tests,
+                                    store,
+                                    "tests",
+                                    "jar",
+                                    store.outputRelativePath(tests.getArtifact().getFile().toPath()),
+                                    csvFile.toPath())));
 
       action.execute(task);
 
       assertTrue("did not create CSV file!",
                  csvFile.exists());
       List<String> lines = Files.readAllLines(csvFile.toPath());
+      assertTrue("missing jar dependency from report!",
+                 lines.contains(formatLineForMainArtifact(jar, store, csvFile.toPath())));
 
-      String duplicateLine = formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath());
+      String duplicateLine = formatLineForClassifier(
+            tests,
+            store,
+            "tests",
+            "jar",
+            store.outputRelativePath(tests.getArtifact().getFile().toPath()),
+            csvFile.toPath());
       assertEquals("report contains duplicate lines!",
                    1,
                    lines.stream()
@@ -169,7 +213,7 @@ public class CreateCsvDependencyReportActionIT {
    @Test
    public void testDoesNotGenerateCsvFileIfNotConfigured() throws Throwable {
       when(task.isCreateCsvFile()).thenReturn(false);
-      action.setDependencyResults(Collections.singletonList(jar));
+      action.setStore(store.addResult(jar, pom));
       action.execute(task);
       assertFalse("should not have created file!",
                   csvFile.exists());

@@ -26,12 +26,14 @@ public class ArtifactResultStoreTest {
 
    private Path localRepositoryPath = Paths.get("my", "m2", "repo");
 
+   private Path outputDirectoryPath = Paths.get("some", "output");
+
    private Path pom;
 
    @Before
    public void setup() throws Throwable {
       pom = localRepositoryPath.resolve(Paths.get("foo", "bar.pom"));
-      store = new ArtifactResultStore(localRepositoryPath);
+      store = new ArtifactResultStore(localRepositoryPath, outputDirectoryPath);
    }
 
    @Test
@@ -46,7 +48,7 @@ public class ArtifactResultStoreTest {
       assertTrue("did not add result to store!",
                  store.getMainResults().contains(result));
       assertEquals("did not return path to main artifact!",
-                   repositoryRelativePath(result),
+                   outputRelativePath(result),
                    store.getRelativePathToMainArtifact(result));
       assertFalse("should not have other classifiers!",
                   store.hasOtherClassifiers(result));
@@ -61,7 +63,7 @@ public class ArtifactResultStoreTest {
                                         "jar");
       store.addResult(result, pom);
       assertEquals("did not return path to main pom!",
-                   localRepositoryPath.relativize(pom),
+                   outputRelativePath(pom),
                    store.getRelativePathToPom(result));
    }
 
@@ -85,7 +87,7 @@ public class ArtifactResultStoreTest {
       assertFalse("should not return sources as a main result!",
                   store.getMainResults().contains(sourcesResult));
       assertEquals("did not return path to main artifact!",
-                   repositoryRelativePath(mainResult),
+                   outputRelativePath(mainResult),
                    store.getRelativePathToMainArtifact(mainResult));
       assertTrue("should have other classifiers!",
                  store.hasOtherClassifiers(mainResult));
@@ -129,7 +131,7 @@ public class ArtifactResultStoreTest {
       store.addResult(mainResult, pom);
       store.addResult(sourcesResult, pom);
       assertEquals("did not return jar extension for sources classifier!",
-                   Collections.singletonList(repositoryRelativePath(sourcesResult)),
+                   Collections.singletonList(outputRelativePath(sourcesResult)),
                    store.getRelativePathsToOtherClassifiers(mainResult));
    }
 
@@ -160,7 +162,12 @@ public class ArtifactResultStoreTest {
       return artifactResult;
    }
 
-   private Path repositoryRelativePath(ArtifactResult result) {
-      return localRepositoryPath.relativize(result.getArtifact().getFile().toPath());
+   private Path outputRelativePath(ArtifactResult result) {
+      return outputRelativePath(result.getArtifact().getFile().toPath());
+   }
+
+   private Path outputRelativePath(Path file) {
+      Path repoRelativePath = localRepositoryPath.relativize(file);
+      return outputDirectoryPath.resolve(repoRelativePath);
    }
 }
