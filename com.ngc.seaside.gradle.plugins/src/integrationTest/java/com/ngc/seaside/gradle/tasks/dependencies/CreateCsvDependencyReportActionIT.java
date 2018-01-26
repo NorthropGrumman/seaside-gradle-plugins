@@ -243,6 +243,4 @@ public class CreateCsvDependencyReportActionIT {
       Files.createFile(pom);
       return pom;
    }
-
-
 }

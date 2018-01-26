@@ -57,6 +57,11 @@ public class PopulateMaven2Repository extends DefaultTask {
    private File dependencyInfoCsvFile;
 
    /**
+    * The deployment script file to generate.
+    */
+   private File deployScriptFile;
+
+   /**
     * The configuration to resolve dependencies for.  If not set, dependencies for all configurations will be resolved.
     */
    private Configuration configuration;
@@ -84,14 +89,19 @@ public class PopulateMaven2Repository extends DefaultTask {
    private boolean ignoreArtifactDescriptorRepositories = true;
 
    /**
+    * The update policy to use when resolving dependencies.
+    */
+   private String repositoryUpdatePolicy = RepositoryPolicy.UPDATE_POLICY_NEVER;
+
+   /**
     * If true, a CSV will be created.
     */
    private boolean createCsvFile = true;
 
    /**
-    * The update policy to use when resolving dependencies.
+    * If true, a deployment script will be created.
     */
-   private String repositoryUpdatePolicy = RepositoryPolicy.UPDATE_POLICY_NEVER;
+   private boolean createDeployScript = true;
 
    /**
     * Used to create instances of {@code MavenArtifactRepository} for ease of user configuration.  Provided by Gradle at
@@ -219,6 +229,34 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
+    * Gets the script file that can be used to deploy dependencies.
+    */
+   @OutputFile
+   @org.gradle.api.tasks.Optional
+   public File getDeployScriptFile() {
+      return deployScriptFile;
+   }
+
+   /**
+    * Sets the script file that can be used to deploy dependencies.
+    */
+   public void setDeployScriptFile(File deployScriptFile) {
+      this.deployScriptFile = deployScriptFile;
+   }
+
+   /**
+    * Sets the script file that can be used to deploy dependencies. This method allows a user to
+    * specify the output CSV file as a command line option.
+    */
+   @Option(option = "deployScriptFile",
+         description = "The location of the deployment script file to generate.")
+   public void setDeployScriptFile(String deployScriptFile) {
+      Preconditions.checkNotNull(deployScriptFile, "deployScriptFile may not be null!");
+      Preconditions.checkArgument(!deployScriptFile.trim().isEmpty(), "deployScriptFile may not be null!");
+      setDeployScriptFile(new File(deployScriptFile));
+   }
+
+   /**
     * Gets the configuration to retrieve dependencies for.  If this value is {@code null}, dependencies will be
     * retrieved for all configurations used by the project.
     */
@@ -290,10 +328,9 @@ public class PopulateMaven2Repository extends DefaultTask {
     * If true, repositories that are listed in the POM of dependencies will be ignored when attempting to resolve
     * missing items.
     */
-   public PopulateMaven2Repository setIgnoreArtifactDescriptorRepositories(
+   public void setIgnoreArtifactDescriptorRepositories(
          boolean ignoreArtifactDescriptorRepositories) {
       this.ignoreArtifactDescriptorRepositories = ignoreArtifactDescriptorRepositories;
-      return this;
    }
 
    /**
@@ -306,9 +343,22 @@ public class PopulateMaven2Repository extends DefaultTask {
    /**
     * Sets if a CSV file with dependency information will be created.
     */
-   public PopulateMaven2Repository setCreateCsvFile(boolean createCsvFile) {
+   public void setCreateCsvFile(boolean createCsvFile) {
       this.createCsvFile = createCsvFile;
-      return this;
+   }
+
+   /**
+    * If true, a deploy script for all dependencies will be created.
+    */
+   public boolean isCreateDeployScript() {
+      return createDeployScript;
+   }
+
+   /**
+    * Sets if a deploy script for all dependencies will be created.
+    */
+   public void setCreateDeployScript(boolean createDeployScript) {
+      this.createDeployScript = createDeployScript;
    }
 
    /**
