@@ -15,7 +15,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class PopulateMaven2RepositoryTest {
@@ -29,6 +30,9 @@ public class PopulateMaven2RepositoryTest {
 
    @Mock
    private CopyDependencyFilesAction copyDependencyFilesAction;
+
+   @Mock
+   private CreateCsvDependencyReportAction createCsvDependencyReportAction;
 
    @Mock
    private BaseRepositoryFactory baseRepositoryFactory;
@@ -46,6 +50,11 @@ public class PopulateMaven2RepositoryTest {
                protected CopyDependencyFilesAction newCopyDependencyFilesAction() {
                   return copyDependencyFilesAction;
                }
+
+               @Override
+               protected CreateCsvDependencyReportAction newCreateCsvDependencyReportAction() {
+                  return createCsvDependencyReportAction;
+               }
             })
             .setProject(project)
             .create();
@@ -60,9 +69,12 @@ public class PopulateMaven2RepositoryTest {
 
       verify(resolveDependenciesAction).validate(task);
       verify(copyDependencyFilesAction).validate(task);
+      verify(createCsvDependencyReportAction).validate(task);
 
       verify(resolveDependenciesAction).execute(task);
       verify(copyDependencyFilesAction).setDependencyResults(results);
       verify(copyDependencyFilesAction).execute(task);
+      verify(createCsvDependencyReportAction).setDependencyResults(results);
+      verify(createCsvDependencyReportAction).execute(task);
    }
 }

@@ -86,4 +86,7 @@ task testM2repo(type: PopulateMaven2Repository) {
     remoteRepository = project.repositories.getByName('NexusConsolidated')
     localRepository = mavenLocal()
     configuration = project.configurations.getByName('thirdParty')
+
+    createCsvFile = true
+    dependencyInfoCsvFile = project.file("${project.buildDir}/dependencies.csv")
 }

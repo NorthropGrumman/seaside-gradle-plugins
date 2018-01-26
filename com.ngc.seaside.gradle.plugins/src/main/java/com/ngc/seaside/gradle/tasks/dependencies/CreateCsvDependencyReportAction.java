@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,6 +39,8 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
 
    private Collection<DependencyResult> dependencyResults;
 
+   private Path localRepositoryPath;
+
    @Override
    public void validate(PopulateMaven2Repository task) throws InvalidUserDataException {
       GradleUtil.checkUserData(!task.isCreateCsvFile() || task.getDependencyInfoCsvFile() != null,
@@ -50,15 +53,17 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
       return this;
    }
 
-   static String formatLine(Artifact artifact, Path pom, Path csvFile) {
+   static String formatLine(Artifact artifact, Path localMavenRepositoryPath, Path pom, Path csvFile) {
       String line;
+      Path artifactRepositoryRelativePath = localMavenRepositoryPath.relativize(artifact.getFile().toPath());
+      Path pomRepositoryRelativePath = localMavenRepositoryPath.relativize(pom);
       if ("".equals(artifact.getClassifier())) {
          line = String.format(COLUMN_FORMAT,
                               artifact.getGroupId(),
                               artifact.getArtifactId(),
                               artifact.getVersion(),
-                              relativizeToParentOf(csvFile, artifact.getFile().toPath()),
-                              relativizeToParentOf(csvFile, pom),
+                              relativizeToParentOf(csvFile, artifactRepositoryRelativePath),
+                              relativizeToParentOf(csvFile, pomRepositoryRelativePath),
                               "",
                               "");
       } else {
@@ -66,8 +71,8 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
                               artifact.getGroupId(),
                               artifact.getArtifactId(),
                               artifact.getVersion(),
-                              relativizeToParentOf(csvFile, artifact.getFile().toPath()),
-                              relativizeToParentOf(csvFile, pom),
+                              relativizeToParentOf(csvFile, artifactRepositoryRelativePath),
+                              relativizeToParentOf(csvFile, pomRepositoryRelativePath),
                               artifact.getClassifier(),
                               artifact.getExtension());
       }
@@ -79,6 +84,7 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
       if (task.isCreateCsvFile()) {
          Preconditions.checkState(dependencyResults != null, "dependencyResults must be set!");
          logger.lifecycle("Creating CSV dependency report.");
+         localRepositoryPath = Paths.get(task.getLocalRepository().getUrl());
          createReport();
       }
    }
@@ -91,6 +97,7 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
             Optional<Path> pom = findPom(artifactResult);
             if (pom.isPresent()) {
                lines.add(formatLine(artifactResult.getArtifact(),
+                                    localRepositoryPath,
                                     pom.get(),
                                     task.getDependencyInfoCsvFile().toPath()));
             } else {

@@ -102,14 +102,18 @@ public class PopulateMaven2Repository extends DefaultTask {
    public void populateRepository() {
       ResolveDependenciesAction resolveDependencies = newResolveDependenciesAction();
       CopyDependencyFilesAction copyDependencyFiles = newCopyDependencyFilesAction();
+      CreateCsvDependencyReportAction createCsvDependencyReport = newCreateCsvDependencyReportAction();
 
       resolveDependencies.validate(this);
       copyDependencyFiles.validate(this);
+      createCsvDependencyReport.validate(this);
 
       resolveDependencies.execute(this);
-
       copyDependencyFiles.setDependencyResults(resolveDependencies.getDependencyResults());
       copyDependencyFiles.execute(this);
+      createCsvDependencyReport.setDependencyResults(resolveDependencies.getDependencyResults());
+      createCsvDependencyReport.execute(this);
+
    }
 
    /**
@@ -323,5 +327,12 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    protected CopyDependencyFilesAction newCopyDependencyFilesAction() {
       return new CopyDependencyFilesAction();
+   }
+
+   /**
+    * Factory method to create a new instance of {@code CreateCsvDependencyReportAction}.  Useful for testing.
+    */
+   protected CreateCsvDependencyReportAction newCreateCsvDependencyReportAction() {
+      return new CreateCsvDependencyReportAction();
    }
 }

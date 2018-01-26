@@ -18,7 +18,7 @@ import java.nio.file.Paths
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
 
-@Ignore("This test can take a long time and requires network access.")
+//@Ignore("This test can take a long time and requires network access.")
 class PopulateMaven2RepositoryFT {
     private File projectDir
     private Project project

@@ -43,6 +43,8 @@ public class CreateCsvDependencyReportActionIT {
 
    private File localMavenRepo;
 
+   private File outputDirectory;
+
    private DependencyResult jar;
 
    private DependencyResult sources;
@@ -57,12 +59,13 @@ public class CreateCsvDependencyReportActionIT {
    private PopulateMaven2Repository task;
 
    @Rule
-   public TemporaryFolder outputDirectory = new TemporaryFolder();
+   public TemporaryFolder temp = new TemporaryFolder();
 
    @Before
    public void setup() throws Throwable {
-      csvFile = new File(outputDirectory.getRoot(), "dependencies.csv");
-      localMavenRepo = outputDirectory.newFolder("m2-dependencies");
+      csvFile = new File(temp.getRoot(), "dependencies.csv");
+      localMavenRepo = temp.newFolder("local", "m2repo");
+      outputDirectory = temp.newFolder("dependencies-m2");
 
       jar = newDependencyResult("group",
                                 "artifact",
@@ -105,12 +108,13 @@ public class CreateCsvDependencyReportActionIT {
       assertTrue("did not create CSV file!",
                  csvFile.exists());
       List<String> lines = Files.readAllLines(csvFile.toPath());
+      lines.forEach(System.out::println); // TODO TH: remove
       assertTrue("missing jar dependency from report!",
-                 lines.contains(formatLine(jar.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+                 lines.contains(formatLine(jar.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
       assertTrue("missing sources dependency from report!",
-                 lines.contains(formatLine(sources.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+                 lines.contains(formatLine(sources.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
       assertTrue("missing tests dependency from report!",
-                 lines.contains(formatLine(tests.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+                 lines.contains(formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
    }
 
    @Test
@@ -118,7 +122,7 @@ public class CreateCsvDependencyReportActionIT {
       // Create an existing file.
       Files.write(csvFile.toPath(),
                   Arrays.asList(CreateCsvDependencyReportAction.COLUMN_HEADERS,
-                                formatLine(tests.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+                                formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
 
       when(task.isCreateCsvFile()).thenReturn(true);
       when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
@@ -130,11 +134,11 @@ public class CreateCsvDependencyReportActionIT {
                  csvFile.exists());
       List<String> lines = Files.readAllLines(csvFile.toPath());
       assertTrue("missing jar dependency from report!",
-                 lines.contains(formatLine(jar.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+                 lines.contains(formatLine(jar.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
       assertTrue("missing sources dependency from report!",
-                 lines.contains(formatLine(sources.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+                 lines.contains(formatLine(sources.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
       assertTrue("missing tests dependency from report!",
-                 lines.contains(formatLine(tests.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+                 lines.contains(formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
    }
 
    @Test
@@ -142,7 +146,7 @@ public class CreateCsvDependencyReportActionIT {
       // Create an existing file.
       Files.write(csvFile.toPath(),
                   Arrays.asList(CreateCsvDependencyReportAction.COLUMN_HEADERS,
-                                formatLine(tests.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath())));
+                                formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath())));
 
       when(task.isCreateCsvFile()).thenReturn(true);
       when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
@@ -154,7 +158,7 @@ public class CreateCsvDependencyReportActionIT {
                  csvFile.exists());
       List<String> lines = Files.readAllLines(csvFile.toPath());
 
-      String duplicateLine = formatLine(tests.getArtifactResults().get(0).getArtifact(), pom, csvFile.toPath());
+      String duplicateLine = formatLine(tests.getArtifactResults().get(0).getArtifact(), localMavenRepo.toPath(), pom, csvFile.toPath());
       assertEquals("report contains duplicate lines!",
                    1,
                    lines.stream()
