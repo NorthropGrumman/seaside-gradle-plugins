@@ -6,13 +6,19 @@ import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+/**
+ * Used to increment the version in the build.gradle file
+ *   and then commit it to the repository
+ */
 class BumpVersionTask extends DefaultTask {
 
+   //will be used in the future
    boolean dryRun
+
    boolean commitChanges
    boolean push
 
-   String tagPrefix
+   ReleaseType releaseType = ReleaseType.MINOR
    String versionSuffix
    private VersionResolver resolver
 
@@ -33,149 +39,52 @@ class BumpVersionTask extends DefaultTask {
     */
    @TaskAction
    def bumpTheVersion() {
-//      Preconditions.checkState(
-//              ReleaseUtil.isExtensionSet(project),
-//              "Release task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
+
        getReleaseExtensionSettings()
-       //bumpVersion()
+       bumpVersion()
    }
 
-//   private void bumpVersion() {
-//      if (!isReleaseVersionSet()) {
-//         def currentProjectVersion = resolver.getProjectVersion(releaseType)
-//         def newReleaseVersion = getTheReleaseVersion(currentProjectVersion)
-//         setTheNewReleaseVersion(newReleaseVersion)
-//         setTheReleaseVersionProjectProperty(newReleaseVersion)
-//      }
-//   }
-//
-//   private boolean isReleaseVersionSet() {
-//      return project.rootProject.hasProperty("releaseVersion")
-//   }
-//
-//   private String getTheReleaseVersion(String currentProjectVersion) {
-//      def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
-//      String newReleaseVersion = upgradeStrategy.getVersion(currentProjectVersion)
-//      project.logger.info("Using release version '$newReleaseVersion'")
-//      return newReleaseVersion
-//   }
-//
-//   private void setTheNewReleaseVersion(String newReleaseVersion) {
-//      if (!dryRun) {
-//         project.logger.lifecycle("Setting version in root build.gradle to $newReleaseVersion")
-//         resolver.setProjectVersionOnFile(newReleaseVersion)
-//      } else {
-//         project.logger.lifecycle("Dry Run >> Would have set version in root build.gradle to $newReleaseVersion")
-//      }
-//   }
-//
-//   private void setTheReleaseVersionProjectProperty(String newReleaseVersion) {
-//      project.rootProject.ext.set("releaseVersion", newReleaseVersion)
-//
-//      String dryRunHeader = (dryRun) ? "Dry Run >>" : ""
-//      project.logger.lifecycle("$dryRunHeader Set project version to '$newReleaseVersion'")
-//   }
-//
-//   private void releaseAllProjectsIfNecessary() {
-//      String dryRunHeader = (dryRun) ? "Dry Run >>" : ""
-//      if (!areAllProjectsReleased()) {
-//         project.logger.lifecycle("$dryRunHeader Beginning the release task for " +
-//                 "${tagPrefix}${project.version}")
-//         tagTheRelease()
-//         persistTheNewProjectVersion()
-//         pushTheChangesIfNecessary()
-//         setThePublishedProjectsProjectProperty()
-//      }
-//   }
-//
-//   private boolean areAllProjectsReleased() {
-//      return project.rootProject.hasProperty("publishedProjects")
-//   }
-//
-//   private void tagTheRelease() {
-//      commitVersionFileWithMessage("Release of version v$project.version")
-//      createReleaseTag(resolver.getTagName(tagPrefix, versionSuffix))
-//   }
-//
-//   private void commitVersionFileWithMessage(String msg) {
-//      if (commitChanges && !dryRun) {
-//         git "commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath"
-//         project.logger.info("Committed version file: $msg")
-//      }
-//
-//      if (dryRun) {
-//         project.logger.lifecycle("Dry Run >> Would have committed version file: $msg")
-//      }
-//   }
-//
-//   private void git(Object[] arguments) {
-//      project.logger.debug("Will run: git $arguments")
-//      def output = new ByteArrayOutputStream()
-//
-//      project.exec {
-//         executable "git"
-//         args arguments
-//         standardOutput output
-//         ignoreExitValue = true
-//      }
-//
-//      output = output.toString().trim()
-//      if (!output.isEmpty()) {
-//         project.logger.debug(output)
-//      }
-//   }
-//
-//   private void createReleaseTag(String tagName) {
-//      if (commitChanges && !dryRun) {
-//         git "tag", "-a", tagName, "-m Release of $tagName"
-//         project.logger.debug("Created release tag: $tagName")
-//      }
-//
-//      if (dryRun) {
-//         project.logger.lifecycle("Dry Run >> Would have created release tag: $tagName")
-//      }
-//   }
-//
-//   private void persistTheNewProjectVersion() {
-//      String nextVersion = getNextVersion()
-//      String dryRunHeader = (dryRun) ? "Dry Run >>" : ""
-//      if (!dryRun) {
-//         resolver.setProjectVersionOnFile(nextVersion)
-//      }
-//      commitVersionFileWithMessage("Creating new $nextVersion version after release")
-//      project.logger.lifecycle("\n$dryRunHeader Updated project version to $nextVersion")
-//   }
-//
-//   private String getNextVersion() {
-//      def (major, minor, patch) = calculateNextVersion()
-//      return "${major}.${minor}.${patch}${versionSuffix}".toString()
-//   }
-//
-//   private List<Integer> calculateNextVersion() {
-//      String versionWithoutSuffix = project.version.toString() - versionSuffix
-//      def version = VersionUpgradeStrategyFactory.parseVersionInfo(versionWithoutSuffix)
-//      return [version.major, version.minor, version.patch + 1]
-//   }
-//
-//   private void pushTheChangesIfNecessary() {
-//      if (push && !dryRun) {
-//         pushChanges(resolver.getTagName(tagPrefix, versionSuffix))
-//      }
-//
-//      if (dryRun) {
-//         project.logger.lifecycle("Dry Run >> Would have pushed changes to remote")
-//      }
-//   }
-//
-//   private void pushChanges(String tag) {
-//      git "push", "origin", tag
-//      git "push", "origin", "HEAD"
-//   }
-//
-//   private void setThePublishedProjectsProjectProperty() {
-//      project.rootProject.ext.set("publishedProjects", true)
-//   }
+   /**
+    * This will go and get the next version based on the ReleaseType
+    *   and then write it to the build.gradle file and then commit it.
+    */
+   private void bumpVersion() {
+      def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
+      def nextVersion = upgradeStrategy.getVersion(getCurrentVersion()) + versionSuffix
+      commitNextVersionToFile(nextVersion)
+   }
 
+   /**
+    *
+    * @return String based on the current version in the build.gradle file
+    */
+   String getCurrentVersion() {
+      return resolver.getProjectVersion(releaseType)
+   }
+
+   /**
+    *
+    * @param nextVersion used to set the version in the build.gradle file
+    */
+   private void commitNextVersionToFile(String nextVersion) {
+      resolver.setProjectVersionOnFile(nextVersion)
+      commitVersionFileWithMessage("Creating new $nextVersion version after release")
+      logger.lifecycle("\n Updated project version to $nextVersion")
+   }
+
+   /**
+    * commits new build.gradle to our GitHub repository
+    *
+    * @param msg to be used with the git command
+    */
+   private void commitVersionFileWithMessage(String msg) {
+      ReleaseUtil.git (project, "commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath")
+
+   }
+
+   /**
+    * Resolves class variables with the Project extension variables
+    */
    private void getReleaseExtensionSettings() {
       commitChanges = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).commitChanges
       push = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).push

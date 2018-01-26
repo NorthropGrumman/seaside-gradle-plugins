@@ -10,6 +10,7 @@ import org.gradle.api.tasks.TaskAction
  */
 class ReleasePushTask extends DefaultTask {
 
+   // Will be used in the future
    boolean dryRun
 
    /**
@@ -18,7 +19,11 @@ class ReleasePushTask extends DefaultTask {
    ReleasePushTask() {}
 
    /**
-    * function required to be a task within the gradle framework
+    * function required to be a task within the
+    * gradle framework and is the entry point for
+    * gradle
+    *
+    * @return
     */
     @TaskAction
     def releasePush() {
@@ -26,35 +31,13 @@ class ReleasePushTask extends DefaultTask {
     }
 
    /**
-    * This will grab the last created tag and then push changes to gitHub
+    * push all the commited changes done for the release to our GitHub repository
     */
    private void pushChanges() {
-        def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag
-        git("push", "origin", tag)
-        git("push", "origin", "HEAD")
+      def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag
+      ReleaseUtil.git(project, "push", "origin", tag)
+      ReleaseUtil.git(project, "push", "origin", "HEAD")
     }
 
-   /**
-    *
-    * @param arguments
-    * @return The return from the git call
-    */
-   private String git(Object[] arguments) {
-
-      def output = new ByteArrayOutputStream()
-
-      project.exec {
-         executable "git"
-         args arguments
-         standardOutput output
-         ignoreExitValue = true
-      }
-      output = output.toString().trim()
-      if (!output.isEmpty()) {
-         logger.debug(output)
-      }
-
-      return output
-   }
 
 }

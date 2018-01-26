@@ -6,7 +6,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 /**
- * Used to create the tags for builds
+ * Used to create the tags for new releases to our GitHub repository
  * */
 class CreateTagTask extends DefaultTask {
 
@@ -14,6 +14,7 @@ class CreateTagTask extends DefaultTask {
    private String tagPrefix
    private String tagName
 
+   //will be used in the future
    boolean dryRun
 
    boolean commitChanges
@@ -23,7 +24,10 @@ class CreateTagTask extends DefaultTask {
 
 
    /**
-    * function required to be a task within the gradle framework
+    * function required to be a task within the
+    * gradle framework and is the entry point for
+    * gradle
+    *
     * @return
     */
    @TaskAction
@@ -53,37 +57,13 @@ class CreateTagTask extends DefaultTask {
     */
    private void createTag(boolean commitChanges, boolean dryRun) {
 
-      if (commitChanges && !dryRun) {
-         git "tag", "-a", tagName, "-m Release of $tagName"
-         logger.debug("Created release tag: $tagName")
-      }
-
-      if (dryRun) {
-         logger.lifecycle("Dry Run >> Would have created release tag: $tagName")
-      }
+      ReleaseUtil.git(project, "tag", "-a", tagName, "-m Release of $tagName")
+      logger.debug("Created release tag: $tagName")
    }
 
    /**
-    *
-    * @param arguments
+    * Resolves class variables with the Project extension variables
     */
-   private void git(Object[] arguments) {
-
-      def output = new ByteArrayOutputStream()
-
-      project.exec {
-         executable "git"
-         args arguments
-         standardOutput output
-         ignoreExitValue = true
-      }
-
-      output = output.toString().trim()
-      if (!output.isEmpty()) {
-         project.logger.debug(output)
-      }
-   }
-
    private void getReleaseExtensionSettings() {
       commitChanges = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).commitChanges
       tagPrefix = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tagPrefix
