@@ -113,7 +113,7 @@ class BumpVersionTask extends DefaultTask {
     * @param msg to be used with the git command
     */
    private void commitVersionFileWithMessage(String msg) {
-      ReleaseUtil.git (project, "commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath")
+      project.exec ReleaseUtil.git(null, "commit", "-m", "$msg", "$resolver.versionFile.absolutePath")
 
    }
 

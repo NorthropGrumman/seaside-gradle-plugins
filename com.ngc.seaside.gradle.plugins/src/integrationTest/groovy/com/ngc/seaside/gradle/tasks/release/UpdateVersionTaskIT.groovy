@@ -8,6 +8,6 @@ class UpdateVersionTaskIT {
     @Ignore
     @Test
     void fail() {
-        Assert.fail("implement me!");
+        Assert.fail("implement me!")
     }
 }

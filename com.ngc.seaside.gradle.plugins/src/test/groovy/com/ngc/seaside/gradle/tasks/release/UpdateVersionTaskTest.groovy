@@ -13,8 +13,9 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
 import static org.mockito.Mockito.any
-import static org.mockito.Mockito.when
+import static org.mockito.Mockito.times
 import static org.mockito.Mockito.verify
+import static org.mockito.Mockito.when
 
 @RunWith(MockitoJUnitRunner.Silent)
 class UpdateVersionTaskTest {
@@ -40,7 +41,7 @@ class UpdateVersionTaskTest {
         when(testProject.rootProject).thenReturn(testProject)
         when(testProject.rootProject.hasProperty("releaseVersion")).thenReturn(true)
 
-        when(resolver.getProjectVersion(any())).thenReturn(TEST_UPGRADE_VERSION)
+        when(resolver.getProjectVersion(any(ReleaseType))).thenReturn(TEST_UPGRADE_VERSION)
         when(resolver.getProjectVersion(ReleaseType.SNAPSHOT)).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
     }
 
@@ -67,9 +68,22 @@ class UpdateVersionTaskTest {
     private void confirmVersionUpgradeForReleaseType(ReleaseType releaseType, String expectedUpgradeVersion) {
         task = createTaskWithReleaseType(releaseType)
         task.updateReleaseVersion()
-        verify(resolver).getProjectVersion(releaseType)
-        Assert.assertEquals(releaseType, task.getReleaseType())
-        Assert.assertEquals(expectedUpgradeVersion, task.getVersionForRelease())
+        verify(resolver, times(2)).getProjectVersion(releaseType)
+        Assert.assertEquals(
+              "the release type should have been: $releaseType",
+              releaseType,
+              task.getReleaseType()
+        )
+        Assert.assertEquals(
+              "the version to release should have been: $expectedUpgradeVersion",
+              expectedUpgradeVersion,
+              task.getVersionForRelease()
+        )
+        Assert.assertEquals(
+              "the current version should have been: " + expectedCurrentVersion(),
+              expectedCurrentVersion(),
+              task.getCurrentVersion()
+        )
     }
 
     private UpdateVersionTask createTaskWithReleaseType(ReleaseType releaseType) {
@@ -78,5 +92,13 @@ class UpdateVersionTaskTest {
               .setName(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME)
               .setSupplier({ new UpdateVersionTask(resolver, releaseType) })
               .create()
+    }
+
+    private String expectedCurrentVersion() {
+        // If we try to perform a snapshot release, nothing should change. (Don't ask me why we even have "snapshot
+        // releases", though...)
+        return (task.getReleaseType() == ReleaseType.SNAPSHOT) ?
+                TEST_RELEASE_SNAPSHOT_VERSION :
+                TEST_UPGRADE_VERSION
     }
 }

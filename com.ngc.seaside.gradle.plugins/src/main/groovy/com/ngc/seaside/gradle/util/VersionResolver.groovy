@@ -13,7 +13,6 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class VersionResolver implements IResolver {
-
     public static final String VERSION_SUFFIX = "-SNAPSHOT"
 
     private static final Pattern PATTERN =
@@ -70,7 +69,7 @@ class VersionResolver implements IResolver {
     }
 
     void setProjectVersionOnFile(String newVersion) {
-        versionFile.text = versionFile.text.replaceFirst(PATTERN, "\tversion = \'$newVersion\'")
+        versionFile.text = versionFile.text.replaceFirst(PATTERN, "   version = \'$newVersion\'")
     }
 
     String getTagName(String tagPrefix, String versionSuffix) {
