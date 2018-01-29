@@ -62,6 +62,8 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
              * the nexus consolidated repository.
              */
             repositories {
+                mavenLocal()
+
                 maven {
                     credentials {
                         username nexusUsername
@@ -70,8 +72,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                     name REMOTE_MAVEN_REPOSITORY_NAME
                     url nexusConsolidated
                 }
-
-                mavenLocal()
             }
 
             project.afterEvaluate {
