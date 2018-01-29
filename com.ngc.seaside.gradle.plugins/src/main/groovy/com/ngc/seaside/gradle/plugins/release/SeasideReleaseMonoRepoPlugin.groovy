@@ -42,29 +42,25 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
             UpdateVersionTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             RELEASE_UPDATE_VERSION_TASK_NAME,
-            'Define a release version (i.e. remove -SNAPSHOT) and commit it.',
-            releaseExtension)
+            'Define a release version (i.e. remove -SNAPSHOT) and commit it.')
 
         ReleaseUtil.configureTask(project,
             CreateTagTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             RELEASE_CREATE_TAG_TASK_NAME,
-            'Create the version tag used by GitHub.',
-            releaseExtension)
+            'Create the version tag used by GitHub.')
 
         ReleaseUtil.configureTask(project,
             ReleasePushTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             RELEASE_PUSH_TASK_NAME,
-            'Push the project to GitHub.',
-            releaseExtension)
+            'Push the project to GitHub.')
 
         ReleaseUtil.configureTask(project,
             BumpVersionTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             RELEASE_BUMP_VERSION_TASK_NAME,
-            'Will bump ths version in the build gradle file.',
-            releaseExtension)
+            'Will bump ths version in the build gradle file.')
 
     }
 

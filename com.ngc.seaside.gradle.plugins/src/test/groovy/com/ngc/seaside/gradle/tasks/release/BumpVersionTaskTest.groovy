@@ -21,11 +21,7 @@ import static org.mockito.Mockito.*
 @RunWith(MockitoJUnitRunner.Silent)
 class BumpVersionTaskTest {
     private static final String TEST_VERSION_SUFFIX = "-SNAPSHOT"
-    private static final String TEST_UPGRADE_VERSION = "1.2.2"
-    private static final String TEST_RELEASE_SNAPSHOT_VERSION = "${TEST_UPGRADE_VERSION}${TEST_VERSION_SUFFIX}"
-    private static final String TEST_RELEASE_PATCH_VERSION = "1.2.3"
     private static final String TEST_RELEASE_MINOR_VERSION = "1.3.0"
-    private static final String TEST_RELEASE_MAJOR_VERSION = "2.0.0"
 
     private ProjectInternal testProject
     private BumpVersionTask task
@@ -41,44 +37,26 @@ class BumpVersionTaskTest {
         testProject = GradleMocks.newProjectMock()
         when(testProject.rootProject).thenReturn(testProject)
         when(testProject.rootProject.hasProperty("releaseVersion")).thenReturn(true)
-
-        when(resolver.updateProjectVersionForRelease(any())).thenReturn(TEST_UPGRADE_VERSION)
-        when(resolver.updateProjectVersionForRelease(ReleaseType.SNAPSHOT)).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
-    }
-
-    @Test
-    void doesNotUpgradeVersionForSnapshotRelease() {
-        confirmVersionUpgradeForReleaseType(ReleaseType.SNAPSHOT, TEST_RELEASE_SNAPSHOT_VERSION + TEST_VERSION_SUFFIX)
-    }
-
-    @Test
-    void canUpgradeVersionForPatchRelease() {
-        confirmVersionUpgradeForReleaseType(ReleaseType.PATCH, TEST_RELEASE_PATCH_VERSION + TEST_VERSION_SUFFIX)
+        when(resolver.getProjectVersion()).thenReturn(TEST_RELEASE_MINOR_VERSION)
     }
 
     @Test
     void canUpgradeVersionForMinorRelease() {
-        confirmVersionUpgradeForReleaseType(ReleaseType.MINOR, TEST_RELEASE_MINOR_VERSION + TEST_VERSION_SUFFIX)
+        confirmVersionUpgradeForReleaseType(TEST_RELEASE_MINOR_VERSION + TEST_VERSION_SUFFIX)
     }
 
-    @Test
-    void canUpgradeVersionForMajorRelease() {
-        confirmVersionUpgradeForReleaseType(ReleaseType.MAJOR, TEST_RELEASE_MAJOR_VERSION + TEST_VERSION_SUFFIX)
-    }
-
-    private void confirmVersionUpgradeForReleaseType(ReleaseType releaseType, String expectedUpgradeVersion) {
-        task = createTaskWithReleaseType(releaseType)
+    private void confirmVersionUpgradeForReleaseType(String expectedUpgradeVersion) {
+        task = createTaskWithReleaseType()
         task.setNextVersion()
-        verify(resolver).updateProjectVersionForRelease(releaseType)
-        Assert.assertEquals(releaseType, task.getReleaseType())
+        verify(resolver).getProjectVersion()
         Assert.assertEquals(expectedUpgradeVersion, task.setNextVersion())
     }
 
-    private BumpVersionTask createTaskWithReleaseType(ReleaseType releaseType) {
+    private BumpVersionTask createTaskWithReleaseType() {
         return new TaskBuilder<BumpVersionTask>(BumpVersionTask)
               .setProject(testProject)
               .setName(SeasideReleaseMonoRepoPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
-              .setSupplier({ new BumpVersionTask(resolver, releaseType) })
+              .setSupplier({ new BumpVersionTask(resolver) })
               .create()
     }
 }

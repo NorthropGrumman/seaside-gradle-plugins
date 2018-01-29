@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.util
 
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
+import com.sun.xml.internal.fastinfoset.util.StringArray
 import org.gradle.api.Project
 
 /**
@@ -36,13 +37,14 @@ class ReleaseUtil {
     * @param name of the task you are creating
     * @param description describes what the gradle task does
     * @param releaseExtension that belongs to this project
+    * @param This must be a comma seperatd string ex: "build, upload"
     */
    static void configureTask(Project project,
                               Class type,
                               String group,
                               String name,
                               String description,
-                              SeasideReleaseExtension releaseExtension) {
+                              String[] dependentTasks={}) {
       boolean isDryRun = name.endsWith(DRY_RUN_TASK_NAME_SUFFIX)
       project.afterEvaluate {
          def task = project.task(name,
@@ -56,10 +58,7 @@ class ReleaseUtil {
                }
             }
          }
-
-         if (releaseExtension.uploadArtifacts && !isDryRun) {
-            task.dependsOn(TaskResolver.findTask(project,"uploadArchives"))
-         }
+         dependentTasks.each{taskName -> task.dependsOn(TaskResolver.findTask(project, taskName))}
       }
    }
 
