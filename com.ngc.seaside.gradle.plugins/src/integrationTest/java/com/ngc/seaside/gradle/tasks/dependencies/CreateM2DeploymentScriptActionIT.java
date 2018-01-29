@@ -108,7 +108,6 @@ public class CreateM2DeploymentScriptActionIT {
       assertTrue("did not create script!",
                  script.exists());
       List<String> lines = Files.readAllLines(script.toPath());
-      lines.forEach(System.out::println);
       assertTrue("missing command to deploy main jar, sources, and test!",
                  lines.contains(formatMavenDeployCommand(jar,
                                                          store,
