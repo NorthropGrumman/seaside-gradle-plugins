@@ -77,16 +77,29 @@ class ReleaseUtil {
    /**
     * Execute a git command on the current Gradle project passing the specified arguments to git.
     *
-    * @param output The output stream to which the command output should be directed.
-    * @param argumentsToGit The arguments to pass to the git command.
+    * @param arguments The arguments to pass to the git command.
     *
     * @return The closure to be added to your project for running the git command with the arguments specified.
     */
-   static Closure git(ByteArrayOutputStream output, Object[] argumentsToGit) {
-      println("trying to run git $argumentsToGit")
+   static Closure git(Object[] arguments) {
+      return gitWithOutput(null, arguments)
+   }
+
+   /**
+    * Execute a git command on the current Gradle project passing the specified arguments to git and redirecting
+    * standard output and standard error to the specified output stream. This could be useful for testing that the
+    * command's output is what you expect.
+    *
+    * @param output The output stream to which the command output should be directed.
+    * @param arguments The arguments to pass to the git command.
+    *
+    * @return The closure to be added to your project for running the git command with the arguments specified.
+    */
+   static Closure gitWithOutput(ByteArrayOutputStream output, Object[] arguments) {
+      println("trying to run git $arguments")
       return {
          executable "git"
-         args argumentsToGit
+         args arguments
          standardOutput output ?: new ByteArrayOutputStream()
          ignoreExitValue = true
       }

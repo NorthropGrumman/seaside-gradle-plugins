@@ -44,7 +44,7 @@ class SeasideReleaseMonoRepoPluginFT {
         // TODO(Cameron): fix this test so that it runs correctly
         checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME) {
             def output = new ByteArrayOutputStream()
-            def result = project.exec ReleaseUtil.git(output, "log", "--pretty=format:%s")
+            def result = project.exec ReleaseUtil.gitWithOutput(output, "log", "--pretty=format:%s")
             Assert.assertEquals(0, result.getExitValue())
             Assert.assertTrue(
                   "output did not contain expected release message",
@@ -81,9 +81,9 @@ class SeasideReleaseMonoRepoPluginFT {
     }
 
     private void setupTestingGitRepo() {
-        project.exec ReleaseUtil.git(null, "init", projectDir.getAbsolutePath())
-        project.exec ReleaseUtil.git(null, "add", ".")
-        project.exec ReleaseUtil.git(null, "commit", "-m", "initial commit")
+        project.exec ReleaseUtil.git("init", projectDir.getAbsolutePath())
+        project.exec ReleaseUtil.git("add", ".")
+        project.exec ReleaseUtil.git("commit", "-m", "initial commit")
     }
 
     private void checkForTaskSuccess(String taskName, Closure closure) {

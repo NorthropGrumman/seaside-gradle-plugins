@@ -36,9 +36,12 @@ class VersionResolver implements IResolver {
         logger = project.logger
     }
 
-    String getProjectVersion(ReleaseType releaseType) throws Exception {
-        def versionFromFile = getSemanticVersion(versionFile.text.trim(), enforceVersionSuffix)
-        return resolveVersionUpgradeStrategy(releaseType).getVersion(versionFromFile)
+    String getProjectVersion() throws Exception {
+        return getSemanticVersion(versionFile.text.trim(), enforceVersionSuffix)
+    }
+
+    String updateProjectVersionForRelease(ReleaseType releaseType) throws Exception {
+        return resolveVersionUpgradeStrategy(releaseType).getVersion(getProjectVersion())
     }
 
     protected String getSemanticVersion(String input, boolean enforceVersionSuffix = false) {

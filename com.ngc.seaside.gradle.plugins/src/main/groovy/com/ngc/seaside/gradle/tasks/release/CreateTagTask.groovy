@@ -69,7 +69,7 @@ class CreateTagTask extends DefaultTask {
     * @return tag that will be used for a release
     */
    String setTagName(){
-      return tagName = getTagPrefix() + setNextVersion()
+      return tagName = getTagPrefix() + getCurrentVersion()
    }
 
    /**
@@ -93,17 +93,8 @@ class CreateTagTask extends DefaultTask {
     * @param dryRun Not actually creating the tag
     */
    private void createTag(boolean commitChanges, boolean dryRun) {
-      project.exec ReleaseUtil.git(null, "tag", "-a", tagName, "-m Release of $tagName")
+      project.exec ReleaseUtil.git("tag", "-a", tagName, "-m Release of $tagName")
       logger.debug("Created release tag: $tagName")
-   }
-
-   /**
-    *
-    * @return the string of the next version to be written to the build.gradle file
-    */
-   String setNextVersion() {
-      def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
-      return upgradeStrategy.getVersion(getCurrentVersion())
    }
 
    /**
@@ -111,7 +102,7 @@ class CreateTagTask extends DefaultTask {
     * @return String based on the current version in the build.gradle file
     */
    private String getCurrentVersion() {
-      return resolver.getProjectVersion(releaseType)
+      return resolver.getProjectVersion()
    }
 
    /**
