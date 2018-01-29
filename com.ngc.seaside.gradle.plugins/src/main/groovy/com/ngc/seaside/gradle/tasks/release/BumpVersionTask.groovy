@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
+import com.google.common.base.Preconditions
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.util.ReleaseUtil
 import com.ngc.seaside.gradle.util.VersionResolver
@@ -18,9 +19,11 @@ class BumpVersionTask extends DefaultTask {
    boolean commitChanges
    boolean push
 
-   ReleaseType releaseType = ReleaseType.MINOR
-   String versionSuffix
+   private ReleaseType releaseType = ReleaseType.MINOR
+   private String versionSuffix
    private VersionResolver resolver
+   private String nextVersion
+
 
    /**
     * CTOR
@@ -28,6 +31,19 @@ class BumpVersionTask extends DefaultTask {
    BumpVersionTask(){
       resolver = new VersionResolver(project)
       resolver.enforceVersionSuffix = true
+   }
+
+   /**
+    * CTOR used by testing framework
+    * @param resolver
+    * @param typeOfRelease defaulted to ReleaseType Minor
+    */
+   BumpVersionTask(VersionResolver resolver,
+                   ReleaseType typeOfRelease = ReleaseType.MINOR,
+                   String versionSuffix='-SNAPSHOT') {
+      this.resolver = Preconditions.checkNotNull(resolver, "resolver may not be null!")
+      this.releaseType = typeOfRelease
+      this.versionSuffix = versionSuffix
    }
 
    /**
@@ -45,20 +61,39 @@ class BumpVersionTask extends DefaultTask {
    }
 
    /**
+    *
+    * @return the string of the next version to be written to the build.gradle file
+    */
+   String setNextVersion() {
+      def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
+      return nextVersion = upgradeStrategy.getVersion(getCurrentVersion()) + getVersionSuffix()
+   }
+
+   protected String getVersionSuffix() {
+      return versionSuffix
+   }
+
+   /**
+    *
+    * @return ReleaseType for this version
+    */
+   ReleaseType getReleaseType() {
+      return releaseType
+   }
+
+   /**
     * This will go and get the next version based on the ReleaseType
     *   and then write it to the build.gradle file and then commit it.
     */
    private void bumpVersion() {
-      def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
-      def nextVersion = upgradeStrategy.getVersion(getCurrentVersion()) + versionSuffix
-      commitNextVersionToFile(nextVersion)
+      commitNextVersionToFile(setNextVersion())
    }
 
    /**
     *
     * @return String based on the current version in the build.gradle file
     */
-   String getCurrentVersion() {
+   private String getCurrentVersion() {
       return resolver.getProjectVersion(releaseType)
    }
 
