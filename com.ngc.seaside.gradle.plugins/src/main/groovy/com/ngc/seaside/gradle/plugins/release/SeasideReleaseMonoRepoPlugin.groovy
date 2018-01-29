@@ -57,20 +57,22 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
 
         ReleaseUtil.configureTask(
             project,
-            ReleasePushTask,
-            RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            RELEASE_PUSH_TASK_NAME,
-            'Push the project to GitHub.',
-            dependencies)
-
-        ReleaseUtil.configureTask(
-            project,
             BumpVersionTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
             RELEASE_BUMP_VERSION_TASK_NAME,
             'Will bump the version (i.e. add -SNAPSHOT) in the version file.',
             dependencies)
 
+        ReleaseUtil.configureTask(
+            project,
+            ReleasePushTask,
+            RELEASE_MONO_REPO_TASK_GROUP_NAME,
+            RELEASE_PUSH_TASK_NAME,
+            'Push the project to GitHub.',
+            (String[])[
+                  RELEASE_UPDATE_VERSION_TASK_NAME,
+                  RELEASE_CREATE_TAG_TASK_NAME
+            ])
     }
 
 
