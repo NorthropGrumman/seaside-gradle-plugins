@@ -33,13 +33,13 @@ class VersionResolverIT {
    void doesSetProjectVersionOnFile() {
       def version = "4.5.6"
       resolver.setProjectVersionOnFile(version)
-      Assert.assertEquals("4.5.7", resolver.updateProjectVersionForRelease(ReleaseType.PATCH))
-      Assert.assertEquals("4.6.0", resolver.updateProjectVersionForRelease(ReleaseType.MINOR))
-      Assert.assertEquals("5.0.0", resolver.updateProjectVersionForRelease(ReleaseType.MAJOR))
+      Assert.assertEquals("4.5.7", resolver.getUpdatedProjectVersionForRelease(ReleaseType.PATCH))
+      Assert.assertEquals("4.6.0", resolver.getUpdatedProjectVersionForRelease(ReleaseType.MINOR))
+      Assert.assertEquals("5.0.0", resolver.getUpdatedProjectVersionForRelease(ReleaseType.MAJOR))
 
       version = "4.5.6-SUFFIX"
       resolver.setProjectVersionOnFile(version)
-      Assert.assertEquals(version, resolver.updateProjectVersionForRelease(ReleaseType.SNAPSHOT))
+      Assert.assertEquals(version, resolver.getUpdatedProjectVersionForRelease(ReleaseType.SNAPSHOT))
    }
 
    @Test

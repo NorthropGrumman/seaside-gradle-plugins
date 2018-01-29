@@ -27,10 +27,10 @@ abstract class AbstractProjectPlugin implements IProjectPlugin {
         if (project.extensions.findByName(VERSION_SETTINGS_CONVENTION_NAME) == null) {
             this.versionResolver = project.extensions.create(VERSION_SETTINGS_CONVENTION_NAME, VersionResolver, project)
         } else {
-            this.versionResolver = project.extensions.findByName(VERSION_SETTINGS_CONVENTION_NAME)
+            this.versionResolver = (VersionResolver)project.extensions.findByName(VERSION_SETTINGS_CONVENTION_NAME)
         }
         this.versionResolver.setEnforceVersionSuffix(false)
-        project.version = "${-> versionResolver.updateProjectVersionForRelease(ReleaseType.SNAPSHOT)}"
+        project.version = "${-> versionResolver.getUpdatedProjectVersionForRelease(ReleaseType.SNAPSHOT)}"
         doApply(project)
     }
 

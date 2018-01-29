@@ -40,10 +40,10 @@ class UpdateVersionTaskTest {
         when(testProject.rootProject.hasProperty("releaseVersion")).thenReturn(true)
 
         when(resolver.getProjectVersion()).thenReturn(TEST_UPGRADE_VERSION)
-        when(resolver.updateProjectVersionForRelease(ReleaseType.SNAPSHOT)).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
-        when(resolver.updateProjectVersionForRelease(ReleaseType.PATCH)).thenReturn(TEST_RELEASE_PATCH_VERSION)
-        when(resolver.updateProjectVersionForRelease(ReleaseType.MINOR)).thenReturn(TEST_RELEASE_MINOR_VERSION)
-        when(resolver.updateProjectVersionForRelease(ReleaseType.MAJOR)).thenReturn(TEST_RELEASE_MAJOR_VERSION)
+        when(resolver.getUpdatedProjectVersionForRelease(ReleaseType.SNAPSHOT)).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
+        when(resolver.getUpdatedProjectVersionForRelease(ReleaseType.PATCH)).thenReturn(TEST_RELEASE_PATCH_VERSION)
+        when(resolver.getUpdatedProjectVersionForRelease(ReleaseType.MINOR)).thenReturn(TEST_RELEASE_MINOR_VERSION)
+        when(resolver.getUpdatedProjectVersionForRelease(ReleaseType.MAJOR)).thenReturn(TEST_RELEASE_MAJOR_VERSION)
     }
 
     @Test
@@ -76,7 +76,7 @@ class UpdateVersionTaskTest {
         )
 
         task.updateReleaseVersion()
-        verify(resolver).updateProjectVersionForRelease(releaseType)
+        verify(resolver).getUpdatedProjectVersionForRelease(releaseType)
 
         Assert.assertEquals(
               "the release type should have been: $releaseType",

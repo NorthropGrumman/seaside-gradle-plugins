@@ -40,7 +40,7 @@ class VersionResolver implements IResolver {
         return getSemanticVersion(versionFile.text.trim())
     }
 
-    String updateProjectVersionForRelease(ReleaseType releaseType) throws Exception {
+    String getUpdatedProjectVersionForRelease(ReleaseType releaseType) throws Exception {
         return resolveVersionUpgradeStrategy(releaseType).getVersion(getProjectVersion())
     }
 

@@ -60,7 +60,7 @@ class UpdateVersionTask extends DefaultTask {
      * @return version used for the next release
      */
     String getVersionForRelease() {
-        return resolver.updateProjectVersionForRelease(releaseType)
+        return resolver.getUpdatedProjectVersionForRelease(releaseType)
     }
 
     /**
