@@ -24,7 +24,7 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
     * The column headers.
     */
    final static String COLUMN_HEADERS =
-         "Group ID\tArtifact ID\tVersion\tPOM File\tFile\tFiles (optional)\tClassifiers  (optional)\tTypes (optional)";
+         "GroupID\tArtifactID\tVersion\tpomFile\tfile\tfiles\tclassifiers\ttypes";
 
    /**
     * The character that delimits fields.

@@ -52,7 +52,7 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
     * should attempt to be resolved.
     */
    private final static Collection<String> DEFAULT_CLASSIFIERS = Collections.unmodifiableCollection(
-         Arrays.asList(null, "sources", "tests"));
+         Arrays.asList(null, "sources", "tests", "javadoc"));
    // TODO TH: add javadoc to the list of classifiers above.
 
    /**
