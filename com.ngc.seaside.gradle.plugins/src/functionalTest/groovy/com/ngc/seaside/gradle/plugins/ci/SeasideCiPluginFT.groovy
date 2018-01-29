@@ -91,11 +91,11 @@ class SeasideCiPluginFT {
         assertTrue("m2 archive not created!",
                    m2Archive.isFile())
 
-        File csvReport = new File(
+        File dependencyReport = new File(
               projectDir,
               "com.ngc.seaside.service.konnichiwamojuru/build/" +
-              SeasideCiPlugin.DEFAULT_CSV_FILE_NAME)
-        assertTrue("csv report not created!",
-                   csvReport.isFile())
+              SeasideCiExtension.DEFAULT_M2_ARCHIVE_NAME)
+        assertTrue("dependency report not created!",
+                   dependencyReport.isFile())
     }
 }

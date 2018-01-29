@@ -87,6 +87,6 @@ task testM2repo(type: PopulateMaven2Repository) {
     localRepository = mavenLocal()
     configuration = project.configurations.getByName('thirdParty')
 
-    createCsvFile = true
-    dependencyInfoCsvFile = project.file("${project.buildDir}/dependencies.csv")
+    createDependencyReportFile = true
+    dependencyInfoReportFile = project.file("${project.buildDir}/dependencies.tsv")
 }

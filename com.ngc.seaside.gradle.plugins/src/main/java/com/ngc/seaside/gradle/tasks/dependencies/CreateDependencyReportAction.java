@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
-public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateMaven2Repository> {
+public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMaven2Repository> {
 
    /**
     * The column headers.
@@ -35,11 +35,11 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
 
    @Override
    public void validate(PopulateMaven2Repository task) throws InvalidUserDataException {
-      GradleUtil.checkUserData(!task.isCreateCsvFile() || task.getDependencyInfoCsvFile() != null,
+      GradleUtil.checkUserData(!task.isCreateDependencyReportFile() || task.getDependencyInfoReportFile() != null,
                                "CSV file is not configured!");
    }
 
-   public CreateCsvDependencyReportAction setStore(ArtifactResultStore store) {
+   public CreateDependencyReportAction setStore(ArtifactResultStore store) {
       this.store = Preconditions.checkNotNull(store, "store may not be null!");
       return this;
    }
@@ -65,7 +65,7 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
 
    @Override
    protected void doExecute() {
-      if (task.isCreateCsvFile()) {
+      if (task.isCreateDependencyReportFile()) {
          Preconditions.checkState(store != null, "store must be set!");
          createReport();
       }
@@ -74,7 +74,7 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
    private void createReport() {
       Set<String> lines = readExistingReportIfAny();
 
-      Path csvFile = task.getDependencyInfoCsvFile().toPath();
+      Path csvFile = task.getDependencyInfoReportFile().toPath();
       for (ArtifactResult mainResult : store.getMainResults()) {
          lines.add(formatLine(mainResult, store, csvFile));
       }
@@ -86,7 +86,7 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
       // Use a tree set which sorts the output.
       Set<String> lines = new TreeSet<>();
 
-      Path csvFile = task.getDependencyInfoCsvFile().toPath();
+      Path csvFile = task.getDependencyInfoReportFile().toPath();
       if (Files.isRegularFile(csvFile)) {
          logger.lifecycle("Updating CSV dependency report {}.", csvFile.toAbsolutePath());
          try {
@@ -108,23 +108,23 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
 
    private void writeLines(Set<String> lines) {
       // Create parent directories if needed.
-      File dir = task.getDependencyInfoCsvFile().getParentFile();
+      File dir = task.getDependencyInfoReportFile().getParentFile();
       if (dir != null && !dir.isDirectory()) {
          dir.mkdirs();
       }
 
       try {
-         Files.write(task.getDependencyInfoCsvFile().toPath(),
+         Files.write(task.getDependencyInfoReportFile().toPath(),
                      Collections.singleton(COLUMN_HEADERS),
                      StandardOpenOption.WRITE,
                      StandardOpenOption.CREATE,
                      StandardOpenOption.TRUNCATE_EXISTING);
-         Files.write(task.getDependencyInfoCsvFile().toPath(),
+         Files.write(task.getDependencyInfoReportFile().toPath(),
                      lines,
                      StandardOpenOption.WRITE,
                      StandardOpenOption.APPEND);
       } catch (IOException e) {
-         logger.error("Unexpected error while creating dependency report at {}.", e, task.getDependencyInfoCsvFile());
+         logger.error("Unexpected error while creating dependency report at {}.", e, task.getDependencyInfoReportFile());
       }
    }
 

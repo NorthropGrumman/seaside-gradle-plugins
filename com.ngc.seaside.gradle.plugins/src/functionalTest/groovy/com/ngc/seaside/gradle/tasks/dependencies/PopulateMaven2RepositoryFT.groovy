@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.tasks.dependencies
 
+import com.ngc.seaside.gradle.extensions.ci.SeasideCiExtension
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
@@ -18,7 +19,7 @@ import java.nio.file.Paths
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
 
-@Ignore("This test can take a long time and requires network access.")
+//@Ignore("This test can take a long time and requires network access.")
 class PopulateMaven2RepositoryFT {
     private File projectDir
     private Project project
@@ -37,7 +38,7 @@ class PopulateMaven2RepositoryFT {
     }
 
     @Test
-    void doesPopulateM2Repo() {
+    void doesPopulateM2RepoAndCreateReport() {
         BuildResult result = GradleRunner.create().withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()
@@ -53,5 +54,11 @@ class PopulateMaven2RepositoryFT {
                    m2repo.exists())
         assertTrue("m2 repo is empty!",
                    m2repo.listFiles().length > 0)
+
+        File dependencyReport = new File(
+              projectDir,
+              "build/dependencies.tsv")
+        assertTrue("dependency report not created!",
+                   dependencyReport.isFile())
     }
 }

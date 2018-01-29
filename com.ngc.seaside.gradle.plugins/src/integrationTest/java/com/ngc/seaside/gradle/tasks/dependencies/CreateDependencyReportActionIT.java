@@ -25,7 +25,7 @@ import java.util.List;
 
 import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newArtifactResult;
 import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newLocalMavenRepo;
-import static com.ngc.seaside.gradle.tasks.dependencies.CreateCsvDependencyReportAction.formatLine;
+import static com.ngc.seaside.gradle.tasks.dependencies.CreateDependencyReportAction.formatLine;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -33,11 +33,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class CreateCsvDependencyReportActionIT {
+public class CreateDependencyReportActionIT {
 
-   private CreateCsvDependencyReportAction action;
+   private CreateDependencyReportAction action;
 
-   private File csvFile;
+   private File reportFile;
 
    private File localMavenRepo;
 
@@ -63,7 +63,7 @@ public class CreateCsvDependencyReportActionIT {
 
    @Before
    public void setup() throws Throwable {
-      csvFile = new File(temp.getRoot(), "dependencies.csv");
+      reportFile = new File(temp.getRoot(), "dependencies.csv");
       localMavenRepo = temp.newFolder("local", "m2repo");
       outputDirectory = temp.newFolder("dependencies-m2");
 
@@ -95,50 +95,50 @@ public class CreateCsvDependencyReportActionIT {
       when(task.getLocalRepository()).thenReturn(local);
 
       store = new ArtifactResultStore(localMavenRepo.toPath(), outputDirectory.toPath());
-      action = new CreateCsvDependencyReportAction();
+      action = new CreateDependencyReportAction();
    }
 
    @Test
-   public void testDoesGenerateCsvFile() throws Throwable {
-      when(task.isCreateCsvFile()).thenReturn(true);
-      when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
+   public void testDoesGenerateReportFile() throws Throwable {
+      when(task.isCreateDependencyReportFile()).thenReturn(true);
+      when(task.getDependencyInfoReportFile()).thenReturn(reportFile);
       action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom));
 
       action.execute(task);
 
       assertTrue("did not create CSV file!",
-                 csvFile.exists());
-      List<String> lines = Files.readAllLines(csvFile.toPath());
+                 reportFile.exists());
+      List<String> lines = Files.readAllLines(reportFile.toPath());
       assertTrue("missing jar dependency from report!",
-                 lines.contains(formatLine(jar, store, csvFile.toPath())));
+                 lines.contains(formatLine(jar, store, reportFile.toPath())));
    }
 
    @Test
-   public void testDoesAppendToExistingCsvFile() throws Throwable {
-      when(task.isCreateCsvFile()).thenReturn(true);
-      when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
+   public void testDoesAppendToExistingReportFile() throws Throwable {
+      when(task.isCreateDependencyReportFile()).thenReturn(true);
+      when(task.getDependencyInfoReportFile()).thenReturn(reportFile);
       action.setStore(store.addResult(jar, pom).addResult(sources, pom));
 
       // Create an existing file.
       String extraLine = "group2\tartifact2\t2.0\tmy-pom.pom\tmy-file.jar\tmy-sources.jar\tsources\tjar";
-      Files.write(csvFile.toPath(), Arrays.asList(CreateCsvDependencyReportAction.COLUMN_HEADERS,
-                                                  extraLine));
+      Files.write(reportFile.toPath(), Arrays.asList(CreateDependencyReportAction.COLUMN_HEADERS,
+                                                     extraLine));
 
       action.execute(task);
 
-      assertTrue("did not create CSV file!",
-                 csvFile.exists());
-      List<String> lines = Files.readAllLines(csvFile.toPath());
+      assertTrue("did not create report file!",
+                 reportFile.exists());
+      List<String> lines = Files.readAllLines(reportFile.toPath());
       assertTrue("missing jar dependency from report!",
-                 lines.contains(formatLine(jar, store, csvFile.toPath())));
+                 lines.contains(formatLine(jar, store, reportFile.toPath())));
       assertTrue("did not keep old line!",
                  lines.contains(extraLine));
    }
 
 //   @Test
-//   public void testDoesNotInsertDuplicatesIntoCsvFile() throws Throwable {
-//      when(task.isCreateCsvFile()).thenReturn(true);
-//      when(task.getDependencyInfoCsvFile()).thenReturn(csvFile);
+//   public void testDoesNotInsertDuplicatesIntoReportFile() throws Throwable {
+//      when(task.isCreateDependencyReportFile()).thenReturn(true);
+//      when(task.getDependencyInfoReportFile()).thenReturn(csvFile);
 //      action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom));
 //
 //      // Create an existing file.
@@ -174,27 +174,27 @@ public class CreateCsvDependencyReportActionIT {
 //   }
 
    @Test
-   public void testDoesNotGenerateCsvFileIfNotConfigured() throws Throwable {
-      when(task.isCreateCsvFile()).thenReturn(false);
+   public void testDoesNotGenerateReportFileIfNotConfigured() throws Throwable {
+      when(task.isCreateDependencyReportFile()).thenReturn(false);
       action.setStore(store.addResult(jar, pom));
       action.execute(task);
       assertFalse("should not have created file!",
-                  csvFile.exists());
+                  reportFile.exists());
    }
 
    @Test
    public void testDoesValidate() throws Throwable {
-      when(task.isCreateCsvFile()).thenReturn(true);
-      when(task.getDependencyInfoCsvFile()).thenReturn(null);
+      when(task.isCreateDependencyReportFile()).thenReturn(true);
+      when(task.getDependencyInfoReportFile()).thenReturn(null);
 
       try {
          action.validate(task);
-         fail("did not validate missing CSV file!");
+         fail("did not validate missing report file!");
       } catch (InvalidUserDataException e) {
          // Expected.
       }
 
-      when(task.isCreateCsvFile()).thenReturn(false);
+      when(task.isCreateDependencyReportFile()).thenReturn(false);
       // Missing file should be okay.
       action.validate(task);
    }

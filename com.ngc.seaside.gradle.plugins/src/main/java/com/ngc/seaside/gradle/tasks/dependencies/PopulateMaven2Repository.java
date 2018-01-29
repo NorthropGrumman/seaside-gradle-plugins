@@ -52,12 +52,12 @@ public class PopulateMaven2Repository extends DefaultTask {
    private File outputDirectory;
 
    /**
-    * The file that will be written that contains the dependency info in CSV form.
+    * The file that will be written that contains the dependency info.
     */
-   private File dependencyInfoCsvFile;
+   private File dependencyInfoReportFile;
 
    /**
-    * The deployment script file to generate.
+    * The file that will be written that contains the deployment script.
     */
    private File deployScriptFile;
 
@@ -94,14 +94,9 @@ public class PopulateMaven2Repository extends DefaultTask {
    private String repositoryUpdatePolicy = RepositoryPolicy.UPDATE_POLICY_NEVER;
 
    /**
-    * If true, a CSV will be created.
+    * If true, a dependency report will be created.
     */
-   private boolean createCsvFile = true;
-
-   /**
-    * If true, a deployment script will be created.
-    */
-   private boolean createDeployScript = true;
+   private boolean createDependencyReportFile = true;
 
    /**
     * Used to create instances of {@code MavenArtifactRepository} for ease of user configuration.  Provided by Gradle at
@@ -118,7 +113,7 @@ public class PopulateMaven2Repository extends DefaultTask {
    public void populateRepository() {
       ResolveDependenciesAction resolveDependencies = newResolveDependenciesAction();
       CopyDependencyFilesAction copyDependencyFiles = newCopyDependencyFilesAction();
-      CreateCsvDependencyReportAction createCsvDependencyReport = newCreateCsvDependencyReportAction();
+      CreateDependencyReportAction createCsvDependencyReport = newCreateDependencyReportAction();
 
       resolveDependencies.validate(this);
       copyDependencyFiles.validate(this);
@@ -200,32 +195,32 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * Gets the file that will be written that contains the dependency info in CSV form.
+    * Gets the file that will be written that contains the dependency info.
     */
    @OutputFile
    @org.gradle.api.tasks.Optional
-   public File getDependencyInfoCsvFile() {
-      return dependencyInfoCsvFile;
+   public File getDependencyInfoReportFile() {
+      return dependencyInfoReportFile;
    }
 
    /**
-    * Sets file that will be written that contains the dependency info in CSV form.
+    * Sets file that will be written that contains the dependency info.
     */
-   public void setDependencyInfoCsvFile(File dependencyInfoCsvFile) {
-      this.dependencyInfoCsvFile = Preconditions.checkNotNull(dependencyInfoCsvFile,
-                                                              "dependencyInfoCsvFile may not be null!");
+   public void setDependencyInfoReportFile(File dependencyInfoReportFile) {
+      this.dependencyInfoReportFile = Preconditions.checkNotNull(dependencyInfoReportFile,
+                                                                 "dependencyInfoReportFile may not be null!");
    }
 
    /**
-    * Sets file that will be written that contains the dependency info in CSV form.  This method allows a user to
-    * specify the output CSV file as a command line option.
+    * specify the output file as a command line option.
     */
-   @Option(option = "dependencyInfoCsvFile",
-         description = "The CSV file to output which contains the dependency information.")
-   public void setDependencyInfoCsvFile(String dependencyInfoCsvFile) {
-      Preconditions.checkNotNull(dependencyInfoCsvFile, "dependencyInfoCsvFile may not be null!");
-      Preconditions.checkArgument(!dependencyInfoCsvFile.trim().isEmpty(), "dependencyInfoCsvFile may not be null!");
-      setDependencyInfoCsvFile(new File(dependencyInfoCsvFile));
+   @Option(option = "dependencyInfoReportFile",
+         description = "The report file to output which contains the dependency information.")
+   public void setDependencyInfoCsvFile(String dependencyInfoReportFile) {
+      Preconditions.checkNotNull(dependencyInfoReportFile, "dependencyInfoReportFile may not be null!");
+      Preconditions
+            .checkArgument(!dependencyInfoReportFile.trim().isEmpty(), "dependencyInfoReportFile may not be null!");
+      setDependencyInfoReportFile(new File(dependencyInfoReportFile));
    }
 
    /**
@@ -245,8 +240,8 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * Sets the script file that can be used to deploy dependencies. This method allows a user to
-    * specify the output CSV file as a command line option.
+    * Sets the script file that can be used to deploy dependencies. This method allows a user to specify the output CSV
+    * file as a command line option.
     */
    @Option(option = "deployScriptFile",
          description = "The location of the deployment script file to generate.")
@@ -334,31 +329,17 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * If true, a CSV file with dependency information will be created.
+    * If true, a dependency report file with dependency information will be created.
     */
-   public boolean isCreateCsvFile() {
-      return createCsvFile;
+   public boolean isCreateDependencyReportFile() {
+      return createDependencyReportFile;
    }
 
    /**
-    * Sets if a CSV file with dependency information will be created.
+    * Sets if a dependency report file with dependency information will be created.
     */
-   public void setCreateCsvFile(boolean createCsvFile) {
-      this.createCsvFile = createCsvFile;
-   }
-
-   /**
-    * If true, a deploy script for all dependencies will be created.
-    */
-   public boolean isCreateDeployScript() {
-      return createDeployScript;
-   }
-
-   /**
-    * Sets if a deploy script for all dependencies will be created.
-    */
-   public void setCreateDeployScript(boolean createDeployScript) {
-      this.createDeployScript = createDeployScript;
+   public void setCreateDependencyReportFile(boolean createDependencyReportFile) {
+      this.createDependencyReportFile = createDependencyReportFile;
    }
 
    /**
@@ -391,10 +372,10 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * Factory method to create a new instance of {@code CreateCsvDependencyReportAction}.  Useful for testing.
+    * Factory method to create a new instance of {@code CreateDependencyReportAction}.  Useful for testing.
     */
-   protected CreateCsvDependencyReportAction newCreateCsvDependencyReportAction() {
-      return new CreateCsvDependencyReportAction();
+   protected CreateDependencyReportAction newCreateDependencyReportAction() {
+      return new CreateDependencyReportAction();
    }
 
    /**

@@ -39,7 +39,7 @@ public class PopulateMaven2RepositoryTest {
    private CopyDependencyFilesAction copyDependencyFilesAction;
 
    @Mock
-   private CreateCsvDependencyReportAction createCsvDependencyReportAction;
+   private CreateDependencyReportAction createDependencyReportAction;
 
    @Mock
    private BaseRepositoryFactory baseRepositoryFactory;
@@ -61,8 +61,8 @@ public class PopulateMaven2RepositoryTest {
                }
 
                @Override
-               protected CreateCsvDependencyReportAction newCreateCsvDependencyReportAction() {
-                  return createCsvDependencyReportAction;
+               protected CreateDependencyReportAction newCreateDependencyReportAction() {
+                  return createDependencyReportAction;
                }
             })
             .setProject(project)
@@ -81,13 +81,13 @@ public class PopulateMaven2RepositoryTest {
 
       verify(resolveDependenciesAction).validate(task);
       verify(copyDependencyFilesAction).validate(task);
-      verify(createCsvDependencyReportAction).validate(task);
+      verify(createDependencyReportAction).validate(task);
 
       verify(resolveDependenciesAction).execute(task);
       verify(copyDependencyFilesAction).setDependencyResults(results);
       verify(copyDependencyFilesAction).execute(task);
 
-      verify(createCsvDependencyReportAction).setStore(any(ArtifactResultStore.class));
-      verify(createCsvDependencyReportAction).execute(task);
+      verify(createDependencyReportAction).setStore(any(ArtifactResultStore.class));
+      verify(createDependencyReportAction).execute(task);
    }
 }
