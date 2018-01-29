@@ -1,6 +1,5 @@
 package com.ngc.seaside.gradle.tasks.dependencies
 
-import com.ngc.seaside.gradle.extensions.ci.SeasideCiExtension
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
@@ -19,8 +18,9 @@ import java.nio.file.Paths
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
 
-//@Ignore("This test can take a long time and requires network access.")
+@Ignore("This test can take a long time and requires network access.")
 class PopulateMaven2RepositoryFT {
+
     private File projectDir
     private Project project
     private List<File> pluginClasspath
