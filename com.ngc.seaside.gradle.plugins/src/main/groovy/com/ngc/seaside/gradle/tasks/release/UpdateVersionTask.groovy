@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.tasks.release
 
 import com.google.common.base.Preconditions
+import com.ngc.seaside.gradle.util.ReleaseUtil
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -9,7 +10,7 @@ import javax.inject.Inject
 
 
 /**
- * updates the version for gradle builds
+ * Updates the version of the project to prepare for a release.
  */
 class UpdateVersionTask extends DefaultTask {
     //will be used in the future
@@ -46,7 +47,14 @@ class UpdateVersionTask extends DefaultTask {
      */
     @TaskAction
     void updateReleaseVersion() {
+        // TODO(Cameron): Remove debug statements
+        println("DEBUG: running the updateReleaseVersion task...")
         def newReleaseVersion = getVersionForRelease()
+        def currentVersion = getCurrentVersion()
+        println("DEBUG: will upgrade from current version: $currentVersion to new version: $newReleaseVersion")
+        resolver.setProjectVersionOnFile(newReleaseVersion)
+        ReleaseUtil.git(null, "commit", "-am", "Release of version v$newReleaseVersion")
+        println("DEBUG: done running the updateReleaseVersion task!")
     }
 
     /**

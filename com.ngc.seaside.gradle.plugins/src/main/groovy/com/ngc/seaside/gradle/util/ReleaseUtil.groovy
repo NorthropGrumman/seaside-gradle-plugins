@@ -7,14 +7,13 @@ import org.gradle.api.Project
  * Things common to all Release Tasks
  */
 class ReleaseUtil {
-
    static final String DRY_RUN_TASK_NAME_SUFFIX = 'DryRun'
    static final String RELEASE_VERSION = 'releaseVersion'
 
    /**
     * Wanted this to be strictly used as a static utility class
     */
-   private ReleaseUtil(){}
+   private ReleaseUtil() {}
 
    /**
     * To check for the release property in the current release project
@@ -70,23 +69,20 @@ class ReleaseUtil {
    }
 
    /**
+    * Execute a git command on the current Gradle project passing the specified arguments to git.
     *
-    * @param arguments
+    * @param output The output stream to which the command output should be directed.
+    * @param argumentsToGit The arguments to pass to the git command.
+    *
+    * @return The closure to be added to your project for running the git command with the arguments specified.
     */
-   static void git(Project project, Object[] arguments) {
-
-      def output = new ByteArrayOutputStream()
-
-      project.exec {
+   static Closure git(ByteArrayOutputStream output, Object[] argumentsToGit) {
+      println("trying to run git $argumentsToGit")
+      return {
          executable "git"
-         args arguments
-         standardOutput output
+         args argumentsToGit
+         standardOutput output ?: new ByteArrayOutputStream()
          ignoreExitValue = true
-      }
-
-      output = output.toString().trim()
-      if (!output.isEmpty()) {
-         project.logger.debug(output)
       }
    }
 }

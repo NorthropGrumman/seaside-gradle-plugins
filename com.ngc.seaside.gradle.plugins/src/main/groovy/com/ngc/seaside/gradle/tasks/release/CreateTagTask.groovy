@@ -56,8 +56,7 @@ class CreateTagTask extends DefaultTask {
     * @param dryRun Not actually creating the tag
     */
    private void createTag(boolean commitChanges, boolean dryRun) {
-
-      ReleaseUtil.git(project, "tag", "-a", tagName, "-m Release of $tagName")
+      project.exec ReleaseUtil.git(null, "tag", "-a", tagName, "-m Release of $tagName")
       logger.debug("Created release tag: $tagName")
    }
 

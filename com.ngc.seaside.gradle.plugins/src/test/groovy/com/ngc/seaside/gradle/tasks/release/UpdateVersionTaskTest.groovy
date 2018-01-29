@@ -13,8 +13,9 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
 import static org.mockito.Mockito.any
-import static org.mockito.Mockito.when
+import static org.mockito.Mockito.times
 import static org.mockito.Mockito.verify
+import static org.mockito.Mockito.when
 
 @RunWith(MockitoJUnitRunner.Silent)
 class UpdateVersionTaskTest {
@@ -67,7 +68,7 @@ class UpdateVersionTaskTest {
     private void confirmVersionUpgradeForReleaseType(ReleaseType releaseType, String expectedUpgradeVersion) {
         task = createTaskWithReleaseType(releaseType)
         task.updateReleaseVersion()
-        verify(resolver).getProjectVersion(releaseType)
+        verify(resolver, times(2)).getProjectVersion(releaseType)
         Assert.assertEquals(
               "the release type should have been: $releaseType",
               releaseType,
