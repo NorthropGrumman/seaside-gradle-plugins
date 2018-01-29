@@ -48,13 +48,11 @@ class UpdateVersionTask extends DefaultTask {
     @TaskAction
     void updateReleaseVersion() {
         // TODO(Cameron): Remove debug statements
-        println("DEBUG: running the updateReleaseVersion task...")
-        def newReleaseVersion = getVersionForRelease()
         def currentVersion = getCurrentVersion()
+        def newReleaseVersion = getVersionForRelease()
         println("DEBUG: will upgrade from current version: $currentVersion to new version: $newReleaseVersion")
         resolver.setProjectVersionOnFile(newReleaseVersion)
         ReleaseUtil.git("commit", "-am", "Release of version v$newReleaseVersion")
-        println("DEBUG: done running the updateReleaseVersion task!")
     }
 
     /**
@@ -64,8 +62,7 @@ class UpdateVersionTask extends DefaultTask {
      * @return version used for the next release
      */
     String getVersionForRelease() {
-        def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
-        return upgradeStrategy.getVersion(getCurrentVersion())
+        return resolver.updateProjectVersionForRelease(releaseType)
     }
 
     /**
@@ -74,7 +71,7 @@ class UpdateVersionTask extends DefaultTask {
      * @return version from the current version file
      */
     String getCurrentVersion() {
-        return resolver.getProjectVersion(releaseType)
+        return resolver.getProjectVersion()
     }
 
     /**

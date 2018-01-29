@@ -64,7 +64,7 @@ class ReleaseTask extends DefaultTask {
 
     private void createNewReleaseVersionIfNecessary() {
         if (!ReleaseUtil.isExtensionSet(project)) {
-            def currentProjectVersion = resolver.getProjectVersion(releaseType)
+            def currentProjectVersion = resolver.getProjectVersion()
             def newReleaseVersion = getTheReleaseVersion(currentProjectVersion)
             setTheNewReleaseVersion(newReleaseVersion)
             setTheReleaseVersionProjectProperty(newReleaseVersion)

@@ -33,7 +33,7 @@ class BumpVersionTask extends DefaultTask {
     * @Inject was used because there are two constructors and gradle seems to be confused on which constructor to use.
     */
    @Inject
-   BumpVersionTask(){
+   BumpVersionTask() {
       resolver = new VersionResolver(project)
       resolver.enforceVersionSuffix = true
    }
@@ -60,7 +60,6 @@ class BumpVersionTask extends DefaultTask {
     */
    @TaskAction
    def bumpTheVersion() {
-
        getReleaseExtensionSettings()
        bumpVersion()
    }
@@ -70,8 +69,7 @@ class BumpVersionTask extends DefaultTask {
     * @return the string of the next version to be written to the build.gradle file
     */
    String setNextVersion() {
-      def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
-      return nextVersion = upgradeStrategy.getVersion(getCurrentVersion()) + getVersionSuffix()
+      return resolver.updateProjectVersionForRelease(releaseType) + getVersionSuffix()
    }
 
    protected String getVersionSuffix() {
@@ -99,7 +97,7 @@ class BumpVersionTask extends DefaultTask {
     * @return String based on the current version in the build.gradle file
     */
    private String getCurrentVersion() {
-      return resolver.getProjectVersion(releaseType)
+      return resolver.getProjectVersion()
    }
 
    /**

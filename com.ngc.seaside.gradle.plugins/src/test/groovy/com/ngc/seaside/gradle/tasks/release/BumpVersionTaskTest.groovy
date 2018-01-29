@@ -42,8 +42,8 @@ class BumpVersionTaskTest {
         when(testProject.rootProject).thenReturn(testProject)
         when(testProject.rootProject.hasProperty("releaseVersion")).thenReturn(true)
 
-        when(resolver.getProjectVersion(any())).thenReturn(TEST_UPGRADE_VERSION)
-        when(resolver.getProjectVersion(ReleaseType.SNAPSHOT)).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
+        when(resolver.updateProjectVersionForRelease(any())).thenReturn(TEST_UPGRADE_VERSION)
+        when(resolver.updateProjectVersionForRelease(ReleaseType.SNAPSHOT)).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
     }
 
     @Test
@@ -69,7 +69,7 @@ class BumpVersionTaskTest {
     private void confirmVersionUpgradeForReleaseType(ReleaseType releaseType, String expectedUpgradeVersion) {
         task = createTaskWithReleaseType(releaseType)
         task.setNextVersion()
-        verify(resolver).getProjectVersion(releaseType)
+        verify(resolver).updateProjectVersionForRelease(releaseType)
         Assert.assertEquals(releaseType, task.getReleaseType())
         Assert.assertEquals(expectedUpgradeVersion, task.setNextVersion())
     }
