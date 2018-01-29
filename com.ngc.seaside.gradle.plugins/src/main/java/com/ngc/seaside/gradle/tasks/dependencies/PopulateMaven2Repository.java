@@ -99,6 +99,12 @@ public class PopulateMaven2Repository extends DefaultTask {
    private boolean createDependencyReportFile = true;
 
    /**
+    * If true, snapshot dependencies that were added to the local maven repository as a result of this build will be
+    * removed.  This is usually done only on CI servers.
+    */
+   private boolean removeSnapshots = false;
+
+   /**
     * Used to create instances of {@code MavenArtifactRepository} for ease of user configuration.  Provided by Gradle at
     * runtime.
     */
@@ -114,10 +120,12 @@ public class PopulateMaven2Repository extends DefaultTask {
       ResolveDependenciesAction resolveDependencies = newResolveDependenciesAction();
       CopyDependencyFilesAction copyDependencyFiles = newCopyDependencyFilesAction();
       CreateDependencyReportAction createCsvDependencyReport = newCreateDependencyReportAction();
+      RemoveSnapshotsAction removeSnapshots = newRemoveSnapshotsAction();
 
       resolveDependencies.validate(this);
       copyDependencyFiles.validate(this);
       createCsvDependencyReport.validate(this);
+      removeSnapshots.validate(this);
 
       resolveDependencies.execute(this);
 
@@ -130,6 +138,9 @@ public class PopulateMaven2Repository extends DefaultTask {
          createCsvDependencyReport.setStore(store);
          createCsvDependencyReport.execute(this);
       }
+
+      removeSnapshots.setDependencyResults(resolveDependencies.getDependencyResults());
+      removeSnapshots.execute(this);
    }
 
    /**
@@ -250,6 +261,37 @@ public class PopulateMaven2Repository extends DefaultTask {
       Preconditions.checkArgument(!deployScriptFile.trim().isEmpty(), "deployScriptFile may not be null!");
       setDeployScriptFile(new File(deployScriptFile));
    }
+
+   /**
+    * If true, snapshot dependencies that were added to the local maven repository as a result of this build will be
+    * removed.  This is usually done only on CI servers.
+    */
+   public boolean isRemoveSnapshots() {
+      return removeSnapshots;
+   }
+
+   /**
+    * Sets the value that indicates if snapshot dependencies that were added to the local maven repository as a result
+    * of this build will be removed.  This is usually done only on CI servers.
+    */
+   public PopulateMaven2Repository setRemoveSnapshots(boolean removeSnapshots) {
+      this.removeSnapshots = removeSnapshots;
+      return this;
+   }
+
+   /**
+    * Sets the value that indicates if snapshot dependencies that were added to the local maven repository as a result
+    * of this build will be removed.  This is usually done only on CI servers.  This method allows a user to specify the
+    * output CSV file as a command line option.
+    */
+   @Option(option = "removeSnapshots",
+         description = "If true, snapshots installed to the local maven repository will be removed.")
+   public void setRemoveSnapshots(String removeSnapshots) {
+      Preconditions.checkNotNull(removeSnapshots, "removeSnapshots may not be null!");
+      Preconditions.checkArgument(!removeSnapshots.trim().isEmpty(), "removeSnapshots may not be null!");
+      setRemoveSnapshots(Boolean.valueOf(removeSnapshots));
+   }
+
 
    /**
     * Gets the configuration to retrieve dependencies for.  If this value is {@code null}, dependencies will be
@@ -376,6 +418,13 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    protected CreateDependencyReportAction newCreateDependencyReportAction() {
       return new CreateDependencyReportAction();
+   }
+
+   /**
+    * Factory method to create a new instance of {@code RemoveSnapshotsAction}.  Useful for testing.
+    */
+   protected RemoveSnapshotsAction newRemoveSnapshotsAction() {
+      return new RemoveSnapshotsAction();
    }
 
    /**

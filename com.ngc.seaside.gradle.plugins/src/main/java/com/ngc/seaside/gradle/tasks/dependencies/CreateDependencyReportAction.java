@@ -86,21 +86,21 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
       // Use a tree set which sorts the output.
       Set<String> lines = new TreeSet<>();
 
-      Path reportFile = task.getDependencyInfoReportFile().toPath();
-      if (Files.isRegularFile(reportFile)) {
-         logger.lifecycle("Updating dependency report {}.", reportFile.toAbsolutePath());
+      Path csvFile = task.getDependencyInfoReportFile().toPath();
+      if (Files.isRegularFile(csvFile)) {
+         logger.lifecycle("Updating dependency report {}.", csvFile.toAbsolutePath());
          try {
-            lines.addAll(Files.readAllLines(reportFile));
+            lines.addAll(Files.readAllLines(csvFile));
             // Remove the previous header because we will write it again.
             lines.remove(COLUMN_HEADERS);
          } catch (IOException e) {
             logger.error("Unexpected exception while reading existing dependency report; the current report will"
                          + " be overwritten.",
                          e,
-                         reportFile);
+                         csvFile);
          }
       } else {
-         logger.lifecycle("Creating dependency report {}.", reportFile.toAbsolutePath());
+         logger.lifecycle("Creating dependency report {}.", csvFile.toAbsolutePath());
       }
 
       return lines;
