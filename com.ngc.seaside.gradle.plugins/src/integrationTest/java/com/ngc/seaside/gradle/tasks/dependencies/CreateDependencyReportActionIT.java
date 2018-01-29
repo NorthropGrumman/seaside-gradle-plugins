@@ -26,6 +26,7 @@ import java.util.List;
 import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newArtifactResult;
 import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newLocalMavenRepo;
 import static com.ngc.seaside.gradle.tasks.dependencies.CreateDependencyReportAction.formatLine;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -135,43 +136,31 @@ public class CreateDependencyReportActionIT {
                  lines.contains(extraLine));
    }
 
-//   @Test
-//   public void testDoesNotInsertDuplicatesIntoReportFile() throws Throwable {
-//      when(task.isCreateDependencyReportFile()).thenReturn(true);
-//      when(task.getDependencyInfoReportFile()).thenReturn(csvFile);
-//      action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom));
-//
-//      // Create an existing file.
-//      Files.write(csvFile.toPath(), Arrays.asList(
-//            CreateCsvDependencyReportAction.COLUMN_HEADERS,
-//            formatLineForClassifier(tests,
-//                                    store,
-//                                    "tests",
-//                                    "jar",
-//                                    store.outputRelativePath(tests.getArtifact().getFile().toPath()),
-//                                    csvFile.toPath())));
-//
-//      action.execute(task);
-//
-//      assertTrue("did not create CSV file!",
-//                 csvFile.exists());
-//      List<String> lines = Files.readAllLines(csvFile.toPath());
-//      assertTrue("missing jar dependency from report!",
-//                 lines.contains(formatLineForMainArtifact(jar, store, csvFile.toPath())));
-//
-//      String duplicateLine = formatLineForClassifier(
-//            tests,
-//            store,
-//            "tests",
-//            "jar",
-//            store.outputRelativePath(tests.getArtifact().getFile().toPath()),
-//            csvFile.toPath());
-//      assertEquals("report contains duplicate lines!",
-//                   1,
-//                   lines.stream()
-//                         .filter(l -> l.equals(duplicateLine))
-//                         .count());
-//   }
+   @Test
+   public void testDoesNotInsertDuplicatesIntoReportFile() throws Throwable {
+      when(task.isCreateDependencyReportFile()).thenReturn(true);
+      when(task.getDependencyInfoReportFile()).thenReturn(reportFile);
+      action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom));
+
+      // Create an existing file.
+      String line = formatLine(jar, store, reportFile.toPath());
+      Files.write(reportFile.toPath(), Arrays.asList(CreateDependencyReportAction.COLUMN_HEADERS,
+                                                     line));
+
+      action.execute(task);
+
+      assertTrue("did not create dependency report file!",
+                 reportFile.exists());
+      List<String> lines = Files.readAllLines(reportFile.toPath());
+      assertTrue("missing jar dependency from report!",
+                 lines.contains(line));
+
+      assertEquals("report contains duplicate lines!",
+                   1,
+                   lines.stream()
+                         .filter(l -> l.equals(line))
+                         .count());
+   }
 
    @Test
    public void testDoesNotGenerateReportFileIfNotConfigured() throws Throwable {

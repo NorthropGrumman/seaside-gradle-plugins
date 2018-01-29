@@ -36,7 +36,7 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
    @Override
    public void validate(PopulateMaven2Repository task) throws InvalidUserDataException {
       GradleUtil.checkUserData(!task.isCreateDependencyReportFile() || task.getDependencyInfoReportFile() != null,
-                               "CSV file is not configured!");
+                               "dependency report file is not configured!");
    }
 
    public CreateDependencyReportAction setStore(ArtifactResultStore store) {
@@ -46,12 +46,12 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
 
    static String formatLine(ArtifactResult artifactResult,
                             ArtifactResultStore store,
-                            Path csvOutputFile) {
-      Path pom = relativizeToParentOf(csvOutputFile, store.getRelativePathToPom(artifactResult));
-      Path file = relativizeToParentOf(csvOutputFile, store.getRelativePathToMainArtifact(artifactResult));
+                            Path outputFile) {
+      Path pom = relativizeToParentOf(outputFile, store.getRelativePathToPom(artifactResult));
+      Path file = relativizeToParentOf(outputFile, store.getRelativePathToMainArtifact(artifactResult));
       Stream<String> files = store.getRelativePathsToOtherClassifiers(artifactResult)
             .stream()
-            .map(p -> relativizeToParentOf(csvOutputFile, p).toString());
+            .map(p -> relativizeToParentOf(outputFile, p).toString());
 
       return artifactResult.getArtifact().getGroupId() + FIELD_SEPARATOR
              + artifactResult.getArtifact().getArtifactId() + FIELD_SEPARATOR
@@ -74,9 +74,9 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
    private void createReport() {
       Set<String> lines = readExistingReportIfAny();
 
-      Path csvFile = task.getDependencyInfoReportFile().toPath();
+      Path outputFile = task.getDependencyInfoReportFile().toPath();
       for (ArtifactResult mainResult : store.getMainResults()) {
-         lines.add(formatLine(mainResult, store, csvFile));
+         lines.add(formatLine(mainResult, store, outputFile));
       }
 
       writeLines(lines);
@@ -86,21 +86,21 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
       // Use a tree set which sorts the output.
       Set<String> lines = new TreeSet<>();
 
-      Path csvFile = task.getDependencyInfoReportFile().toPath();
-      if (Files.isRegularFile(csvFile)) {
-         logger.lifecycle("Updating CSV dependency report {}.", csvFile.toAbsolutePath());
+      Path reportFile = task.getDependencyInfoReportFile().toPath();
+      if (Files.isRegularFile(reportFile)) {
+         logger.lifecycle("Updating dependency report {}.", reportFile.toAbsolutePath());
          try {
-            lines.addAll(Files.readAllLines(csvFile));
+            lines.addAll(Files.readAllLines(reportFile));
             // Remove the previous header because we will write it again.
             lines.remove(COLUMN_HEADERS);
          } catch (IOException e) {
-            logger.error("Unexpected exception while reading existing CSV dependency report; the current report will"
+            logger.error("Unexpected exception while reading existing dependency report; the current report will"
                          + " be overwritten.",
                          e,
-                         csvFile);
+                         reportFile);
          }
       } else {
-         logger.lifecycle("Creating CSV dependency report {}.", csvFile.toAbsolutePath());
+         logger.lifecycle("Creating dependency report {}.", reportFile.toAbsolutePath());
       }
 
       return lines;
