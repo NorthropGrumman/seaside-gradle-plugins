@@ -21,11 +21,11 @@ buildscript {
     }
 
     repositories {
+        mavenLocal()
+
         maven {
             url nexusConsolidated
         }
-
-        mavenLocal()
 
         // Allows the build to reference its own artifact from a previous build.
         flatDir {
@@ -75,11 +75,11 @@ subprojects {
     }
 
     repositories {
+        mavenLocal()
+
         maven {
             url nexusConsolidated
         }
-
-        mavenLocal()
     }
 
     //Augment the name of the jar to prepend the group.
