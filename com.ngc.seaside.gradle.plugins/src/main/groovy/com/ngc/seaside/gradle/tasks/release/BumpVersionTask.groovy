@@ -24,7 +24,6 @@ class BumpVersionTask extends DefaultTask {
    private ReleaseType releaseType = ReleaseType.MINOR
    private String versionSuffix
    private VersionResolver resolver
-   private String nextVersion
 
 
    /**
@@ -42,6 +41,7 @@ class BumpVersionTask extends DefaultTask {
     * CTOR used by testing framework
     * @param resolver
     * @param typeOfRelease defaulted to ReleaseType Minor
+    * @param version suffix to be used
     */
    BumpVersionTask(VersionResolver resolver,
                    ReleaseType typeOfRelease = ReleaseType.MINOR,
@@ -71,10 +71,10 @@ class BumpVersionTask extends DefaultTask {
     */
    String setNextVersion() {
       def upgradeStrategy = resolver.resolveVersionUpgradeStrategy(releaseType)
-      return nextVersion = upgradeStrategy.getVersion(getCurrentVersion()) + getVersionSuffix()
+      return upgradeStrategy.getVersion(getCurrentVersion()) + getVersionSuffix()
    }
 
-   protected String getVersionSuffix() {
+   private String getVersionSuffix() {
       return versionSuffix
    }
 

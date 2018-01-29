@@ -77,7 +77,7 @@ class BumpVersionTaskTest {
     private BumpVersionTask createTaskWithReleaseType(ReleaseType releaseType) {
         return new TaskBuilder<BumpVersionTask>(BumpVersionTask)
               .setProject(testProject)
-              .setName(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME)
+              .setName(SeasideReleaseMonoRepoPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
               .setSupplier({ new BumpVersionTask(resolver, releaseType) })
               .create()
     }
