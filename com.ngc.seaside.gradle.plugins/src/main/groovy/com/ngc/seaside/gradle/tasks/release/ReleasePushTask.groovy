@@ -31,10 +31,10 @@ class ReleasePushTask extends DefaultTask {
     }
 
    /**
-    * push all the commited changes done for the release to our GitHub repository
+    * push all the committed changes done for the release to our GitHub repository
     */
    private void pushChanges() {
-      def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag
+      def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).getTag()
       project.exec ReleaseUtil.git("push", "origin", tag)
       project.exec ReleaseUtil.git("push", "origin", "HEAD")
     }

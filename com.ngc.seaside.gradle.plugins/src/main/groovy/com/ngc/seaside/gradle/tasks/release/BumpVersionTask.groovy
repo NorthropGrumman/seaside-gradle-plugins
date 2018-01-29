@@ -61,7 +61,7 @@ class BumpVersionTask extends DefaultTask {
    @TaskAction
    def bumpTheVersion() {
        getReleaseExtensionSettings()
-       bumpVersion()
+       commitNextVersionToFile()
    }
 
    /**
@@ -85,14 +85,6 @@ class BumpVersionTask extends DefaultTask {
    }
 
    /**
-    * This will go and get the next version based on the ReleaseType
-    *   and then write it to the build.gradle file and then commit it.
-    */
-   private void bumpVersion() {
-      commitNextVersionToFile(setNextVersion())
-   }
-
-   /**
     *
     * @return String based on the current version in the build.gradle file
     */
@@ -104,7 +96,8 @@ class BumpVersionTask extends DefaultTask {
     *
     * @param nextVersion used to set the version in the build.gradle file
     */
-   private void commitNextVersionToFile(String nextVersion) {
+   private void commitNextVersionToFile() {
+      def nextVersion = setNextVersion()
       resolver.setProjectVersionOnFile(nextVersion)
       commitVersionFileWithMessage("Creating new $nextVersion version after release")
       logger.lifecycle("\n Updated project version to $nextVersion")

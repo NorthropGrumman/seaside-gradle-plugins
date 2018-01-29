@@ -23,10 +23,7 @@ import static org.mockito.Mockito.when
 @RunWith(MockitoJUnitRunner.Silent)
 class CreateTagTaskTest {
     private static final String TEST_PREFIX ="v"
-    private static final String TEST_UPGRADE_VERSION = "1.2.2"
-    private static final String TEST_RELEASE_PATCH_VERSION = "1.2.3"
     private static final String TEST_RELEASE_MINOR_VERSION = "1.3.0"
-    private static final String TEST_RELEASE_MAJOR_VERSION = "2.0.0"
 
     private ProjectInternal testProject
     private CreateTagTask task
@@ -42,39 +39,27 @@ class CreateTagTaskTest {
         testProject = GradleMocks.newProjectMock()
         when(testProject.rootProject).thenReturn(testProject)
         when(testProject.rootProject.hasProperty("releaseVersion")).thenReturn(true)
-
-        when(resolver.getProjectVersion(any())).thenReturn(TEST_UPGRADE_VERSION)
-
+        when(resolver.getProjectVersion()).thenReturn(TEST_RELEASE_MINOR_VERSION)
 
     }
 
     @Test
     void canUpgradeVersionForPatchRelease() {
-        confirmVersionUpgradeForReleaseType(ReleaseType.PATCH, TEST_PREFIX + TEST_RELEASE_PATCH_VERSION)
+        confirmVersionUpgradeForReleaseType(TEST_PREFIX + TEST_RELEASE_MINOR_VERSION)
     }
 
-    @Test
-    void canUpgradeVersionForMinorRelease() {
-        confirmVersionUpgradeForReleaseType(ReleaseType.MINOR, TEST_PREFIX + TEST_RELEASE_MINOR_VERSION)
-    }
-
-    @Test
-    void canUpgradeVersionForMajorRelease() {
-        confirmVersionUpgradeForReleaseType(ReleaseType.MAJOR, TEST_PREFIX + TEST_RELEASE_MAJOR_VERSION)
-    }
-
-    private void confirmVersionUpgradeForReleaseType(ReleaseType releaseType, String expectedUpgradeVersion) {
-        task = createTask(releaseType)
+    private void confirmVersionUpgradeForReleaseType(String expectedUpgradeVersion) {
+        task = createTask()
         task.setTagName()
-        verify(resolver).getProjectVersion(releaseType)
+        verify(resolver).getProjectVersion()
         Assert.assertEquals(expectedUpgradeVersion, task.getTagName())
     }
 
-    private CreateTagTask createTask(ReleaseType releaseType) {
+    private CreateTagTask createTask() {
         return new TaskBuilder<CreateTagTask>(CreateTagTask)
               .setProject(testProject)
               .setName(SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
-              .setSupplier({ new CreateTagTask(resolver, releaseType, TEST_PREFIX) })
+              .setSupplier({ new CreateTagTask(resolver, TEST_PREFIX) })
               .create()
     }
 }
