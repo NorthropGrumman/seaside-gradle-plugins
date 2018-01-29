@@ -64,6 +64,12 @@ class ReleaseUtil {
       }
    }
 
+   /**
+    *
+    * @param project for current release
+    * @param extensionName that you are looking to retrieve
+    * @return a SeasideReleaseExtension
+    */
    static SeasideReleaseExtension getReleaseExtension(Project project, String extensionName) {
       return (SeasideReleaseExtension)project.extensions
               .findByName(extensionName)
