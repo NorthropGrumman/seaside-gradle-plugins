@@ -8,7 +8,6 @@ import org.gradle.testkit.runner.GradleRunner
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 class SeasideReleaseMonoRepoPluginFT {
@@ -35,10 +34,11 @@ class SeasideReleaseMonoRepoPluginFT {
 
     @After
     void after() {
-        projectDir.delete()
+        if (projectDir != null) {
+            projectDir.deleteDir()
+        }
     }
 
-    @Ignore
     @Test
     void doesUpdateReleaseVersion() {
         // TODO(Cameron): fix this test so that it runs correctly
@@ -47,7 +47,7 @@ class SeasideReleaseMonoRepoPluginFT {
             def result = project.exec ReleaseUtil.gitWithOutput(output, "log", "--pretty=format:%s")
             Assert.assertEquals(0, result.getExitValue())
             Assert.assertTrue(
-                  "output did not contain expected release message",
+                  "output did not contain expected release message!\noutput:" + output.toString(),
                   output.toString().split("\n")[0].startsWith("Release of version v")
             )
         }

@@ -12,8 +12,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
-import static org.mockito.Mockito.any
-import static org.mockito.Mockito.times
 import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
 
@@ -41,12 +39,16 @@ class UpdateVersionTaskTest {
         when(testProject.rootProject).thenReturn(testProject)
         when(testProject.rootProject.hasProperty("releaseVersion")).thenReturn(true)
 
-        when(resolver.updateProjectVersionForRelease(any(ReleaseType))).thenReturn(TEST_UPGRADE_VERSION)
+        when(resolver.getProjectVersion()).thenReturn(TEST_UPGRADE_VERSION)
         when(resolver.updateProjectVersionForRelease(ReleaseType.SNAPSHOT)).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
+        when(resolver.updateProjectVersionForRelease(ReleaseType.PATCH)).thenReturn(TEST_RELEASE_PATCH_VERSION)
+        when(resolver.updateProjectVersionForRelease(ReleaseType.MINOR)).thenReturn(TEST_RELEASE_MINOR_VERSION)
+        when(resolver.updateProjectVersionForRelease(ReleaseType.MAJOR)).thenReturn(TEST_RELEASE_MAJOR_VERSION)
     }
 
     @Test
     void doesNotUpgradeVersionForSnapshotRelease() {
+        when(resolver.getProjectVersion()).thenReturn(TEST_RELEASE_SNAPSHOT_VERSION)
         confirmVersionUpgradeForReleaseType(ReleaseType.SNAPSHOT, TEST_RELEASE_SNAPSHOT_VERSION)
     }
 
@@ -67,8 +69,15 @@ class UpdateVersionTaskTest {
 
     private void confirmVersionUpgradeForReleaseType(ReleaseType releaseType, String expectedUpgradeVersion) {
         task = createTaskWithReleaseType(releaseType)
+        Assert.assertEquals(
+              "the current version should have been: " + expectedCurrentVersion(),
+              expectedCurrentVersion(),
+              task.getCurrentVersion()
+        )
+
         task.updateReleaseVersion()
-        verify(resolver, times(2)).updateProjectVersionForRelease(releaseType)
+        verify(resolver).updateProjectVersionForRelease(releaseType)
+
         Assert.assertEquals(
               "the release type should have been: $releaseType",
               releaseType,
@@ -78,11 +87,6 @@ class UpdateVersionTaskTest {
               "the version to release should have been: $expectedUpgradeVersion",
               expectedUpgradeVersion,
               task.getVersionForRelease()
-        )
-        Assert.assertEquals(
-              "the current version should have been: " + expectedCurrentVersion(),
-              expectedCurrentVersion(),
-              task.getCurrentVersion()
         )
     }
 

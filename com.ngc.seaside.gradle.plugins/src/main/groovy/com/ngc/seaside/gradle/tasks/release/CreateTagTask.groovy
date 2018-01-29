@@ -13,14 +13,11 @@ import javax.inject.Inject
  * Used to create the tags for new releases to our GitHub repository
  * */
 class CreateTagTask extends DefaultTask {
-
-
    private String tagPrefix
    private String tagName
 
    //will be used in the future
    boolean dryRun
-   boolean commitChanges
 
    private ReleaseType releaseType = ReleaseType.MINOR
    VersionResolver resolver
@@ -30,8 +27,9 @@ class CreateTagTask extends DefaultTask {
     *
     */
    @Inject
-   CreateTagTask(){
+   CreateTagTask() {
       resolver = new VersionResolver(project)
+      resolver.enforceVersionSuffix = false
    }
 
    /**
@@ -58,29 +56,26 @@ class CreateTagTask extends DefaultTask {
    @TaskAction
    def createReleaseTag() {
       getReleaseExtensionSettings()
-      tagName = setTagName()
+      setTagName()
       ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag = tagName
-      createTag(commitChanges, dryRun)
+      createTag()
 
    }
 
    /**
-    *
-    * @return tag that will be used for a release
+    * Set the tag name that will represent a release.
     */
-   String setTagName(){
-      return tagName = getTagPrefix() + getCurrentVersion()
+   void setTagName(){
+      tagName = getTagPrefix() + getCurrentVersion()
    }
 
    /**
+    * Get the tag name.
     *
-    * @return The string of the version of the tag that was
-    *    pushed to gitHub for this release
+    * @return The string representation of the tagged release version.
     */
    String getTagName() {
-
       return tagName
-
    }
 
    String getTagPrefix(){
@@ -88,18 +83,17 @@ class CreateTagTask extends DefaultTask {
    }
 
    /**
-    *
-    * @param commit Changes to really push the changes or not
-    * @param dryRun Not actually creating the tag
+    * Create the tag in git.
     */
-   private void createTag(boolean commitChanges, boolean dryRun) {
+   private void createTag() {
       project.exec ReleaseUtil.git("tag", "-a", tagName, "-m Release of $tagName")
       logger.debug("Created release tag: $tagName")
    }
 
    /**
+    * Get the project's current version.
     *
-    * @return String based on the current version in the build.gradle file
+    * @return String based on the current version in the version file.
     */
    private String getCurrentVersion() {
       return resolver.getProjectVersion()
@@ -109,7 +103,6 @@ class CreateTagTask extends DefaultTask {
     * Resolves class variables with the Project extension variables
     */
    private void getReleaseExtensionSettings() {
-      commitChanges = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).getCommitChanges()
       tagPrefix = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).getTagPrefix()
    }
 }

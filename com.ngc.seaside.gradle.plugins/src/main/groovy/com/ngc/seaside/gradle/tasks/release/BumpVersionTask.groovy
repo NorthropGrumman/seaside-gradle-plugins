@@ -34,7 +34,7 @@ class BumpVersionTask extends DefaultTask {
    @Inject
    BumpVersionTask() {
       resolver = new VersionResolver(project)
-      resolver.enforceVersionSuffix = true
+      resolver.enforceVersionSuffix = false
    }
 
    /**

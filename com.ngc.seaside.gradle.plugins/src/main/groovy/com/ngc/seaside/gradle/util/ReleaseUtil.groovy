@@ -20,37 +20,37 @@ class ReleaseUtil {
     * To check for the release property in the current release project
     *
     * @param project of current release
-    * @return boolean to indicate whether or not the release has been
-    *     set in the current project
+    * @return boolean to indicate whether or not the release has been set in the current project
     */
    static boolean isExtensionSet(Project project) {
       return project.rootProject.hasProperty(RELEASE_VERSION)
    }
 
    /**
+    * A one stop place to create a release type Gradle task
     *
-    * A one stop place to create a release type gradle task
-    *
-    * @param project current gradle release
-    * @param type Gradle Task that you are creating
-    * @param group that this task belongs to
-    * @param name of the task you are creating
-    * @param description describes what the gradle task does
-    * @param releaseExtension that belongs to this project
-    * @param This must be a comma seperatd string ex: "build, upload"
+    * @param project The current gradle project.
+    * @param task The Gradle task to be created.
+    * @param group The task group to which the new task will belong.
+    * @param name The name of the task being created.
+    * @param description Describes what the gradle task does.
+    * @param releaseExtension The release extension associated with the project.
+    * @param dependecies The list of dependencies strings for the task.
     */
-   static void configureTask(Project project,
-                              Class type,
-                              String group,
-                              String name,
-                              String description,
-                              String[] dependentTasks={}) {
+   static void configureTask(
+         Project project,
+         Class taskType,
+         String group,
+         String name,
+         String description,
+         String[] dependencies = []) {
       boolean isDryRun = name.endsWith(DRY_RUN_TASK_NAME_SUFFIX)
       project.afterEvaluate {
-         def task = project.task(name,
-                 type: type,
-                 group: group,
-                 description: description) {
+         def task = project.task(
+               name,
+               type: taskType,
+               group: group,
+               description: description) {
             dryRun = isDryRun
             dependsOn {
                project.rootProject.subprojects.collect { subproject ->
@@ -58,19 +58,11 @@ class ReleaseUtil {
                }
             }
          }
-         dependentTasks.each{taskName -> task.dependsOn(TaskResolver.findTask(project, taskName))}
-      }
-   }
 
-   /**
-    *
-    * @param project for current release
-    * @param extensionName that you are looking to retrieve
-    * @return a SeasideReleaseExtension
-    */
-   static SeasideReleaseExtension getReleaseExtension(Project project, String extensionName) {
-      return (SeasideReleaseExtension)project.extensions
-              .findByName(extensionName)
+         dependencies.each{ taskName ->
+            task.dependsOn(TaskResolver.findTask(project, taskName))
+         }
+      }
    }
 
    /**
@@ -82,6 +74,17 @@ class ReleaseUtil {
     */
    static Closure git(Object[] arguments) {
       return gitWithOutput(null, arguments)
+   }
+
+   /**
+    * Get the SeasideReleaseExtension associated with the project.
+    *
+    * @param project for current release
+    * @param extensionName that you are looking to retrieve
+    * @return a SeasideReleaseExtension
+    */
+   static SeasideReleaseExtension getReleaseExtension(Project project, String extensionName) {
+      return (SeasideReleaseExtension)project.extensions.findByName(extensionName)
    }
 
    /**

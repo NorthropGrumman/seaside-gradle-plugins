@@ -47,12 +47,10 @@ class UpdateVersionTask extends DefaultTask {
      */
     @TaskAction
     void updateReleaseVersion() {
-        // TODO(Cameron): Remove debug statements
-        def currentVersion = getCurrentVersion()
+        resolver.enforceVersionSuffix = false
         def newReleaseVersion = getVersionForRelease()
-        println("DEBUG: will upgrade from current version: $currentVersion to new version: $newReleaseVersion")
         resolver.setProjectVersionOnFile(newReleaseVersion)
-        ReleaseUtil.git("commit", "-am", "Release of version v$newReleaseVersion")
+        project.exec ReleaseUtil.git("commit", "-am", "Release of version v$newReleaseVersion")
     }
 
     /**

@@ -37,14 +37,14 @@ class VersionResolver implements IResolver {
     }
 
     String getProjectVersion() throws Exception {
-        return getSemanticVersion(versionFile.text.trim(), enforceVersionSuffix)
+        return getSemanticVersion(versionFile.text.trim())
     }
 
     String updateProjectVersionForRelease(ReleaseType releaseType) throws Exception {
         return resolveVersionUpgradeStrategy(releaseType).getVersion(getProjectVersion())
     }
 
-    protected String getSemanticVersion(String input, boolean enforceVersionSuffix = false) {
+    protected String getSemanticVersion(String input) {
         Matcher matcher = PATTERN.matcher(input.trim())
         StringBuilder sb = new StringBuilder()
 
@@ -53,7 +53,7 @@ class VersionResolver implements IResolver {
             String suffix = matcher.group(3)
             if (version) {
                 sb.append(version)
-                if (!suffix && enforceVersionSuffix) {
+                if (suffix == null && enforceVersionSuffix) {
                     logger.error("Missing project version (${version}${suffix})  suffix: $VERSION_SUFFIX")
                     throw new GradleException("Missing project version (${version}${suffix}) suffix:$VERSION_SUFFIX")
                 } else if (suffix) {
