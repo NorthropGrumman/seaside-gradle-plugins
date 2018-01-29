@@ -227,10 +227,10 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    @Option(option = "dependencyInfoReportFile",
          description = "The report file to output which contains the dependency information.")
-   public void setDependencyInfoCsvFile(String dependencyInfoReportFile) {
+   public void setDependencyInfoReportFile(String dependencyInfoReportFile) {
       Preconditions.checkNotNull(dependencyInfoReportFile, "dependencyInfoReportFile may not be null!");
-      Preconditions
-            .checkArgument(!dependencyInfoReportFile.trim().isEmpty(), "dependencyInfoReportFile may not be null!");
+      Preconditions.checkArgument(!dependencyInfoReportFile.trim().isEmpty(),
+                                  "dependencyInfoReportFile may not be null!");
       setDependencyInfoReportFile(new File(dependencyInfoReportFile));
    }
 
@@ -274,9 +274,8 @@ public class PopulateMaven2Repository extends DefaultTask {
     * Sets the value that indicates if snapshot dependencies that were added to the local maven repository as a result
     * of this build will be removed.  This is usually done only on CI servers.
     */
-   public PopulateMaven2Repository setRemoveSnapshots(boolean removeSnapshots) {
+   public void setRemoveSnapshots(boolean removeSnapshots) {
       this.removeSnapshots = removeSnapshots;
-      return this;
    }
 
    /**
