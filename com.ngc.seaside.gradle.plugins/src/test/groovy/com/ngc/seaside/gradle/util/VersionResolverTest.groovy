@@ -18,7 +18,7 @@ class VersionResolverTest {
    void before() {
       Mockito.when(project.version).thenReturn("1.2.3.DEV")
       Mockito.when(project.rootProject).thenReturn(rootProject)
-      Mockito.when(project.extensions.findByName(Mockito.any())).thenReturn(null)
+      Mockito.when(project.extensions.findByName(Mockito.any(String))).thenReturn(null)
       Mockito.when(project.getLogger()).thenReturn(logger)
       Mockito.when(rootProject.buildFile).thenReturn(file)
       resolver = new VersionResolver(project)
@@ -41,6 +41,6 @@ class VersionResolverTest {
 
    @Test
    void doesGetTagNameWithPrefix() {
-      Assert.assertEquals('myPrefix_1.2.3', resolver.getTagName('myPrefix_', '.DEV'))
+      Assert.assertEquals("myPrefix_1.2.3", resolver.getTagName("myPrefix_", ".DEV"))
    }
 }
