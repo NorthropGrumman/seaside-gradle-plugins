@@ -43,26 +43,13 @@ class ReleaseUtil {
          String group,
          String name,
          String description,
-         String[] dependencies = []) {
-      boolean isDryRun = name.endsWith(DRY_RUN_TASK_NAME_SUFFIX)
-      project.afterEvaluate {
-         def task = project.task(
-               name,
-               type: taskType,
-               group: group,
-               description: description) {
-            dryRun = isDryRun
-            dependsOn {
-               project.rootProject.subprojects.collect { subproject ->
-                  TaskResolver.findTask(subproject, "build")
-               }
-            }
-         }
-
-         dependencies.each{ taskName ->
-            task.dependsOn(TaskResolver.findTask(project, taskName))
-         }
-      }
+         List<String> dependencies = []) {
+      project.task(
+            name,
+            type: taskType,
+            group: group,
+            description: description,
+            dependsOn: dependencies)
    }
 
    /**

@@ -14,6 +14,7 @@ class SeasideReleaseMonoRepoPluginFT {
     private File projectDir
     private Project project
     private List<File> pluginClasspath
+    private SeasideReleaseMonoRepoPlugin plugin
     private List<String> subprojectNames = [
             "service.bonjourlemonde",
             "service.helloworld",
@@ -29,6 +30,10 @@ class SeasideReleaseMonoRepoPluginFT {
             pathToTheDestinationProjectDirectory()
         )
         project = TestingUtilities.createTheTestProjectWith(projectDir)
+
+        plugin = new SeasideReleaseMonoRepoPlugin()
+        plugin.apply(project)
+
         setupTestingGitRepo()
     }
 
