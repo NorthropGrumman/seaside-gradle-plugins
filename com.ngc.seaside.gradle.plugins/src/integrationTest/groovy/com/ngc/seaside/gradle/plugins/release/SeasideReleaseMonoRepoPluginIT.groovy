@@ -3,7 +3,6 @@ package com.ngc.seaside.gradle.plugins.release
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.util.TaskResolver
-import javafx.concurrent.Task
 import org.gradle.api.Project
 import org.junit.Assert
 import org.junit.Before
@@ -57,8 +56,8 @@ class SeasideReleaseMonoRepoPluginIT {
     @Test
     void desApplyPluginUsingDifferentVersionFile() {
         project.extensions
-                .findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME)
-                .versionFile = Paths.get(sourceDirectoryWithTheTestProject().toString(), "versions.gradle").toFile()
+               .findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME)
+               .versionFile = Paths.get(sourceDirectoryWithTheTestProject().toString(), "versions.gradle").toFile()
 
         project.evaluate()
 

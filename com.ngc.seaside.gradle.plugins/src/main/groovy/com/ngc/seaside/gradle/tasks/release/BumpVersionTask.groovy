@@ -7,6 +7,8 @@ import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+import javax.inject.Inject
+
 /**
  * Used to increment the version in the build.gradle file
  *   and then commit it to the repository
@@ -27,7 +29,10 @@ class BumpVersionTask extends DefaultTask {
 
    /**
     * CTOR
+    *
+    * @Inject was used because there are two constructors and gradle seems to be confused on which constructor to use.
     */
+   @Inject
    BumpVersionTask(){
       resolver = new VersionResolver(project)
       resolver.enforceVersionSuffix = true
