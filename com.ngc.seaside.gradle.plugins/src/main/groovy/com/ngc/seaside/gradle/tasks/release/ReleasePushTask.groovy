@@ -35,8 +35,8 @@ class ReleasePushTask extends DefaultTask {
     */
    private void pushChanges() {
       def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag
-      project.exec ReleaseUtil.git(null, "push", "origin", tag)
-      project.exec ReleaseUtil.git(null, "push", "origin", "HEAD")
+      project.exec ReleaseUtil.git("push", "origin", tag)
+      project.exec ReleaseUtil.git("push", "origin", "HEAD")
     }
 
 

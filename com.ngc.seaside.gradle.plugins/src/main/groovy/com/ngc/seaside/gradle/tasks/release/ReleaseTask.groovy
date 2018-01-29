@@ -117,7 +117,7 @@ class ReleaseTask extends DefaultTask {
 
     private void commitVersionFileWithMessage(String msg) {
         if (commitChanges && !dryRun) {
-            project.exec ReleaseUtil.git(null, "commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath")
+            project.exec ReleaseUtil.git("commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath")
             project.logger.info("Committed version file: $msg")
         }
 
@@ -128,7 +128,7 @@ class ReleaseTask extends DefaultTask {
 
     private void createReleaseTag(String tagName) {
         if (commitChanges && !dryRun) {
-            project.exec ReleaseUtil.git(null,"tag", "-a", tagName, "-m Release of $tagName")
+            project.exec ReleaseUtil.git("tag", "-a", tagName, "-m Release of $tagName")
             project.logger.debug("Created release tag: $tagName")
         }
 
@@ -169,8 +169,8 @@ class ReleaseTask extends DefaultTask {
     }
 
     private void pushChanges(String tag) {
-        project.exec ReleaseUtil.git(null, "push", "origin", tag)
-        project.exec ReleaseUtil.git(null, "push", "origin", "HEAD")
+        project.exec ReleaseUtil.git("push", "origin", tag)
+        project.exec ReleaseUtil.git("push", "origin", "HEAD")
     }
 
     private void setThePublishedProjectsProjectProperty() {

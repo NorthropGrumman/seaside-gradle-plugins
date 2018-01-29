@@ -53,7 +53,7 @@ class UpdateVersionTask extends DefaultTask {
         def currentVersion = getCurrentVersion()
         println("DEBUG: will upgrade from current version: $currentVersion to new version: $newReleaseVersion")
         resolver.setProjectVersionOnFile(newReleaseVersion)
-        ReleaseUtil.git(null, "commit", "-am", "Release of version v$newReleaseVersion")
+        ReleaseUtil.git("commit", "-am", "Release of version v$newReleaseVersion")
         println("DEBUG: done running the updateReleaseVersion task!")
     }
 
