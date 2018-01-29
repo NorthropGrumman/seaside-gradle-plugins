@@ -14,9 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateMaven2Repository> {
 
@@ -24,14 +24,12 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
     * The column headers.
     */
    final static String COLUMN_HEADERS =
-         "Group ID, Artifact ID, Version, File, POM File, Classifier (optional), Extension (optional)";
+         "Group ID\tArtifact ID\tVersion\tPOM File\tFile\tFiles (optional)\tClassifiers  (optional)\tTypes (optional)";
 
    /**
-    * The format for the columns in the file.  This format is {@code groupId, artifactId, version, file, pom,
-    * classifier, extension}.
+    * The character that delimits fields.
     */
-   private final static String COLUMN_FORMAT = "%s,%s,%s,%s,%s,%s,%s";
-
+   private final static char FIELD_SEPARATOR = '\t';
 
    private ArtifactResultStore store;
 
@@ -46,6 +44,25 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
       return this;
    }
 
+   static String formatLine(ArtifactResult artifactResult,
+                            ArtifactResultStore store,
+                            Path csvOutputFile) {
+      Path pom = relativizeToParentOf(csvOutputFile, store.getRelativePathToPom(artifactResult));
+      Path file = relativizeToParentOf(csvOutputFile, store.getRelativePathToMainArtifact(artifactResult));
+      Stream<String> files = store.getRelativePathsToOtherClassifiers(artifactResult)
+            .stream()
+            .map(p -> relativizeToParentOf(csvOutputFile, p).toString());
+
+      return artifactResult.getArtifact().getGroupId() + FIELD_SEPARATOR
+             + artifactResult.getArtifact().getArtifactId() + FIELD_SEPARATOR
+             + artifactResult.getArtifact().getVersion() + FIELD_SEPARATOR
+             + pom + FIELD_SEPARATOR
+             + file + FIELD_SEPARATOR
+             + String.join(",", (Iterable<String>) files::iterator) + FIELD_SEPARATOR
+             + String.join(",", store.getOtherClassifiers(artifactResult)) + FIELD_SEPARATOR
+             + String.join(",", store.getOtherExtensions(artifactResult));
+   }
+
    @Override
    protected void doExecute() {
       if (task.isCreateCsvFile()) {
@@ -54,57 +71,12 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
       }
    }
 
-   static String formatLineForMainArtifact(ArtifactResult artifactResult,
-                                           ArtifactResultStore store,
-                                           Path csvOutputFile) {
-      return String.format(COLUMN_FORMAT,
-                           artifactResult.getArtifact().getGroupId(),
-                           artifactResult.getArtifact().getArtifactId(),
-                           artifactResult.getArtifact().getVersion(),
-                           relativizeToParentOf(csvOutputFile, store.getRelativePathToMainArtifact(artifactResult)),
-                           relativizeToParentOf(csvOutputFile, store.getRelativePathToPom(artifactResult)),
-                           "", // no classifier for main artifact
-                           ""); // no extension for main artifact
-   }
-
-   static String formatLineForClassifier(ArtifactResult artifactResult,
-                                         ArtifactResultStore store,
-                                         String classifier,
-                                         String extension,
-                                         Path pathToArtifact,
-                                         Path csvOutputFile) {
-      return String.format(COLUMN_FORMAT,
-                           artifactResult.getArtifact().getGroupId(),
-                           artifactResult.getArtifact().getArtifactId(),
-                           artifactResult.getArtifact().getVersion(),
-                           relativizeToParentOf(csvOutputFile, pathToArtifact),
-                           relativizeToParentOf(csvOutputFile, store.getRelativePathToPom(artifactResult)),
-                           classifier,
-                           extension);
-   }
-
    private void createReport() {
       Set<String> lines = readExistingReportIfAny();
 
       Path csvFile = task.getDependencyInfoCsvFile().toPath();
       for (ArtifactResult mainResult : store.getMainResults()) {
-         // Add the line for the main artifact.
-         lines.add(formatLineForMainArtifact(mainResult, store, csvFile));
-         // Add the lines for the extra classifiers (if any).
-         if (store.hasOtherClassifiers(mainResult)) {
-            Iterator<String> classifiers = store.getOtherClassifiers(mainResult).iterator();
-            Iterator<String> extensions = store.getOtherExtensions(mainResult).iterator();
-            Iterator<Path> paths = store.getRelativePathsToOtherClassifiers(mainResult).iterator();
-
-            while (classifiers.hasNext()) {
-               lines.add(formatLineForClassifier(mainResult,
-                                                 store,
-                                                 classifiers.next(),
-                                                 extensions.next(),
-                                                 paths.next(),
-                                                 csvFile));
-            }
-         }
+         lines.add(formatLine(mainResult, store, csvFile));
       }
 
       writeLines(lines);
@@ -119,7 +91,7 @@ public class CreateCsvDependencyReportAction extends DefaultTaskAction<PopulateM
          logger.lifecycle("Updating CSV dependency report {}.", csvFile.toAbsolutePath());
          try {
             lines.addAll(Files.readAllLines(csvFile));
-            // Remove the previous header because we will right it again.
+            // Remove the previous header because we will write it again.
             lines.remove(COLUMN_HEADERS);
          } catch (IOException e) {
             logger.error("Unexpected exception while reading existing CSV dependency report; the current report will"

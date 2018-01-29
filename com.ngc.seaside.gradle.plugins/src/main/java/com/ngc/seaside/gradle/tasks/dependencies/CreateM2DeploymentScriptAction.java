@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
@@ -32,14 +31,6 @@ public class CreateM2DeploymentScriptAction extends DefaultTaskAction<PopulateMa
    public CreateM2DeploymentScriptAction setStore(ArtifactResultStore store) {
       this.store = store;
       return this;
-   }
-
-   @Override
-   protected void doExecute() {
-      if (task.isCreateDeployScript()) {
-         Preconditions.checkState(store != null, "store must be set!");
-         createScript();
-      }
    }
 
    static String formatMavenDeployCommand(ArtifactResult mainArtifact,
@@ -66,6 +57,14 @@ public class CreateM2DeploymentScriptAction extends DefaultTaskAction<PopulateMa
                .append(String.join(",", (Iterable<String>) files::iterator));
       }
       return sb.toString();
+   }
+
+   @Override
+   protected void doExecute() {
+      if (task.isCreateDeployScript()) {
+         Preconditions.checkState(store != null, "store must be set!");
+         createScript();
+      }
    }
 
    private void createScript() {
