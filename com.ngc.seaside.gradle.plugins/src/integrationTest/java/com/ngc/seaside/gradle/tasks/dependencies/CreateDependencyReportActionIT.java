@@ -103,7 +103,7 @@ public class CreateDependencyReportActionIT {
    public void testDoesGenerateReportFile() throws Throwable {
       when(task.isCreateDependencyReportFile()).thenReturn(true);
       when(task.getDependencyInfoReportFile()).thenReturn(reportFile);
-      action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom));
+      action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom).finish());
 
       action.execute(task);
 
@@ -118,7 +118,7 @@ public class CreateDependencyReportActionIT {
    public void testDoesAppendToExistingReportFile() throws Throwable {
       when(task.isCreateDependencyReportFile()).thenReturn(true);
       when(task.getDependencyInfoReportFile()).thenReturn(reportFile);
-      action.setStore(store.addResult(jar, pom).addResult(sources, pom));
+      action.setStore(store.addResult(jar, pom).addResult(sources, pom).finish());
 
       // Create an existing file.
       String extraLine = "group2\tartifact2\t2.0\tmy-pom.pom\tmy-file.jar\tmy-sources.jar\tsources\tjar";
@@ -140,7 +140,7 @@ public class CreateDependencyReportActionIT {
    public void testDoesNotInsertDuplicatesIntoReportFile() throws Throwable {
       when(task.isCreateDependencyReportFile()).thenReturn(true);
       when(task.getDependencyInfoReportFile()).thenReturn(reportFile);
-      action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom));
+      action.setStore(store.addResult(jar, pom).addResult(sources, pom).addResult(tests, pom).finish());
 
       // Create an existing file.
       String line = formatLine(jar, store, reportFile.toPath());

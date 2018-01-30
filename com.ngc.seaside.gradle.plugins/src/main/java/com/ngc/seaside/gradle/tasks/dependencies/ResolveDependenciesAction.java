@@ -247,7 +247,7 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
    protected void handleDependencyResult(DependencyResult result) {
       for (ArtifactResult localArtifact : result.getArtifactResults()) {
          logger.lifecycle("Located {}.", localArtifact.getArtifact().getFile());
-         if (!transitiveClassifierResolutionInProgress && "".equals(localArtifact.getArtifact().getClassifier())) {
+         if (!transitiveClassifierResolutionInProgress) {
             transitiveDependenciesWithMissingClassifiers.add(new ArtifactKey(
                   localArtifact.getArtifact().getGroupId(),
                   localArtifact.getArtifact().getArtifactId(),

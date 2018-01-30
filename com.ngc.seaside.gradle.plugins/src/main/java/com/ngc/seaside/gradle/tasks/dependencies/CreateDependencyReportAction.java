@@ -26,7 +26,7 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
     * The column headers.
     */
    final static String COLUMN_HEADERS =
-         "GroupID\tArtifactID\tVersion\tpomFile\tfile\tpackaging\tfiles\tclassifiers\ttypes";
+         "GroupID\tArtifactID\tVersion\tpomFile\tfile\tpackaging\tclassifier\tfiles\tclassifiers\ttypes";
 
    /**
     * The character that delimits fields.
@@ -60,7 +60,8 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
              + artifactResult.getArtifact().getVersion() + FIELD_SEPARATOR
              + pom + FIELD_SEPARATOR
              + file + FIELD_SEPARATOR
-             + FilenameUtils.getExtension(file.toString()) + FIELD_SEPARATOR
+             + store.getMainExtension(artifactResult) + FIELD_SEPARATOR
+             + store.getMainClassifier(artifactResult) + FIELD_SEPARATOR
              + String.join(",", (Iterable<String>) files::iterator) + FIELD_SEPARATOR
              + String.join(",", store.getOtherClassifiers(artifactResult)) + FIELD_SEPARATOR
              + String.join(",", store.getOtherExtensions(artifactResult));

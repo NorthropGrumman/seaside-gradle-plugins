@@ -76,6 +76,7 @@ dependencies {
     thirdParty 'commons-lang:commons-lang:2.4'
     thirdParty 'commons-collections:commons-collections:3.2.1'
     thirdParty 'commons-logging:commons-logging-osgi:1.1.1'
+    thirdParty 'com.google.protobuf:protoc:3.2.0:linux-x86_64@exe'
 
     platform "com.ngc.blocs:service.deployment.impl.common.autodeploymentservice:${blocsCoreVersion}"
     platform "org.eclipse.equinox:equinox-common:3.6.200.v20130402-1505"

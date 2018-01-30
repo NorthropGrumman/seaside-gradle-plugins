@@ -45,6 +45,7 @@ public class ArtifactResultStoreTest {
                                         "jar");
 
       store.addResult(result, pom);
+      store.finish();
       assertTrue("did not add result to store!",
                  store.getMainResults().contains(result));
       assertEquals("did not return path to main artifact!",
@@ -52,6 +53,12 @@ public class ArtifactResultStoreTest {
                    store.getRelativePathToMainArtifact(result));
       assertFalse("should not have other classifiers!",
                   store.hasOtherClassifiers(result));
+      assertEquals("did not get main extension!",
+                   "jar",
+                   store.getMainExtension(result));
+      assertEquals("did not get main classifier!",
+                   "",
+                   store.getMainClassifier(result));
    }
 
    @Test
@@ -62,6 +69,7 @@ public class ArtifactResultStoreTest {
                                         null,
                                         "jar");
       store.addResult(result, pom);
+      store.finish();
       assertEquals("did not return path to main pom!",
                    outputRelativePath(pom),
                    store.getRelativePathToPom(result));
@@ -82,6 +90,7 @@ public class ArtifactResultStoreTest {
 
       store.addResult(mainResult, pom);
       store.addResult(sourcesResult, pom);
+      store.finish();
       assertTrue("did not add result to store!",
                  store.getMainResults().contains(mainResult));
       assertFalse("should not return sources as a main result!",
@@ -111,6 +120,7 @@ public class ArtifactResultStoreTest {
 
       store.addResult(mainResult, pom);
       store.addResult(sourcesResult, pom);
+      store.finish();
       assertEquals("did not return jar extension for sources classifier!",
                    Collections.singletonList("jar"),
                    store.getOtherExtensions(mainResult));
@@ -130,9 +140,31 @@ public class ArtifactResultStoreTest {
                                                "jar");
       store.addResult(mainResult, pom);
       store.addResult(sourcesResult, pom);
+      store.finish();
       assertEquals("did not return jar extension for sources classifier!",
                    Collections.singletonList(outputRelativePath(sourcesResult)),
                    store.getRelativePathsToOtherClassifiers(mainResult));
+   }
+
+   @Test
+   public void testDoesHandleClassifierOnlyArtifact() throws Throwable {
+      ArtifactResult sourcesResult = newResult("foo",
+                                               "bar",
+                                               "1.0",
+                                               "sources",
+                                               "jar");
+
+      store.addResult(sourcesResult, pom);
+      store.finish();
+
+      assertTrue("did not return classifier only as main result",
+                 store.getMainResults().contains(sourcesResult));
+      assertEquals("did not get main extension!",
+                   "jar",
+                   store.getMainExtension(sourcesResult));
+      assertEquals("did not get main classifier!",
+                   "sources",
+                   store.getMainClassifier(sourcesResult));
    }
 
    private ArtifactResult newResult(String groupId,

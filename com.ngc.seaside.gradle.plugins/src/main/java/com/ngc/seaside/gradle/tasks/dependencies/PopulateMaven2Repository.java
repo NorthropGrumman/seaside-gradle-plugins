@@ -452,6 +452,7 @@ public class PopulateMaven2Repository extends DefaultTask {
             }
          }
       }
+      store.finish();
       return store;
    }
 

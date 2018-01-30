@@ -6,7 +6,6 @@ import org.eclipse.aether.resolution.ArtifactResult;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,16 @@ public class ArtifactResultStore {
          record.additionalClassifiers.add(result);
       }
 
+      return this;
+   }
+
+   public ArtifactResultStore finish() {
+      for (ArtifactResultRecord record : mainResults.values()) {
+         if (record.mainArtifact == null) {
+            // Pick a classifier to be the main artifact.
+            record.mainArtifact = record.additionalClassifiers.remove(0);
+         }
+      }
       return this;
    }
 
@@ -67,6 +76,13 @@ public class ArtifactResultStore {
       return outputRelativePath(pom);
    }
 
+   public String getMainClassifier(ArtifactResult result) {
+      Preconditions.checkNotNull(result, "result may not be null!");
+      ArtifactResult main = mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD).mainArtifact;
+      Preconditions.checkState(main != null, "unable to find main artifact for %s!", result.getArtifact().getFile());
+      return main.getArtifact().getClassifier();
+   }
+
    public List<String> getOtherClassifiers(ArtifactResult result) {
       Preconditions.checkNotNull(result, "result may not be null!");
       return mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD)
@@ -74,6 +90,13 @@ public class ArtifactResultStore {
             .stream()
             .map(r -> r.getArtifact().getClassifier())
             .collect(Collectors.toList());
+   }
+
+   public String getMainExtension(ArtifactResult result) {
+      Preconditions.checkNotNull(result, "result may not be null!");
+      ArtifactResult main = mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD).mainArtifact;
+      Preconditions.checkState(main != null, "unable to find main artifact for %s!", result.getArtifact().getFile());
+      return main.getArtifact().getExtension();
    }
 
    public List<String> getOtherExtensions(ArtifactResult result) {
@@ -87,9 +110,8 @@ public class ArtifactResultStore {
 
    public boolean hasOtherClassifiers(ArtifactResult result) {
       Preconditions.checkNotNull(result, "result may not be null!");
-      return !mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD)
-            .additionalClassifiers
-            .isEmpty();
+      ArtifactResultRecord record = mainResults.get(key(result));
+      return record != null && !record.additionalClassifiers.isEmpty();
    }
 
    Path outputRelativePath(Path file) {
@@ -115,7 +137,7 @@ public class ArtifactResultStore {
 
       final static ArtifactResultRecord EMPTY_RECORD = new ArtifactResultRecord(null);
 
-      final Collection<ArtifactResult> additionalClassifiers = new ArrayList<>();
+      final List<ArtifactResult> additionalClassifiers = new ArrayList<>();
       final Path pom;
       ArtifactResult mainArtifact;
 
