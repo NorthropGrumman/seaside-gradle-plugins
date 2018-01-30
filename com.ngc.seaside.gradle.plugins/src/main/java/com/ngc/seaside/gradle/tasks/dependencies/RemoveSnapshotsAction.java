@@ -38,7 +38,7 @@ public class RemoveSnapshotsAction extends DefaultTaskAction<PopulateMaven2Repos
                      try {
                         FileUtils.deleteDirectory(parentDir);
                      } catch (IOException e) {
-                        logger.error("Unexpected exception while deleting {}.", e, parentDir);
+                        logger.error("Unexpected exception while deleting {}.", parentDir, e);
                      }
                   }
                }

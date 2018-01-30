@@ -124,7 +124,7 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
                      StandardOpenOption.WRITE,
                      StandardOpenOption.APPEND);
       } catch (IOException e) {
-         logger.error("Unexpected error while creating dependency report at {}.", e, task.getDependencyInfoReportFile());
+         logger.error("Unexpected error while creating dependency report at {}.", task.getDependencyInfoReportFile(), e);
       }
    }
 
