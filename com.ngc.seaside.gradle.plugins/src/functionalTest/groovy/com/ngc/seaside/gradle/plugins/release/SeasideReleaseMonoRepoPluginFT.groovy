@@ -46,7 +46,6 @@ class SeasideReleaseMonoRepoPluginFT {
 
     @Test
     void doesUpdateReleaseVersion() {
-        // TODO(Cameron): fix this test so that it runs correctly
         checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME) {
             def output = new ByteArrayOutputStream()
             def result = project.exec ReleaseUtil.gitWithOutput(output, "log", "--pretty=format:%s")
