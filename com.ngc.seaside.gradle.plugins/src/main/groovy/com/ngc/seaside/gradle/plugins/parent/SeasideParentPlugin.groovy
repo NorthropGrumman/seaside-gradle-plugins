@@ -251,6 +251,10 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         project.getPlugins().apply('com.github.ksoichiro.console.reporter')
         project.getPlugins().apply(SeasideReleasePlugin)
         project.getPlugins().apply(SeasideCiPlugin)
+
+        // Apply the CI plugin to the root project.  This allows us to run the populateM2repo task and CI related
+        // tasks for root projects as well as subprojects.
+        project.getRootProject().getPlugins().apply(SeasideCiPlugin)
     }
 
     /**
