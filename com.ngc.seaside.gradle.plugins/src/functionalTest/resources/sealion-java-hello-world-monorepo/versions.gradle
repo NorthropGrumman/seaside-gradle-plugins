@@ -1,0 +1,9 @@
+allprojects {
+    group = 'com.ngc.seaside.functional.tests'
+    version = '1.2.3-SNAPSHOT'
+
+    ext {
+        seasidePluginsVersion = '2.2.1-SNAPSHOT'
+        log4jVersion = '1.2.17'
+    }
+}
