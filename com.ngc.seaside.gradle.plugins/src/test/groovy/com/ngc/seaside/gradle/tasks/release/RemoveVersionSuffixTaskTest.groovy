@@ -14,11 +14,11 @@ import org.mockito.junit.MockitoJUnitRunner
 import static org.mockito.Mockito.when
 
 @RunWith(MockitoJUnitRunner.Silent)
-class UpdateVersionTaskTest {
+class RemoveVersionSuffixTaskTest {
     private static final String TEST_UPGRADE_VERSION = "1.2.3"
     private static final String TEST_VERSION_FROM_FILE = "${TEST_UPGRADE_VERSION}${VersionResolver.VERSION_SUFFIX}"
 
-    private UpdateVersionTask task
+    private RemoveVersionSuffixTask task
 
     @Mock
     private VersionResolver resolver
@@ -27,10 +27,10 @@ class UpdateVersionTaskTest {
     void before() {
         when(resolver.getProjectVersion()).thenReturn(TEST_VERSION_FROM_FILE)
 
-        task = new TaskBuilder<UpdateVersionTask>(UpdateVersionTask)
+        task = new TaskBuilder<RemoveVersionSuffixTask>(RemoveVersionSuffixTask)
               .setProject(GradleMocks.newProjectMock())
               .setName(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME)
-              .setSupplier({ new UpdateVersionTask(resolver) })
+              .setSupplier({ new RemoveVersionSuffixTask(resolver) })
               .create()
 
     }

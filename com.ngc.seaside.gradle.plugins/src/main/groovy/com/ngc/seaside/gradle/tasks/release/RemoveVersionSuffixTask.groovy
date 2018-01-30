@@ -12,7 +12,7 @@ import javax.inject.Inject
 /**
  * Updates the version of the project to prepare for a release.
  */
-class UpdateVersionTask extends DefaultTask {
+class RemoveVersionSuffixTask extends DefaultTask {
     private final VersionResolver resolver
 
     /**
@@ -21,7 +21,7 @@ class UpdateVersionTask extends DefaultTask {
      * @Inject was used because there are two constructors and gradle seems to be confused on which constructor to use.
      */
     @Inject
-    UpdateVersionTask() {
+    RemoveVersionSuffixTask() {
         this.resolver = new VersionResolver(project)
     }
 
@@ -31,7 +31,7 @@ class UpdateVersionTask extends DefaultTask {
      * @param resolver An instance of a version resolver for the current projecet.
      * @param typeOfRelease The type of release to be performed (default: ReleaseType.MINOR)
      */
-    UpdateVersionTask(VersionResolver resolver) {
+    RemoveVersionSuffixTask(VersionResolver resolver) {
         this.resolver = Preconditions.checkNotNull(resolver, "resolver may not be null!")
     }
 
@@ -40,7 +40,7 @@ class UpdateVersionTask extends DefaultTask {
      * Gradle runs it.
      */
     @TaskAction
-    void updateReleaseVersion() {
+    void removeVersionSuffix() {
         def versionForRelease = getVersionForRelease()
         resolver.setProjectVersionOnFile(versionForRelease)
         project.exec ReleaseUtil.git("commit", "-m", "Releasing of version v$versionForRelease", resolver.versionFile.absolutePath)

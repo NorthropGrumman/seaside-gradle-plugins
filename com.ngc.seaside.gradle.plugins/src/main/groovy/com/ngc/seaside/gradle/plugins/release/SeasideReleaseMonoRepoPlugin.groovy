@@ -4,7 +4,7 @@ import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import com.ngc.seaside.gradle.tasks.release.BumpVersionTask
 import com.ngc.seaside.gradle.tasks.release.ReleasePushTask
-import com.ngc.seaside.gradle.tasks.release.UpdateVersionTask
+import com.ngc.seaside.gradle.tasks.release.RemoveVersionSuffixTask
 import com.ngc.seaside.gradle.tasks.release.CreateTagTask
 import com.ngc.seaside.gradle.util.ReleaseUtil
 import org.gradle.api.Project
@@ -12,7 +12,7 @@ import org.gradle.api.Project
 class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
     public static final String RELEASE_MONO_REPO_TASK_GROUP_NAME = 'Mono Repo Release'
     public static final String RELEASE_MONO_EXTENSION_NAME = 'seasideReleaseMonoRepo'
-    public static final String RELEASE_UPDATE_VERSION_TASK_NAME = 'updateReleaseVersion'
+    public static final String RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME = 'removeVersionSuffix'
     public static final String RELEASE_CREATE_TAG_TASK_NAME = 'createReleaseTag'
     public static final String RELEASE_BUMP_VERSION_TASK_NAME = 'bumpTheVersion'
     public static final String RELEASE_PUSH_TASK_NAME = 'releasePush'
@@ -39,12 +39,12 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
     private static void createTasks(Project project) {
         ReleaseUtil.configureTask(
             project,
-            UpdateVersionTask,
+            RemoveVersionSuffixTask,
             RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            RELEASE_UPDATE_VERSION_TASK_NAME,
+            RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME,
             'Define a release version (i.e. remove -SNAPSHOT) and commit it.')
 
-        List<String> dependencies = [RELEASE_UPDATE_VERSION_TASK_NAME]
+        List<String> dependencies = [RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME]
 
         ReleaseUtil.configureTask(
             project,
