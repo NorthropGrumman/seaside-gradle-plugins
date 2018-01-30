@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ArtifactResultStore {
@@ -110,38 +109,6 @@ public class ArtifactResultStore {
       return new ArtifactKey(result.getArtifact().getGroupId(),
                              result.getArtifact().getArtifactId(),
                              result.getArtifact().getVersion());
-   }
-
-   private static class ArtifactKey {
-
-      final String groupId;
-      final String artifactId;
-      final String version;
-
-      ArtifactKey(String groupId, String artifactId, String version) {
-         this.groupId = groupId;
-         this.artifactId = artifactId;
-         this.version = version;
-      }
-
-      @Override
-      public boolean equals(Object o) {
-         if (this == o) {
-            return true;
-         }
-         if (!(o instanceof ArtifactKey)) {
-            return false;
-         }
-         ArtifactKey that = (ArtifactKey) o;
-         return Objects.equals(groupId, that.groupId) &&
-                Objects.equals(artifactId, that.artifactId) &&
-                Objects.equals(version, that.version);
-      }
-
-      @Override
-      public int hashCode() {
-         return Objects.hash(groupId, artifactId, version);
-      }
    }
 
    private static class ArtifactResultRecord {

@@ -7,7 +7,9 @@ import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
+import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.logging.Logger;
 import org.junit.Before;
@@ -59,8 +61,15 @@ public class ResolveDependenciesActionTest {
    @Before
    public void setup() {
       Logger logger = mock(Logger.class);
+
       when(task.getProject()).thenReturn(project);
       when(task.getLogger()).thenReturn(logger);
+
+      ConfigurationContainer scriptConfigs = mock(ConfigurationContainer.class);
+      ScriptHandler scriptHandler = mock(ScriptHandler.class);
+      when(scriptHandler.getConfigurations()).thenReturn(scriptConfigs);
+      when(project.getBuildscript()).thenReturn(scriptHandler);
+      when(project.getRootProject()).thenReturn(project);
 
       MavenArtifactRepository local = newLocalMavenRepo(localRepositoryDirectory.getRoot());
       when(task.getOutputDirectory()).thenReturn(outputDirectory.getRoot());
@@ -87,10 +96,12 @@ public class ResolveDependenciesActionTest {
       DependencyResult jarResult = newDependencyResult();
       DependencyResult sourcesResult = newDependencyResult();
       DependencyResult testsResult = newDependencyResult();
+      DependencyResult javadocResult = newDependencyResult();
       when(repositorySystem.resolveDependencies(eq(session), any(DependencyRequest.class)))
             .thenReturn(jarResult)
             .thenReturn(sourcesResult)
-            .thenReturn(testsResult);
+            .thenReturn(testsResult)
+            .thenReturn(javadocResult);
 
       action.execute(task);
       Collection<DependencyResult> results = action.getDependencyResults();
@@ -102,13 +113,15 @@ public class ResolveDependenciesActionTest {
                  results.contains(sourcesResult));
       assertTrue("missing tests result!",
                  results.contains(testsResult));
+      assertTrue("missing javadoc result!",
+                 results.contains(javadocResult));
       assertEquals("contains extra results!",
-                   3,
+                   4,
                    results.size());
    }
 
    @Test
-   public void doesSkipMissingSourcesAndTests() throws Throwable {
+   public void doesSkipMissingClassifiers() throws Throwable {
       config.getDependencies().add(newDependency("a", "b", "1.0"));
 
       DependencyResult jarResult = newDependencyResult();
@@ -116,6 +129,7 @@ public class ResolveDependenciesActionTest {
       when(repositorySystem.resolveDependencies(eq(session), any(DependencyRequest.class)))
             .thenReturn(jarResult)
             .thenReturn(sourcesResult)
+            .thenThrow(newNotFoundException())
             .thenThrow(newNotFoundException());
 
       action.execute(task);

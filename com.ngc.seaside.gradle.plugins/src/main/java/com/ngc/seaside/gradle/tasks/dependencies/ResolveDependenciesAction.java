@@ -25,6 +25,7 @@ import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.repository.AuthenticationBuilder;
 import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencyArtifact;
@@ -38,8 +39,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Resolves dependencies using the Maven Aether API.
@@ -51,9 +54,8 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
     * and "tests".  Note {@code null} indicates that the "real" artifact of the dependency (ie, the actual JAR file)
     * should attempt to be resolved.
     */
-   private final static Collection<String> DEFAULT_CLASSIFIERS = Collections.unmodifiableCollection(
+   private final static List<String> DEFAULT_CLASSIFIERS = Collections.unmodifiableList(
          Arrays.asList(null, "sources", "tests", "javadoc"));
-   // TODO TH: add javadoc to the list of classifiers above.
 
    /**
     * The default extension to use when using the default classifiers.  We need this in case the build uses the defaults
@@ -90,6 +92,10 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
     * The total dependencies resolved thus far (not including transitive dependencies).
     */
    private long totalDependenciesRetrieved = 0;
+
+   private final Set<ArtifactKey> transitiveDependenciesWithMissingClassifiers = new HashSet<>();
+
+   private boolean transitiveClassifierResolutionInProgress = false;
 
    @Override
    public void validate(PopulateMaven2Repository task) throws InvalidUserDataException {
@@ -128,6 +134,9 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
             resolveDependency(dependency);
          }
       }
+
+      // Try to resolve any additional classifiers for transitive dependencies.
+      resolveExtraClassifiersForTransitiveDependencies();
    }
 
    /**
@@ -208,13 +217,13 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
       if (e.getCause() instanceof ArtifactResolutionException) {
          // If the artifact was not resolved and it is one of the default classifiers (ie, sources or tests), it's
          // no big deal if that artifact wasn't found.  Just let the user know not to worry.
-         if (DEFAULT_CLASSIFIERS.contains(classifier)) {
+         if (classifier != null && DEFAULT_CLASSIFIERS.contains(classifier)) {
             logger.lifecycle("Did not resolve '{}' but that is okay since that artifact is only {}.",
                              prettyGave,
                              classifier);
          } else {
             // Otherwise, we didn't find something that may actually be important.
-            logger.warn("Failed to resolve '{}' (this artifact may be required).", prettyGave);
+            logger.warn("Failed to resolve '{}' (this artifact may be required).", prettyGave, e);
          }
       } else {
          // This means something else failed.
@@ -229,6 +238,12 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
    protected void handleDependencyResult(DependencyResult result) {
       for (ArtifactResult localArtifact : result.getArtifactResults()) {
          logger.lifecycle("Located {}.", localArtifact.getArtifact().getFile());
+         if (!transitiveClassifierResolutionInProgress && "".equals(localArtifact.getArtifact().getClassifier())) {
+            transitiveDependenciesWithMissingClassifiers.add(new ArtifactKey(
+                  localArtifact.getArtifact().getGroupId(),
+                  localArtifact.getArtifact().getArtifactId(),
+                  localArtifact.getArtifact().getVersion()));
+         }
       }
       dependencyResults.add(result);
    }
@@ -241,7 +256,15 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
       if (task.getConfiguration() != null) {
          configs = Collections.singleton(task.getConfiguration());
       } else {
-         configs = task.getProject().getConfigurations();
+         Project project = task.getProject();
+         configs = new ArrayList<>(project.getConfigurations());
+         // Include the configurations from the build script.
+         configs.addAll(project.getBuildscript().getConfigurations());
+         // If there is a real root project, be sure to add the configurations of that build script to the configuration
+         // to resolve since those configurations will be used to build this project as well.
+         if (!project.equals(project.getRootProject())) {
+            configs.addAll(project.getRootProject().getBuildscript().getConfigurations());
+         }
       }
       return configs;
    }
@@ -279,8 +302,7 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
    }
 
    /**
-    * Resolves the given {@code Dependency}.  The artifacts for the {@link #DEFAULT_CLASSIFIERS} will also be resolved
-    * if they exists.
+    * Resolves the given {@code Dependency}.
     */
    private void doResolveDependency(Dependency dependency) {
       logger.lifecycle("[{}/{}] Attempting to resolve artifacts for '{}:{}:{}'.",
@@ -290,14 +312,22 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
                        dependency.getName(),
                        dependency.getVersion());
 
-      for (String classifier : DEFAULT_CLASSIFIERS) {
-         getDependencyResult(dependency.getGroup(),
-                             dependency.getName(),
-                             dependency.getVersion(),
-                             classifier,
-                             DEFAULT_EXTENSION)
-               .ifPresent(this::handleDependencyResult);
-      }
+      getDependencyResult(dependency.getGroup(),
+                          dependency.getName(),
+                          dependency.getVersion(),
+                          DEFAULT_CLASSIFIERS.get(0),
+                          DEFAULT_EXTENSION)
+            .ifPresent(this::handleDependencyResult);
+
+//      // Try to resolve the dependency along with any extra classifiers.
+//      for (String classifier : DEFAULT_CLASSIFIERS) {
+//         getDependencyResult(dependency.getGroup(),
+//                             dependency.getName(),
+//                             dependency.getVersion(),
+//                             classifier,
+//                             DEFAULT_EXTENSION)
+//               .ifPresent(this::handleDependencyResult);
+//      }
    }
 
    /**
@@ -327,6 +357,39 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
                   .ifPresent(this::handleDependencyResult);
          }
       }
+   }
+
+   private void resolveExtraClassifiersForTransitiveDependencies() {
+      int resolved = 0;
+      logger.lifecycle("Extra classifiers for {} transitive dependencies must be resolved.",
+                       transitiveDependenciesWithMissingClassifiers.size());
+      transitiveClassifierResolutionInProgress = true;
+
+      for (ArtifactKey key : transitiveDependenciesWithMissingClassifiers) {
+         logger.lifecycle("[{}/{}] Attempting to resolve additional classifiers for transitive dependency '{}:{}:{}'.",
+                          resolved + 1,
+                          transitiveDependenciesWithMissingClassifiers.size(),
+                          key.getGroupId(),
+                          key.getArtifactId(),
+                          key.getVersion());
+
+         // Try to resolve the dependency along with any extra classifiers.
+         // Skip the first default classifier because we already have that artifact.  We just want the other
+         // classifiers.
+         for (String classifier : DEFAULT_CLASSIFIERS.subList(1, DEFAULT_CLASSIFIERS.size())) {
+            getDependencyResult(key.getGroupId(),
+                                key.getArtifactId(),
+                                key.getVersion(),
+                                classifier,
+                                DEFAULT_EXTENSION)
+                  .ifPresent(this::handleDependencyResult);
+         }
+
+         resolved++;
+      }
+
+      transitiveClassifierResolutionInProgress = false;
+      transitiveDependenciesWithMissingClassifiers.clear();
    }
 
    /**
