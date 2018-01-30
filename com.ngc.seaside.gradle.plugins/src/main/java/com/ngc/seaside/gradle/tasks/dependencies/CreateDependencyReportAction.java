@@ -1,6 +1,8 @@
 package com.ngc.seaside.gradle.tasks.dependencies;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
 
 import com.ngc.seaside.gradle.tasks.DefaultTaskAction;
 import com.ngc.seaside.gradle.util.GradleUtil;
@@ -15,7 +17,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
@@ -32,6 +37,11 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
     * The character that delimits fields.
     */
    private final static char FIELD_SEPARATOR = '\t';
+
+   /**
+    * The value to use if a field is blank.
+    */
+   private final static String DEFAULT_EMPTY_FIELD = " ";
 
    private ArtifactResultStore store;
 
@@ -60,11 +70,11 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
              + artifactResult.getArtifact().getVersion() + FIELD_SEPARATOR
              + pom + FIELD_SEPARATOR
              + file + FIELD_SEPARATOR
-             + store.getMainExtension(artifactResult) + FIELD_SEPARATOR
-             + store.getMainClassifier(artifactResult) + FIELD_SEPARATOR
-             + String.join(",", (Iterable<String>) files::iterator) + FIELD_SEPARATOR
-             + String.join(",", store.getOtherClassifiers(artifactResult)) + FIELD_SEPARATOR
-             + String.join(",", store.getOtherExtensions(artifactResult));
+             + neverEmpty(store.getMainExtension(artifactResult)) + FIELD_SEPARATOR
+             + neverEmpty(store.getMainClassifier(artifactResult)) + FIELD_SEPARATOR
+             + neverEmpty(String.join(",", (Iterable<String>) files::iterator)) + FIELD_SEPARATOR
+             + neverEmpty(String.join(",", store.getOtherClassifiers(artifactResult))) + FIELD_SEPARATOR
+             + neverEmpty(String.join(",", store.getOtherExtensions(artifactResult)));
    }
 
    @Override
@@ -110,12 +120,14 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
       return lines;
    }
 
-   private void writeLines(Set<String> lines) {
+   private void writeLines(Collection<String> lines) {
       // Create parent directories if needed.
       File dir = task.getDependencyInfoReportFile().getParentFile();
       if (dir != null && !dir.isDirectory()) {
          dir.mkdirs();
       }
+
+      lines = scrubLines(lines);
 
       try {
          Files.write(task.getDependencyInfoReportFile().toPath(),
@@ -132,6 +144,30 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
       }
    }
 
+   private static Collection<String> scrubLines(Collection<String> lines) {
+      List<String> list = new ArrayList<>(lines);
+      List<String> scrubed = new ArrayList<>();
+
+      for(int i = 0; i < list.size(); i++) {
+         String line = list.get(i);
+         String next = i < list.size() - 1 ? list.get(i + 1) : null;
+         if(next == null || !isDuplicateLine(line, next)) {
+            scrubed.add(line);
+         }
+      }
+
+      return scrubed;
+   }
+
+   private static boolean isDuplicateLine(String line, String next) {
+      String[] lineFields = line.split(String.valueOf(FIELD_SEPARATOR));
+      String[] nextFields = next.split(String.valueOf(FIELD_SEPARATOR));
+      return lineFields[0].equals(nextFields[0]) // group
+            && lineFields[1].equals(nextFields[1]) // artifact
+            && lineFields[2].equals(nextFields[2]) // version
+            && lineFields[3].equals(nextFields[3]); // pom file
+   }
+
    private static Path relativizeToParentOf(Path path, Path other) {
       Path relative = other;
       if (path.getParent() != null) {
@@ -139,4 +175,9 @@ public class CreateDependencyReportAction extends DefaultTaskAction<PopulateMave
       }
       return relative;
    }
+
+   private static String neverEmpty(String value) {
+      return value.trim().isEmpty() ? DEFAULT_EMPTY_FIELD : value;
+   }
+
 }

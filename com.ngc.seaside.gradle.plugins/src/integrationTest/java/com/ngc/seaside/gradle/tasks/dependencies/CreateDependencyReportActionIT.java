@@ -110,6 +110,7 @@ public class CreateDependencyReportActionIT {
       assertTrue("did not create CSV file!",
                  reportFile.exists());
       List<String> lines = Files.readAllLines(reportFile.toPath());
+      lines.forEach(System.out::println);
       assertTrue("missing jar dependency from report!",
                  lines.contains(formatLine(jar, store, reportFile.toPath())));
    }
