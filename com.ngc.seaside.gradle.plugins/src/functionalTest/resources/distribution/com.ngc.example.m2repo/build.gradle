@@ -1,6 +1,17 @@
 import com.ngc.seaside.gradle.tasks.dependencies.PopulateMaven2Repository
 
-import java.nio.file.Paths
+buildscript {
+    repositories {
+        maven {
+            url nexusConsolidated
+        }
+    }
+
+    dependencies {
+        // This allows us to test resolving build script configurations.
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5"
+    }
+}
 
 plugins {
     id 'com.ngc.seaside.service-distribution'
@@ -85,6 +96,7 @@ task testM2repo(type: PopulateMaven2Repository) {
     outputDirectory = project.file("${project.buildDir}/dependencies-m2")
     remoteRepository = project.repositories.getByName('NexusConsolidated')
     localRepository = mavenLocal()
+    // Comment out the line below to resolve dependencies for all configurations.
     configuration = project.configurations.getByName('thirdParty')
 
     createDependencyReportFile = true
