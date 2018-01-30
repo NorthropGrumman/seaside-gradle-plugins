@@ -69,7 +69,7 @@ class BumpVersionTask extends DefaultTask {
     * @return the string of the next version to be written to the build.gradle file
     */
    String setNextVersion() {
-      return getCurrentVersion() + getVersionSuffix()
+      return getUpdatedVersion() + getVersionSuffix()
    }
 
    private String getVersionSuffix() {
@@ -88,8 +88,16 @@ class BumpVersionTask extends DefaultTask {
     *
     * @return String based on the current version in the build.gradle file
     */
-   private String getCurrentVersion() {
+   private String getUpdatedVersion() {
       return resolver.getUpdatedProjectVersionForRelease(releaseType)
+   }
+
+   /**
+    *
+    * @return String based on the current version in the build.gradle file
+    */
+   String getCurrentVersion() {
+      return resolver.getProjectVersion()
    }
 
    /**

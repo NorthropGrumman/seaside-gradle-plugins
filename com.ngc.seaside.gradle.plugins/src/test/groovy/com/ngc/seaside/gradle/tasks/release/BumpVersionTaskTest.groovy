@@ -63,9 +63,24 @@ class BumpVersionTaskTest {
 
     private void confirmVersionUpgradeForReleaseType(ReleaseType type, String expectedUpgradeVersion) {
         task = createTaskWithReleaseType(type)
+        Assert.assertEquals(
+                "the current version should have been: " + TEST_UPGRADE_VERSION,
+                TEST_UPGRADE_VERSION,
+                task.getCurrentVersion()
+        )
+
         task.setNextVersion()
         verify(resolver).getUpdatedProjectVersionForRelease(type)
-        Assert.assertEquals(expectedUpgradeVersion, task.setNextVersion())
+        Assert.assertEquals(
+                "The release type should have been: $type",
+                type,
+                task.getReleaseType()
+        )
+
+        Assert.assertEquals(
+                "This was the version expected: $expectedUpgradeVersion",
+                expectedUpgradeVersion,
+                task.setNextVersion())
     }
 
     private BumpVersionTask createTaskWithReleaseType(ReleaseType type) {
@@ -75,4 +90,5 @@ class BumpVersionTaskTest {
               .setSupplier({ new BumpVersionTask(resolver, type) })
               .create()
     }
+
 }
