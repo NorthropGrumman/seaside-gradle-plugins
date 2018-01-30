@@ -13,9 +13,6 @@ import javax.inject.Inject
  * Updates the version of the project to prepare for a release.
  */
 class UpdateVersionTask extends DefaultTask {
-    //will be used in the future
-    boolean dryRun
-
     private final VersionResolver resolver
 
     /**
@@ -44,7 +41,6 @@ class UpdateVersionTask extends DefaultTask {
      */
     @TaskAction
     void updateReleaseVersion() {
-        resolver.enforceVersionSuffix = false
         def newReleaseVersion = getVersionForRelease()
         resolver.setProjectVersionOnFile(newReleaseVersion)
         project.exec ReleaseUtil.git("commit", "-m", "Releasing Version $newReleaseVersion : $resolver.versionFile.absolutePath")

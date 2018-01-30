@@ -85,7 +85,6 @@ class ReleaseUtil {
     * @return The closure to be added to your project for running the git command with the arguments specified.
     */
    static Closure gitWithOutput(ByteArrayOutputStream output, Object[] arguments) {
-      println("trying to run git $arguments")
       return {
          executable "git"
          args arguments
