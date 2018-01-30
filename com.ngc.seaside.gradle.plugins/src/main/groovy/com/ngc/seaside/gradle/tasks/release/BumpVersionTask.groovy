@@ -89,7 +89,7 @@ class BumpVersionTask extends DefaultTask {
     * @return String based on the current version in the build.gradle file
     */
    private String getCurrentVersion() {
-      return resolver.getProjectVersion()
+      return resolver.getUpdatedProjectVersionForRelease(releaseType)
    }
 
    /**

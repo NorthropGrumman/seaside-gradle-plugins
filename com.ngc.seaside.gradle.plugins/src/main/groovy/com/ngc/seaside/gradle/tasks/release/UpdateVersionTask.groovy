@@ -17,7 +17,6 @@ class UpdateVersionTask extends DefaultTask {
     boolean dryRun
 
     private final VersionResolver resolver
-    private ReleaseType typeOfRelease
 
     /**
      * CTOR
@@ -27,7 +26,6 @@ class UpdateVersionTask extends DefaultTask {
     @Inject
     UpdateVersionTask() {
         this.resolver = new VersionResolver(project)
-        this.typeOfRelease = ReleaseType.MINOR
     }
 
     /**
@@ -36,9 +34,8 @@ class UpdateVersionTask extends DefaultTask {
      * @param resolver An instance of a version resolver for the current projecet.
      * @param typeOfRelease The type of release to be performed (default: ReleaseType.MINOR)
      */
-    UpdateVersionTask(VersionResolver resolver, ReleaseType typeOfRelease = ReleaseType.MINOR) {
+    UpdateVersionTask(VersionResolver resolver) {
         this.resolver = Preconditions.checkNotNull(resolver, "resolver may not be null!")
-        this.typeOfRelease = typeOfRelease
     }
 
     /**
@@ -50,7 +47,7 @@ class UpdateVersionTask extends DefaultTask {
         resolver.enforceVersionSuffix = false
         def newReleaseVersion = getVersionForRelease()
         resolver.setProjectVersionOnFile(newReleaseVersion)
-        project.exec ReleaseUtil.git("commit", "-am", "Release of version v$newReleaseVersion")
+        project.exec ReleaseUtil.git("commit", "-m", "Releasing Version $newReleaseVersion : $resolver.versionFile.absolutePath")
     }
 
     /**
@@ -60,7 +57,7 @@ class UpdateVersionTask extends DefaultTask {
      * @return version used for the next release
      */
     String getVersionForRelease() {
-        return resolver.getUpdatedProjectVersionForRelease(releaseType)
+        return resolver.getProjectVersion()
     }
 
     /**
@@ -72,12 +69,4 @@ class UpdateVersionTask extends DefaultTask {
         return resolver.getProjectVersion()
     }
 
-    /**
-     * Get the type of release to be performed.
-     *
-     * @return release type for current release
-     */
-    ReleaseType getReleaseType() {
-        return typeOfRelease
-    }
 }

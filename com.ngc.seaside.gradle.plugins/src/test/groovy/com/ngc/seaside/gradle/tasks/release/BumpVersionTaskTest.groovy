@@ -21,7 +21,8 @@ import static org.mockito.Mockito.*
 @RunWith(MockitoJUnitRunner.Silent)
 class BumpVersionTaskTest {
     private static final String TEST_VERSION_SUFFIX = "-SNAPSHOT"
-    private static final String TEST_RELEASE_MINOR_VERSION = "1.3.0"
+    private static final String TEST_RELEASE_MINOR_VERSION = "1.2.2"
+    private static final String TEST_RELEASE_NEW_VERSION = "1.3.0"
 
     private ProjectInternal testProject
     private BumpVersionTask task
@@ -42,7 +43,7 @@ class BumpVersionTaskTest {
 
     @Test
     void canUpgradeVersionForMinorRelease() {
-        confirmVersionUpgradeForReleaseType(TEST_RELEASE_MINOR_VERSION + TEST_VERSION_SUFFIX)
+        confirmVersionUpgradeForReleaseType(TEST_RELEASE_NEW_VERSION + TEST_VERSION_SUFFIX)
     }
 
     private void confirmVersionUpgradeForReleaseType(String expectedUpgradeVersion) {
