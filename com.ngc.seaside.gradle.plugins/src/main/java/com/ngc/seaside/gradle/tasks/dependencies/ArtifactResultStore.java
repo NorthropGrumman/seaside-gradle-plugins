@@ -5,8 +5,9 @@ import com.google.common.base.Preconditions;
 import org.eclipse.aether.resolution.ArtifactResult;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,7 +32,10 @@ public class ArtifactResultStore {
       if (isMainArtifact(result)) {
          record.mainArtifact = result;
       } else {
-         record.additionalClassifiers.add(result);
+         record.additionalClassifiers.put(key(result)
+                                                .setClassifier(result.getArtifact().getClassifier())
+                                                .setExtension(result.getArtifact().getExtension()),
+                                          result);
       }
 
       return this;
@@ -41,7 +45,9 @@ public class ArtifactResultStore {
       for (ArtifactResultRecord record : mainResults.values()) {
          if (record.mainArtifact == null) {
             // Pick a classifier to be the main artifact.
-            record.mainArtifact = record.additionalClassifiers.remove(0);
+            Iterator<ArtifactResult> i = record.additionalClassifiers.values().iterator();
+            record.mainArtifact = i.next();
+            i.remove();
          }
       }
       return this;
@@ -64,6 +70,7 @@ public class ArtifactResultStore {
       Preconditions.checkNotNull(result, "result may not be null!");
       return mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD)
             .additionalClassifiers
+            .values()
             .stream()
             .map(this::outputRelativePath)
             .collect(Collectors.toList());
@@ -87,6 +94,7 @@ public class ArtifactResultStore {
       Preconditions.checkNotNull(result, "result may not be null!");
       return mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD)
             .additionalClassifiers
+            .values()
             .stream()
             .map(r -> r.getArtifact().getClassifier())
             .collect(Collectors.toList());
@@ -103,6 +111,7 @@ public class ArtifactResultStore {
       Preconditions.checkNotNull(result, "result may not be null!");
       return mainResults.getOrDefault(key(result), ArtifactResultRecord.EMPTY_RECORD)
             .additionalClassifiers
+            .values()
             .stream()
             .map(r -> r.getArtifact().getExtension())
             .collect(Collectors.toList());
@@ -137,7 +146,7 @@ public class ArtifactResultStore {
 
       final static ArtifactResultRecord EMPTY_RECORD = new ArtifactResultRecord(null);
 
-      final List<ArtifactResult> additionalClassifiers = new ArrayList<>();
+      final Map<ArtifactKey, ArtifactResult> additionalClassifiers = new LinkedHashMap<>();
       final Path pom;
       ArtifactResult mainArtifact;
 
