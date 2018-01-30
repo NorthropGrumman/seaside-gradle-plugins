@@ -3,7 +3,11 @@ package com.ngc.seaside.gradle.tasks.dependencies;
 import com.ngc.seaside.gradle.tasks.DefaultTaskAction;
 import com.ngc.seaside.gradle.util.GradleUtil;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Parent;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -33,7 +37,10 @@ import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,8 +108,8 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
    private long totalDependenciesRetrieved = 0;
 
    /**
-    * If true, extra classifiers for transitive dependencies are being resolved.  This means we don't want to
-    * add the artifact to the list of transitive dependencies again.
+    * If true, extra classifiers for transitive dependencies are being resolved.  This means we don't want to add the
+    * artifact to the list of transitive dependencies again.
     */
    private boolean transitiveClassifierResolutionInProgress = false;
 
@@ -252,9 +259,35 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
                   localArtifact.getArtifact().getGroupId(),
                   localArtifact.getArtifact().getArtifactId(),
                   localArtifact.getArtifact().getVersion()));
+
+            getParentPom(localArtifact);
          }
       }
       dependencyResults.add(result);
+   }
+
+   private void getParentPom(ArtifactResult localArtifact) {
+      Optional<Path> pom = PopulateMaven2Repository.findPom(localArtifact);
+      if (pom.isPresent()) {
+         MavenXpp3Reader reader = new MavenXpp3Reader();
+         try {
+            Model model = reader.read(new FileReader(pom.get().toFile()));
+            Parent parent = model.getParent();
+            if (parent != null) {
+               getDependencyResult(parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), null, "pom")
+                     .ifPresent(result -> {
+                        dependencyResults.add(result);
+                        result.getArtifactResults().forEach(this::getParentPom);
+                     });
+            }
+         } catch (IOException | XmlPullParserException e) {
+            logger.error("Unexpected error while attempting to resolve parent POM of '{}:{}:{}'.",
+                         localArtifact.getArtifact().getGroupId(),
+                         localArtifact.getArtifact().getArtifactId(),
+                         localArtifact.getArtifact().getVersion(),
+                         e);
+         }
+      }
    }
 
    /**

@@ -5,6 +5,9 @@ import com.google.common.base.Preconditions;
 import groovy.lang.Closure;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyResult;
@@ -20,6 +23,8 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.ConfigureUtil;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -459,7 +464,7 @@ public class PopulateMaven2Repository extends DefaultTask {
    /**
     * Finds the POM on disk for the given artifact.
     */
-   private static Optional<Path> findPom(ArtifactResult artifactResult) {
+   static Optional<Path> findPom(ArtifactResult artifactResult) {
       Optional<Path> path = Optional.empty();
       File artifact = artifactResult.getArtifact().getFile();
       if (artifact.getParentFile() != null) {
