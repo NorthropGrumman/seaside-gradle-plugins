@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
-import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseRootProjectPlugin
 import com.ngc.seaside.gradle.util.VersionResolver
 import com.ngc.seaside.gradle.util.test.GradleMocks
 import com.ngc.seaside.gradle.util.test.TaskBuilder
@@ -29,7 +29,7 @@ class RemoveVersionSuffixTaskTest {
 
         task = new TaskBuilder<RemoveVersionSuffixTask>(RemoveVersionSuffixTask)
               .setProject(GradleMocks.newProjectMock())
-              .setName(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME)
+              .setName(SeasideReleaseRootProjectPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME)
               .setSupplier({ new RemoveVersionSuffixTask(resolver) })
               .create()
 

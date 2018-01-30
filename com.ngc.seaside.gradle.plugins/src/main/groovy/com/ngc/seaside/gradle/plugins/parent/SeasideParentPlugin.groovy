@@ -4,7 +4,6 @@ import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
-import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
 import com.ngc.seaside.gradle.util.GradleUtil
@@ -29,7 +28,6 @@ import org.gradle.api.tasks.bundling.Jar
  * </pre>
  */
 class SeasideParentPlugin extends AbstractProjectPlugin {
-
     public static final String PARENT_TASK_GROUP_NAME = 'parent'
     public static final String SOURCE_JAR_TASK_NAME = 'sourcesJar'
     public static final String JAVADOC_JAR_TASK_NAME = 'javadocJar'
@@ -249,7 +247,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         project.getPlugins().apply('com.github.ben-manes.versions')
         project.getPlugins().apply('com.github.ksoichiro.console.reporter')
         project.getPlugins().apply(SeasideReleasePlugin)
-        project.getPlugins().apply(SeasideReleaseMonoRepoPlugin)
         project.getPlugins().apply(SeasideCiPlugin)
     }
 

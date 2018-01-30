@@ -9,9 +9,9 @@ import com.ngc.seaside.gradle.tasks.release.CreateTagTask
 import com.ngc.seaside.gradle.util.ReleaseUtil
 import org.gradle.api.Project
 
-class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
-    public static final String RELEASE_MONO_REPO_TASK_GROUP_NAME = 'Mono Repo Release'
-    public static final String RELEASE_MONO_EXTENSION_NAME = 'seasideReleaseMonoRepo'
+class SeasideReleaseRootProjectPlugin extends AbstractProjectPlugin {
+    public static final String RELEASE_ROOT_PROJECT_TASK_GROUP_NAME = 'Root Project Release'
+    public static final String RELEASE_ROOT_PROJECT_EXTENSION_NAME = 'seasideReleaseRoot'
     public static final String RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME = 'removeVersionSuffix'
     public static final String RELEASE_CREATE_TAG_TASK_NAME = 'createReleaseTag'
     public static final String RELEASE_BUMP_VERSION_TASK_NAME = 'bumpTheVersion'
@@ -26,7 +26,7 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      */
     @Override
     void doApply(Project project) {
-        releaseExtension = project.extensions.create(RELEASE_MONO_EXTENSION_NAME, SeasideReleaseExtension)
+        releaseExtension = project.extensions.create(RELEASE_ROOT_PROJECT_EXTENSION_NAME, SeasideReleaseExtension)
         project.logger.info(String.format("Initializing release extensions for %s", project.name))
         createTasks(project)
     }
@@ -38,40 +38,32 @@ class SeasideReleaseMonoRepoPlugin extends AbstractProjectPlugin {
      */
     private static void createTasks(Project project) {
         ReleaseUtil.configureTask(
-            project,
-            RemoveVersionSuffixTask,
-            RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME,
-            'Define a release version (i.e. remove -SNAPSHOT) and commit it.')
-
-        List<String> dependencies = [RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME]
+              project,
+              RemoveVersionSuffixTask,
+              RELEASE_ROOT_PROJECT_TASK_GROUP_NAME,
+              RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME,
+              'Define a release version (i.e. remove -SNAPSHOT) and commit it.')
 
         ReleaseUtil.configureTask(
-            project,
-            CreateTagTask,
-            RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            RELEASE_CREATE_TAG_TASK_NAME,
-            'Create the version tag used by GitHub.',
-            dependencies)
+              project,
+              CreateTagTask,
+              RELEASE_ROOT_PROJECT_TASK_GROUP_NAME,
+              RELEASE_CREATE_TAG_TASK_NAME,
+              'Create the version tag used by GitHub.')
 
         ReleaseUtil.configureTask(
-            project,
-            BumpVersionTask,
-            RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            RELEASE_BUMP_VERSION_TASK_NAME,
-            'Will bump the version (i.e. add -SNAPSHOT) in the version file.',
-            dependencies)
+              project,
+              BumpVersionTask,
+              RELEASE_ROOT_PROJECT_TASK_GROUP_NAME,
+              RELEASE_BUMP_VERSION_TASK_NAME,
+              'Will bump the version (i.e. add -SNAPSHOT) in the version file.')
 
         ReleaseUtil.configureTask(
-            project,
-            ReleasePushTask,
-            RELEASE_MONO_REPO_TASK_GROUP_NAME,
-            RELEASE_PUSH_TASK_NAME,
-            'Push the project to GitHub.',
-            dependencies + [
-                  RELEASE_BUMP_VERSION_TASK_NAME,
-                  RELEASE_CREATE_TAG_TASK_NAME
-            ])
+              project,
+              ReleasePushTask,
+              RELEASE_ROOT_PROJECT_TASK_GROUP_NAME,
+              RELEASE_PUSH_TASK_NAME,
+              'Push the project to GitHub.')
     }
 
 

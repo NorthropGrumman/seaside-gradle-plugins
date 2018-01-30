@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.tasks.release
 
 import com.google.common.base.Preconditions
-import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseRootProjectPlugin
 import com.ngc.seaside.gradle.util.ReleaseUtil
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
@@ -57,7 +57,7 @@ class CreateTagTask extends DefaultTask {
    def createReleaseTag() {
       getReleaseExtensionSettings()
       setTagName()
-      ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).tag = tagName
+      ReleaseUtil.getReleaseExtension(project, SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME).tag = tagName
       createTag()
 
    }
@@ -103,6 +103,6 @@ class CreateTagTask extends DefaultTask {
     * Resolves class variables with the Project extension variables
     */
    private void getReleaseExtensionSettings() {
-      tagPrefix = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).getTagPrefix()
+      tagPrefix = ReleaseUtil.getReleaseExtension(project, SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME).getTagPrefix()
    }
 }

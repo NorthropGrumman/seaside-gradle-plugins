@@ -10,19 +10,19 @@ import org.junit.Test
 
 import java.nio.file.Paths
 
-class SeasideReleaseMonoRepoPluginIT {
+class SeasideReleaseRootProjectPluginIT {
     private static final String BUILD_GRADLE_TEST_VERSION_NUMBER = "1.2.3-SNAPSHOT"
     private static final String VERSIONS_GRADLE_TEST_VERSION_NUMBER = "1.2.4-SNAPSHOT"
 
     private File projectDir
     private Project project
     private TaskResolver resolver
-    private SeasideReleaseMonoRepoPlugin plugin
+    private SeasideReleaseRootProjectPlugin plugin
     private List<String> taskNames = [
-          SeasideReleaseMonoRepoPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME,
-          SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME,
-          SeasideReleaseMonoRepoPlugin.RELEASE_PUSH_TASK_NAME,
-          SeasideReleaseMonoRepoPlugin.RELEASE_BUMP_VERSION_TASK_NAME
+          SeasideReleaseRootProjectPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME,
+          SeasideReleaseRootProjectPlugin.RELEASE_CREATE_TAG_TASK_NAME,
+          SeasideReleaseRootProjectPlugin.RELEASE_PUSH_TASK_NAME,
+          SeasideReleaseRootProjectPlugin.RELEASE_BUMP_VERSION_TASK_NAME
     ]
 
     @Before
@@ -33,11 +33,11 @@ class SeasideReleaseMonoRepoPluginIT {
         )
         project = TestingUtilities.createTheTestProjectWith(projectDir)
 
-        plugin = new SeasideReleaseMonoRepoPlugin()
+        plugin = new SeasideReleaseRootProjectPlugin()
         plugin.apply(project)
 
         project.extensions
-               .findByName(SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME)
+               .findByName(SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME)
                .uploadArtifacts = false
         resolver = new TaskResolver(project)
     }
@@ -48,7 +48,7 @@ class SeasideReleaseMonoRepoPluginIT {
 
         Assert.assertEquals(BUILD_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
 
-        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME))
+        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME))
 
         checkForTask()
     }
@@ -63,7 +63,7 @@ class SeasideReleaseMonoRepoPluginIT {
 
         Assert.assertEquals(VERSIONS_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
 
-        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME))
+        Assert.assertNotNull(project.extensions.findByName(SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME))
 
         checkForTask()
     }

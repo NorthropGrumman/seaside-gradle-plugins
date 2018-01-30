@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
-import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseRootProjectPlugin
 import com.ngc.seaside.gradle.util.ReleaseUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -34,7 +34,7 @@ class ReleasePushTask extends DefaultTask {
     * push all the committed changes done for the release to our GitHub repository
     */
    private void pushChanges() {
-      def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseMonoRepoPlugin.RELEASE_MONO_EXTENSION_NAME).getTag()
+      def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME).getTag()
       project.exec ReleaseUtil.git("push", "origin", tag)
       project.exec ReleaseUtil.git("push", "origin", "HEAD")
     }

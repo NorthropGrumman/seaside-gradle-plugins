@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
-import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseRootProjectPlugin
 import com.ngc.seaside.gradle.util.VersionResolver
 import com.ngc.seaside.gradle.util.test.GradleMocks
 import com.ngc.seaside.gradle.util.test.TaskBuilder
@@ -12,7 +12,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
-import static org.mockito.ArgumentMatchers.any
 import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
 
@@ -58,7 +57,7 @@ class CreateTagTaskTest {
     private CreateTagTask createTask() {
         return new TaskBuilder<CreateTagTask>(CreateTagTask)
               .setProject(testProject)
-              .setName(SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
+              .setName(SeasideReleaseRootProjectPlugin.RELEASE_CREATE_TAG_TASK_NAME)
               .setSupplier({ new CreateTagTask(resolver, TEST_PREFIX) })
               .create()
     }

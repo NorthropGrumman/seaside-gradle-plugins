@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
-import com.ngc.seaside.gradle.plugins.release.SeasideReleaseMonoRepoPlugin
+import com.ngc.seaside.gradle.plugins.release.SeasideReleaseRootProjectPlugin
 import com.ngc.seaside.gradle.util.VersionResolver
 import com.ngc.seaside.gradle.util.test.GradleMocks
 import com.ngc.seaside.gradle.util.test.TaskBuilder
@@ -86,7 +86,7 @@ class BumpVersionTaskTest {
     private BumpVersionTask createTaskWithReleaseType(ReleaseType type) {
         return new TaskBuilder<BumpVersionTask>(BumpVersionTask)
               .setProject(testProject)
-              .setName(SeasideReleaseMonoRepoPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
+              .setName(SeasideReleaseRootProjectPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
               .setSupplier({ new BumpVersionTask(resolver, type) })
               .create()
     }

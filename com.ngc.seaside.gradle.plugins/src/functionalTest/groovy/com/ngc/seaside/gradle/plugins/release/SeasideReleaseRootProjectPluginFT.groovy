@@ -10,11 +10,11 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
-class SeasideReleaseMonoRepoPluginFT {
+class SeasideReleaseRootProjectPluginFT {
     private File projectDir
     private Project project
     private List<File> pluginClasspath
-    private SeasideReleaseMonoRepoPlugin plugin
+    private SeasideReleaseRootProjectPlugin plugin
     private List<String> subprojectNames = [
             "service.bonjourlemonde",
             "service.helloworld",
@@ -31,7 +31,7 @@ class SeasideReleaseMonoRepoPluginFT {
         )
         project = TestingUtilities.createTheTestProjectWith(projectDir)
 
-        plugin = new SeasideReleaseMonoRepoPlugin()
+        plugin = new SeasideReleaseRootProjectPlugin()
         plugin.apply(project)
 
         setupTestingGitRepo()
@@ -45,31 +45,32 @@ class SeasideReleaseMonoRepoPluginFT {
     }
 
     @Test
-    void doesUpdateReleaseVersion() {
-        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_UPDATE_VERSION_TASK_NAME) {
+    void doesRemoveVersionSuffix() {
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME) {
             def output = new ByteArrayOutputStream()
             def result = project.exec ReleaseUtil.gitWithOutput(output, "log", "--pretty=format:%s")
             Assert.assertEquals(0, result.getExitValue())
-            Assert.assertTrue(
-                  "output did not contain expected release message!\noutput:" + output.toString(),
-                  output.toString().split("\n")[0].startsWith("Release of version v")
+            Assert.assertEquals(
+                  "output did not contain expected release message!",
+                  output.toString().split("\n")[0],
+                  "Release of version v1.2.3"
             )
         }
     }
 
     @Test
     void doesCreateTag() {
-        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_CREATE_TAG_TASK_NAME)
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_CREATE_TAG_TASK_NAME)
     }
 
     @Test
     void doesBumpVersion() {
-        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
     }
 
     @Test
     void doesReleasePush() {
-        checkForTaskSuccess(SeasideReleaseMonoRepoPlugin.RELEASE_PUSH_TASK_NAME)
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_PUSH_TASK_NAME)
     }
 
     private static File sourceDirectoryWithTheTestProject() {
