@@ -41,19 +41,18 @@ class UpdateVersionTask extends DefaultTask {
      */
     @TaskAction
     void updateReleaseVersion() {
-        def newReleaseVersion = getVersionForRelease()
-        resolver.setProjectVersionOnFile(newReleaseVersion)
-        project.exec ReleaseUtil.git("commit", "-m", "Releasing Version $newReleaseVersion : $resolver.versionFile.absolutePath")
+        def versionForRelease = getVersionForRelease()
+        resolver.setProjectVersionOnFile(versionForRelease)
+        project.exec ReleaseUtil.git("commit", "-m", "Releasing of version v$versionForRelease", resolver.versionFile.absolutePath)
     }
 
     /**
-     * Get the next version that will be released based on the current version and the type of release that will be
-     * performed.
+     * Get the version that will be released - specifically, the current version without the version suffix.
      *
-     * @return version used for the next release
+     * @return version used for the current release
      */
     String getVersionForRelease() {
-        return resolver.getProjectVersion()
+        return getCurrentVersion() - resolver.VERSION_SUFFIX
     }
 
     /**
