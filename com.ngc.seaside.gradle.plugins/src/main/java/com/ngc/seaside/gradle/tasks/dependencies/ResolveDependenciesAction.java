@@ -69,6 +69,13 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
    private final Collection<DependencyResult> dependencyResults = new ArrayList<>();
 
    /**
+    * The set of artifacts (including transitive dependencies) that have been resolved.  These artifacts were resolved
+    * with only the default classifier (null) so it may be necessary to resolve additional classifiers for these
+    * artifacts.
+    */
+   private final Set<ArtifactKey> transitiveDependenciesWithMissingClassifiers = new HashSet<>();
+
+   /**
     * Maven API used to make requests for artifacts.
     */
    private RepositorySystem repositorySystem;
@@ -93,8 +100,10 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
     */
    private long totalDependenciesRetrieved = 0;
 
-   private final Set<ArtifactKey> transitiveDependenciesWithMissingClassifiers = new HashSet<>();
-
+   /**
+    * If true, extra classifiers for transitive dependencies are being resolved.  This means we don't want to
+    * add the artifact to the list of transitive dependencies again.
+    */
    private boolean transitiveClassifierResolutionInProgress = false;
 
    @Override
@@ -312,22 +321,14 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
                        dependency.getName(),
                        dependency.getVersion());
 
+      // Just resolve the default classifier for now.  We will get the additional classifiers (IE, javadoc, sources,
+      // etc) when we resolve the classifiers for all transitive dependencies.
       getDependencyResult(dependency.getGroup(),
                           dependency.getName(),
                           dependency.getVersion(),
                           DEFAULT_CLASSIFIERS.get(0),
                           DEFAULT_EXTENSION)
             .ifPresent(this::handleDependencyResult);
-
-//      // Try to resolve the dependency along with any extra classifiers.
-//      for (String classifier : DEFAULT_CLASSIFIERS) {
-//         getDependencyResult(dependency.getGroup(),
-//                             dependency.getName(),
-//                             dependency.getVersion(),
-//                             classifier,
-//                             DEFAULT_EXTENSION)
-//               .ifPresent(this::handleDependencyResult);
-//      }
    }
 
    /**
@@ -360,9 +361,12 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
    }
 
    private void resolveExtraClassifiersForTransitiveDependencies() {
+      // The number of artifacts we have resolved extra classifiers for (so far).
       int resolved = 0;
       logger.lifecycle("Extra classifiers for {} transitive dependencies must be resolved.",
                        transitiveDependenciesWithMissingClassifiers.size());
+      // Set this to true so we don't keep adding the same things to the list of transitive dependencies again.
+      // We don't reset this in a try/finally because any exception will abort the entire build anyway.
       transitiveClassifierResolutionInProgress = true;
 
       for (ArtifactKey key : transitiveDependenciesWithMissingClassifiers) {
@@ -374,7 +378,7 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
                           key.getVersion());
 
          // Try to resolve the dependency along with any extra classifiers.
-         // Skip the first default classifier because we already have that artifact.  We just want the other
+         // Skip the first default classifier because we already have that file.  We just want the other
          // classifiers.
          for (String classifier : DEFAULT_CLASSIFIERS.subList(1, DEFAULT_CLASSIFIERS.size())) {
             getDependencyResult(key.getGroupId(),
@@ -388,6 +392,7 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
          resolved++;
       }
 
+      // Reset state.
       transitiveClassifierResolutionInProgress = false;
       transitiveDependenciesWithMissingClassifiers.clear();
    }
