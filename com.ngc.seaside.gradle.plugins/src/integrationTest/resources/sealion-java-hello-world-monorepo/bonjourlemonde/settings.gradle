@@ -1,0 +1,3 @@
+rootProject.name = 'bonjourlemonde'
+include 'bonjour'
+include 'aurevoir'

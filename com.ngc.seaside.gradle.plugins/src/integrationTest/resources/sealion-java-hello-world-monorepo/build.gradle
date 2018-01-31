@@ -1,0 +1,1 @@
+throw new IllegalAccessException("Fooled ya! This isn't a real Gradle project!")
