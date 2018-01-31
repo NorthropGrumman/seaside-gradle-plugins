@@ -30,7 +30,7 @@ class VersionResolverIT {
    }
 
    @Test
-   void doesSetProjectVersionOnFile() {
+   void doesUpdateProjectVersionCorrectlyBasedOnReleaseType() {
       def version = "4.5.6"
       resolver.setProjectVersionOnFile(version)
       Assert.assertEquals("4.5.7", resolver.getUpdatedProjectVersionForRelease(ReleaseType.PATCH))

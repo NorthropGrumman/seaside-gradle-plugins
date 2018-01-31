@@ -14,7 +14,6 @@ import org.mockito.junit.MockitoJUnitRunner
 
 import static org.mockito.Mockito.*
 
-
 /**
  * Test for the BumpVersionTask
  */
@@ -69,7 +68,7 @@ class BumpVersionTaskTest {
                 task.getCurrentVersion()
         )
 
-        task.setNextVersion()
+        task.getVersionAfterRelease()
         verify(resolver).getUpdatedProjectVersionForRelease(type)
         Assert.assertEquals(
                 "The release type should have been: $type",
@@ -80,7 +79,7 @@ class BumpVersionTaskTest {
         Assert.assertEquals(
                 "This was the version expected: $expectedUpgradeVersion",
                 expectedUpgradeVersion,
-                task.setNextVersion())
+                task.getVersionAfterRelease())
     }
 
     private BumpVersionTask createTaskWithReleaseType(ReleaseType type) {

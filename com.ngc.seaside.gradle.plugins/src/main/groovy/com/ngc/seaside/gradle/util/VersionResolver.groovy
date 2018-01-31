@@ -30,7 +30,7 @@ class VersionResolver implements IResolver {
     VersionResolver(Project p) {
         project = p
         if (project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME) == null) {
-            def versionFileForRootProject = Paths.get(project.rootProject.projectDir.toString(), "versions.gradle").toFile()
+            def versionFileForRootProject = Paths.get(project.rootProject.projectDir.parent, "versions.gradle").toFile()
             versionFile = versionFileForRootProject.exists() ? versionFileForRootProject : project.rootProject.buildFile
         } else {
             versionFile = project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME).versionFile
@@ -39,7 +39,6 @@ class VersionResolver implements IResolver {
     }
 
     String getProjectVersion() throws Exception {
-        logger.lifecycle(versionFile.text.trim())
         return getSemanticVersion(versionFile.text.trim())
     }
 

@@ -1,7 +1,6 @@
 package com.ngc.seaside.gradle.tasks.release
 
 import com.google.common.base.Preconditions
-import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.util.ReleaseUtil
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
@@ -10,21 +9,11 @@ import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
 
 /**
- * Used to increment the version in the build.gradle file
- *   and then commit it to the repository
+ * Used to increment the version in the version file and then commit it to the repository.
  */
 class BumpVersionTask extends DefaultTask {
-
-   //will be used in the future
-   boolean dryRun
-
-   boolean commitChanges
-   boolean push
-
    private ReleaseType releaseType = ReleaseType.MINOR
-   private String versionSuffix
    private VersionResolver resolver
-
 
    /**
     * CTOR
@@ -39,95 +28,60 @@ class BumpVersionTask extends DefaultTask {
 
    /**
     * CTOR used by testing framework
+    *
     * @param resolver
     * @param typeOfRelease defaulted to ReleaseType Minor
-    * @param version suffix to be used
     */
-   BumpVersionTask(VersionResolver resolver,
-                   ReleaseType typeOfRelease = ReleaseType.MINOR,
-                   String versionSuffix='-SNAPSHOT') {
+   BumpVersionTask(VersionResolver resolver, ReleaseType typeOfRelease = ReleaseType.MINOR) {
       this.resolver = Preconditions.checkNotNull(resolver, "resolver may not be null!")
       this.releaseType = typeOfRelease
-      this.versionSuffix = versionSuffix
    }
 
    /**
-    * function required to be a task within the
-    * gradle framework and is the entry point for
-    * gradle
-    *
-    * @return
+    * Function that defines what the task actually does. This function is actually the entry point for the task when
+    * Gradle runs it.
     */
    @TaskAction
-   def bumpTheVersion() {
-       getReleaseExtensionSettings()
-       commitNextVersionToFile()
+   void bumpTheVersion() {
+      def nextVersion = getVersionAfterRelease()
+      resolver.setProjectVersionOnFile(nextVersion)
+      project.exec ReleaseUtil.git("commit", "-m", "Creating new $nextVersion version after release", resolver.versionFile.absolutePath)
+      logger.lifecycle("\n Updated project version to $nextVersion")
    }
 
    /**
+    * Get the next beta release version to be used for the project after applying the specified type of release.
     *
-    * @return the string of the next version to be written to the build.gradle file
+    * @return The next beta release version.
     */
-   String setNextVersion() {
-      return getUpdatedVersion() + getVersionSuffix()
-   }
-
-   private String getVersionSuffix() {
-      return versionSuffix
+   String getVersionAfterRelease() {
+      return getUpdatedVersion() + resolver.VERSION_SUFFIX
    }
 
    /**
+    * Get the type of release (i.e. major, minor, patch, snapshot) to be used for setting the updated version.
     *
-    * @return ReleaseType for this version
+    * @return The type of release to be performed.
     */
    ReleaseType getReleaseType() {
       return releaseType
    }
 
    /**
+    * Get the updated version after applying the specified release type.
     *
-    * @return String based on the current version in the build.gradle file
+    * @return The project version after applying the specified release type.
     */
    private String getUpdatedVersion() {
       return resolver.getUpdatedProjectVersionForRelease(releaseType)
    }
 
    /**
+    * Get the current version of this project.
     *
-    * @return String based on the current version in the build.gradle file
+    * @return The current project version.
     */
    String getCurrentVersion() {
       return resolver.getProjectVersion()
    }
-
-   /**
-    *
-    * @param nextVersion used to set the version in the build.gradle file
-    */
-   private void commitNextVersionToFile() {
-      def nextVersion = setNextVersion()
-      resolver.setProjectVersionOnFile(nextVersion)
-      commitVersionFileWithMessage("Creating new $nextVersion version after release")
-      logger.lifecycle("\n Updated project version to $nextVersion")
-   }
-
-   /**
-    * commits new build.gradle to our GitHub repository
-    *
-    * @param msg to be used with the git command
-    */
-   private void commitVersionFileWithMessage(String msg) {
-      project.exec ReleaseUtil.git("commit", "-m", "$msg", "$resolver.versionFile.absolutePath")
-
-   }
-
-   /**
-    * Resolves class variables with the Project extension variables
-    */
-   private void getReleaseExtensionSettings() {
-      commitChanges = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).commitChanges
-      push = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).push
-      versionSuffix = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).versionSuffix
-   }
-
 }

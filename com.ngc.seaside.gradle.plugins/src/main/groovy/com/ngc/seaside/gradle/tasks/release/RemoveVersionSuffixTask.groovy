@@ -41,11 +41,9 @@ class RemoveVersionSuffixTask extends DefaultTask {
      */
     @TaskAction
     void removeVersionSuffix() {
-        println(">>>>>>>>>>>>>>>> CVC: are we even getting here?")
-        resolver.setVersionFile(project.rootProject.rootDir)
         def versionForRelease = getVersionForRelease()
         resolver.setProjectVersionOnFile(versionForRelease)
-        project.exec ReleaseUtil.git("commit", "-m", "Releasing of version v$versionForRelease", resolver.versionFile.absolutePath)
+        project.exec ReleaseUtil.git("commit", "-m", "Release of version v$versionForRelease", resolver.versionFile.absolutePath)
     }
 
     /**

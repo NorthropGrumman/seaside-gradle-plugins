@@ -21,6 +21,8 @@ class VersionResolverTest {
       Mockito.when(project.extensions.findByName(Mockito.any(String))).thenReturn(null)
       Mockito.when(project.getLogger()).thenReturn(logger)
       Mockito.when(rootProject.buildFile).thenReturn(file)
+      Mockito.when(rootProject.projectDir).thenReturn(file)
+      Mockito.when(rootProject.projectDir.parent).thenReturn("")
       resolver = new VersionResolver(project)
    }
 
