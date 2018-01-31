@@ -266,6 +266,7 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
       dependencyResults.add(result);
    }
 
+   // TODO TH: make protected.
    private void getParentPom(ArtifactResult localArtifact) {
       Optional<Path> pom = PopulateMaven2Repository.findPom(localArtifact);
       if (pom.isPresent()) {
