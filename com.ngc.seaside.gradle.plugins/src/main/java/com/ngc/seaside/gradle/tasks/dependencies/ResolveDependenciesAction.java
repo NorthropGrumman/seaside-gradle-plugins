@@ -35,7 +35,6 @@ import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencyArtifact;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
-import org.gradle.testing.jacoco.plugins.JacocoPlugin;
 
 import java.io.File;
 import java.io.FileReader;
@@ -70,9 +69,6 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
     * and does not specific the classifiers or extensions directly.
     */
    private final static String DEFAULT_EXTENSION = "jar";
-
-   private final static List<String> CONFIGS_TO_RESOLVE = Collections.unmodifiableList(
-         Arrays.asList(JacocoPlugin.AGENT_CONFIGURATION_NAME, JacocoPlugin.ANT_CONFIGURATION_NAME));
 
    /**
     * The dependencies that have been resolved.
@@ -127,6 +123,9 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
             task.getLocalRepository().getUrl());
    }
 
+   /**
+    * Gets the resolved dependencies.  This includes transitive dependencies and parent POMs.
+    */
    public Collection<DependencyResult> getDependencyResults() {
       return dependencyResults;
    }
@@ -150,9 +149,14 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
       // Resolve each dependency.
       for (Configuration config : configs) {
          logger.lifecycle("Resolving dependencies for configuration {}.", config.getName());
-         // Resolve if necessary.
-         // TODO TH: make this configurable.
-         if(CONFIGS_TO_RESOLVE.contains(config.getName())) {
+         // Sometimes, a configuration has default dependencies.  In this case, the configuration will look empty,
+         // but in reality the configuration is waiting to be resolved before the default dependencies are configured.
+         // See org.gradle.api.artifacts.Configuration.defaultDependencies(..).
+         // In this case, we attempt to resolve the configuration so the default dependencies are configured.  We don't
+         // resolve all configuration by default because that would download the dependencies using the Gradle API.
+         // This just takes time and is not needed since we are using the Maven API to resolve the dependencies.  (We
+         // prefer Maven since we can disable the "check for updated" policy which slows Gradle down).
+         if (task.getConfigurationsToResolve().contains(config.getName())) {
             config.resolve();
          }
 
@@ -270,25 +274,37 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
                   localArtifact.getArtifact().getArtifactId(),
                   localArtifact.getArtifact().getVersion()));
 
-            getParentPom(localArtifact);
+            // See if this artifact has a parent POM.  If so, try to resolve it.
+            tryResolveParentPom(localArtifact);
          }
       }
       dependencyResults.add(result);
    }
 
-   // TODO TH: make protected.
-   private void getParentPom(ArtifactResult localArtifact) {
+   /**
+    * Attempts to resolve the parent POMs of the artifact.  This resolution process will traverse the entire POM
+    * hierarchy in an attempt to resolve all POM.
+    */
+   private void tryResolveParentPom(ArtifactResult localArtifact) {
+      // Find the POM for this artifact.  We have to do this directly since the Maven API does not reveal the POM to us.
       Optional<Path> pom = PopulateMaven2Repository.findPom(localArtifact);
+      // If the POM was not found, don't worry about it.
       if (pom.isPresent()) {
+         // Use the Maven API to parse the POM.  We need to use this to get the coordinates of the parent POM.
          MavenXpp3Reader reader = new MavenXpp3Reader();
          try {
+            // Parse the POM.
             Model model = reader.read(new FileReader(pom.get().toFile()));
+            // Get the parent.
             Parent parent = model.getParent();
             if (parent != null) {
+               // Get the parent artifact.
                getDependencyResult(parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), null, "pom")
                      .ifPresent(result -> {
+                        // If the POM was found, list it as a dependency result.
                         dependencyResults.add(result);
-                        result.getArtifactResults().forEach(this::getParentPom);
+                        // Try and resolve the parent POM from the POM we just found.
+                        result.getArtifactResults().forEach(this::tryResolveParentPom);
                      });
             }
          } catch (IOException | XmlPullParserException e) {

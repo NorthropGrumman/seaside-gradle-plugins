@@ -1,6 +1,8 @@
 package com.ngc.seaside.gradle.extensions.ci
 
 import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
+import org.gradle.api.artifacts.Configuration
+import org.gradle.testing.jacoco.plugins.JacocoPlugin
 
 /**
  * An extension used to configure the {@link com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin}.
@@ -11,6 +13,16 @@ class SeasideCiExtension {
      * The default name of the m2 archive.
      */
     final static String DEFAULT_M2_ARCHIVE_NAME = "dependencies-m2.zip"
+
+    /**
+     * The names of the configurations that must be resolved when populating the M2 repository.
+     */
+    private final Collection<String> configurationsToResolve = new HashSet<>()
+
+    SeasideCiExtension() {
+        configurationsToResolve.add(JacocoPlugin.AGENT_CONFIGURATION_NAME)
+        configurationsToResolve.add(JacocoPlugin.ANT_CONFIGURATION_NAME)
+    }
 
     /**
      * The name of the remote repository to use to resolve dependencies when populating and offline maven2 directory.
@@ -50,4 +62,30 @@ class SeasideCiExtension {
      * not upload artifacts.
      */
     boolean createDependencyReportFile = true
+
+    /**
+     * Forces the early explicit resolution of the given configuration before attempting to determine its dependencies
+     * when populating the M2 repository.
+     */
+    SeasideCiExtension forceResolutionOf(Configuration config) {
+        return forceResolutionOf(config.getName())
+    }
+
+    /**
+     * Forces the early explicit resolution of the configuration with the given name before attempting to determine its
+     * dependencies when populating the M2 repository.
+     */
+    SeasideCiExtension forceResolutionOf(String configurationName) {
+        configurationsToResolve.add(configurationName)
+        return this
+    }
+
+    /**
+     * Gets the names of the configurations that must be resolved when populating the M2 repository.  The default
+     * configurations include {@link JacocoPlugin#AGENT_CONFIGURATION_NAME} and
+     * {@link JacocoPlugin#ANT_CONFIGURATION_NAME}.
+     */
+    Collection<String> getConfigurationsToResolve() {
+        return configurationsToResolve
+    }
 }

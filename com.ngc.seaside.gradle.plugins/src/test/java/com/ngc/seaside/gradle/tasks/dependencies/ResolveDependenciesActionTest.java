@@ -20,7 +20,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 
 import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newDependency;
 import static com.ngc.seaside.gradle.tasks.dependencies.AetherMocks.newDependencyResult;
@@ -32,6 +34,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -93,10 +96,10 @@ public class ResolveDependenciesActionTest {
    public void doesResolveDependencies() throws Throwable {
       config.getDependencies().add(newDependency("a", "b", "1.0"));
 
-      DependencyResult jarResult = newDependencyResult();
-      DependencyResult sourcesResult = newDependencyResult();
-      DependencyResult testsResult = newDependencyResult();
-      DependencyResult javadocResult = newDependencyResult();
+      DependencyResult jarResult = newDependencyResult(new File("."));
+      DependencyResult sourcesResult = newDependencyResult(new File("."));
+      DependencyResult testsResult = newDependencyResult(new File("."));
+      DependencyResult javadocResult = newDependencyResult(new File("."));
       when(repositorySystem.resolveDependencies(eq(session), any(DependencyRequest.class)))
             .thenReturn(jarResult)
             .thenReturn(sourcesResult)
@@ -124,8 +127,8 @@ public class ResolveDependenciesActionTest {
    public void doesSkipMissingClassifiers() throws Throwable {
       config.getDependencies().add(newDependency("a", "b", "1.0"));
 
-      DependencyResult jarResult = newDependencyResult();
-      DependencyResult sourcesResult = newDependencyResult();
+      DependencyResult jarResult = newDependencyResult(new File("."));
+      DependencyResult sourcesResult = newDependencyResult(new File("."));
       when(repositorySystem.resolveDependencies(eq(session), any(DependencyRequest.class)))
             .thenReturn(jarResult)
             .thenReturn(sourcesResult)
@@ -143,5 +146,28 @@ public class ResolveDependenciesActionTest {
       assertEquals("contains extra results!",
                    2,
                    results.size());
+   }
+
+   @Test
+   public void testDoesResolveConfigurationsIfConfigured() throws Throwable {
+      config.getDependencies().add(newDependency("a", "b", "1.0"));
+
+      DependencyResult jarResult = newDependencyResult(new File("."));
+      DependencyResult sourcesResult = newDependencyResult(new File("."));
+      DependencyResult testsResult = newDependencyResult(new File("."));
+      DependencyResult javadocResult = newDependencyResult(new File("."));
+      when(repositorySystem.resolveDependencies(eq(session), any(DependencyRequest.class)))
+            .thenReturn(jarResult)
+            .thenReturn(sourcesResult)
+            .thenReturn(testsResult)
+            .thenReturn(javadocResult);
+
+      when(config.getName()).thenReturn("config1");
+      when(task.getConfigurationsToResolve()).thenReturn(Collections.singletonList("config1"));
+      when(config.resolve()).thenReturn(Collections.emptySet());
+
+      action.execute(task);
+
+      verify(config).resolve();
    }
 }

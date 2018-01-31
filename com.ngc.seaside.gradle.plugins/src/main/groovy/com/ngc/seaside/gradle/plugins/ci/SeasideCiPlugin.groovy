@@ -155,6 +155,7 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
                 createDependencyReportFile = ciExtension.createDependencyReportFile
                 dependencyInfoReportFile = ciExtension.dependencyInfoReportFile ?:
                                         new File(project.buildDir, DEFAULT_DEPENDENCY_REPORT_FILE_NAME)
+                configurationsToResolve = ciExtension.getConfigurationsToResolve()
             }
 
             getTaskResolver().findTask(CREATE_M2_REPO_ARCHIVE_TASK_NAME) {

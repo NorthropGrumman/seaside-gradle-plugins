@@ -5,9 +5,6 @@ import com.google.common.base.Preconditions;
 import groovy.lang.Closure;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyResult;
@@ -23,11 +20,10 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.ConfigureUtil;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -62,14 +58,16 @@ public class PopulateMaven2Repository extends DefaultTask {
    private File dependencyInfoReportFile;
 
    /**
-    * The file that will be written that contains the deployment script.
-    */
-   private File deployScriptFile;
-
-   /**
     * The configuration to resolve dependencies for.  If not set, dependencies for all configurations will be resolved.
     */
    private Configuration configuration;
+
+   /**
+    * The names of the configurations which must be resolved prior to determining their dependencies.  This allows
+    * configurations with default dependencies to set their dependencies.  See {@link
+    * Configuration#defaultDependencies(Action)}.
+    */
+   private Collection<String> configurationsToResolve = new HashSet<>();
 
    /**
     * The remote repository to use to download artifacts if the artifacts are not in the local repository.
@@ -240,34 +238,6 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * Gets the script file that can be used to deploy dependencies.
-    */
-   @OutputFile
-   @org.gradle.api.tasks.Optional
-   public File getDeployScriptFile() {
-      return deployScriptFile;
-   }
-
-   /**
-    * Sets the script file that can be used to deploy dependencies.
-    */
-   public void setDeployScriptFile(File deployScriptFile) {
-      this.deployScriptFile = deployScriptFile;
-   }
-
-   /**
-    * Sets the script file that can be used to deploy dependencies. This method allows a user to specify the output CSV
-    * file as a command line option.
-    */
-   @Option(option = "deployScriptFile",
-         description = "The location of the deployment script file to generate.")
-   public void setDeployScriptFile(String deployScriptFile) {
-      Preconditions.checkNotNull(deployScriptFile, "deployScriptFile may not be null!");
-      Preconditions.checkArgument(!deployScriptFile.trim().isEmpty(), "deployScriptFile may not be null!");
-      setDeployScriptFile(new File(deployScriptFile));
-   }
-
-   /**
     * If true, snapshot dependencies that were added to the local maven repository as a result of this build will be
     * removed.  This is usually done only on CI servers.
     */
@@ -311,6 +281,25 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    public void setConfiguration(Configuration configuration) {
       this.configuration = configuration;
+   }
+
+   /**
+    * Gets the names of the configurations which must be resolved prior to determining their dependencies.  This allows
+    * configurations with default dependencies to set their dependencies.  See {@link
+    * Configuration#defaultDependencies(Action)}.
+    */
+   public Collection<String> getConfigurationsToResolve() {
+      return configurationsToResolve;
+   }
+
+   /**
+    * Sets the names of the configurations which must be resolved prior to determining their dependencies. This allows
+    * configurations with default dependencies to set their dependencies.  See {@link
+    * Configuration#defaultDependencies(Action)}.
+    */
+   public void setConfigurationsToResolve(Collection<String> configurationsToResolve) {
+      this.configurationsToResolve = Preconditions.checkNotNull(configurationsToResolve,
+                                                                "configurationsToResolve may not be null!");
    }
 
    /**
