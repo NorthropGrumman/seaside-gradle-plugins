@@ -11,7 +11,7 @@ import org.gradle.api.tasks.TaskAction
 class ReleasePushTask extends DefaultTask {
 
    // Will be used in the future
-   boolean dryRun
+   boolean dryRun = true
 
    /**
     * CTOR
@@ -34,9 +34,17 @@ class ReleasePushTask extends DefaultTask {
     * push all the committed changes done for the release to our GitHub repository
     */
    private void pushChanges() {
-      def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME).getTag()
-      project.exec ReleaseUtil.git("push", "origin", tag)
-      project.exec ReleaseUtil.git("push", "origin", "HEAD")
+
+      if (dryRun) {
+         project.logger.lifecycle("MEL IN THE DRY RUN SECTION")
+         project.exec ReleaseUtil.git("reset", "--hard", "origin")
+      }
+      else{
+         project.logger.lifecycle("MEL IN THE RELEASE SECTION")
+         //def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME).getTag()
+         //project.exec ReleaseUtil.git("push", "origin", tag)
+         //project.exec ReleaseUtil.git("push", "origin", "HEAD")
+      }
     }
 
 
