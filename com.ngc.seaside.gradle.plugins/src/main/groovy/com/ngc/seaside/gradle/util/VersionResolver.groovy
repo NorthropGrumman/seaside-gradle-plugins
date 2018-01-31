@@ -15,6 +15,7 @@ import java.util.regex.Pattern
 
 class VersionResolver implements IResolver {
     public static final String VERSION_SUFFIX = "-SNAPSHOT"
+    public static final String VERSIONS_FILE = "/versions.gradle"
 
     private static final Pattern PATTERN =
           Pattern.compile(
@@ -30,8 +31,8 @@ class VersionResolver implements IResolver {
     VersionResolver(Project p) {
         project = p
         if (project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME) == null) {
-            def versionFileForRootProject = Paths.get(project.rootProject.projectDir.toString(), "versions.gradle").toFile()
-            versionFile = versionFileForRootProject.exists() ? versionFileForRootProject : project.rootProject.buildFile
+            versionFile = new File(project.rootProject.projectDir.getParent() + VERSIONS_FILE)
+            versionFile = versionFile.exists() ? versionFile : project.rootProject.buildFile
         } else {
             versionFile = project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME).versionFile
         }
@@ -39,7 +40,6 @@ class VersionResolver implements IResolver {
     }
 
     String getProjectVersion() throws Exception {
-        logger.lifecycle(versionFile.text.trim())
         return getSemanticVersion(versionFile.text.trim())
     }
 
@@ -48,7 +48,6 @@ class VersionResolver implements IResolver {
     }
 
     protected String getSemanticVersion(String input) {
-        logger.lifecycle("Processing ${versionFile.absolutePath} to extract version information.")
 
         Matcher matcher = PATTERN.matcher(input.trim())
         StringBuilder sb = new StringBuilder()
