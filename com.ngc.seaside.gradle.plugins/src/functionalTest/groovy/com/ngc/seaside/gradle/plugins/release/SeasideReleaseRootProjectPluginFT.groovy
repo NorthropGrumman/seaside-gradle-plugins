@@ -8,6 +8,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class SeasideReleaseRootProjectPluginFT {
@@ -64,16 +65,19 @@ class SeasideReleaseRootProjectPluginFT {
         }
     }
 
+    @Ignore
     @Test
     void doesCreateTag() {
         checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_CREATE_TAG_TASK_NAME)
     }
 
+    @Ignore
     @Test
     void doesBumpVersion() {
         checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
     }
 
+    @Ignore
     @Test
     void doesReleasePush() {
         checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_PUSH_TASK_NAME)

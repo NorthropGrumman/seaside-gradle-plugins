@@ -1,8 +1,7 @@
 package com.ngc.seaside.gradle.plugins.release
 
-import com.ngc.seaside.gradle.util.test.TestingUtilities
-import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.util.TaskResolver
+import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.junit.Assert
 import org.junit.Before
@@ -32,38 +31,35 @@ class SeasideReleaseRootProjectPluginIT {
                 pathToTheDestinationProjectDirectory()
         )
         project = TestingUtilities.createTheTestProjectWith(projectDir)
-
-        plugin = new SeasideReleaseRootProjectPlugin()
-        plugin.apply(project)
-
-        project.extensions
-               .findByName(SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME)
-               .uploadArtifacts = false
-        resolver = new TaskResolver(project)
     }
 
     @Test
     void doesApplyPlugin() {
-        project.evaluate()
+        makeTheVersionResolverUseTheDefaultVersionFile()
+        applyThePlugin()
 
         Assert.assertEquals(BUILD_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
-
         Assert.assertNotNull(project.extensions.findByName(SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME))
+
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseRootProjectPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseRootProjectPlugin.RELEASE_CREATE_TAG_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseRootProjectPlugin.RELEASE_BUMP_VERSION_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseRootProjectPlugin.RELEASE_PUSH_TASK_NAME))
 
         checkForTask()
     }
 
     @Test
-    void desApplyPluginUsingDifferentVersionFile() {
-        project.extensions
-               .findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME)
-               .versionFile = Paths.get(sourceDirectoryWithTheTestProject().toString(), "versions.gradle").toFile()
-
-        project.evaluate()
+    void doesApplyPluginUsingDifferentVersionFile() {
+        applyThePlugin()
 
         Assert.assertEquals(VERSIONS_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
-
         Assert.assertNotNull(project.extensions.findByName(SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME))
+
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseRootProjectPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseRootProjectPlugin.RELEASE_CREATE_TAG_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseRootProjectPlugin.RELEASE_BUMP_VERSION_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask(SeasideReleaseRootProjectPlugin.RELEASE_PUSH_TASK_NAME))
 
         checkForTask()
     }
@@ -84,5 +80,21 @@ class SeasideReleaseRootProjectPluginIT {
         taskNames.each { taskNames ->
             Assert.assertNotNull(resolver.findTask(taskNames))
         }
+    }
+
+    private void makeTheVersionResolverUseTheDefaultVersionFile() {
+        Paths.get(projectDir.toString(), "versions.gradle").toFile().delete()
+    }
+
+    private void applyThePlugin() {
+        plugin = new SeasideReleaseRootProjectPlugin()
+        plugin.apply(project)
+
+        project.extensions
+              .findByName(SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME)
+              .uploadArtifacts = false
+
+        project.evaluate()
+        resolver = new TaskResolver(project)
     }
 }

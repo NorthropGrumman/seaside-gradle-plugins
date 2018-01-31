@@ -2,7 +2,6 @@ package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.util.ReleaseUtil
 import com.ngc.seaside.gradle.util.test.TestingUtilities
-import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.util.TaskResolver
 import org.gradle.api.Project
 import org.junit.Assert
@@ -17,6 +16,7 @@ class SeasideReleasePluginIT {
 
     private File projectDir
     private Project project
+    private TaskResolver resolver
     private SeasideReleasePlugin plugin
 
     @Before
@@ -26,19 +26,12 @@ class SeasideReleasePluginIT {
             pathToTheDestinationProjectDirectory()
         )
         project = TestingUtilities.createTheTestProjectWith(projectDir)
-
-        plugin = new SeasideReleasePlugin()
-        plugin.apply(project)
-
-        project.extensions
-               .findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
-               .uploadArtifacts = false
     }
 
     @Test
     void doesApplyPlugin() {
-        project.evaluate()
-        TaskResolver resolver = new TaskResolver(project)
+        makeTheVersionResolverUseTheDefaultVersionFile()
+        applyThePlugin()
 
         Assert.assertEquals(BUILD_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
 
@@ -54,12 +47,7 @@ class SeasideReleasePluginIT {
 
     @Test
     void doesApplyPluginFromDifferentVersionFile() {
-        project.extensions
-               .findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME)
-               .versionFile = Paths.get(sourceDirectoryWithTheTestProject().toString(), "versions.gradle").toFile()
-
-        project.evaluate()
-        TaskResolver resolver = new TaskResolver(project)
+        applyThePlugin()
 
         Assert.assertEquals(VERSIONS_GRADLE_TEST_VERSION_NUMBER, project.version.toString())
 
@@ -83,5 +71,21 @@ class SeasideReleasePluginIT {
         return TestingUtilities.turnListIntoPath(
             "build", "integrationTest", "resources", "release", "sealion-java-hello-world"
         )
+    }
+
+    private void makeTheVersionResolverUseTheDefaultVersionFile() {
+        Paths.get(projectDir.toString(), "versions.gradle").toFile().delete()
+    }
+
+    private void applyThePlugin() {
+        plugin = new SeasideReleasePlugin()
+        plugin.apply(project)
+
+        project.extensions
+              .findByName(SeasideReleasePlugin.RELEASE_EXTENSION_NAME)
+              .uploadArtifacts = false
+
+        project.evaluate()
+        resolver = new TaskResolver(project)
     }
 }

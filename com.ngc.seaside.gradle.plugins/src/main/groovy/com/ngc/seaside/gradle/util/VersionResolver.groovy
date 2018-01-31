@@ -9,6 +9,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 
+import java.nio.file.Paths
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -29,7 +30,8 @@ class VersionResolver implements IResolver {
     VersionResolver(Project p) {
         project = p
         if (project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME) == null) {
-            versionFile = project.rootProject.buildFile
+            def versionFileForRootProject = Paths.get(project.rootProject.projectDir.toString(), "versions.gradle").toFile()
+            versionFile = versionFileForRootProject.exists() ? versionFileForRootProject : project.rootProject.buildFile
         } else {
             versionFile = project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME).versionFile
         }
@@ -37,6 +39,7 @@ class VersionResolver implements IResolver {
     }
 
     String getProjectVersion() throws Exception {
+        logger.lifecycle(versionFile.text.trim())
         return getSemanticVersion(versionFile.text.trim())
     }
 
@@ -45,6 +48,8 @@ class VersionResolver implements IResolver {
     }
 
     protected String getSemanticVersion(String input) {
+        logger.lifecycle("Processing ${versionFile.absolutePath} to extract version information.")
+
         Matcher matcher = PATTERN.matcher(input.trim())
         StringBuilder sb = new StringBuilder()
 
@@ -54,8 +59,8 @@ class VersionResolver implements IResolver {
             if (version) {
                 sb.append(version)
                 if (suffix == null && enforceVersionSuffix) {
-                    logger.error("Missing project version (${version}${suffix})  suffix: $VERSION_SUFFIX")
-                    throw new GradleException("Missing project version (${version}${suffix}) suffix:$VERSION_SUFFIX")
+                    logger.error("Missing project version (${version}${suffix}) suffix: $VERSION_SUFFIX")
+                    throw new GradleException("Missing project version (${version}${suffix}) suffix: $VERSION_SUFFIX")
                 } else if (suffix) {
                     sb.append(suffix)
                 }
@@ -65,9 +70,9 @@ class VersionResolver implements IResolver {
                 throw new GradleException("Missing project version (${version}${suffix})")
             }
         } else {
-            logger.error("\nFailed to extract semantic versioning information from file contents:$input")
+            logger.error("\nFailed to extract semantic versioning information from file contents: '$input'")
             logger.error("Does the version information follow Semantic Versioning Format?\n")
-            throw new GradleException("Version:$input \ndoes not follow semantic versioning format")
+            throw new GradleException("File contents: '$input'\ndo not follow semantic versioning format")
         }
     }
 

@@ -31,7 +31,6 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
      * @param project
      */
     private void createTasks(Project project) {
-
         project.logger.info(String.format("Creating release tasks for %s", project.name))
 
         configureTask(project,
@@ -112,6 +111,4 @@ class SeasideReleasePlugin extends AbstractProjectPlugin {
             }
         }
     }
-
-
 }

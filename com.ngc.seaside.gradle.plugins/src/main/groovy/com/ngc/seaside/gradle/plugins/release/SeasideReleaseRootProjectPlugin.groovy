@@ -65,6 +65,4 @@ class SeasideReleaseRootProjectPlugin extends AbstractProjectPlugin {
               RELEASE_PUSH_TASK_NAME,
               'Push the project to GitHub.')
     }
-
-
 }
