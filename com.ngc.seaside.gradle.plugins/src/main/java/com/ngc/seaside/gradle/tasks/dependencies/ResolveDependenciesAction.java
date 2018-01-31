@@ -35,6 +35,7 @@ import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencyArtifact;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
+import org.gradle.testing.jacoco.plugins.JacocoPlugin;
 
 import java.io.File;
 import java.io.FileReader;
@@ -69,6 +70,9 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
     * and does not specific the classifiers or extensions directly.
     */
    private final static String DEFAULT_EXTENSION = "jar";
+
+   private final static List<String> CONFIGS_TO_RESOLVE = Collections.unmodifiableList(
+         Arrays.asList(JacocoPlugin.AGENT_CONFIGURATION_NAME, JacocoPlugin.ANT_CONFIGURATION_NAME));
 
    /**
     * The dependencies that have been resolved.
@@ -146,6 +150,12 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
       // Resolve each dependency.
       for (Configuration config : configs) {
          logger.lifecycle("Resolving dependencies for configuration {}.", config.getName());
+         // Resolve if necessary.
+         // TODO TH: make this configurable.
+         if(CONFIGS_TO_RESOLVE.contains(config.getName())) {
+            config.resolve();
+         }
+
          for (Dependency dependency : config.getDependencies()) {
             resolveDependency(dependency);
          }
@@ -309,6 +319,7 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
             configs.addAll(project.getRootProject().getBuildscript().getConfigurations());
          }
       }
+
       return configs;
    }
 
