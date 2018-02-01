@@ -49,13 +49,13 @@ class VersionUpgradeStrategyFactoryTest {
     @Test
     void doesCreatePatchVersionUpgradeStrategy() {
         def strategy = VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(SUFFIX)
-        Assert.assertEquals("1.2.3", strategy.getVersion("1.2.3-SNAPSHOT"))
+        Assert.assertEquals("1.2.4", strategy.getVersion("1.2.3-SNAPSHOT"))
     }
 
     @Test
     void doesCreatePatchVersionUpgradeStrategyWithoutSnapshot() {
         def strategy = VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(SUFFIX)
-        Assert.assertEquals("1.2.3", strategy.getVersion("1.2.3"))
+        Assert.assertEquals("1.2.4", strategy.getVersion("1.2.3"))
     }
 
     @Test
