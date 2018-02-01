@@ -24,21 +24,23 @@ public class CreateDeploymentScriptAction extends DefaultTaskAction<PopulateMave
    protected void doExecute() {
       if (task.isCreateDeploymentScriptFile()) {
          File script = task.getDeploymentScriptFile();
+         if (!script.exists()) {
 
-         // Make the directory if necessary.
-         File parentDir = script.getParentFile();
-         if (parentDir != null && !parentDir.isDirectory()) {
-            parentDir.mkdirs();
-         }
+            // Make the directory if necessary.
+            File parentDir = script.getParentFile();
+            if (parentDir != null && !parentDir.isDirectory()) {
+               parentDir.mkdirs();
+            }
 
-         logger.lifecycle("Creating deployment script {}.", script);
-         try (InputStream is = CreateDeploymentScriptAction.class
-               .getClassLoader()
-               .getResourceAsStream(DEPLOYMENT_SCRIPT_RESOURCE_NAME)) {
-            // Copy the script to the output directory.
-            Files.copy(is, script.toPath());
-         } catch (IOException e) {
-            throw new IllegalStateException("failed to load configuration properties from classpath!", e);
+            logger.lifecycle("Creating deployment script {}.", script);
+            try (InputStream is = CreateDeploymentScriptAction.class
+                  .getClassLoader()
+                  .getResourceAsStream(DEPLOYMENT_SCRIPT_RESOURCE_NAME)) {
+               // Copy the script to the output directory.
+               Files.copy(is, script.toPath());
+            } catch (IOException e) {
+               throw new IllegalStateException("failed to load configuration properties from classpath!", e);
+            }
          }
       }
    }

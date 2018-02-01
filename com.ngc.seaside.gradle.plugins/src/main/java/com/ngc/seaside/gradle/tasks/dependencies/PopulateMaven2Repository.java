@@ -417,6 +417,13 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
+    * Sets if a dependency report file with dependency information will be created.
+    */
+   public void setCreateDependencyReportFile(boolean createDependencyReportFile) {
+      this.createDependencyReportFile = createDependencyReportFile;
+   }
+
+   /**
     * Gets if a deployment script file should be created.
     */
    public boolean isCreateDeploymentScriptFile() {
@@ -428,13 +435,6 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    public void setCreateDeploymentScriptFile(boolean createDeploymentScriptFile) {
       this.createDeploymentScriptFile = createDeploymentScriptFile;
-   }
-
-   /**
-    * Sets if a dependency report file with dependency information will be created.
-    */
-   public void setCreateDependencyReportFile(boolean createDependencyReportFile) {
-      this.createDependencyReportFile = createDependencyReportFile;
    }
 
    /**
