@@ -50,7 +50,17 @@ class SeasideReleaseRootProjectPluginFT {
 
     @Test
     void doesCreateTag() {
-        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_CREATE_TAG_TASK_NAME)
+        // The version suffix will always need to be removed before creating the tag.
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME)
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_CREATE_TAG_TASK_NAME) {
+            def output = new ByteArrayOutputStream()
+            def result = project.exec ReleaseUtil.gitWithOutput(output, "tag", "--list")
+            Assert.assertEquals(0, result.getExitValue())
+            Assert.assertTrue(
+                  "output did not contain expected release git tag!",
+                  output.toString().split("\n").contains("v1.2.3")
+            )
+        }
     }
 
     @Test

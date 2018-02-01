@@ -47,7 +47,6 @@ class VersionResolver implements IResolver {
     }
 
     protected String getSemanticVersion(String input) {
-
         Matcher matcher = PATTERN.matcher(input.trim())
         StringBuilder sb = new StringBuilder()
 
