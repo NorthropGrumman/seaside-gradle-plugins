@@ -106,4 +106,6 @@ task testM2repo(type: PopulateMaven2Repository) {
 
     createDependencyReportFile = true
     dependencyInfoReportFile = project.file("${project.buildDir}/dependencies.tsv")
+
+    deploymentScriptFile = project.file("${project.buildDir}/deploy.sh")
 }

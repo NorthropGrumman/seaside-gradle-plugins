@@ -58,6 +58,11 @@ public class PopulateMaven2Repository extends DefaultTask {
    private File dependencyInfoReportFile;
 
    /**
+    * The file to create for the deployment script.
+    */
+   private File deploymentScriptFile;
+
+   /**
     * The configuration to resolve dependencies for.  If not set, dependencies for all configurations will be resolved.
     */
    private Configuration configuration;
@@ -108,6 +113,11 @@ public class PopulateMaven2Repository extends DefaultTask {
    private boolean removeSnapshots = false;
 
    /**
+    * If true, a deployment script file will be created.
+    */
+   private boolean createDeploymentScriptFile = true;
+
+   /**
     * Used to create instances of {@code MavenArtifactRepository} for ease of user configuration.  Provided by Gradle at
     * runtime.
     */
@@ -123,11 +133,13 @@ public class PopulateMaven2Repository extends DefaultTask {
       ResolveDependenciesAction resolveDependencies = newResolveDependenciesAction();
       CopyDependencyFilesAction copyDependencyFiles = newCopyDependencyFilesAction();
       CreateDependencyReportAction createCsvDependencyReport = newCreateDependencyReportAction();
+      CreateDeploymentScriptAction createDeploymentScript = newCreateDeploymentScriptAction();
       RemoveSnapshotsAction removeSnapshots = newRemoveSnapshotsAction();
 
       resolveDependencies.validate(this);
       copyDependencyFiles.validate(this);
       createCsvDependencyReport.validate(this);
+      createDeploymentScript.validate(this);
       removeSnapshots.validate(this);
 
       resolveDependencies.execute(this);
@@ -141,6 +153,8 @@ public class PopulateMaven2Repository extends DefaultTask {
          createCsvDependencyReport.setStore(store);
          createCsvDependencyReport.execute(this);
       }
+
+      createDeploymentScript.execute(this);
 
       removeSnapshots.setDependencyResults(resolveDependencies.getDependencyResults());
       removeSnapshots.execute(this);
@@ -218,7 +232,7 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * Sets file that will be written that contains the dependency info.
+    * Sets the file that will be written that contains the dependency info.
     */
    public void setDependencyInfoReportFile(File dependencyInfoReportFile) {
       this.dependencyInfoReportFile = Preconditions.checkNotNull(dependencyInfoReportFile,
@@ -226,7 +240,8 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
-    * specify the output file as a command line option.
+    * Sets the file that will be written that contains the dependency info.  This method allows a user to specify the
+    * output directory as a command line option.
     */
    @Option(option = "dependencyInfoReportFile",
          description = "The report file to output which contains the dependency information.")
@@ -235,6 +250,37 @@ public class PopulateMaven2Repository extends DefaultTask {
       Preconditions.checkArgument(!dependencyInfoReportFile.trim().isEmpty(),
                                   "dependencyInfoReportFile may not be null!");
       setDependencyInfoReportFile(new File(dependencyInfoReportFile));
+   }
+
+   /**
+    * Gets the file to use when creating the deployment script.
+    */
+   @OutputFile
+   @org.gradle.api.tasks.Optional
+   public File getDeploymentScriptFile() {
+      return deploymentScriptFile;
+   }
+
+   /**
+    * Sets the file to use when creating the deployment script.
+    */
+   public void setDeploymentScriptFile(File deploymentScriptFile) {
+
+      this.deploymentScriptFile = Preconditions.checkNotNull(deploymentScriptFile,
+                                                             "deploymentScriptFile may not be null!");
+   }
+
+   /**
+    * Sets the file to use when creating the deployment script.  This method allows a user to specify the output
+    * directory as a command line option.
+    */
+   @Option(option = "deploymentScriptFile",
+         description = "The report file to output which contains the dependency information.")
+   public void setDeploymentScriptFile(String deploymentScriptFile) {
+      Preconditions.checkNotNull(deploymentScriptFile, "deploymentScriptFile may not be null!");
+      Preconditions.checkArgument(!deploymentScriptFile.trim().isEmpty(),
+                                  "deploymentScriptFile may not be null!");
+      setDeploymentScriptFile(new File(deploymentScriptFile));
    }
 
    /**
@@ -371,6 +417,20 @@ public class PopulateMaven2Repository extends DefaultTask {
    }
 
    /**
+    * Gets if a deployment script file should be created.
+    */
+   public boolean isCreateDeploymentScriptFile() {
+      return createDeploymentScriptFile;
+   }
+
+   /**
+    * Sets if a deployment script file should be created.
+    */
+   public void setCreateDeploymentScriptFile(boolean createDeploymentScriptFile) {
+      this.createDeploymentScriptFile = createDeploymentScriptFile;
+   }
+
+   /**
     * Sets if a dependency report file with dependency information will be created.
     */
    public void setCreateDependencyReportFile(boolean createDependencyReportFile) {
@@ -418,6 +478,13 @@ public class PopulateMaven2Repository extends DefaultTask {
     */
    protected RemoveSnapshotsAction newRemoveSnapshotsAction() {
       return new RemoveSnapshotsAction();
+   }
+
+   /**
+    * Factory method to create a new instance of {@code CreateDeploymentScriptAction}.  Useful for testing.
+    */
+   protected CreateDeploymentScriptAction newCreateDeploymentScriptAction() {
+      return new CreateDeploymentScriptAction();
    }
 
    /**

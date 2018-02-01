@@ -93,9 +93,14 @@ class SeasideCiPluginFT {
 
         File dependencyReport = new File(
               projectDir,
-              "com.ngc.seaside.service.konnichiwamojuru/build/" +
-              SeasideCiExtension.DEFAULT_M2_ARCHIVE_NAME)
+              "com.ngc.seaside.service.konnichiwamojuru/build/" + SeasideCiExtension.DEFAULT_M2_ARCHIVE_NAME)
         assertTrue("dependency report not created!",
                    dependencyReport.isFile())
+
+        File deploymentScript = new File(
+              projectDir,
+              "com.ngc.seaside.service.konnichiwamojuru/build/" + SeasideCiPlugin.DEFAULT_M2_DEPLOYMENT_SCRIPT_NAME)
+        assertTrue("deployment script not created!",
+                   deploymentScript.isFile())
     }
 }

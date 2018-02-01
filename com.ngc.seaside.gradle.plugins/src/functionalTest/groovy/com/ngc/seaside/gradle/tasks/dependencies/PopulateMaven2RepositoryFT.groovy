@@ -38,7 +38,7 @@ class PopulateMaven2RepositoryFT {
     }
 
     @Test
-    void doesPopulateM2RepoAndCreateReport() {
+    void doesPopulateM2RepoAndCreateReportAndScript() {
         BuildResult result = GradleRunner.create().withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()
@@ -60,5 +60,11 @@ class PopulateMaven2RepositoryFT {
               "build/dependencies.tsv")
         assertTrue("dependency report not created!",
                    dependencyReport.isFile())
+
+        File script = new File(
+              projectDir,
+              "build/deploy.sh")
+        assertTrue("script not created!",
+                   script.isFile())
     }
 }

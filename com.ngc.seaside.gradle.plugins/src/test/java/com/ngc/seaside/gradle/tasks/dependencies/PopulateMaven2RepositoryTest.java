@@ -42,6 +42,9 @@ public class PopulateMaven2RepositoryTest {
    private CreateDependencyReportAction createDependencyReportAction;
 
    @Mock
+   private CreateDeploymentScriptAction createDeploymentScriptAction;
+
+   @Mock
    private BaseRepositoryFactory baseRepositoryFactory;
 
    @Before
@@ -64,6 +67,11 @@ public class PopulateMaven2RepositoryTest {
                protected CreateDependencyReportAction newCreateDependencyReportAction() {
                   return createDependencyReportAction;
                }
+
+               @Override
+               protected CreateDeploymentScriptAction newCreateDeploymentScriptAction() {
+                  return createDeploymentScriptAction;
+               }
             })
             .setProject(project)
             .create();
@@ -82,6 +90,7 @@ public class PopulateMaven2RepositoryTest {
       verify(resolveDependenciesAction).validate(task);
       verify(copyDependencyFilesAction).validate(task);
       verify(createDependencyReportAction).validate(task);
+      verify(createDeploymentScriptAction).validate(task);
 
       verify(resolveDependenciesAction).execute(task);
       verify(copyDependencyFilesAction).setDependencyResults(results);
@@ -89,5 +98,6 @@ public class PopulateMaven2RepositoryTest {
 
       verify(createDependencyReportAction).setStore(any(ArtifactResultStore.class));
       verify(createDependencyReportAction).execute(task);
+      verify(createDeploymentScriptAction).execute(task);
    }
 }

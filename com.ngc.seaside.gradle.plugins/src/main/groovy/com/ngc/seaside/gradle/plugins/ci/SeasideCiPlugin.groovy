@@ -58,6 +58,11 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
     final static String DEFAULT_DEPENDENCY_REPORT_FILE_NAME = 'dependencies.tsv'
 
     /**
+     * The default name of the M2 deployment script.
+     */
+    final static String DEFAULT_M2_DEPLOYMENT_SCRIPT_NAME = "deploy.sh"
+
+    /**
      * The name of the system property used when printing the value of a property.
      */
     private final static String DISPLAY_PROPERTY_NAME = 'display.property.name'
@@ -151,11 +156,15 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
                 remoteRepository = project.repositories.findByName(ciExtension.remoteM2RepositoryName)
                 // Configure the output directory using $buildDir/m2 as the default.
                 outputDirectory = m2Directory
+                // Setup the configurations.
+                configurationsToResolve = ciExtension.getConfigurationsToResolve()
                 // Configure the dependencies report.
                 createDependencyReportFile = ciExtension.createDependencyReportFile
                 dependencyInfoReportFile = ciExtension.dependencyInfoReportFile ?:
-                                        new File(project.buildDir, DEFAULT_DEPENDENCY_REPORT_FILE_NAME)
-                configurationsToResolve = ciExtension.getConfigurationsToResolve()
+                                           new File(project.buildDir, DEFAULT_DEPENDENCY_REPORT_FILE_NAME)
+                // Configure the deployment script.
+                deploymentScriptFile = ciExtension.deploymentScriptFile ?:
+                                       new File(project.buildDir, DEFAULT_M2_DEPLOYMENT_SCRIPT_NAME)
             }
 
             getTaskResolver().findTask(CREATE_M2_REPO_ARCHIVE_TASK_NAME) {

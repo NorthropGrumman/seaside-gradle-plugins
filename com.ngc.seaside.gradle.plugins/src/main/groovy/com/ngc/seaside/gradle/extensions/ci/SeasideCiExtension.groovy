@@ -58,6 +58,13 @@ class SeasideCiExtension {
     File dependencyInfoReportFile
 
     /**
+     * Configures the output file of the M2 dependency deployment script.  If not defined a default of
+     * {@link com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin#DEFAULT_M2_DEPLOYMENT_SCRIPT_NAME} inside the
+     * @code $project.buildDir} directory is used.
+     */
+    File deploymentScriptFile
+
+    /**
      * If true, a dependencies report will be generated.  If this is turned off, the generated deployment script will
      * not upload artifacts.
      */
