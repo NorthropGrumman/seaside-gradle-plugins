@@ -32,8 +32,8 @@ public class RemoveSnapshotsAction extends DefaultTaskAction<PopulateMaven2Repos
                if (artifactResult.getArtifact().isSnapshot()) {
                   File parentDir = artifactResult.getArtifact().getFile().getParentFile();
                   if (parentDir.isDirectory()) {
-                     logger.lifecycle("Removing {} from local maven repository to avoid polluting the repository.",
-                                      parentDir);
+                     logger.info("Removing {} from local maven repository to avoid polluting the repository.",
+                                 parentDir);
                      // Delete the entire directory contents of the dependency.
                      try {
                         FileUtils.deleteDirectory(parentDir);

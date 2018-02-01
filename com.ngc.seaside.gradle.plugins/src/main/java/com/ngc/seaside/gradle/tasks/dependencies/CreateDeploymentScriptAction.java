@@ -31,6 +31,7 @@ public class CreateDeploymentScriptAction extends DefaultTaskAction<PopulateMave
             parentDir.mkdirs();
          }
 
+         logger.lifecycle("Creating deployment script {}.", script);
          try (InputStream is = CreateDeploymentScriptAction.class
                .getClassLoader()
                .getResourceAsStream(DEPLOYMENT_SCRIPT_RESOURCE_NAME)) {

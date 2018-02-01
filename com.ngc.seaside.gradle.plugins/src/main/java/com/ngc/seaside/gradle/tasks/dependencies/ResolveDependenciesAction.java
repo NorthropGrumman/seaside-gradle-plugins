@@ -267,7 +267,7 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
     */
    protected void handleDependencyResult(DependencyResult result) {
       for (ArtifactResult localArtifact : result.getArtifactResults()) {
-         logger.lifecycle("Located {}.", localArtifact.getArtifact().getFile());
+         logger.info("Located {}.", localArtifact.getArtifact().getFile());
          if (!transitiveClassifierResolutionInProgress) {
             transitiveDependenciesWithMissingClassifiers.add(new ArtifactKey(
                   localArtifact.getArtifact().getGroupId(),
@@ -479,7 +479,7 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
                                         extension);
       String remoteLogMsg = task.getRemoteRepository() == null ? "no remote repository configured, no download possible"
                                                                : "download may be required";
-      logger.lifecycle("Retrieving '{}' and its dependencies ({}) ...", prettyGave, remoteLogMsg);
+      logger.info("Retrieving '{}' and its dependencies ({}) ...", prettyGave, remoteLogMsg);
 
       // Make API stuff.
       CollectRequest request = new CollectRequest();
