@@ -78,6 +78,10 @@ class CreateTagTask extends DefaultTask {
       return tagName
    }
 
+   /**
+    *
+    * @return tagPrefix usually a 'v'
+    */
    String getTagPrefix(){
       return tagPrefix
    }

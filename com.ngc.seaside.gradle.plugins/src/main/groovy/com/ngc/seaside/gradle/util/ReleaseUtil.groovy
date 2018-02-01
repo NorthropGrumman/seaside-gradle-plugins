@@ -1,7 +1,6 @@
 package com.ngc.seaside.gradle.util
 
 import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
-import com.sun.xml.internal.fastinfoset.util.StringArray
 import org.gradle.api.Project
 
 /**
