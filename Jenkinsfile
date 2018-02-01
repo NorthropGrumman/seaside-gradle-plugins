@@ -56,7 +56,7 @@ pipeline {
                 sh './gradlew prepareForRelease'
                 sh './gradlew removeVersionSuffix -PbootstrapRelease'
                 sh './gradlew createReleaseTag -PbootstrapRelease'
-                sh './gradlew clean clean build upload -x integrationTest -x functionalTest -x test'
+                sh './gradlew clean build upload -x integrationTest -x functionalTest -x test'
 
                 script {
                     try {
