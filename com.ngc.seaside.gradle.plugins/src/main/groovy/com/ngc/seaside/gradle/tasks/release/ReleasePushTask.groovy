@@ -34,13 +34,12 @@ class ReleasePushTask extends DefaultTask {
     * push all the committed changes done for the release to our GitHub repository
     */
    private void pushChanges() {
-      def tag = ReleaseUtil.getReleaseExtension(project, SeasideReleaseRootProjectPlugin.RELEASE_ROOT_PROJECT_EXTENSION_NAME).getTag()
       if (dryRun) {
-         project.logger.lifecycle("Would have Pushed Release with version tag: " + tag)
+         project.logger.lifecycle("Would have Pushed Release")
          project.exec ReleaseUtil.git("reset", "--hard", "origin")
       }
       else{
-         project.logger.lifecycle("Pushing Release with version tag: " + tag)
+         project.logger.lifecycle("Pushing Release")
          project.exec ReleaseUtil.git("push", "origin", "--tags")
          project.exec ReleaseUtil.git("push", "origin", "HEAD")
       }
