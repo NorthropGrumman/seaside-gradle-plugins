@@ -6,7 +6,7 @@ buildscript {
         getSelfDependencies = { ->
             // Put all files on in the bootstrapDirectory on the build classpath.
             // Don't use project.file since we want to configure the error message if the file is not found.
-            def dir = new File(project.buildDir, "$bootstrapDirectory")
+            def dir = new File("$bootstrapDirectory")
             if (!dir.isDirectory() || dir.list().length == 0) {
                 throw new IllegalStateException(
                       "Cannot perform a release because project has not already been built, please run 'gradle prepareForRelease' first!")
@@ -57,7 +57,7 @@ subprojects {
     }
 
     group = 'com.ngc.seaside'
-	version = '2.3.0-SNAPSHOT'
+   version = '2.3.0'
 
     ext {
         junitVersion = '4.12'
