@@ -53,7 +53,9 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh './gradlew clean prepareForRelease'
+                sh './gradlew clean removeVersionSuffix'
+                sh './gradlew clean createReleaseTag'
+                sh './gradlew clean clean build upload -x integrationTest -x functionalTest -x test'
 
                 script {
                     try {
@@ -66,7 +68,7 @@ pipeline {
                                                           usernameVariable: 'gitUsername')]) {
                             // This allows use to use a custom credential helper that uses the values from Jenkins.
                             sh "git config credential.helper '!echo password=\$gitPassword; echo username=\$gitUsername; echo'"
-                            sh 'GIT_ASKPASS=true ./gradlew release -x integrationTest -x functionalTest -x test'
+                            sh 'GIT_ASKPASS=true ./gradlew releasePush'
                         }
                     } finally {
                         sh 'git config --unset credential.helper'
