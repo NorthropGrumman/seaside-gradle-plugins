@@ -41,7 +41,7 @@ class ReleasePushTask extends DefaultTask {
       }
       else{
          project.logger.lifecycle("Pushing Release with version tag: " + tag)
-         project.exec ReleaseUtil.git("push", "origin", tag)
+         project.exec ReleaseUtil.git("push", "origin", "--tags")
          project.exec ReleaseUtil.git("push", "origin", "HEAD")
       }
     }
