@@ -28,7 +28,6 @@ import org.gradle.api.tasks.bundling.Jar
  * </pre>
  */
 class SeasideParentPlugin extends AbstractProjectPlugin {
-
     public static final String PARENT_TASK_GROUP_NAME = 'parent'
     public static final String SOURCE_JAR_TASK_NAME = 'sourcesJar'
     public static final String JAVADOC_JAR_TASK_NAME = 'javadocJar'

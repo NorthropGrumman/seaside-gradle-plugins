@@ -1,0 +1,17 @@
+buildscript {
+    ext {
+        versionsFile = file('../versions.gradle')
+    }
+    apply from: versionsFile, to: project
+}
+
+plugins {
+    id 'com.ngc.seaside.release.root'
+}
+
+subprojects {
+    apply plugin: 'com.ngc.seaside.parent'
+    versionSettings {
+        versionFile = versionsFile
+    }
+}

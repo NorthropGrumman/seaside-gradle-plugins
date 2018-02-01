@@ -1,12 +1,13 @@
 package com.ngc.seaside.gradle.tasks.release
 
 import com.google.common.base.Preconditions
+import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
+import com.ngc.seaside.gradle.util.ReleaseUtil
 import com.ngc.seaside.gradle.util.VersionResolver
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class ReleaseTask extends DefaultTask {
-
     private VersionResolver resolver
 
     /**
@@ -42,8 +43,7 @@ class ReleaseTask extends DefaultTask {
 
         // If the task was invoked, update the version number before the build actually executes.  This ensures that
         // tasks which do not use lazy property evaluation are configured correctly before they are executed.  If we
-        // waited to do this during the execution phase, tasks would be configured to execute with the wrong the wrong
-        // version.
+        // waited to do this during the execution phase, tasks would be configured to execute with the wrong version.
         if (isTaskInvoked) {
             project.logger.info("Preparing for a $releaseType release.")
             this.releaseType = releaseType
@@ -54,24 +54,21 @@ class ReleaseTask extends DefaultTask {
 
     @TaskAction
     def release() {
-        // Perform the actually release.  Require the plugin be configured before executing.
+        // Require the plugin to be configured before executing.
         Preconditions.checkState(
-              isReleaseVersionSet(),
+              ReleaseUtil.isExtensionSet(project),
               "Release task executing but prepareForReleaseIfNeeded() not invoked during configuration phase!")
+        getReleaseExtensionSettings()
         releaseAllProjectsIfNecessary()
     }
 
     private void createNewReleaseVersionIfNecessary() {
-        if (!isReleaseVersionSet()) {
-            def currentProjectVersion = resolver.getProjectVersion(releaseType)
+        if (!ReleaseUtil.isExtensionSet(project)) {
+            def currentProjectVersion = resolver.getProjectVersion()
             def newReleaseVersion = getTheReleaseVersion(currentProjectVersion)
             setTheNewReleaseVersion(newReleaseVersion)
             setTheReleaseVersionProjectProperty(newReleaseVersion)
         }
-    }
-
-    private boolean isReleaseVersionSet() {
-        return project.rootProject.hasProperty("releaseVersion")
     }
 
     private String getTheReleaseVersion(String currentProjectVersion) {
@@ -120,7 +117,7 @@ class ReleaseTask extends DefaultTask {
 
     private void commitVersionFileWithMessage(String msg) {
         if (commitChanges && !dryRun) {
-            git "commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath"
+            project.exec ReleaseUtil.git("commit", "-m", "\"$msg\"", "$resolver.versionFile.absolutePath")
             project.logger.info("Committed version file: $msg")
         }
 
@@ -129,26 +126,9 @@ class ReleaseTask extends DefaultTask {
         }
     }
 
-    private void git(Object[] arguments) {
-        project.logger.debug("Will run: git $arguments")
-        def output = new ByteArrayOutputStream()
-
-        project.exec {
-            executable "git"
-            args arguments
-            standardOutput output
-            ignoreExitValue = true
-        }
-
-        output = output.toString().trim()
-        if (!output.isEmpty()) {
-            project.logger.debug(output)
-        }
-    }
-
     private void createReleaseTag(String tagName) {
         if (commitChanges && !dryRun) {
-            git "tag", "-a", tagName, "-m Release of $tagName"
+            project.exec ReleaseUtil.git("tag", "-a", tagName, "-m Release of $tagName")
             project.logger.debug("Created release tag: $tagName")
         }
 
@@ -159,7 +139,7 @@ class ReleaseTask extends DefaultTask {
 
     private void persistTheNewProjectVersion() {
         String nextVersion = getNextVersion()
-        String dryRunHeader = (isDryRun()) ? "Dry Run >>" : ""
+        String dryRunHeader = (dryRun) ? "Dry Run >>" : ""
         if (!dryRun) {
             resolver.setProjectVersionOnFile(nextVersion)
         }
@@ -189,11 +169,18 @@ class ReleaseTask extends DefaultTask {
     }
 
     private void pushChanges(String tag) {
-        git "push", "origin", tag
-        git "push", "origin", "HEAD"
+        project.exec ReleaseUtil.git("push", "origin", tag)
+        project.exec ReleaseUtil.git("push", "origin", "HEAD")
     }
 
     private void setThePublishedProjectsProjectProperty() {
         project.rootProject.ext.set("publishedProjects", true)
+    }
+
+    private void getReleaseExtensionSettings() {
+        commitChanges = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).getCommitChanges()
+        push = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).getPush()
+        versionSuffix = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).getVersionSuffix()
+        tagPrefix = ReleaseUtil.getReleaseExtension(project, SeasideReleasePlugin.RELEASE_EXTENSION_NAME).getTagPrefix()
     }
 }

@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.util.test
 
+import com.ngc.seaside.gradle.extensions.release.SeasideReleaseExtension
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.internal.service.ServiceRegistry
 import org.gradle.util.Path

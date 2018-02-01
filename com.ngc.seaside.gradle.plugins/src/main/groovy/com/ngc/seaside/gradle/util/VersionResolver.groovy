@@ -9,11 +9,11 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 
+import java.nio.file.Paths
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class VersionResolver implements IResolver {
-
     public static final String VERSION_SUFFIX = "-SNAPSHOT"
 
     private static final Pattern PATTERN =
@@ -30,19 +30,24 @@ class VersionResolver implements IResolver {
     VersionResolver(Project p) {
         project = p
         if (project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME) == null) {
-            versionFile = project.rootProject.buildFile
+            def versionFileForRootProject = Paths.get(project.rootProject.projectDir.parent, "versions.gradle").toFile()
+            versionFile = versionFileForRootProject.exists() ? versionFileForRootProject : project.rootProject.buildFile
         } else {
             versionFile = project.extensions.findByName(AbstractProjectPlugin.VERSION_SETTINGS_CONVENTION_NAME).versionFile
         }
         logger = project.logger
     }
 
-    String getProjectVersion(ReleaseType releaseType) throws Exception {
-        def versionFromFile = getSemanticVersion(versionFile.text.trim(), enforceVersionSuffix)
-        return resolveVersionUpgradeStrategy(releaseType).getVersion(versionFromFile)
+    String getProjectVersion() throws Exception {
+        return getSemanticVersion(versionFile.text.trim())
     }
 
-    protected String getSemanticVersion(String input, boolean enforceVersionSuffix = false) {
+    String getUpdatedProjectVersionForRelease(ReleaseType releaseType) throws Exception {
+        return resolveVersionUpgradeStrategy(releaseType).getVersion(getProjectVersion())
+    }
+
+    protected String getSemanticVersion(String input) {
+
         Matcher matcher = PATTERN.matcher(input.trim())
         StringBuilder sb = new StringBuilder()
 
@@ -51,9 +56,9 @@ class VersionResolver implements IResolver {
             String suffix = matcher.group(3)
             if (version) {
                 sb.append(version)
-                if (!suffix && enforceVersionSuffix) {
-                    logger.error("Missing project version (${version}${suffix})  suffix: $VERSION_SUFFIX")
-                    throw new GradleException("Missing project version (${version}${suffix}) suffix:$VERSION_SUFFIX")
+                if (suffix == null && enforceVersionSuffix) {
+                    logger.error("Missing project version (${version}${suffix}) suffix: $VERSION_SUFFIX")
+                    throw new GradleException("Missing project version (${version}${suffix}) suffix: $VERSION_SUFFIX")
                 } else if (suffix) {
                     sb.append(suffix)
                 }
@@ -63,14 +68,14 @@ class VersionResolver implements IResolver {
                 throw new GradleException("Missing project version (${version}${suffix})")
             }
         } else {
-            logger.error("\nFailed to extract semantic versioning information from file contents:$input")
+            logger.error("\nFailed to extract semantic versioning information from file contents: '$input'")
             logger.error("Does the version information follow Semantic Versioning Format?\n")
-            throw new GradleException("Version:$input \ndoes not follow semantic versioning format")
+            throw new GradleException("File contents: '$input'\ndo not follow semantic versioning format")
         }
     }
 
     void setProjectVersionOnFile(String newVersion) {
-        versionFile.text = versionFile.text.replaceFirst(PATTERN, "\tversion = \'$newVersion\'")
+        versionFile.text = versionFile.text.replaceFirst(PATTERN, "   version = \'$newVersion\'")
     }
 
     String getTagName(String tagPrefix, String versionSuffix) {

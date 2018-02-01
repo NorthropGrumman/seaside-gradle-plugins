@@ -11,7 +11,6 @@ import org.gradle.api.Project
  * This also allows plugins to be implemented with knowledge that the project.version is set correctly.
  */
 abstract class AbstractProjectPlugin implements IProjectPlugin {
-
     static final String VERSION_SETTINGS_CONVENTION_NAME = 'versionSettings'
 
     private VersionResolver versionResolver
@@ -23,24 +22,24 @@ abstract class AbstractProjectPlugin implements IProjectPlugin {
      */
     @Override
     final void apply(Project project) {
-        this.taskResolver = new TaskResolver(project)
+        taskResolver = new TaskResolver(project)
         if (project.extensions.findByName(VERSION_SETTINGS_CONVENTION_NAME) == null) {
-            this.versionResolver = project.extensions.create(VERSION_SETTINGS_CONVENTION_NAME, VersionResolver, project)
+            versionResolver = project.extensions.create(VERSION_SETTINGS_CONVENTION_NAME, VersionResolver, project)
         } else {
-            this.versionResolver = project.extensions.findByName(VERSION_SETTINGS_CONVENTION_NAME)
+            versionResolver = (VersionResolver)project.extensions.findByName(VERSION_SETTINGS_CONVENTION_NAME)
         }
-        this.versionResolver.setEnforceVersionSuffix(false)
-        project.version = "${-> versionResolver.getProjectVersion(ReleaseType.SNAPSHOT)}"
+        versionResolver.setEnforceVersionSuffix(false)
+        project.version = "${-> versionResolver.getUpdatedProjectVersionForRelease(ReleaseType.SNAPSHOT)}"
         doApply(project)
     }
 
     @Override
     TaskResolver getTaskResolver() {
-        return this.taskResolver
+        return taskResolver
     }
 
     @Override
     VersionResolver getVersionResolver() {
-        return this.versionResolver
+        return versionResolver
     }
 }
