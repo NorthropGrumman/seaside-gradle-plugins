@@ -63,7 +63,7 @@ pipeline {
                 sh './gradlew createReleaseTag -PbootstrapRelease'
                 // Run the update.  Clean so the artifacts are built with the new version.
                 sh './gradlew clean build upload -x integrationTest -x functionalTest -x test'
-                // Since we just did a client, we need to run prepareForRelease again so the next step of pushing the
+                // Since we just did a clean, we need to run prepareForRelease again so the next step of pushing the
                 // tag will work.
                 sh './gradlew prepareForRelease'
 
