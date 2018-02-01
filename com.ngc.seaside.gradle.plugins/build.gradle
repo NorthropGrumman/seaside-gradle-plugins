@@ -11,6 +11,13 @@ dependencies {
     compile "com.github.ksoichiro:gradle-console-reporter:$consoleReporterVersion"
     compile "com.google.guava:guava:$guavaVersion"
 
+    compile "org.eclipse.aether:aether-connector-basic:$aetherVersion"
+    compile "org.apache.maven:maven-resolver-provider:$mavenVersion"
+    compile "org.apache.maven:maven-settings-builder:$mavenVersion"
+    compile "org.apache.maven:maven-model:$mavenVersion"
+    compile "org.apache.maven.resolver:maven-resolver-transport-http:$aetherVersion"
+    compile "org.apache.maven.resolver:maven-resolver-transport-file:$aetherVersion"
+
     testRuntime files(createClasspathManifest)
 
     testCompile gradleTestKit()

@@ -3,21 +3,6 @@ buildscript {
         bootstrapDirectory = "${project.buildDir}/bootstrapping"
         releaseInProgress = project.gradle.startParameter.taskNames.contains('release')
 
-        pluginName = { ->
-            // Don't use project.file since we want to configure the error message if the file is not found.
-            def dir = new File("$bootstrapDirectory")
-            if (!dir.isDirectory() || dir.list().length == 0) {
-                throw new IllegalStateException(
-                      "Cannot perform a release because project has not already been built, please run 'gradle prepareForRelease' first!")
-            }
-            def fileName = project.file("$bootstrapDirectory")
-                  .list()
-                  .toList()
-                  .find { it.startsWith 'com.ngc.seaside.gradle.plugins' }
-            // Remove .jar extension.
-            return fileName.substring(0, fileName.length() - 4) // 4 = '.jar'.length()
-        }
-
         getSelfDependencies = { ->
             // Put all files on in the bootstrapDirectory on the build classpath.
             // Don't use project.file since we want to configure the error message if the file is not found.
@@ -72,7 +57,7 @@ subprojects {
     }
 
     group = 'com.ngc.seaside'
-   version = '2.2.3-SNAPSHOT'
+	version = '2.3.0-SNAPSHOT'
 
     ext {
         junitVersion = '4.12'
@@ -85,6 +70,8 @@ subprojects {
         dependencyUpdatesVersion = '0.15.0'
         consoleReporterVersion = '0.5.0'
         guavaVersion = '22.0'
+        aetherVersion = '1.1.0'
+        mavenVersion = '3.5.2'
     }
 
     repositories {
@@ -173,7 +160,6 @@ subprojects {
         }
     }
 
-    // Integration Dependencies
     dependencies {
         integrationTestCompile sourceSets.main.output
         integrationTestCompile configurations.testCompile
