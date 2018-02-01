@@ -87,7 +87,7 @@ class CreateTagTask extends DefaultTask {
     */
    private void createTag() {
       project.exec ReleaseUtil.git("tag", "-a", tagName, "-m Release of $tagName")
-      logger.debug("Created release tag: $tagName")
+      logger.lifecycle("Created release tag: $tagName")
    }
 
    /**
