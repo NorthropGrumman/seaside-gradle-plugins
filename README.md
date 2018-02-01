@@ -295,6 +295,78 @@ subprojects {
    }
 ```
 
+# com.ngc.seaside:seaside.ReleaseRootProjectPlugin
+The release plugin provides a gradle release plugin for my java gradle projects and essentially giving the ability to automate 
+the necessary steps to release code to Nexus. This plugin will Initialize the project.version from a semantic version tag specified in the root build.gradle file of a project, prepare the build.gradle for next SNAPSHOT interation, push changes to Git remote(should work from any branch), and provide the default configuration for deploying these artifacts to Nexus.
+
+The release plugin includes the release, releaseMajorVersion, and releaseMinorVersion task. The release task will create a tagged non-SNAPSHOT release of the current version as specified in the root build.gradle file.The releaseMajorVersion task upgrades to next major version & creates a tagged non-SNAPSHOT release. The releaseMinorVersion task will upgrade to the next minor version & creates a tagged non-SNAPSHOT release.
+
+## Details
+The following list contains the gradle task that are a part of the plugin with a brief description
+
+
+Root Project Release tasks
+--------------------------
+bumpTheVersion - Will bump the version (i.e. add -SNAPSHOT) in the version file.
+
+createReleaseTag - Create the version tag used by GitHub.
+
+releasePush - Push the project to GitHub.
+
+removeVersionSuffix - Define a release version (i.e. remove -SNAPSHOT) and commit it.
+
+In the root directory of the repo you should have a versions.gradle file that looks like the following entry:
+```groovy
+allprojects {
+    //required for the plugin
+    group = 'com.ngc.seaside'
+    
+    //required for the plugin
+    version = '2.0.0-SNAPSHOT'
+
+    ext {
+    
+        //This is the first verison that contains the
+        //new plugin 
+        seasidePluginsVersion = '2.2.3-SNAPSHOT'
+    }
+}
+```
+You will need the following sections in your build.gradle for each subproject or at least at a level where you will need to use the plugin's tasks
+```groovy
+buildscript {
+    //required 
+    ext {
+        versionsFile = file('../versions.gradle')
+    }
+    //required 
+    apply from: versionsFile, to: project
+
+}
+
+//required 
+apply plugin: 'com.ngc.seaside.release.root'
+
+subprojects {
+    apply plugin: 'com.ngc.seaside.parent'
+    //required 
+    versionSettings {
+        versionFile = versionsFile
+    }
+}
+```
+
+Note that all _releaseXXX_ tasks run non-interactively and are thus well suited for continuous integration.
+## This plugin requires properties in your gradle.properties file (usually ~/.gradle/gradle.properties):
+* nexusUsername     : the username to use when uploading artifacts to nexus
+* nexusPassword     : the password to use when uploading artifacts to nexus
+* nexusReleases     : url to the releases repository
+* nexusSnapshots    : url to the snapshots repository
+* nexusConsolidated : url to the maven public download site usually a proxy to maven central and the
+releases and snapshots
+* systemProp.sonar.host.url : url to the Sonarqube server
+
+
 # com.ngc.seaside:seaside.bats
 The seaside gradle bats plugin provides a method of running the
 [bats framework](https://github.com/bats-core/bats-core) as a gradle task
