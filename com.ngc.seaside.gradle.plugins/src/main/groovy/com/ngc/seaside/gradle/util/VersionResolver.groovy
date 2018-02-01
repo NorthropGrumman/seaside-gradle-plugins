@@ -47,7 +47,6 @@ class VersionResolver implements IResolver {
     }
 
     protected String getSemanticVersion(String input) {
-        logger.lifecycle("Processing ${versionFile.absolutePath} to extract version information.")
 
         Matcher matcher = PATTERN.matcher(input.trim())
         StringBuilder sb = new StringBuilder()
