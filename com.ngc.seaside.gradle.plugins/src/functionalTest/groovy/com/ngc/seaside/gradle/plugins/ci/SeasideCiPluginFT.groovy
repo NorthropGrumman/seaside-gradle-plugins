@@ -102,5 +102,11 @@ class SeasideCiPluginFT {
               "com.ngc.seaside.service.konnichiwamojuru/build/" + SeasideCiPlugin.DEFAULT_M2_DEPLOYMENT_SCRIPT_NAME)
         assertTrue("deployment script not created!",
                    deploymentScript.isFile())
+
+        File settingsFile = new File(
+              projectDir,
+              "com.ngc.seaside.service.konnichiwamojuru/build/settings.xml")
+        assertTrue("settings file not created!",
+                   settingsFile.isFile())
     }
 }

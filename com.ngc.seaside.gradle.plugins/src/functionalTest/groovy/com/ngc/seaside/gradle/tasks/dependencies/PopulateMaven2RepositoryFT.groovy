@@ -66,5 +66,11 @@ class PopulateMaven2RepositoryFT {
               "build/deploy.sh")
         assertTrue("script not created!",
                    script.isFile())
+
+        File settings = new File(
+              projectDir,
+              "build/settings.xml")
+        assertTrue("settings not created!",
+                   settings.isFile())
     }
 }

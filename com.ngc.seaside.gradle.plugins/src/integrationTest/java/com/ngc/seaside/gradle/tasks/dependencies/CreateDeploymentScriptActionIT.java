@@ -32,6 +32,8 @@ public class CreateDeploymentScriptActionIT {
 
    private File scriptFile;
 
+   private File settingsFile;
+
    private ProjectInternal project = GradleMocks.newProjectMock();
 
    @Mock
@@ -43,6 +45,7 @@ public class CreateDeploymentScriptActionIT {
    @Before
    public void setup() throws Throwable {
       scriptFile = new File(temp.getRoot(), "deploy.sh");
+      settingsFile = new File(temp.getRoot(), CreateDeploymentScriptAction.SETTINGS_FILE_NAME);
 
       Logger logger = mock(Logger.class);
       when(task.getProject()).thenReturn(project);
@@ -59,6 +62,8 @@ public class CreateDeploymentScriptActionIT {
       action.execute(task);
       assertTrue("script file should be created!",
                  scriptFile.exists());
+      assertTrue("settings file should be created!",
+                 settingsFile.exists());
       assertEquals(
             "script file not correct!",
             Files.readAllLines(scriptFile.toPath()),
@@ -66,6 +71,15 @@ public class CreateDeploymentScriptActionIT {
                                     .getClassLoader()
                                     .getResourceAsStream(CreateDeploymentScriptAction.DEPLOYMENT_SCRIPT_RESOURCE_NAME),
                               StandardCharsets.US_ASCII));
+
+      assertEquals(
+            "settings file not correct!",
+            Files.readAllLines(settingsFile.toPath()),
+            IOUtils.readLines(
+                  CreateDeploymentScriptActionIT.class
+                        .getClassLoader()
+                        .getResourceAsStream(CreateDeploymentScriptAction.DEPLOYMNENT_SETTINGS_RESOURCE_NAME),
+                  StandardCharsets.US_ASCII));
    }
 
    @Test
@@ -75,6 +89,8 @@ public class CreateDeploymentScriptActionIT {
       action.execute(task);
       assertFalse("script file should not be created!",
                   scriptFile.exists());
+      assertFalse("settings file should not be created!",
+                  settingsFile.exists());
    }
 
    @Test

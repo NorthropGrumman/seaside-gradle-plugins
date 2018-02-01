@@ -13,6 +13,8 @@ import java.nio.file.Files;
 public class CreateDeploymentScriptAction extends DefaultTaskAction<PopulateMaven2Repository> {
 
    final static String DEPLOYMENT_SCRIPT_RESOURCE_NAME = "com/ngc/seaside/gradle/tasks/dependencies/deploy.sh";
+   final static String DEPLOYMNENT_SETTINGS_RESOURCE_NAME = "com/ngc/seaside/gradle/tasks/dependencies/settings.xml";
+   final static String SETTINGS_FILE_NAME = "settings.xml";
 
    @Override
    public void validate(PopulateMaven2Repository task) throws InvalidUserDataException {
@@ -23,24 +25,28 @@ public class CreateDeploymentScriptAction extends DefaultTaskAction<PopulateMave
    @Override
    protected void doExecute() {
       if (task.isCreateDeploymentScriptFile()) {
-         File script = task.getDeploymentScriptFile();
-         if (!script.exists()) {
+         copyFile(DEPLOYMENT_SCRIPT_RESOURCE_NAME, task.getDeploymentScriptFile());
+         copyFile(DEPLOYMNENT_SETTINGS_RESOURCE_NAME, new File(task.getDeploymentScriptFile().getParentFile(),
+                                                               SETTINGS_FILE_NAME));
+      }
+   }
 
-            // Make the directory if necessary.
-            File parentDir = script.getParentFile();
-            if (parentDir != null && !parentDir.isDirectory()) {
-               parentDir.mkdirs();
-            }
+   private void copyFile(String resource, File dest) {
+      if (!dest.exists()) {
+         // Make the directory if necessary.
+         File parentDir = dest.getParentFile();
+         if (parentDir != null && !parentDir.isDirectory()) {
+            parentDir.mkdirs();
+         }
 
-            logger.lifecycle("Creating deployment script {}.", script);
-            try (InputStream is = CreateDeploymentScriptAction.class
-                  .getClassLoader()
-                  .getResourceAsStream(DEPLOYMENT_SCRIPT_RESOURCE_NAME)) {
-               // Copy the script to the output directory.
-               Files.copy(is, script.toPath());
-            } catch (IOException e) {
-               throw new IllegalStateException("failed to load configuration properties from classpath!", e);
-            }
+         logger.lifecycle("Creating {} file for deployment.", dest);
+         try (InputStream is = CreateDeploymentScriptAction.class
+               .getClassLoader()
+               .getResourceAsStream(resource)) {
+            // Copy the file to the output directory.
+            Files.copy(is, dest.toPath());
+         } catch (IOException e) {
+            throw new IllegalStateException("failed to read " + resource + " resource from classpath!", e);
          }
       }
    }
