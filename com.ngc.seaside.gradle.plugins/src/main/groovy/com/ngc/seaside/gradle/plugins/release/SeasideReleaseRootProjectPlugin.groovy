@@ -56,7 +56,7 @@ class SeasideReleaseRootProjectPlugin extends AbstractProjectPlugin {
               BumpVersionTask,
               RELEASE_ROOT_PROJECT_TASK_GROUP_NAME,
               RELEASE_BUMP_VERSION_TASK_NAME,
-              'Will bump the version (i.e. add -SNAPSHOT) in the version file.')
+              'Bump the version (i.e. add -SNAPSHOT) in the version file.')
 
         ReleaseUtil.configureTask(
               project,
