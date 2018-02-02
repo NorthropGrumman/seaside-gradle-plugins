@@ -37,7 +37,7 @@ class SeasideReleaseRootProjectPluginFT {
     void doesRemoveVersionSuffix() {
         checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME) {
             def output = new ByteArrayOutputStream()
-            def result = project.exec ReleaseUtil.gitWithOutput(output, "log", "--pretty=format:%s")
+            def result = project.exec ReleaseUtil.gitWithOutput(output, "log", "--format=%s")
             Assert.assertEquals(0, result.getExitValue())
             Assert.assertTrue(
                   "output did not contain expected release message!",
@@ -67,7 +67,7 @@ class SeasideReleaseRootProjectPluginFT {
         checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME)
         checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_BUMP_VERSION_TASK_NAME) {
             def output = new ByteArrayOutputStream()
-            def result = project.exec ReleaseUtil.gitWithOutput(output, "log", "--pretty=format:%s")
+            def result = project.exec ReleaseUtil.gitWithOutput(output, "log", "--format=%s")
             Assert.assertEquals(0, result.getExitValue())
             Assert.assertTrue(
                   "output did not contain the expected update version message!",
