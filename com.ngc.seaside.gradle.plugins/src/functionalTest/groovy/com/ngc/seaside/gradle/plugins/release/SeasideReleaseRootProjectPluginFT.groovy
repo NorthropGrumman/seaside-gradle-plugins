@@ -30,9 +30,7 @@ class SeasideReleaseRootProjectPluginFT {
 
     @After
     void after() {
-        if (projectDir != null) {
-            projectDir.deleteDir()
-        }
+        projectDir.deleteDir()
     }
 
     @Test
@@ -80,7 +78,48 @@ class SeasideReleaseRootProjectPluginFT {
 
     @Test
     void doesReleasePush() {
-        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_PUSH_TASK_NAME)
+        def remoteRepo = TestingUtilities.turnListIntoPath(projectDir.parentFile.absolutePath, "test")
+        setupTestingGitRemote(remoteRepo)
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_REMOVE_VERSION_SUFFIX_TASK_NAME)
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_CREATE_TAG_TASK_NAME)
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_BUMP_VERSION_TASK_NAME)
+        checkForTaskSuccess(SeasideReleaseRootProjectPlugin.RELEASE_PUSH_TASK_NAME) {
+            assertCorrectTagWasPushed()
+            assertCorrectCommitWasPushed()
+        }
+        remoteRepo.deleteDir()
+    }
+
+    private void assertCorrectTagWasPushed() {
+        def output = new ByteArrayOutputStream()
+        def result = project.exec ReleaseUtil.gitWithOutput(output, "ls-remote", "origin", "refs/tags/v1.2.3")
+        Assert.assertEquals(0, result.getExitValue())
+        Assert.assertTrue(
+              "the tag wasn't pushed to the remote repo!",
+              output.toString().trim().endsWith("refs/tags/v1.2.3")
+        )
+    }
+
+    private void assertCorrectCommitWasPushed() {
+        Assert.assertEquals(
+              "the last commit in origin does not match what is in origin!",
+              getLocalCommitHash(),
+              getRemoteCommitHash()
+        )
+    }
+
+    private String getLocalCommitHash() {
+        def output = new ByteArrayOutputStream()
+        def result = project.exec ReleaseUtil.gitWithOutput(output, "log", "--format=%H", "-n1")
+        Assert.assertEquals(0, result.getExitValue())
+        return output.toString().trim()
+    }
+
+    private String getRemoteCommitHash() {
+        def output = new ByteArrayOutputStream()
+        def result = project.exec ReleaseUtil.gitWithOutput(output, "ls-remote", "origin", "HEAD")
+        Assert.assertEquals(0, result.getExitValue())
+        return output.toString().trim().split("\t")[0]
     }
 
     private static File sourceDirectoryWithTheTestProject() {
@@ -96,9 +135,18 @@ class SeasideReleaseRootProjectPluginFT {
     }
 
     private void setupTestingGitRepo() {
-        project.exec ReleaseUtil.git("init", projectDir.getAbsolutePath())
+        project.exec ReleaseUtil.git("init", projectDir.absolutePath)
         project.exec ReleaseUtil.git("add", ".")
         project.exec ReleaseUtil.git("commit", "-m", "initial commit")
+    }
+
+    private void setupTestingGitRemote(File remoteRepo) {
+        if (remoteRepo.exists()) {
+            remoteRepo.deleteDir()
+        }
+
+        project.exec ReleaseUtil.git("init", "--bare", remoteRepo.absolutePath)
+        project.exec ReleaseUtil.git("remote", "add", "origin", remoteRepo.absolutePath)
     }
 
     private void checkForTaskSuccess(String taskName, Closure closure) {
