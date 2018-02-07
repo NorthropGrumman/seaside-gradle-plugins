@@ -65,6 +65,11 @@ class SeasideCiExtension {
     File deploymentScriptFile
 
     /**
+     * Configure the
+     */
+    List<Configuration> configs
+
+    /**
      * If true, a dependencies report will be generated.  If this is turned off, the generated deployment script will
      * not upload artifacts.
      */

@@ -322,8 +322,8 @@ public class ResolveDependenciesAction extends DefaultTaskAction<PopulateMaven2R
     */
    private Collection<Configuration> getConfigurations() {
       Collection<Configuration> configs;
-      if (task.getConfiguration() != null) {
-         configs = Collections.singleton(task.getConfiguration());
+      if (task.getConfigurations() != null) {
+         configs = new ArrayList<>(task.getConfigurations());
       } else {
          Project project = task.getProject();
          configs = new ArrayList<>(project.getConfigurations());
