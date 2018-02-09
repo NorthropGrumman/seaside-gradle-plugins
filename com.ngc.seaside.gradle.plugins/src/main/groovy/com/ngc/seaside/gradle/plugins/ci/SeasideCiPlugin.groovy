@@ -165,6 +165,8 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
                 // Configure the deployment script.
                 deploymentScriptFile = ciExtension.deploymentScriptFile ?:
                                        new File(project.buildDir, DEFAULT_M2_DEPLOYMENT_SCRIPT_NAME)
+                configurations = ciExtension.configs
+
             }
 
             getTaskResolver().findTask(CREATE_M2_REPO_ARCHIVE_TASK_NAME) {

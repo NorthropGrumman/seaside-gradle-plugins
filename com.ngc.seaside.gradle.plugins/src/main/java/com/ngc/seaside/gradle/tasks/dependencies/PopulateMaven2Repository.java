@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -31,7 +32,7 @@ import javax.inject.Inject;
 /**
  * This task will create a directory in a maven2 layout for the dependencies of a project.  By default, it resolves all
  * dependencies of all configurations declared in the project.  This can be overridden by specifying the configuration
- * to use directly via {@link #setConfiguration(Configuration)}.  A typical usage of this task looks like this:
+ * to use directly via {@link #setConfigurations(List)}.  A typical usage of this task looks like this:
  * <pre>
  * {@code
  * task m2repo(type: PopulateMaven2Repository) {
@@ -63,9 +64,10 @@ public class PopulateMaven2Repository extends DefaultTask {
    private File deploymentScriptFile;
 
    /**
-    * The configuration to resolve dependencies for.  If not set, dependencies for all configurations will be resolved.
+    * The configurations in which to resolve the dependencies.
+    * If not set, dependencies for all configurations will be resolved
     */
-   private Configuration configuration;
+   private List<Configuration> configs;
 
    /**
     * The names of the configurations which must be resolved prior to determining their dependencies.  This allows
@@ -317,16 +319,16 @@ public class PopulateMaven2Repository extends DefaultTask {
     * Gets the configuration to retrieve dependencies for.  If this value is {@code null}, dependencies will be
     * retrieved for all configurations used by the project.
     */
-   public Configuration getConfiguration() {
-      return configuration;
+   public List<Configuration> getConfigurations() {
+      return configs;
    }
 
    /**
-    * Sets the configuration to retrieve dependencies for.  If this value is {@code null}, dependencies will be
+    * Sets the configurations in which to retrieve dependencies.  If this value is {@code null}, dependencies will be
     * retrieved for all configurations used by the project.
     */
-   public void setConfiguration(Configuration configuration) {
-      this.configuration = configuration;
+   public void setConfigurations(List<Configuration> configs) {
+      this.configs = configs;
    }
 
    /**
