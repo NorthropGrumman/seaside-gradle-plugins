@@ -76,7 +76,7 @@ public class ResolveDependenciesActionTest {
 
       MavenArtifactRepository local = newLocalMavenRepo(localRepositoryDirectory.getRoot());
       when(task.getOutputDirectory()).thenReturn(outputDirectory.getRoot());
-      when(task.getConfiguration()).thenReturn(config);
+      when(task.getConfigurations()).thenReturn(Collections.singletonList(config));
       when(task.getLocalRepository()).thenReturn(local);
 
       action = new ResolveDependenciesAction() {
