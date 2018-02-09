@@ -102,7 +102,7 @@ task testM2repo(type: PopulateMaven2Repository) {
     remoteRepository = project.repositories.getByName('NexusConsolidated')
     localRepository = mavenLocal()
     // Comment out the line below to resolve dependencies for all configurations.
-    configuration = project.configurations.getByName('thirdParty')
+    configurations = [project.configurations.getByName('thirdParty')]
 
     createDependencyReportFile = true
     dependencyInfoReportFile = project.file("${project.buildDir}/dependencies.tsv")
