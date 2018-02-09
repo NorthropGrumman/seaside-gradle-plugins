@@ -66,6 +66,8 @@ pipeline {
                 // Since we just did a clean, we need to run prepareForRelease again so the next step of pushing the
                 // tag will work.
                 sh './gradlew prepareForRelease'
+                // Bump the version to the next snapshot.
+                sh './gradlew bumpTheVersion'
 
                 script {
                     try {
