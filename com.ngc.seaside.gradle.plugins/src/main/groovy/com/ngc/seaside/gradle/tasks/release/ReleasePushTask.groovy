@@ -8,41 +8,26 @@ import org.gradle.api.tasks.TaskAction
  * Pushes the released version to GitHub with the latest created tag
  */
 class ReleasePushTask extends DefaultTask {
+    boolean dryRun = false
 
-   // Will be used in the future
-   boolean dryRun = false
+    /**
+     * CTOR
+     */
+    ReleasePushTask() {}
 
-   /**
-    * CTOR
-    */
-   ReleasePushTask() {}
-
-   /**
-    * function required to be a task within the
-    * gradle framework and is the entry point for
-    * gradle
-    *
-    * @return
-    */
+    /**
+     * Function that defines what the task actually does. This function is actually the entry point for the task when
+     * Gradle runs it.
+     */
     @TaskAction
     def releasePush() {
-       pushChanges()
+        if (dryRun) {
+            project.logger.lifecycle("Would have pushed release")
+            project.exec ReleaseUtil.git("push", "--tags", "--dry-run", "origin", "HEAD")
+            project.exec ReleaseUtil.git("reset", "--hard")
+        } else {
+            project.logger.lifecycle("Pushing release")
+            project.exec ReleaseUtil.git("push", "--tags", "origin", "HEAD")
+        }
     }
-
-   /**
-    * push all the committed changes done for the release to our GitHub repository
-    */
-   private void pushChanges() {
-      if (dryRun) {
-         project.logger.lifecycle("Would have Pushed Release")
-         project.exec ReleaseUtil.git("reset", "--hard", "origin")
-      }
-      else{
-         project.logger.lifecycle("Pushing Release")
-         project.exec ReleaseUtil.git("push", "origin", "--tags")
-         project.exec ReleaseUtil.git("push", "origin", "HEAD")
-      }
-    }
-
-
 }
