@@ -67,7 +67,7 @@ pipeline {
                 // tag will work.
                 sh './gradlew prepareForRelease'
                 // Bump the version to the next snapshot.
-                sh './gradlew bumpTheVersion'
+                sh './gradlew bumpTheVersion -PbootstrapRelease'
 
                 script {
                     try {
