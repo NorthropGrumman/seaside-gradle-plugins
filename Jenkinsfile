@@ -5,6 +5,15 @@ pipeline {
             customWorkspace "${JENKINS_HOME}/workspace/seaside-gradle-plugins/${JOB_NAME}"
         }
     }
+	
+	parameters {
+        booleanParam(name: 'upload',
+                     description: 'If true, artifacts will be uploaded to the build\'s remote repository.  Don\'t use this option with performRelease.',
+                     defaultValue: false)
+        booleanParam(name: 'performRelease',
+                     defaultValue: false,
+                     description: 'If true, a release build will be performed.  Releases can only be performed from master.')
+    }
 
     stages {
         stage('Build') {
@@ -23,7 +32,6 @@ pipeline {
                     junit '**/build/test-results/test/*.xml'
                 }
             }
-
         }
 
         stage('Integration Test') {
@@ -50,7 +58,7 @@ pipeline {
 
         stage('Release') {
             when {
-                branch 'master'
+                expression { params.offlineSupport }
             }
             steps {
                 // Prepare for a release by building the plugins if necessary and set them up on disk so this
