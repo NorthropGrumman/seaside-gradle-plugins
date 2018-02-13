@@ -6,7 +6,7 @@ pipeline {
         }
     }
 	
-	parameters {
+    parameters {
         booleanParam(name: 'upload',
                      description: 'If true, artifacts will be uploaded to the build\'s remote repository.  Don\'t use this option with performRelease.',
                      defaultValue: false)
@@ -55,10 +55,19 @@ pipeline {
                 }
             }
         }
+		
+		stage('Upload Snapshot') {
+            when {
+                expression { params.upload }
+            }
+			steps {
+			    sh './gradlew upload'
+			}
+		}
 
         stage('Release') {
             when {
-                expression { params.offlineSupport }
+                expression { env.BRANCH_NAME == 'master' && params.performRelease }
             }
             steps {
                 // Prepare for a release by building the plugins if necessary and set them up on disk so this
