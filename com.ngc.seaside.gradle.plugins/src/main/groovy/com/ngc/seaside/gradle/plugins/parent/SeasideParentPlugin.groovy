@@ -11,6 +11,7 @@ import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.ide.visualstudio.ConfigFile
 
 /**
  * The seaside parent plugin provides calls to common tasks, sets up the default dependencies for BLoCS and OSGi along
@@ -163,10 +164,21 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                     }
                 }
 
+                checkstyle {
+                    toolVersion "8.8"
+                    config project.resources.text.('ceacide_checks.xml')
+//                    config project.resources.text.
+                    //fails the build but at the first error, however still generates the report at that bundle
+                    ignoreFailures = false
+                    maxErrors = 0
+                    maxWarnings = 0
+                }
+
                 /**
                  * Configure Sonarqube to use the Jacoco code coverage reports.
                  */
                 sonarqube {
+                    check
                     properties {
                         if (new File("${project.buildDir}/jacoco/test.exec").exists()) {
                             property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
@@ -251,6 +263,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
         project.getPlugins().apply('com.github.ksoichiro.console.reporter')
         project.getPlugins().apply(SeasideReleasePlugin)
         project.getPlugins().apply(SeasideCiPlugin)
+        project.getPlugins().apply('checkstyle')
     }
 
     /**
@@ -338,5 +351,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                      dependsOn: [buildTask, javadocJarTask, sourceJarTask],
                      description: 'Performs a full build and generates all artifacts including Javadoc and source JARs.')
         taskResolver.findTask(ALL_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+
     }
 }
