@@ -165,27 +165,31 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                }
             }
 
-//            tasks.withType(Checkstyle) {
-//               tasks -> enabled = false
-//            }
+            /**
+             * Ensure that checkstyleMain can only be called when running the task from the command line
+             * We don't want checkstyle to run on ever build due to time.
+             */
+            tasks.withType(Checkstyle) {
+               task -> enabled = gradle.startParameter.taskNames.contains(task.name)
+            }
 
+            /**
+             * The checkstyle configuration creates a temporary directory and stores the configuration from
+             * this projects resources into it for each project being built.
+             */
             checkstyle {
                toolVersion "8.8"
 
+               //read the resource within this project and copy it's contents to a temporary location.
                def resource = SeasideParentPlugin.class
                      .getClassLoader()
                      .getResourceAsStream("checkstyle/ceacide_checks.xml")
                      .text;
-
                File tempDir = File.createTempDir()
-
-               println "checkstyle: Creating temporary directory " + tempDir.getAbsolutePath()
-
                File output = new File(tempDir, "ceacide_checks.xml");
-
                output << resource
 
-               println output.getAbsolutePath()
+               println "checkstyle: created temporary configuration " + output.getAbsolutePath()
 
                configFile output
             }
@@ -367,6 +371,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                    dependsOn: [buildTask, javadocJarTask, sourceJarTask],
                    description: 'Performs a full build and generates all artifacts including Javadoc and source JARs.')
       taskResolver.findTask(ALL_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
+
 
    }
 }
