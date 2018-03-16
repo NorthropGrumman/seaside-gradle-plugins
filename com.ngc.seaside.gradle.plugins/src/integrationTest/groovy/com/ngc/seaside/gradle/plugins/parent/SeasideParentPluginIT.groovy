@@ -43,6 +43,7 @@ class SeasideParentPluginIT {
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.ANALYZE_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.DOWNLOAD_DEPENDENCIES_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.CLEANUP_DEPENDENCIES_TASK_NAME))
+        Assert.assertNotNull(resolver.findTask("checkstyleMain"))
     }
 
     static void setRequiredProjectProperties(Project project) {

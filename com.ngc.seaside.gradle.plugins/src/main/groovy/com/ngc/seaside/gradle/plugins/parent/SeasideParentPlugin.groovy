@@ -12,7 +12,6 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.ide.visualstudio.ConfigFile
 
 /**
  * The seaside parent plugin provides calls to common tasks, sets up the default dependencies for BLoCS and OSGi along
@@ -42,7 +41,13 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
    public static final String CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
    public static final String ALL_TASK_NAME = 'all'
    public static final String LOCAL_TAG = 'local-'
+   public static final String CHECKSTYLE_TOOL_VERSION = '8.8'
+   public static final String CHECKSTYLE_FAIL_ON_ERROR_PROPERTY = 'fail-on-checkstyle-error'
+   public static final String CHECKSTYLE_CONFIG_FILE_NAME = 'ceacide_checks.xml'
+   public static final String CHECKSTYLE_CONFIG_FILE = 'checkstyle/' + CHECKSTYLE_CONFIG_FILE_NAME
+
    public static String REMOTE_TAG = ''
+
 
    @Override
    void doApply(Project project) {
@@ -178,27 +183,38 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
              * this projects resources into it for each project being built.
              */
             checkstyle {
-               toolVersion "8.8"
+               toolVersion CHECKSTYLE_TOOL_VERSION
+
+               //determine if the fail on error property has been set and set the appropriate
+               //configuration options if it is set to 'true'
+               //by default, this will not fail the build.
+               if (project.hasProperty(CHECKSTYLE_FAIL_ON_ERROR_PROPERTY)) {
+                  if (project.findProperty(CHECKSTYLE_FAIL_ON_ERROR_PROPERTY).equals("true")) {
+                     ignoreFailures = false
+                     maxErrors = 0
+                     maxWarnings = 0
+                  }
+               }
 
                //read the resource within this project and copy it's contents to a temporary location.
                def resource = SeasideParentPlugin.class
                      .getClassLoader()
-                     .getResourceAsStream("checkstyle/ceacide_checks.xml")
+                     .getResourceAsStream(CHECKSTYLE_CONFIG_FILE)
                      .text;
                File tempDir = File.createTempDir()
-               File output = new File(tempDir, "ceacide_checks.xml");
+               File output = new File(tempDir, CHECKSTYLE_CONFIG_FILE_NAME);
                output << resource
 
                println "checkstyle: created temporary configuration " + output.getAbsolutePath()
-
                configFile output
+
             }
 
             /**
              * Configure Sonarqube to use the Jacoco code coverage reports.
              */
             sonarqube {
-//                    checkstyleMain
+               check
                properties {
                   if (new File("${project.buildDir}/jacoco/test.exec").exists()) {
                      property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
