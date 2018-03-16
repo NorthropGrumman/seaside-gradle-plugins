@@ -56,4 +56,17 @@ class SeasideParentPluginFT {
 
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:analyze").getOutcome())
     }
+
+    @Test
+    void doesRunGradleCleanBuildCheckstyleMainWithSuccess() {
+
+        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
+              .withPluginClasspath(pluginClasspath)
+              .forwardOutput()
+              .withArguments("clean", "build", "checkstyleMain")
+              .build()
+
+        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:checkstyleMain").getOutcome())
+    }
+
 }
