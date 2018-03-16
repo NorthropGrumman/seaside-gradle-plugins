@@ -166,19 +166,21 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
 
                 checkstyle {
                     toolVersion "8.8"
-                    config project.resources.text.('ceacide_checks.xml')
+//                    config project.resources.text.fromFile('ceacide_checks.xml')
+//                    config 'checkstyle/ceacide_checks.xml'
+                      configFile new File(getClass().getClassLoader().getResource( 'checkstyle/ceacide_checks.xml' ).getFile())
 //                    config project.resources.text.
                     //fails the build but at the first error, however still generates the report at that bundle
-                    ignoreFailures = false
-                    maxErrors = 0
-                    maxWarnings = 0
+//                    ignoreFailures = false
+//                    maxErrors = 0
+//                    maxWarnings = 0
                 }
 
                 /**
                  * Configure Sonarqube to use the Jacoco code coverage reports.
                  */
                 sonarqube {
-                    check
+//                    checkstyleMain
                     properties {
                         if (new File("${project.buildDir}/jacoco/test.exec").exists()) {
                             property 'sonar.jacoco.reportPaths', ["${project.buildDir}/jacoco/test.exec"]
