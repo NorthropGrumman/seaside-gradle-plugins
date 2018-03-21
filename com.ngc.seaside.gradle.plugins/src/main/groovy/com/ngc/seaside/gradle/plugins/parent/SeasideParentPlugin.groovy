@@ -11,6 +11,7 @@ import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.quality.Checkstyle
+import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.tasks.bundling.Jar
 
 /**
@@ -45,6 +46,8 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
    public static final String CHECKSTYLE_FAIL_ON_ERROR_PROPERTY = 'fail-on-checkstyle-error'
    public static final String CHECKSTYLE_CONFIG_FILE_NAME = 'ceacide_checks.xml'
    public static final String CHECKSTYLE_CONFIG_FILE = 'checkstyle/' + CHECKSTYLE_CONFIG_FILE_NAME
+   public static final String CHECKSTYLE_SUPPRESS_FILE_NAME = 'suppressions.xml'
+   public static final String CHECKSTYLE_SUPPRESS_FILE = 'checkstyle/' + CHECKSTYLE_SUPPRESS_FILE_NAME
 
    public static String REMOTE_TAG = ''
 
@@ -175,7 +178,30 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
              * We don't want checkstyle to run on ever build due to time.
              */
             tasks.withType(Checkstyle) {
-               task -> enabled = gradle.startParameter.taskNames.contains(task.name)
+               task -> enabled = project.gradle.startParameter.taskNames.contains(task.name)
+
+               if(project.gradle.startParameter.taskNames.contains(task.name)) {
+                  CheckstyleExtension extension = project.getExtensions().getByType(CheckstyleExtension.class)
+                  File tempDir = File.createTempDir()
+
+                  def resource = SeasideParentPlugin.class
+                        .getClassLoader()
+                        .getResourceAsStream(CHECKSTYLE_CONFIG_FILE)
+                        .text
+                  def suppressionResource = SeasideParentPlugin.class
+                        .getClassLoader()
+                        .getResourceAsStream(CHECKSTYLE_SUPPRESS_FILE)
+                        .text
+
+                  File output = new File(tempDir, CHECKSTYLE_CONFIG_FILE_NAME)
+                  output << resource
+
+                  File suppressionsOutput = new File(tempDir, CHECKSTYLE_SUPPRESS_FILE_NAME)
+                  suppressionsOutput << suppressionResource
+
+                  extension.configFile = output
+                  extension.configProperties = [ "suppressionFile" : suppressionsOutput.getAbsolutePath() ]
+               }
             }
 
             /**
@@ -189,25 +215,12 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                //configuration options if it is set to 'true'
                //by default, this will not fail the build.
                if (project.hasProperty(CHECKSTYLE_FAIL_ON_ERROR_PROPERTY)) {
-                  if (project.findProperty(CHECKSTYLE_FAIL_ON_ERROR_PROPERTY).equals("true")) {
+                  if (project.findProperty(CHECKSTYLE_FAIL_ON_ERROR_PROPERTY) == "true") {
                      ignoreFailures = false
                      maxErrors = 0
                      maxWarnings = 0
                   }
                }
-
-               //read the resource within this project and copy it's contents to a temporary location.
-               def resource = SeasideParentPlugin.class
-                     .getClassLoader()
-                     .getResourceAsStream(CHECKSTYLE_CONFIG_FILE)
-                     .text;
-               File tempDir = File.createTempDir()
-               File output = new File(tempDir, CHECKSTYLE_CONFIG_FILE_NAME);
-               output << resource
-
-               println "checkstyle: created temporary configuration " + output.getAbsolutePath()
-               configFile output
-
             }
 
             /**

@@ -27,6 +27,11 @@
         <property name="eachLine" value="true"/>
     </module>
 
+    <module name="SuppressionFilter">
+        <property name="file" value="${suppressionFile}"/>
+        <property name="optional" value="false"/>
+    </module>
+
     <module name="TreeWalker">
         <module name="OuterTypeFilename"/>
         <module name="IllegalTokenText">
@@ -41,7 +46,7 @@
         </module>
         <module name="LineLength">
             <property name="max" value="120"/>
-            <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+            <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://|^(?=.*?\btarget\b)(?=.*?\bcomponent.name\b).*$"/>
         </module>
         <module name="AvoidStarImport"/>
         <module name="OneTopLevelClass"/>
@@ -139,17 +144,20 @@
              value="Local variable name ''{0}'' must match pattern ''{1}''."/>
         </module>
         <module name="ClassTypeParameterName">
-            <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
+            <!--<property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>-->
+            <property name="format" value="^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)*$"/>
             <message key="name.invalidPattern"
              value="Class type name ''{0}'' must match pattern ''{1}''."/>
         </module>
         <module name="MethodTypeParameterName">
-            <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
+            <!--<property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>-->
+            <property name="format" value="^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)*$"/>
             <message key="name.invalidPattern"
              value="Method type name ''{0}'' must match pattern ''{1}''."/>
         </module>
         <module name="InterfaceTypeParameterName">
-            <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
+            <!--<property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>-->
+            <property name="format" value="^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)*$"/>
             <message key="name.invalidPattern"
              value="Interface type name ''{0}'' must match pattern ''{1}''."/>
         </module>
@@ -168,20 +176,20 @@
             <property name="basicOffset" value="3"/>
             <property name="braceAdjustment" value="0"/>
             <property name="caseIndent" value="3"/>
-            <property name="throwsIndent" value="4"/>
+            <property name="throwsIndent" value="3"/>
             <property name="lineWrappingIndentation" value="6"/>
             <property name="arrayInitIndent" value="3"/>
         </module>
         <module name="AbbreviationAsWordInName">
             <property name="ignoreFinal" value="false"/>
-            <property name="allowedAbbreviationLength" value="1"/>
+            <property name="allowedAbbreviationLength" value="6"/>
         </module>
         <module name="OverloadMethodsDeclarationOrder"/>
-        <module name="VariableDeclarationUsageDistance"/>
+        <!--<module name="VariableDeclarationUsageDistance"/>-->
         <module name="CustomImportOrder">
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="separateLineBetweenGroups" value="true"/>
-            <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE###STANDARD_JAVA_PACKAGE"/>
+            <property name="customImportOrderRules" value="THIRD_PARTY_PACKAGE###STANDARD_JAVA_PACKAGE###STATIC"/>
         </module>
         <module name="MethodParamPad"/>
         <module name="NoWhitespaceBefore">
@@ -203,10 +211,9 @@
             <property name="allowSamelineMultipleAnnotations" value="true"/>
         </module>
         <module name="NonEmptyAtclauseDescription"/>
-        <module name="JavadocTagContinuationIndentation"/>
-        <module name="SummaryJavadoc">
-            <property name="forbiddenSummaryFragments" value="^@return the *|^This method returns |^A [{]@code [a-zA-Z0-9]+[}]( is a )"/>
-        </module>
+        <!--<module name="SummaryJavadoc">-->
+            <!--<property name="forbiddenSummaryFragments" value="^@return the *|^This method returns |^A [{]@code [a-zA-Z0-9]+[}]( is a )"/>-->
+        <!--</module>-->
         <module name="JavadocParagraph">
             <property name="allowNewlineParagraph" value="false"/>
         </module>
@@ -220,7 +227,8 @@
             <property name="allowMissingThrowsTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
             <property name="minLineCount" value="2"/>
-            <property name="allowedAnnotations" value="Override, Test"/>
+            <property name="allowedAnnotations"
+                      value="Override, Test, Activate, Deactivate, SuppressWarnings, Inject, Subscriber, Before, After, Mock, BeforeClass, AfterClass"/>
             <property name="allowThrowsTagsForSubclasses" value="true"/>
         </module>
         <module name="MethodName">
