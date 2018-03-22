@@ -17,7 +17,6 @@ import java.nio.file.Paths
 
 class SeasideParentPluginFT {
 
-
     private File projectDir
     private Project project
     private List<File> pluginClasspath
@@ -56,17 +55,4 @@ class SeasideParentPluginFT {
 
         Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:analyze").getOutcome())
     }
-
-    @Test
-    void doesRunGradleCleanBuildCheckstyleMainWithSuccess() {
-
-        BuildResult result = GradleRunner.create().withProjectDir(projectDir)
-              .withPluginClasspath(pluginClasspath)
-              .forwardOutput()
-              .withArguments("clean", "build", "checkstyleMain")
-              .build()
-
-        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:checkstyleMain").getOutcome())
-    }
-
 }

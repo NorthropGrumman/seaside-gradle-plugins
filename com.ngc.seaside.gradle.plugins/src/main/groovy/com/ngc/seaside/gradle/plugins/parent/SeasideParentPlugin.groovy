@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
+import com.ngc.seaside.gradle.plugins.analyze.SeasideCheckstylePlugin
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
@@ -10,8 +11,6 @@ import com.ngc.seaside.gradle.util.GradleUtil
 import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.api.plugins.quality.Checkstyle
-import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.tasks.bundling.Jar
 
 /**
@@ -42,14 +41,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
    public static final String CLEANUP_DEPENDENCIES_TASK_NAME = 'cleanupDependencies'
    public static final String ALL_TASK_NAME = 'all'
    public static final String LOCAL_TAG = 'local-'
-   public static final String CHECKSTYLE_TOOL_VERSION = '8.8'
-   public static final String CHECKSTYLE_FAIL_ON_ERROR_PROPERTY = 'fail-on-checkstyle-error'
-   public static final String CHECKSTYLE_CONFIG_FILE_NAME = 'ceacide_checks.xml'
-   public static final String CHECKSTYLE_CONFIG_FILE =
-         'com/ngc/seaside/gradle/tasks/checkstyle/' + CHECKSTYLE_CONFIG_FILE_NAME
-   public static final String CHECKSTYLE_SUPPRESS_FILE_NAME = 'suppressions.xml'
-   public static final String CHECKSTYLE_SUPPRESS_FILE =
-         'com/ngc/seaside/gradle/tasks/checkstyle/' + CHECKSTYLE_SUPPRESS_FILE_NAME
 
    public static String REMOTE_TAG = ''
 
@@ -176,56 +167,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
             }
 
             /**
-             * Ensure that checkstyleMain can only be called when running the task from the command line
-             * We don't want checkstyle to run on ever build due to time.
-             */
-            tasks.withType(Checkstyle) { task ->
-               enabled = project.gradle.startParameter.taskNames.contains(task.name)
-
-               if(project.gradle.startParameter.taskNames.contains(task.name)) {
-                  CheckstyleExtension extension = project.getExtensions().getByType(CheckstyleExtension.class)
-                  File tempDir = File.createTempDir()
-
-                  def resource = SeasideParentPlugin.class
-                        .getClassLoader()
-                        .getResourceAsStream(CHECKSTYLE_CONFIG_FILE)
-                        .text
-                  def suppressionResource = SeasideParentPlugin.class
-                        .getClassLoader()
-                        .getResourceAsStream(CHECKSTYLE_SUPPRESS_FILE)
-                        .text
-
-                  File output = new File(tempDir, CHECKSTYLE_CONFIG_FILE_NAME)
-                  output << resource
-
-                  File suppressionsOutput = new File(tempDir, CHECKSTYLE_SUPPRESS_FILE_NAME)
-                  suppressionsOutput << suppressionResource
-
-                  extension.configFile = output
-                  extension.configProperties = [ "suppressionFile" : suppressionsOutput.getAbsolutePath() ]
-               }
-            }
-
-            /**
-             * The checkstyle configuration creates a temporary directory and stores the configuration from
-             * this projects resources into it for each project being built.
-             */
-            checkstyle {
-               toolVersion CHECKSTYLE_TOOL_VERSION
-
-               //determine if the fail on error property has been set and set the appropriate
-               //configuration options if it is set to 'true'
-               //by default, this will not fail the build.
-               if (project.hasProperty(CHECKSTYLE_FAIL_ON_ERROR_PROPERTY)) {
-                  if (project.findProperty(CHECKSTYLE_FAIL_ON_ERROR_PROPERTY) == "true") {
-                     ignoreFailures = false
-                     maxErrors = 0
-                     maxWarnings = 0
-                  }
-               }
-            }
-
-            /**
              * Configure Sonarqube to use the Jacoco code coverage reports.
              */
             sonarqube {
@@ -314,7 +255,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
       project.getPlugins().apply('com.github.ksoichiro.console.reporter')
       project.getPlugins().apply(SeasideReleasePlugin)
       project.getPlugins().apply(SeasideCiPlugin)
-      project.getPlugins().apply('checkstyle')
+      project.getPlugins().apply(SeasideCheckstylePlugin)
    }
 
    /**

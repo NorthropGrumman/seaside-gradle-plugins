@@ -20,14 +20,12 @@ class SeasideParentPluginIT {
 
     @Before
     void before() {
-
         File source = Paths.get("src/integrationTest/resources/sealion-java-hello-world").toFile()
         Path targetPath = Paths.get("build/integrationTest/resources/parent/com.ngc.example.parent")
         projectDir = Files.createDirectories(targetPath).toFile()
         FileUtils.copyDirectory(source, projectDir)
 
         project = ProjectBuilder.builder().withProjectDir(projectDir).build()
-
 
         plugin = new SeasideParentPlugin()
 
@@ -43,7 +41,6 @@ class SeasideParentPluginIT {
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.ANALYZE_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.DOWNLOAD_DEPENDENCIES_TASK_NAME))
         Assert.assertNotNull(resolver.findTask(SeasideParentPlugin.CLEANUP_DEPENDENCIES_TASK_NAME))
-        Assert.assertNotNull(resolver.findTask("checkstyleMain"))
     }
 
     static void setRequiredProjectProperties(Project project) {
