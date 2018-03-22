@@ -45,9 +45,11 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
    public static final String CHECKSTYLE_TOOL_VERSION = '8.8'
    public static final String CHECKSTYLE_FAIL_ON_ERROR_PROPERTY = 'fail-on-checkstyle-error'
    public static final String CHECKSTYLE_CONFIG_FILE_NAME = 'ceacide_checks.xml'
-   public static final String CHECKSTYLE_CONFIG_FILE = 'checkstyle/' + CHECKSTYLE_CONFIG_FILE_NAME
+   public static final String CHECKSTYLE_CONFIG_FILE =
+         'com/ngc/seaside/gradle/tasks/checkstyle/' + CHECKSTYLE_CONFIG_FILE_NAME
    public static final String CHECKSTYLE_SUPPRESS_FILE_NAME = 'suppressions.xml'
-   public static final String CHECKSTYLE_SUPPRESS_FILE = 'checkstyle/' + CHECKSTYLE_SUPPRESS_FILE_NAME
+   public static final String CHECKSTYLE_SUPPRESS_FILE =
+         'com/ngc/seaside/gradle/tasks/checkstyle/' + CHECKSTYLE_SUPPRESS_FILE_NAME
 
    public static String REMOTE_TAG = ''
 
@@ -177,8 +179,8 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
              * Ensure that checkstyleMain can only be called when running the task from the command line
              * We don't want checkstyle to run on ever build due to time.
              */
-            tasks.withType(Checkstyle) {
-               task -> enabled = project.gradle.startParameter.taskNames.contains(task.name)
+            tasks.withType(Checkstyle) { task ->
+               enabled = project.gradle.startParameter.taskNames.contains(task.name)
 
                if(project.gradle.startParameter.taskNames.contains(task.name)) {
                   CheckstyleExtension extension = project.getExtensions().getByType(CheckstyleExtension.class)
