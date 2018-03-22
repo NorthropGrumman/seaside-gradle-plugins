@@ -17,7 +17,6 @@ import java.nio.file.Paths
 
 class SeasideParentPluginFT {
 
-
     private File projectDir
     private Project project
     private List<File> pluginClasspath
