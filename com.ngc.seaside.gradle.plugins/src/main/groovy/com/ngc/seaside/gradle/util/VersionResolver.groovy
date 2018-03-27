@@ -16,11 +16,11 @@ import java.util.regex.Pattern
 class VersionResolver implements IResolver {
     public static final String VERSION_SUFFIX = "-SNAPSHOT"
 
-    private static final Pattern PATTERN =
-          Pattern.compile(
-                "^\\s*version\\s*=\\s*[\"']?(?!\\.)(\\d+(\\.\\d+)+)([-.][A-Z]+)?[\"']?(?![\\d.])\$",
-                Pattern.MULTILINE
-          )
+    private static final Pattern PATTERN = ~/(?m)(?x)
+            ^(?<beginning> \s*? version \s*? = \s*? ([\"']?) )
+             (?<version> \d+?(?:\.\d+?)+? )
+             (?<suffix> [-\.][A-Za-z]+ )?
+             (?<ending> \2\s* )$/
 
     private Logger logger
     private File versionFile
@@ -51,8 +51,8 @@ class VersionResolver implements IResolver {
         StringBuilder sb = new StringBuilder()
 
         if (matcher.find()) {
-            String version = matcher.group(1)
-            String suffix = matcher.group(3)
+            String version = matcher.group('version')
+            String suffix = matcher.group('suffix')
             if (version) {
                 sb.append(version)
                 if (suffix == null && enforceVersionSuffix) {
@@ -74,7 +74,7 @@ class VersionResolver implements IResolver {
     }
 
     void setProjectVersionOnFile(String newVersion) {
-        versionFile.text = versionFile.text.replaceFirst(PATTERN, "   version = \'$newVersion\'")
+        versionFile.text = versionFile.text.replaceFirst(PATTERN, "\${beginning}$newVersion\${ending}")
     }
 
     String getTagName(String tagPrefix, String versionSuffix) {
