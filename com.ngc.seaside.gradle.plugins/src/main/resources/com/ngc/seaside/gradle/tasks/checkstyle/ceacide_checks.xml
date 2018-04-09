@@ -24,7 +24,7 @@
 
     <!-- Do not scan generated code. -->
     <module name="BeforeExecutionExclusionFileFilter">
-        <property name="fileNamePattern" value="build|xtend\-gen|xtext\-gen|src\-gen|generated\-src" />
+        <property name="fileNamePattern" value="xtend\-gen|xtext\-gen|src\-gen|generated\-src" />
     </module>
 
     <!-- Checks for whitespace                               -->
