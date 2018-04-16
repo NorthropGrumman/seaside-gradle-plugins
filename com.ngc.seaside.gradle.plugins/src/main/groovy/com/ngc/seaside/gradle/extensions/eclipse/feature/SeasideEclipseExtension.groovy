@@ -3,13 +3,9 @@ package com.ngc.seaside.gradle.extensions.eclipse.feature
 import org.gradle.api.Project
 
 class SeasideEclipseExtension {
-    private final String DEFAULT_ARCHIVE_NAME = "${project.group}.${project.name}-${project.version}.zip"
-
-    private Project project
+    public String archiveName
 
     SeasideEclipseExtension(Project project) {
-        this.project = project
+        archiveName = "${project.group}.${project.name}-${project.version}.zip"
     }
-
-    String archiveName = DEFAULT_ARCHIVE_NAME
 }
