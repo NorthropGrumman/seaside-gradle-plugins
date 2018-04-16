@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.plugins.eclipse.feature
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
-import com.ngc.seaside.gradle.extensions.eclipse.SeasideEclipseExtension
+import com.ngc.seaside.gradle.extensions.eclipse.feature.SeasideEclipseExtension
 import org.gradle.api.Project
 
 class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {

@@ -1,4 +1,4 @@
-package com.ngc.seaside.gradle.extensions.eclipse
+package com.ngc.seaside.gradle.extensions.eclipse.feature
 
 import org.gradle.api.Project
 
