@@ -51,7 +51,7 @@ class SeasideEclipseFeaturePluginIT {
 
     private static File pathToTheDestinationProjectDirectory() {
         return TestingUtilities.turnListIntoPath(
-              "build", "integrationTest", "resources", "sealion-java-hello-world"
+              "build", "integrationTest", "eclipse", "feature", "sealion-java-hello-world"
         )
     }
 
