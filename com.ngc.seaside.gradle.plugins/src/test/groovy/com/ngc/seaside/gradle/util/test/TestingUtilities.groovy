@@ -41,7 +41,11 @@ class TestingUtilities {
     }
 
     static void assertTaskSuccess(BuildResult result, String projectName, String taskName) {
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":$projectName:$taskName").outcome)
+        Assert.assertEquals(
+              "unexpected task outcome!",
+              TaskOutcome.SUCCESS,
+              result.task(":$projectName:$taskName").outcome
+        )
     }
 
     private static URL getThePluginClassPathResource(Class c) {
