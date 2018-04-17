@@ -30,10 +30,6 @@ class SeasideEclipseFeaturePluginTest {
               SeasideEclipseFeaturePlugin.ECLIPSE_CREATE_JAR_TASK_NAME
         )
         Assert.assertNotNull(
-              "filter feature file task name does not exist!",
-              SeasideEclipseFeaturePlugin.ECLIPSE_FILTER_FEATURE_FILE_TASK_NAME
-        )
-        Assert.assertNotNull(
               "copy feature file task name does not exist!",
               SeasideEclipseFeaturePlugin.ECLIPSE_COPY_FEATURE_FILE_TASK_NAME
         )

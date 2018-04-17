@@ -14,7 +14,6 @@ class SeasideEclipseFeaturePluginIT {
     private File projectDir
     private List<String> taskNames = [
           SeasideEclipseFeaturePlugin.ECLIPSE_CREATE_JAR_TASK_NAME,
-          SeasideEclipseFeaturePlugin.ECLIPSE_FILTER_FEATURE_FILE_TASK_NAME,
           SeasideEclipseFeaturePlugin.ECLIPSE_COPY_FEATURE_FILE_TASK_NAME,
     ]
 
