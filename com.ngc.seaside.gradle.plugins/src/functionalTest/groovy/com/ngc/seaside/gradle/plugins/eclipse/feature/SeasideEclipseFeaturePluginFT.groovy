@@ -31,7 +31,7 @@ class SeasideEclipseFeaturePluginFT {
               .withArguments("clean", "build")
               .build()
 
-        TestingUtilities.assertTaskSuccess(result, "service.helloworld", "build")
+        TestingUtilities.assertTaskSuccess(result, "service.nihao", "build")
     }
 
     private static File sourceDirectoryWithTheTestProject() {
