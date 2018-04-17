@@ -14,12 +14,20 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
 
     private SeasideEclipseExtension extension
 
+    String archiveName
+
     @Override
     void doApply(Project project) {
         project.configure(project) {
             extension = project.extensions.create(ECLIPSE_EXTENSION_NAME, SeasideEclipseExtension, project)
+            setExtensionProperties()
+
             createTasks(project)
         }
+    }
+
+    private void setExtensionProperties() {
+        extension.archiveName = archiveName ?: extension.archiveName
     }
 
     private static void createTasks(Project project) {
