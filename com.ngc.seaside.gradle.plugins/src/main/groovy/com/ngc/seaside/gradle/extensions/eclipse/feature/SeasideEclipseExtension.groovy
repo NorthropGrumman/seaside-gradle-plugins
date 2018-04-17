@@ -6,6 +6,6 @@ class SeasideEclipseExtension {
     public String archiveName
 
     SeasideEclipseExtension(Project project) {
-        archiveName = "${project.group}.${project.name}-${project.version}.zip"
+        archiveName = "${project.group}.${project.name}-${project.version}.jar"
     }
 }

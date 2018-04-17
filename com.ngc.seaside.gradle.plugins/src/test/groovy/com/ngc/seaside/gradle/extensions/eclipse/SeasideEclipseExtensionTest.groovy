@@ -17,7 +17,7 @@ class SeasideEclipseExtensionTest {
     private static final String TEST_PROJECT_GROUP = "test.project.group"
     private static final String TEST_PROJECT_NAME = "test-project-name"
     private static final String TEST_ARCHIVE_NAME =
-          "${TEST_PROJECT_GROUP}.${TEST_PROJECT_NAME}-${TEST_PROJECT_VERSION}.zip"
+          "${TEST_PROJECT_GROUP}.${TEST_PROJECT_NAME}-${TEST_PROJECT_VERSION}.jar"
 
     private SeasideEclipseExtension extension
 
