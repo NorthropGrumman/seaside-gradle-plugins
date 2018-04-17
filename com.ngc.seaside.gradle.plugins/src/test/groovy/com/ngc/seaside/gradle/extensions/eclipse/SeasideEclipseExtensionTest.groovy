@@ -19,20 +19,22 @@ class SeasideEclipseExtensionTest {
     private static final String TEST_ARCHIVE_NAME =
           "${TEST_PROJECT_GROUP}.${TEST_PROJECT_NAME}-${TEST_PROJECT_VERSION}.zip"
 
+    private SeasideEclipseExtension extension
+
     @Mock
     private Project project
 
     @Before
     void before() {
-        when(project.getGroup()).thenReturn(TEST_PROJECT_GROUP)
-        when(project.getName()).thenReturn(TEST_PROJECT_NAME)
-        when(project.getVersion()).thenReturn(TEST_PROJECT_VERSION)
+        when(project.group).thenReturn(TEST_PROJECT_GROUP)
+        when(project.name).thenReturn(TEST_PROJECT_NAME)
+        when(project.version).thenReturn(TEST_PROJECT_VERSION)
+
+        extension = new SeasideEclipseExtension(project)
     }
 
     @Test
     void hasArchiveNameProperty() {
-        def extension = new SeasideEclipseExtension(project)
-
         Assert.assertNotNull("archiveName property doesn't exist!", extension.archiveName)
         Assert.assertEquals("default archive name is incorrect!", extension.archiveName, TEST_ARCHIVE_NAME)
     }
