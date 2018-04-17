@@ -17,7 +17,6 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
     private SeasideEclipseExtension extension
 
     String archiveName
-    String buildDir
 
     @Override
     void doApply(Project project) {
