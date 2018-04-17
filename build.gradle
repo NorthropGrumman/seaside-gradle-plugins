@@ -1,4 +1,5 @@
 buildscript {
+    System.properties['javax.net.ssl.trustStore'] = rootProject.file('.gradle/cacerts/cacerts').absolutePath
     ext {
         bootstrapDirectory = "${project.buildDir}/bootstrapping"
         releaseInProgress = project.hasProperty('bootstrapRelease')
@@ -65,7 +66,7 @@ subprojects {
         commonsIOVersion = '2.5'
         unbescapeVersion = '1.1.3.RELEASE'
         mockitoVersion = '2.7.14'
-        blocsVersion = '2.1'
+        blocsVersion = '2.1.1'
         sonarQubeVersion = '2.5'
         dependencyUpdatesVersion = '0.15.0'
         consoleReporterVersion = '0.5.0'
