@@ -8,7 +8,7 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
 
 class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
-    public static final String ECLIPSE_EXTENSION_NAME = "seasideEclipse"
+    public static final String ECLIPSE_EXTENSION_NAME = "eclipseFeature"
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
 
     public static final String ECLIPSE_CREATE_JAR_TASK_NAME = "createJar"
