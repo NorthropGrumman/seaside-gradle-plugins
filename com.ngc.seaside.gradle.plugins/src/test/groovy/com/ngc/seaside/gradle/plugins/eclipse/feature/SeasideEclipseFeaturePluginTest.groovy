@@ -22,8 +22,14 @@ class SeasideEclipseFeaturePluginTest {
 
     @Test
     void hasNeededPublicNames() {
-        Assert.assertNotNull("extension name does not exist!", SeasideEclipseFeaturePlugin.ECLIPSE_EXTENSION_NAME)
-        Assert.assertNotNull("task group name does not exist!", SeasideEclipseFeaturePlugin.ECLIPSE_TASK_GROUP_NAME)
+        Assert.assertNotNull(
+              "extension name does not exist!",
+              SeasideEclipseFeaturePlugin.ECLIPSE_FEATURE_EXTENSION_NAME
+        )
+        Assert.assertNotNull(
+              "task group name does not exist!",
+              SeasideEclipseFeaturePlugin.ECLIPSE_TASK_GROUP_NAME
+        )
         Assert.assertNotNull(
               "create jar task name does not exist!",
               SeasideEclipseFeaturePlugin.ECLIPSE_CREATE_JAR_TASK_NAME

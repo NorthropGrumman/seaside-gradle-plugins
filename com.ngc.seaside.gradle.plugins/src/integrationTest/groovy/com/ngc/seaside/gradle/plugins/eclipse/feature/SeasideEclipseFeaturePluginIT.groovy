@@ -38,7 +38,7 @@ class SeasideEclipseFeaturePluginIT {
     void extensionExists() {
         Assert.assertNotNull(
               "eclipse extension does not exist!",
-              project.extensions.findByName(SeasideEclipseFeaturePlugin.ECLIPSE_EXTENSION_NAME)
+              project.extensions.findByName(SeasideEclipseFeaturePlugin.ECLIPSE_FEATURE_EXTENSION_NAME)
         )
     }
 

@@ -8,9 +8,9 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
 
 class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
-    public static final String ECLIPSE_EXTENSION_NAME = "eclipseFeature"
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
 
+    public static final String ECLIPSE_FEATURE_EXTENSION_NAME = "eclipseFeature"
     public static final String ECLIPSE_CREATE_JAR_TASK_NAME = "createJar"
     public static final String ECLIPSE_COPY_FEATURE_FILE_TASK_NAME = "copyFeatureFile"
 
@@ -21,8 +21,7 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
     @Override
     void doApply(Project project) {
         project.configure(project) {
-            extension = project.extensions.create(ECLIPSE_EXTENSION_NAME, SeasideEclipseFeatureExtension, project)
-            setExtensionProperties()
+            createExtension(project)
 
             project.configurations {
                 feature
@@ -36,6 +35,12 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
 
             defaultTasks = ["build"]
         }
+    }
+
+    private void createExtension(Project project) {
+        extension = project.extensions
+                           .create(ECLIPSE_FEATURE_EXTENSION_NAME, SeasideEclipseFeatureExtension, project)
+        setExtensionProperties()
     }
 
     private void setExtensionProperties() {
