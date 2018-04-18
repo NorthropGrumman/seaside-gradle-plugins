@@ -4,6 +4,7 @@ import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -32,6 +33,15 @@ class SeasideEclipseFeaturePluginFT {
               .build()
 
         TestingUtilities.assertTaskSuccess(result, "service.nihao", "build")
+
+        Assert.assertTrue(
+              "jar file file was not created!",
+              project.file(
+                    TestingUtilities.turnListIntoPath(
+                          projectDir.absolutePath, "com.ngc.seaside.service.nihao", "build",
+                          "com.ngc.seaside.service.nihao-1.2.3-SNAPSHOT.jar"
+                    )).exists()
+        )
     }
 
     private static File sourceDirectoryWithTheTestProject() {
