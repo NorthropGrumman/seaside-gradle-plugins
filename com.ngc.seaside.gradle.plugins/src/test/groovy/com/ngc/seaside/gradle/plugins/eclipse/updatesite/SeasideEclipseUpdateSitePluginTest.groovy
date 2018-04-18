@@ -22,7 +22,29 @@ class SeasideEclipseUpdateSitePluginTest {
 
     @Test
     void hasNeededPublicNames() {
-        Assert.assertNotNull("extension name does not exist!", SeasideEclipseUpdateSitePlugin.ECLIPSE_EXTENSION_NAME)
-        Assert.assertNotNull("task group name does not exist!", SeasideEclipseUpdateSitePlugin.ECLIPSE_TASK_GROUP_NAME)
+        Assert.assertNotNull(
+              "extension name does not exist!",
+              SeasideEclipseUpdateSitePlugin.ECLIPSE_UPDATE_SITE_EXTENSION_NAME
+        )
+        Assert.assertNotNull(
+              "task group name does not exist!",
+              SeasideEclipseUpdateSitePlugin.ECLIPSE_TASK_GROUP_NAME
+        )
+        Assert.assertNotNull(
+              "copy features task name does not exist!",
+              SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_FEATURES_TASK_NAME
+        )
+        Assert.assertNotNull(
+              "copy sd plugins file task name does not exist!",
+              SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_SD_PLUGINS_TASK_NAME
+        )
+        Assert.assertNotNull(
+              "copy sd plugins file task name does not exist!",
+              SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME
+        )
+        Assert.assertNotNull(
+              "copy sd plugins file task name does not exist!",
+              SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_ZIP_TASK_NAME
+        )
     }
 }
