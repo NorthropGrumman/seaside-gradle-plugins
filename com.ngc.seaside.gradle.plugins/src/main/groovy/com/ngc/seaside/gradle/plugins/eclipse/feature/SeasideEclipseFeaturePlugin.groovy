@@ -49,9 +49,11 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "Create the eclipse feature file jar",
               dependsOn: ECLIPSE_COPY_FEATURE_FILE_TASK_NAME) {
-            from "${project.buildDir}/tmp"
-            destinationDir = project.file(project.buildDir)
-            archiveName = project.extensions.getByType(SeasideEclipseExtension.class).archiveName
+            project.afterEvaluate {
+                from "${project.buildDir}/tmp"
+                destinationDir = project.file(project.buildDir)
+                archiveName = project.extensions.getByType(SeasideEclipseExtension.class).archiveName
+            }
         }
 
         project.task(
