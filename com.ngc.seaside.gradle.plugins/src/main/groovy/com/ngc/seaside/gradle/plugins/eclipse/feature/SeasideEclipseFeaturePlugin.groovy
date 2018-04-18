@@ -1,7 +1,7 @@
 package com.ngc.seaside.gradle.plugins.eclipse.feature
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
-import com.ngc.seaside.gradle.extensions.eclipse.feature.SeasideEclipseExtension
+import com.ngc.seaside.gradle.extensions.eclipse.feature.SeasideEclipseFeatureExtension
 import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
@@ -14,14 +14,14 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_CREATE_JAR_TASK_NAME = "createJar"
     public static final String ECLIPSE_COPY_FEATURE_FILE_TASK_NAME = "copyFeatureFile"
 
-    private SeasideEclipseExtension extension
+    private SeasideEclipseFeatureExtension extension
 
     String archiveName
 
     @Override
     void doApply(Project project) {
         project.configure(project) {
-            extension = project.extensions.create(ECLIPSE_EXTENSION_NAME, SeasideEclipseExtension, project)
+            extension = project.extensions.create(ECLIPSE_EXTENSION_NAME, SeasideEclipseFeatureExtension, project)
             setExtensionProperties()
 
             project.configurations {
@@ -52,7 +52,7 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
             project.afterEvaluate {
                 from "${project.buildDir}/tmp"
                 destinationDir = project.file(project.buildDir)
-                archiveName = project.extensions.getByType(SeasideEclipseExtension.class).archiveName
+                archiveName = project.extensions.getByType(SeasideEclipseFeatureExtension.class).archiveName
             }
         }
 

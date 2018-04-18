@@ -1,7 +1,6 @@
 package com.ngc.seaside.gradle.plugins.eclipse.feature
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
-import com.ngc.seaside.gradle.extensions.eclipse.feature.SeasideEclipseExtension
 import org.junit.Assert
 import org.junit.Test
 

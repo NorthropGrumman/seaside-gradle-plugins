@@ -1,6 +1,6 @@
 package com.ngc.seaside.gradle.extensions.eclipse
 
-import com.ngc.seaside.gradle.extensions.eclipse.feature.SeasideEclipseExtension
+import com.ngc.seaside.gradle.extensions.eclipse.feature.SeasideEclipseFeatureExtension
 import org.gradle.api.Project
 import org.junit.Assert
 import org.junit.Before
@@ -12,14 +12,14 @@ import org.mockito.junit.MockitoJUnitRunner
 import static org.mockito.Mockito.when
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-class SeasideEclipseExtensionTest {
+class SeasideEclipseFeatureExtensionTest {
     private static final String TEST_PROJECT_VERSION = "1.2.3-SNAPSHOT"
     private static final String TEST_PROJECT_GROUP = "test.project.group"
     private static final String TEST_PROJECT_NAME = "test-project-name"
     private static final String TEST_ARCHIVE_NAME =
           "${TEST_PROJECT_GROUP}.${TEST_PROJECT_NAME}-${TEST_PROJECT_VERSION}.jar"
 
-    private SeasideEclipseExtension extension
+    private SeasideEclipseFeatureExtension extension
 
     @Mock
     private Project project
@@ -30,7 +30,7 @@ class SeasideEclipseExtensionTest {
         when(project.name).thenReturn(TEST_PROJECT_NAME)
         when(project.version).thenReturn(TEST_PROJECT_VERSION)
 
-        extension = new SeasideEclipseExtension(project)
+        extension = new SeasideEclipseFeatureExtension(project)
     }
 
     @Test

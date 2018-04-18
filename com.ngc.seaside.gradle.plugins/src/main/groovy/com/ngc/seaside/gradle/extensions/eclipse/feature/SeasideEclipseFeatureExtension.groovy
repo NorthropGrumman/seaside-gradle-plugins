@@ -2,10 +2,10 @@ package com.ngc.seaside.gradle.extensions.eclipse.feature
 
 import org.gradle.api.Project
 
-class SeasideEclipseExtension {
+class SeasideEclipseFeatureExtension {
     public String archiveName
 
-    SeasideEclipseExtension(Project project) {
+    SeasideEclipseFeatureExtension(Project project) {
         archiveName = "${project.group}.${project.name}-${project.version}.jar"
     }
 }
