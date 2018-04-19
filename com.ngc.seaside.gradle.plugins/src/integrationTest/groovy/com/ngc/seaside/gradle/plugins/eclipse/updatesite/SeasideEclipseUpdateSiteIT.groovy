@@ -38,6 +38,21 @@ class SeasideEclipseUpdateSiteIT {
         verifyTasksExistOnThePlugin()
     }
 
+    @Test
+    void configurationsExist() {
+        def configurationNames = ['features', 'eclipsePlugins', 'sdPlugins']
+        configurationNames.forEach({ name ->
+            Assert.assertTrue(
+                  "configuration $name do not exist!",
+                  project.configurations
+                        .stream()
+                        .map({ config -> config.name })
+                        .toArray()
+                        .contains(name)
+            )
+        })
+    }
+
     @Ignore
     @Test
     void extensionExists() {

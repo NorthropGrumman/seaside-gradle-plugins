@@ -18,6 +18,12 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     @Override
     void doApply(Project project) {
         project.configure(project) {
+            project.configurations {
+                features
+                sdPlugins
+                eclipsePlugins
+            }
+
             createTasks(project)
 
             defaultTasks = ["build"]
