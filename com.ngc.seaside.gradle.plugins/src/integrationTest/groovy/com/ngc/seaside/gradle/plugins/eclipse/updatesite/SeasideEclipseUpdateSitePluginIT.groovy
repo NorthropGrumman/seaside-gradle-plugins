@@ -1,14 +1,14 @@
 package com.ngc.seaside.gradle.plugins.eclipse.updatesite
 
+import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdateSiteExtension
 import com.ngc.seaside.gradle.util.TaskResolver
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
-class SeasideEclipseUpdateSiteIT {
+class SeasideEclipseUpdateSitePluginIT {
     private SeasideEclipseUpdateSitePlugin plugin
     private TaskResolver resolver
     private Project project
@@ -68,8 +68,8 @@ class SeasideEclipseUpdateSiteIT {
               project.repositories.empty || project.repositories.get(0).name != 'flatDir'
         )
 
-        // TODO(Cameron): Replace this with extension property
-        def eclipsePluginsDir = '/tmp'
+        def eclipsePluginsDir = project.extensions.
+              getByType(SeasideEclipseUpdateSiteExtension.class).eclipsePluginsDirectory
         def dirs = project.repositories.getByName('flatDir').properties.get('dirs').collect()
         Assert.assertFalse(
               "the flatDir repository dirs should point to $eclipsePluginsDir",
@@ -77,7 +77,6 @@ class SeasideEclipseUpdateSiteIT {
         )
     }
 
-    @Ignore
     @Test
     void extensionExists() {
         Assert.assertNotNull(
