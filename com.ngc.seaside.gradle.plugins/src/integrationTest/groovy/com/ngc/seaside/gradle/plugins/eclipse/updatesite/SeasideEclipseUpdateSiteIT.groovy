@@ -65,7 +65,7 @@ class SeasideEclipseUpdateSiteIT {
     void repositoryExists() {
         Assert.assertFalse(
               "there should be a configured flatDir repository!",
-              project.repositories.empty || !project.repositories.get(0).name.equals('flatDir')
+              project.repositories.empty || project.repositories.get(0).name != 'flatDir'
         )
 
         // TODO(Cameron): Replace this with extension property
