@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.plugins.eclipse.updatesite
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
+import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdateSiteExtension
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
@@ -16,13 +17,23 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_CREATE_METADATA_TASK_NAME = "createMetadata"
     public static final String ECLIPSE_CREATE_ZIP_TASK_NAME = "createZip"
 
+    public String archiveName
+    public String cacheDirectory
+    public String eclipseVersion
+    public String eclipsePluginsDirectory
+    public String linuxDownloadUrl
+    public String windowsDownloadUrl
+
+    private SeasideEclipseUpdateSiteExtension extension
+
     @Override
     void doApply(Project project) {
         project.configure(project) {
+            createExtension(project)
+
             project.repositories {
                 flatDir {
-                    // TODO(Cameron): Replace with extension property
-                    dirs "/tmp"
+                    dirs extension.eclipsePluginsDirectory
                 }
             }
 
@@ -41,6 +52,22 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
             defaultTasks = ["build"]
         }
     }
+
+    private void createExtension(Project project) {
+        extension = project.extensions
+              .create(ECLIPSE_UPDATE_SITE_EXTENSION_NAME, SeasideEclipseUpdateSiteExtension, project)
+        setExtensionProperties()
+    }
+
+    private void setExtensionProperties() {
+        extension.archiveName = archiveName ?: extension.archiveName
+        extension.cacheDirectory = cacheDirectory ?: extension.cacheDirectory
+        extension.eclipseVersion = eclipseVersion ?: extension.eclipseVersion
+        extension.eclipsePluginsDirectory = eclipsePluginsDirectory ?: extension.eclipsePluginsDirectory
+        extension.linuxDownloadUrl = linuxDownloadUrl ?: extension.linuxDownloadUrl
+        extension.windowsDownloadUrl = windowsDownloadUrl ?: extension.windowsDownloadUrl
+    }
+
 
     private static void createTasks(Project project) {
         project.task(
