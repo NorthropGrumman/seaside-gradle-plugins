@@ -49,13 +49,13 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
             createTasks(project)
 
-            defaultTasks = ["build"]
+            project.defaultTasks = ["build"]
         }
     }
 
     private void createExtension(Project project) {
         extension = project.extensions
-              .create(ECLIPSE_UPDATE_SITE_EXTENSION_NAME, SeasideEclipseUpdateSiteExtension, project)
+                           .create(ECLIPSE_UPDATE_SITE_EXTENSION_NAME, SeasideEclipseUpdateSiteExtension, project)
         setExtensionProperties()
     }
 
