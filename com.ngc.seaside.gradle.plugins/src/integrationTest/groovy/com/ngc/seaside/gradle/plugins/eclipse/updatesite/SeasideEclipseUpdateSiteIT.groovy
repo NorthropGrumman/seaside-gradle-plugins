@@ -73,7 +73,7 @@ class SeasideEclipseUpdateSiteIT {
         def dirs = project.repositories.getByName('flatDir').properties.get('dirs').collect()
         Assert.assertFalse(
               "the flatDir repository dirs should point to $eclipsePluginsDir",
-              dirs.empty || !(dirs[0].toString() == eclipsePluginsDir)
+              dirs.empty || dirs[0].toString() != eclipsePluginsDir
         )
     }
 
