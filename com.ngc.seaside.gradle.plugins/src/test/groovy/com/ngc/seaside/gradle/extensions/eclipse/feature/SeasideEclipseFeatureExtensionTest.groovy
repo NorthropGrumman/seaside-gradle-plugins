@@ -1,6 +1,5 @@
-package com.ngc.seaside.gradle.extensions.eclipse
+package com.ngc.seaside.gradle.extensions.eclipse.feature
 
-import com.ngc.seaside.gradle.extensions.eclipse.feature.SeasideEclipseFeatureExtension
 import org.gradle.api.Project
 import org.junit.Assert
 import org.junit.Before
