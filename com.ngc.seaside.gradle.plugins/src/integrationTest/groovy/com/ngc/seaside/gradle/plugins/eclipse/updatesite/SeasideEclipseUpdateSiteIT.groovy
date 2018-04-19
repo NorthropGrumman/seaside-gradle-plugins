@@ -52,8 +52,8 @@ class SeasideEclipseUpdateSiteIT {
             )
 
             if (name.endsWith('Plugins')) {
-                Assert.assertTrue(
-                      "$name should set transitive to true!",
+                Assert.assertFalse(
+                      "$name should set transitive to false!",
                       project.configurations.getByName(name).transitive
                 )
             }

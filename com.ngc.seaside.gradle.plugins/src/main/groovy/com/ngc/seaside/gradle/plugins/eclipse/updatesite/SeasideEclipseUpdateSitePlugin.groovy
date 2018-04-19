@@ -27,8 +27,12 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
             project.configurations {
                 features
-                sdPlugins
-                eclipsePlugins
+                sdPlugins {
+                    transitive = false
+                }
+                eclipsePlugins {
+                    transitive = false
+                }
             }
 
             createTasks(project)
