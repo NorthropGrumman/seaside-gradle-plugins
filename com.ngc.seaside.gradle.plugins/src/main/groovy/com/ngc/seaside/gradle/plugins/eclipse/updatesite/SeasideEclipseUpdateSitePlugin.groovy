@@ -18,6 +18,13 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     @Override
     void doApply(Project project) {
         project.configure(project) {
+            project.repositories {
+                flatDir {
+                    // TODO(Cameron): Replace with extension property
+                    dirs "/tmp"
+                }
+            }
+
             project.configurations {
                 features
                 sdPlugins

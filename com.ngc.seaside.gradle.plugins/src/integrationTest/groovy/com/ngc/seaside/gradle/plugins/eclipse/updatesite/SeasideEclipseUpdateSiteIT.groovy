@@ -60,6 +60,22 @@ class SeasideEclipseUpdateSiteIT {
         })
     }
 
+    @Test
+    void repositoryExists() {
+        Assert.assertFalse(
+              "there should be a configured flatDir repository!",
+              project.repositories.empty || !project.repositories.get(0).name.equals('flatDir')
+        )
+
+        // TODO(Cameron): Replace this with extension property
+        def eclipsePluginsDir = '/tmp'
+        def dirs = project.repositories.getByName('flatDir').properties.get('dirs').collect()
+        Assert.assertFalse(
+              "the flatDir repository dirs should point to $eclipsePluginsDir",
+              dirs.empty || !dirs[0].toString().equals(eclipsePluginsDir)
+        )
+    }
+
     @Ignore
     @Test
     void extensionExists() {
