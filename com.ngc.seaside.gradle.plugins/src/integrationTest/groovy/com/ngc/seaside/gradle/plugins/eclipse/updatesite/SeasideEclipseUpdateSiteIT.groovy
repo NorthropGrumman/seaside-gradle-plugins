@@ -50,6 +50,13 @@ class SeasideEclipseUpdateSiteIT {
                         .toArray()
                         .contains(name)
             )
+
+            if (name.endsWith('Plugins')) {
+                Assert.assertTrue(
+                      "$name should set transitive to true!",
+                      project.configurations.getByName(name).transitive
+                )
+            }
         })
     }
 
