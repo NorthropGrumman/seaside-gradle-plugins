@@ -9,6 +9,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
 
     public static final String ECLIPSE_UPDATE_SITE_EXTENSION_NAME = "eclipseUpdateSite"
+    public static final String ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME = "downloadEclipse"
     public static final String ECLIPSE_COPY_FEATURES_TASK_NAME = "copyFeatures"
     public static final String ECLIPSE_COPY_SD_PLUGINS_TASK_NAME = "copySdPlugins"
     public static final String ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME = "copyEclipsePlugins"
@@ -42,6 +43,11 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     }
 
     private static void createTasks(Project project) {
+        project.task(
+              ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME,
+              group: ECLIPSE_TASK_GROUP_NAME,
+              description: "description of: $ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME")
+
         project.task(
               ECLIPSE_COPY_FEATURES_TASK_NAME,
               type: Copy,
