@@ -37,6 +37,17 @@ class SeasideEclipseUpdateSitePluginIT {
     @Test
     void tasksExist() {
         verifyTasksExistOnThePlugin()
+        Assert.assertNotNull(
+              "clean task does not exist!",
+              project.tasks.getByName("clean")
+        )
+        Assert.assertTrue(
+              "build task does not depend on $SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_ZIP_TASK_NAME",
+              project.tasks
+                     .getByName("build")
+                     .dependsOn
+                     .contains(project.tasks.getByName(SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_ZIP_TASK_NAME))
+        )
     }
 
     @Test
@@ -46,10 +57,10 @@ class SeasideEclipseUpdateSitePluginIT {
             Assert.assertTrue(
                   "configuration $name do not exist!",
                   project.configurations
-                        .stream()
-                        .map({ config -> config.name })
-                        .toArray()
-                        .contains(name)
+                         .stream()
+                         .map({ config -> config.name })
+                         .toArray()
+                         .contains(name)
             )
 
             if (name.endsWith('Plugins')) {
@@ -68,8 +79,9 @@ class SeasideEclipseUpdateSitePluginIT {
               project.repositories.empty || project.repositories.get(0).name != 'flatDir'
         )
 
-        def eclipsePluginsDir = project.extensions.
-              getByType(SeasideEclipseUpdateSiteExtension.class).eclipsePluginsDirectory
+        def eclipsePluginsDir = project.extensions
+                                       .getByType(SeasideEclipseUpdateSiteExtension.class)
+                                       .eclipsePluginsDirectory
         def dirs = project.repositories.getByName('flatDir').properties.get('dirs').collect()
         Assert.assertFalse(
               "the flatDir repository dirs should point to $eclipsePluginsDir",
