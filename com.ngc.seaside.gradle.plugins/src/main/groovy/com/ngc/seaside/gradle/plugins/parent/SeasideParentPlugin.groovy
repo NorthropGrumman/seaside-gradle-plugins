@@ -247,6 +247,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
    private static void applyPlugins(Project project) {
       project.logger.info(String.format("Applying plugins for %s", project.name))
       project.getPlugins().apply('java')
+      project.getPlugins().apply('java-library')
       project.getPlugins().apply('maven')
       project.getPlugins().apply('eclipse')
       project.getPlugins().apply('jacoco')
