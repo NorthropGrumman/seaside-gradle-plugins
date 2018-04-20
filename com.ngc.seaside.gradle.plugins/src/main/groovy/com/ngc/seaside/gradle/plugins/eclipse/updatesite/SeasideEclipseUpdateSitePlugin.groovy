@@ -98,12 +98,13 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "description of: $ECLIPSE_CREATE_METADATA_TASK_NAME",
               dependsOn: [
+                    ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME,
                     ECLIPSE_COPY_FEATURES_TASK_NAME,
                     ECLIPSE_COPY_SD_PLUGINS_TASK_NAME,
                     ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME,
               ])
 
-        def task = project.task(
+        project.task(
               ECLIPSE_CREATE_ZIP_TASK_NAME,
               type: Zip,
               group: ECLIPSE_TASK_GROUP_NAME,
@@ -114,6 +115,6 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
             project.delete(project.buildDir)
         }
 
-        project.task("build").dependsOn(task)
+        project.task("build").dependsOn(project.tasks.getByName(ECLIPSE_CREATE_ZIP_TASK_NAME))
     }
 }

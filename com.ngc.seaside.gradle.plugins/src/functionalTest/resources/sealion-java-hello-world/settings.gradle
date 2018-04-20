@@ -19,3 +19,7 @@ project(':com.ngc.seaside.service.konnichiwamojuru').name = 'service.konnichiwam
 include 'com.ngc.seaside.service.nihao'
 
 project(':com.ngc.seaside.service.nihao').name = 'service.nihao'
+
+include 'com.ngc.seaside.service.heiverden'
+
+project(':com.ngc.seaside.service.heiverden').name = 'service.heiverden'

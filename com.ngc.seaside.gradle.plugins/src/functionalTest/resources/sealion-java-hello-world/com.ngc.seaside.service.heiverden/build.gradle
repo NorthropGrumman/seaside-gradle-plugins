@@ -1,0 +1,8 @@
+plugins {
+    id 'com.ngc.seaside.eclipse.updatesite'
+}
+
+eclipseUpdateSite {
+    linuxDownloadUrl = "http://10.207.42.137/resources/jellyfish/${eclipseVersion}.zip"
+    windowsDownloadUrl = "http://10.207.42.137/resources/jellyfish/${eclipseVersion}.zip"
+}
