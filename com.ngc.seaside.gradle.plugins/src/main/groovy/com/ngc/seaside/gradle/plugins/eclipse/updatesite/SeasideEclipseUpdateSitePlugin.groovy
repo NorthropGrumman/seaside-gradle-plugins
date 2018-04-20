@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.plugins.eclipse.updatesite
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdateSiteExtension
 import com.ngc.seaside.gradle.util.EclipsePlugins
+import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 
@@ -89,8 +90,19 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
         project.task(
               ECLIPSE_COPY_SD_PLUGINS_TASK_NAME,
+              type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
-              description: "description of: $ECLIPSE_COPY_SD_PLUGINS_TASK_NAME")
+              description: "description of: $ECLIPSE_COPY_SD_PLUGINS_TASK_NAME") {
+            from project.configurations.sdPlugins {
+                rename { String name ->
+                    def artifacts = project.configurations.sdPlugins.resolvedConfiguration.resolvedArtifacts
+                    def artifact = artifacts.find { it.file.name == name }
+                    def osgiVersion = Versions.makeOsgiCompliantVersion("${artifact.moduleVersion.id.version}")
+                    "${artifact.moduleVersion.id.group}.${artifact.name}_${osgiVersion}.${artifact.extension}"
+                }
+            }
+            into "${project.buildDir}/updatesite/plugins"
+        }
 
         project.task(
               ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME,
