@@ -3,8 +3,6 @@ package com.ngc.seaside.gradle.plugins.eclipse.updatesite
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdateSiteExtension
 import org.gradle.api.Project
-import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.bundling.Zip
 
 class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
@@ -77,19 +75,16 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
         project.task(
               ECLIPSE_COPY_FEATURES_TASK_NAME,
-              type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "description of: $ECLIPSE_COPY_FEATURES_TASK_NAME")
 
         project.task(
               ECLIPSE_COPY_SD_PLUGINS_TASK_NAME,
-              type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "description of: $ECLIPSE_COPY_SD_PLUGINS_TASK_NAME")
 
         project.task(
               ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME,
-              type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "description of: $ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME")
 
@@ -106,7 +101,6 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
         project.task(
               ECLIPSE_CREATE_ZIP_TASK_NAME,
-              type: Zip,
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "description of: $ECLIPSE_CREATE_ZIP_TASK_NAME",
               dependsOn: ECLIPSE_CREATE_METADATA_TASK_NAME)
