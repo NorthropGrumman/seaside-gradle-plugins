@@ -2,7 +2,9 @@ package com.ngc.seaside.gradle.plugins.eclipse.updatesite
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdateSiteExtension
+import com.ngc.seaside.gradle.util.EclipsePlugins
 import org.gradle.api.Project
+import org.gradle.api.tasks.Copy
 
 class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
@@ -75,8 +77,15 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
         project.task(
               ECLIPSE_COPY_FEATURES_TASK_NAME,
+              type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
-              description: "description of: $ECLIPSE_COPY_FEATURES_TASK_NAME")
+              description: "description of: $ECLIPSE_COPY_FEATURES_TASK_NAME") {
+            from project.configurations.features
+            into "${project.buildDir}/updatesite/features"
+            rename { String name ->
+                EclipsePlugins.makeEclipseCompliantJarFileName(name)
+            }
+        }
 
         project.task(
               ECLIPSE_COPY_SD_PLUGINS_TASK_NAME,
