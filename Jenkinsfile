@@ -5,7 +5,7 @@ pipeline {
             customWorkspace "${JENKINS_HOME}/workspace/seaside-gradle-plugins/${JOB_NAME}"
         }
     }
-	
+    
     parameters {
         booleanParam(name: 'upload',
                      description: 'If true, artifacts will be uploaded to the build\'s remote repository.  Don\'t use this option with performRelease.',
@@ -55,15 +55,19 @@ pipeline {
                 }
             }
         }
-		
-		stage('Upload Snapshot') {
+        
+        stage('Upload') {
             when {
                 expression { params.upload }
             }
-			steps {
-			    sh './gradlew upload'
-			}
-		}
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
+                                                  passwordVariable: 'nexusPassword',
+                                                  usernameVariable: 'nexusUsername')]) {
+                    sh "./gradlew upload -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword"
+                }
+            }
+        }
 
         stage('Release') {
             when {
