@@ -31,8 +31,7 @@ class SeasideEclipseUpdateSitePluginFT {
               .withArguments("clean", "build")
               .build()
 
-        // TODO(Cameron): This will fail until we've implemented the tasks...
-        //TestingUtilities.assertTaskSuccess(result, "service.heiverden", "build")
+        TestingUtilities.assertTaskSuccess(result, "service.heiverden", "build")
     }
 
     private static File sourceDirectoryWithTheTestProject() {
