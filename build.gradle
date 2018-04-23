@@ -191,9 +191,13 @@ subprojects {
     tasks.withType(Test).each { testTask ->
         def properties = ['nexusConsolidated', 'nexusReleases', 'nexusSnapshots']
         for (property in properties) {
-            def value = project.extensions.extraProperties.properties[property]
-            if (value != null) {
-                testTask.systemProperty property, value
+            try {
+                def value = project.property(property)
+                if (value != null) {
+                    testTask.systemProperty property, value
+                }
+            } catch (MissingPropertyException e) {
+                // ignore
             }
         }
         def trustStoreKey = 'javax.net.ssl.trustStore'

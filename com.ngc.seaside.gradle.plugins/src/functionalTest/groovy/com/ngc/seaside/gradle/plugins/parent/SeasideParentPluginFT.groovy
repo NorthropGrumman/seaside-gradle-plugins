@@ -50,7 +50,7 @@ class SeasideParentPluginFT {
                 huc.requestMethod = "GET"
                 huc.connect()
                 def response = huc.responseCode
-                assumeFalse(response < 400)
+                assumeTrue(response < 400)
             } catch(Exception e) {
                 assumeNoException(e)
             }
