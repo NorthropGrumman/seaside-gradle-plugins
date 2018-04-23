@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.eclipse.updatesite
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdateSiteExtension
+import com.ngc.seaside.gradle.tasks.eclipse.updatesite.DownloadEclipseTask
 import com.ngc.seaside.gradle.util.EclipsePlugins
 import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.Project
@@ -75,6 +76,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     private static void createTasks(Project project) {
         project.task(
               ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME,
+              type: DownloadEclipseTask,
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "description of: $ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME")
 
