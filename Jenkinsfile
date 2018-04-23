@@ -64,7 +64,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
                                                   passwordVariable: 'nexusPassword',
                                                   usernameVariable: 'nexusUsername')]) {
-                    sh "./gradlew upload -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword"
+                    sh './gradlew upload -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword'
                 }
             }
         }
