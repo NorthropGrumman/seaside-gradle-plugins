@@ -189,16 +189,20 @@ subprojects {
     check.dependsOn(integrationTest, functionalTest)
 
     tasks.withType(Test).each { testTask ->
-        def properties = ['nexusConsolidated', 'nexusReleases', 'nexusSnapshots']
-        for (property in properties) {
-            try {
-                def value = project.property(property)
-                if (value != null) {
-                    testTask.systemProperty property, value
-                }
-            } catch (MissingPropertyException e) {
-                // ignore
-            }
+        try {
+            testTask.systemProperty 'nexusConsolidated', nexusConsolidated
+        } catch (Exception e) {
+            //ignore
+        }
+        try {
+            testTask.systemProperty 'nexusReleases', nexusReleases
+        } catch (Exception e) {
+            //ignore
+        }
+        try {
+            testTask.systemProperty 'nexusSnapshots', nexusSnapshots
+        } catch (Exception e) {
+            //ignore
         }
         def trustStoreKey = 'javax.net.ssl.trustStore'
         def trustStoreValue = System.properties[trustStoreKey]
