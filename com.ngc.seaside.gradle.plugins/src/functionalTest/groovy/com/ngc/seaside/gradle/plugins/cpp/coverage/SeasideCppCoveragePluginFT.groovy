@@ -2,10 +2,10 @@ package com.ngc.seaside.gradle.plugins.cpp.coverage
 
 import com.ngc.seaside.gradle.extensions.cpp.coverage.SeasideCppCoverageExtension
 import com.ngc.seaside.gradle.util.FileUtil
+import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Ignore
@@ -88,7 +88,7 @@ class SeasideCppCoveragePluginFT {
     }
 
     private void checkForTaskSuccess(String taskName) {
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
                 .withProjectDir(testProjectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()

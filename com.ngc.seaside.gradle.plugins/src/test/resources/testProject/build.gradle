@@ -35,6 +35,6 @@ subprojects {
 
     ext {
         xtextVersion = '2.10.0'
-        blocsVersion = '2.1'
+        blocsVersion = '2.1.1'
     }
 }

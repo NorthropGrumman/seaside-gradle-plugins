@@ -187,6 +187,15 @@ subprojects {
     integrationTest.shouldRunAfter(test)
     functionalTest.shouldRunAfter(integrationTest)
     check.dependsOn(integrationTest, functionalTest)
+
+    tasks.withType(Test).all { testTask ->
+        testTask.systemProperty 'nexusConsolidated', nexusConsolidated
+        def trustStoreKey = 'javax.net.ssl.trustStore'
+        def trustStoreValue = System.properties[trustStoreKey]
+        if (trustStoreValue != null) {
+            testTask.systemProperty(trustStoreKey, trustStoreValue)
+        }
+    }
 }
 
 task clean() {

@@ -1,9 +1,9 @@
 package com.ngc.seaside.gradle.plugins.cpp.celix
 
+import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Before
 import org.junit.Ignore
@@ -41,7 +41,7 @@ class SeasideCelixPluginFT {
 
     @Test
     void doesRunGradleBuildWithSuccess() {
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
               .withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()
