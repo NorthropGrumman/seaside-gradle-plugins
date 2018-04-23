@@ -56,7 +56,7 @@ pipeline {
             }
         }
         
-        stage('Upload Snapshot') {
+        stage('Upload') {
             when {
                 expression { params.upload }
             }
@@ -64,7 +64,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
                                                   passwordVariable: 'nexusPassword',
                                                   usernameVariable: 'nexusUsername')]) {
-                    sh './gradlew upload'
+                    sh "./gradlew upload -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword"
                 }
             }
         }
