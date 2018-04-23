@@ -1,9 +1,9 @@
 package com.ngc.seaside.gradle.plugins.bats
 
+import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
 import org.junit.Before
 import org.junit.Test
 
@@ -33,7 +33,7 @@ class SeasideBatsPluginFT {
 
     @Test
     void doesRunGradleBuildWithSuccess() {
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
               .withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()
@@ -46,7 +46,7 @@ class SeasideBatsPluginFT {
     @Test
     void doesRunBatsTestsWithSuccess() {
         makeShellScriptsExecutable()
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
               .withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()

@@ -1,11 +1,11 @@
 package com.ngc.seaside.gradle.plugins.release
 
+import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -32,7 +32,8 @@ class SeasideReleasePluginFT {
         SeasideReleasePlugin plugin = new SeasideReleasePlugin()
         plugin.apply(project)
 
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
+                .withNexusProperties()
                 .withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
@@ -54,7 +55,8 @@ class SeasideReleasePluginFT {
         SeasideReleasePlugin plugin = new SeasideReleasePlugin()
         plugin.apply(project)
 
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
+                .withNexusProperties()
                 .withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
@@ -73,7 +75,8 @@ class SeasideReleasePluginFT {
             Paths.get(pathToTheDestinationProjectDirectory().toString(), "build.gradle").toFile()
         )
 
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
+                .withNexusProperties()
                 .withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
@@ -87,7 +90,8 @@ class SeasideReleasePluginFT {
 
     @Test
     void doesNotFailBuildWhenSnapshotPresentAndReleaseTaskNotStated() {
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
+                .withNexusProperties()
                 .withProjectDir(projectDir)
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()

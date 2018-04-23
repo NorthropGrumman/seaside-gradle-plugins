@@ -18,11 +18,11 @@ group = 'com.ngc.seaside'
 version = '1.0-SNAPSHOT'
 
 ext {
-    blocsCoreVersion = '2.1'
-    blocsAuthorizationServiceVersion = '2.1'
-    blocsScenarioServiceVersion = '2.1'
-    blocsAuthenticationServiceVersion = '2.1'
-    blocsAutoLoginServiceVersion = '2.1'
+    blocsCoreVersion = '2.1.1'
+    blocsAuthorizationServiceVersion = '2.1.1'
+    blocsScenarioServiceVersion = '2.1.1'
+    blocsAuthenticationServiceVersion = '2.1.1'
+    blocsAutoLoginServiceVersion = '2.1.1'
 }
 
 seasideDistribution {
@@ -35,7 +35,7 @@ seasideDistribution {
 
 
 dependencies {
-    bundles 'com.ngc.seacide:service.transport.api:1.1'
+    bundles 'com.ngc.seaside:service.transport.api:2.5.0'
     blocs "com.ngc.blocs:api:${blocsCoreVersion}"
     blocs "com.ngc.blocs:file.impl.common.fileutilities:${blocsCoreVersion}"
     blocs "com.ngc.blocs:security.impl.common.securityutilities:${blocsCoreVersion}"
