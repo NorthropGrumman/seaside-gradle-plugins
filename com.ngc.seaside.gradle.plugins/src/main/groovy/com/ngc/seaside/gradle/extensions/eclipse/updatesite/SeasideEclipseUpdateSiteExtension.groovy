@@ -18,7 +18,7 @@ class SeasideEclipseUpdateSiteExtension {
 
     SeasideEclipseUpdateSiteExtension(Project project) {
         archiveName = "${project.group}.${project.name}-${project.version}.zip"
-        cacheDirectory = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, "eclipse").toString()
+        cacheDirectory = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, "caches", "eclipse").toString()
         eclipsePluginsDirectory = Paths.get(cacheDirectory, "plugins").toString()
     }
 
@@ -31,5 +31,30 @@ class SeasideEclipseUpdateSiteExtension {
         )
 
         return OperatingSystem.current().isLinux() ? linuxEclipseVersion : windowsEclipseVersion
+    }
+
+    String getEclipseDownloadUrl() {
+        Preconditions.checkNotNull("linuxDownloadUrl must be defined!", linuxDownloadUrl)
+        Preconditions.checkNotNull("windowsDownloadUrl must be defined!", windowsDownloadUrl)
+        Preconditions.checkState(
+              OperatingSystem.current().isLinux() || OperatingSystem.current().isWindows(),
+              "supported operating systems are Linux and Windows!"
+        )
+
+        return OperatingSystem.current().isLinux() ? linuxDownloadUrl : windowsDownloadUrl
+    }
+
+    @Override
+    String toString() {
+        return "SeasideEclipseUpdateSiteExtension[" +
+              "\n\tarchiveName=" + archiveName +
+              "\n\tcacheDirectory=" + cacheDirectory +
+              "\n\teclipsePluginsDirectory=" + eclipsePluginsDirectory +
+              "\n\tlinuxDownloadUrl=" + linuxDownloadUrl +
+              "\n\tlinuxEclipseVersion=" + linuxEclipseVersion +
+              "\n\twindowsDownloadUrl=" + windowsDownloadUrl +
+              "\n\twindowsEclipseVersion=" + windowsEclipseVersion +
+              "\n\teclipseVersion=" + getEclipseVersion() +
+              "\n]"
     }
 }
