@@ -29,19 +29,21 @@ public class SeasideGradleRunner extends GradleRunner {
    }
 
    public SeasideGradleRunner withNexusProperties() {
-      String[] properties = {"nexusConsolidated", "nexusReleases", "nexusSnapshots"};
-      for (String property : properties) {
-         String value = System.getProperty(property);
-         if (value != null) {
-            withArguments("-P" + property + "=" + value);
-         }
+      String value = System.getProperty("nexusConsolidated");
+      if (value == null) {
+         throw new IllegalStateException("nexusConsolidated property cannot be found");
       }
+      this.withArguments(
+            "-PnexusConsolidated=" + value,
+            "-PnexusReleases=test",
+            "-PnexusSnapshots=test",
+            "-PnexusUsername=test",
+            "-PnexusPassword=test");
       String trustStoreKey = "javax.net.ssl.trustStore";
       String trustStoreValue = System.getProperty(trustStoreKey);
       if (trustStoreValue != null) {
          withArguments("-D" + trustStoreKey + "=" + trustStoreValue);
       }
-      withArguments("-PnexusUsername=test", "-PnexusPassword=test");
       return this;
    }
 
