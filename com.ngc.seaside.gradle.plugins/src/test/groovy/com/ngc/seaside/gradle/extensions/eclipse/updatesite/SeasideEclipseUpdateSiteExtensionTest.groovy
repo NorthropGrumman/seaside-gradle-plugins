@@ -2,8 +2,8 @@ package com.ngc.seaside.gradle.extensions.eclipse.updatesite
 
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
-import org.gradle.internal.os.OperatingSystem
 import org.junit.Assert
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,10 +23,7 @@ class SeasideEclipseUpdateSiteExtensionTest {
     private static final String TEST_GRADLE_USER_HOME = "/home/user/.gradle"
     private static final String TEST_CACHES = "eclipse"
     private static final String TEST_CACHE_DIRECTORY_NAME = "$TEST_GRADLE_USER_HOME/$TEST_CACHES"
-    private static final String TEST_ECLIPSE_VERSION =
-          "eclipse-dsl-oxygen-2-${SeasideEclipseUpdateSiteExtension.OS_SPECIFIER}-x86_64"
-    private static final String TEST_ECLIPSE_PLUGINS_DIRECTORY_NAME =
-          "$TEST_CACHE_DIRECTORY_NAME/$TEST_ECLIPSE_VERSION/plugins"
+    private static final String TEST_ECLIPSE_PLUGINS_DIRECTORY_NAME = "$TEST_CACHE_DIRECTORY_NAME/plugins"
 
     private SeasideEclipseUpdateSiteExtension extension
 
@@ -66,16 +63,6 @@ class SeasideEclipseUpdateSiteExtensionTest {
     }
 
     @Test
-    void hasEclipseVersionProperty() {
-        Assert.assertNotNull("eclipseVersion property doesn't exist!", extension.eclipseVersion)
-        Assert.assertEquals(
-              "default eclipse version is incorrect!",
-              extension.eclipseVersion,
-              TEST_ECLIPSE_VERSION
-        )
-    }
-
-    @Test
     void hasEclipsePluginsDirectoryProperty() {
         Assert.assertNotNull("eclipsePluginsDirectory property doesn't exist!", extension.eclipsePluginsDirectory)
         Assert.assertEquals(
@@ -87,7 +74,35 @@ class SeasideEclipseUpdateSiteExtensionTest {
 
     @Test
     void hasRequiredPropertiesWithoutDefaultValues() {
-        Assert.assertNull("linuxDownloadUrl property doesn't exist!", extension.linuxDownloadUrl)
-        Assert.assertNull("windowsDownloadUrl property doesn't exist!", extension.windowsDownloadUrl)
+        Assert.assertNull("linuxDownloadUrl property has default value!", extension.linuxDownloadUrl)
+        Assert.assertNull("linuxEclipseVersion property has default value!", extension.linuxEclipseVersion)
+        Assert.assertNull("windowsDownloadUrl property has default value!", extension.windowsDownloadUrl)
+        Assert.assertNull("windowsEclipseVersion property has default value!", extension.windowsEclipseVersion)
+    }
+
+    @Test
+    void returnsCorrectEclipseVersionOnLinux() {
+        Assume.assumeFalse(
+              "Current OS is Windows, skipping test.",
+              System.getProperty("os.name").toLowerCase().startsWith("win")
+        )
+        Assert.assertEquals(
+              "incorrect eclipse version returned on linux",
+              extension.linuxEclipseVersion,
+              extension.getEclipseVersion()
+        )
+    }
+
+    @Test
+    void returnsCorrectEclipseVersionOnWindows() {
+        Assume.assumeFalse(
+              "Current OS is Linux, skipping test.",
+              System.getProperty("os.name").toLowerCase().startsWith("linux")
+        )
+        Assert.assertEquals(
+              "incorrect eclipse version returned on windows",
+              extension.windowsEclipseVersion,
+              extension.getEclipseVersion()
+        )
     }
 }

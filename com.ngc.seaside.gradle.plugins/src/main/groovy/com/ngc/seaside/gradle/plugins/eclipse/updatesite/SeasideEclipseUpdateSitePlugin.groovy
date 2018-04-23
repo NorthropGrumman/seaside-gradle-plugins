@@ -20,10 +20,11 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
     public String archiveName
     public String cacheDirectory
-    public String eclipseVersion
     public String eclipsePluginsDirectory
     public String linuxDownloadUrl
+    public String linuxEclipseVersion
     public String windowsDownloadUrl
+    public String windowsEclipseVersion
 
     private SeasideEclipseUpdateSiteExtension extension
 
@@ -56,17 +57,18 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
     private void createExtension(Project project) {
         extension = project.extensions
-                           .create(ECLIPSE_UPDATE_SITE_EXTENSION_NAME, SeasideEclipseUpdateSiteExtension, project)
+              .create(ECLIPSE_UPDATE_SITE_EXTENSION_NAME, SeasideEclipseUpdateSiteExtension, project)
         setExtensionProperties()
     }
 
     private void setExtensionProperties() {
         extension.archiveName = archiveName ?: extension.archiveName
         extension.cacheDirectory = cacheDirectory ?: extension.cacheDirectory
-        extension.eclipseVersion = eclipseVersion ?: extension.eclipseVersion
         extension.eclipsePluginsDirectory = eclipsePluginsDirectory ?: extension.eclipsePluginsDirectory
         extension.linuxDownloadUrl = linuxDownloadUrl ?: extension.linuxDownloadUrl
+        extension.linuxEclipseVersion = linuxEclipseVersion ?: extension.linuxEclipseVersion
         extension.windowsDownloadUrl = windowsDownloadUrl ?: extension.windowsDownloadUrl
+        extension.windowsEclipseVersion = windowsEclipseVersion ?: extension.windowsEclipseVersion
     }
 
 
