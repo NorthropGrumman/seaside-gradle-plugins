@@ -34,6 +34,7 @@ class SeasideBatsPluginFT {
     @Test
     void doesRunGradleBuildWithSuccess() {
         BuildResult result = SeasideGradleRunner.create()
+              .withNexusProperties()
               .withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()
@@ -47,6 +48,7 @@ class SeasideBatsPluginFT {
     void doesRunBatsTestsWithSuccess() {
         makeShellScriptsExecutable()
         BuildResult result = SeasideGradleRunner.create()
+              .withNexusProperties()
               .withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()
