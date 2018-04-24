@@ -26,8 +26,8 @@ class SeasideEclipseUpdateSiteExtension {
     }
 
     String getEclipseVersion() {
-        Preconditions.checkNotNull("linuxEclipseVersion must be defined!", linuxEclipseVersion)
-        Preconditions.checkNotNull("windowsEclipseVersion must be defined!", windowsEclipseVersion)
+        Preconditions.checkNotNull(linuxEclipseVersion, "linuxEclipseVersion must be defined!")
+        Preconditions.checkNotNull(windowsEclipseVersion, "windowsEclipseVersion must be defined!")
         Preconditions.checkState(
               OperatingSystem.current().isLinux() || OperatingSystem.current().isWindows(),
               "supported operating systems are Linux and Windows!"
@@ -37,8 +37,8 @@ class SeasideEclipseUpdateSiteExtension {
     }
 
     String getEclipseDownloadUrl() {
-        Preconditions.checkNotNull("linuxDownloadUrl must be defined!", linuxDownloadUrl)
-        Preconditions.checkNotNull("windowsDownloadUrl must be defined!", windowsDownloadUrl)
+        Preconditions.checkNotNull(linuxDownloadUrl, "linuxDownloadUrl must be defined!")
+        Preconditions.checkNotNull(windowsDownloadUrl, "windowsDownloadUrl must be defined!")
         Preconditions.checkState(
               OperatingSystem.current().isLinux() || OperatingSystem.current().isWindows(),
               "supported operating systems are Linux and Windows!"
