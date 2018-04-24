@@ -121,7 +121,7 @@ seasideDistribution {
 }
 
 dependencies {
-    bundles 'com.ngc.seacide:service.transport.api:1.1'
+    bundles 'com.ngc.seacide:service.transport.api:2.5.0'
     blocs "com.ngc.blocs:api:${blocsCoreVersion}"
     blocs "com.ngc.blocs:file.impl.common.fileutilities:${blocsCoreVersion}"
 
@@ -192,7 +192,7 @@ seasideApplication {
 }
 
 dependencies {
-    bundles 'com.ngc.seacide:service.transport.api:1.1'
+    bundles 'com.ngc.seacide:service.transport.api:2.5.0'
     blocs "com.ngc.blocs:api:${blocsCoreVersion}"
     blocs "com.ngc.blocs:file.impl.common.fileutilities:${blocsCoreVersion}"
 

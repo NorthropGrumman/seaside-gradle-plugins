@@ -5,7 +5,7 @@ pipeline {
             customWorkspace "${JENKINS_HOME}/workspace/seaside-gradle-plugins/${JOB_NAME}"
         }
     }
-	
+    
     parameters {
         booleanParam(name: 'upload',
                      description: 'If true, artifacts will be uploaded to the build\'s remote repository.  Don\'t use this option with performRelease.',
@@ -55,15 +55,19 @@ pipeline {
                 }
             }
         }
-		
-		stage('Upload Snapshot') {
+        
+        stage('Upload') {
             when {
                 expression { params.upload }
             }
-			steps {
-			    sh './gradlew upload'
-			}
-		}
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
+                                                  passwordVariable: 'nexusPassword',
+                                                  usernameVariable: 'nexusUsername')]) {
+                    sh './gradlew upload -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword'
+                }
+            }
+        }
 
         stage('Release') {
             when {
@@ -79,7 +83,11 @@ pipeline {
                 // Create the tag.
                 sh './gradlew createReleaseTag -PbootstrapRelease'
                 // Run the update.  Clean so the artifacts are built with the new version.
-                sh './gradlew clean build upload -x integrationTest -x functionalTest -x test'
+				withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
+                                                  passwordVariable: 'nexusPassword',
+                                                  usernameVariable: 'nexusUsername')]) {
+                	sh './gradlew clean build upload -x integrationTest -x functionalTest -x test -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword'
+				}
                 // Since we just did a clean, we need to run prepareForRelease again so the next step of pushing the
                 // tag will work.
                 sh './gradlew prepareForRelease'

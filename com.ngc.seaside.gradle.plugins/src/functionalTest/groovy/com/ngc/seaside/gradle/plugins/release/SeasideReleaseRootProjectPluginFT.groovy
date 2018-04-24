@@ -1,10 +1,10 @@
 package com.ngc.seaside.gradle.plugins.release
 
 import com.ngc.seaside.gradle.util.ReleaseUtil
+import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.After
 import org.junit.Assert
@@ -155,7 +155,8 @@ class SeasideReleaseRootProjectPluginFT {
     }
 
     private void checkForTaskSuccess(String taskName) {
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
+                .withNexusProperties()
                 .withProjectDir(TestingUtilities.turnListIntoPath(projectDir.toString(), projectName))
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()

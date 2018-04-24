@@ -6,6 +6,7 @@ import com.ngc.seaside.gradle.tasks.bats.ExtractBatsTask
 import com.ngc.seaside.gradle.tasks.bats.RunBatsTask
 import org.gradle.api.Project
 
+@Deprecated
 class SeasideBatsPlugin extends AbstractProjectPlugin {
 
     public static final String BATS_EXTENSION_NAME = "seasideBats"

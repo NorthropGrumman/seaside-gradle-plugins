@@ -24,7 +24,7 @@ subprojects {
     version = '1.0-SNAPSHOT'
     
     ext {
-        blocsVersion = '2.1'
+        blocsVersion = '2.1.1'
         osgiVersion =  '6.0.0'
         guavaVersion = '22.0'
         junitVersion = '4.12'
