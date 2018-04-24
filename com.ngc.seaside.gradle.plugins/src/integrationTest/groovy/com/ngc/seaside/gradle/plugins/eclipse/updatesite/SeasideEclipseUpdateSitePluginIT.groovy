@@ -9,6 +9,11 @@ import org.junit.Before
 import org.junit.Test
 
 class SeasideEclipseUpdateSitePluginIT {
+    private static final String TEST_LINUX_ECLIPSE_VERSION = "eclipse-dsl-oxygen-2-linux-gtk-x86_64"
+    private static final String TEST_WINDOWS_ECLIPSE_VERSION = "eclipse-dsl-oxygen-2-win32-x86_64"
+    private static final String TEST_LINUX_ECLIPSE_DOWNLOAD_URL = "http://1.2.3.4/$TEST_LINUX_ECLIPSE_VERSION"
+    private static final String TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL = "http://1.2.3.4/$TEST_WINDOWS_ECLIPSE_VERSION"
+
     private SeasideEclipseUpdateSitePlugin plugin
     private TaskResolver resolver
     private Project project
@@ -29,9 +34,15 @@ class SeasideEclipseUpdateSitePluginIT {
               sourceDirectoryWithTheTestProject(),
               pathToTheDestinationProjectDirectory()
         )
+
         project = TestingUtilities.createTheTestProjectWith(projectDir)
         plugin = new SeasideEclipseUpdateSitePlugin()
+        plugin.linuxEclipseVersion = TEST_LINUX_ECLIPSE_VERSION
+        plugin.windowsEclipseVersion = TEST_WINDOWS_ECLIPSE_VERSION
+        plugin.linuxDownloadUrl = TEST_LINUX_ECLIPSE_DOWNLOAD_URL
+        plugin.windowsDownloadUrl = TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL
         plugin.apply(project)
+
         resolver = new TaskResolver(project)
     }
 
@@ -75,19 +86,21 @@ class SeasideEclipseUpdateSitePluginIT {
 
     @Test
     void repositoryExists() {
-        Assert.assertFalse(
-              "there should be a configured flatDir repository!",
-              project.repositories.empty || project.repositories.get(0).name != 'flatDir'
-        )
+        project.afterEvaluate {
+            Assert.assertFalse(
+                  "there should be a configured flatDir repository!",
+                  project.repositories.empty || project.repositories.get(0).name != 'flatDir'
+            )
 
-        def eclipsePluginsDir = project.extensions
-                                       .getByType(SeasideEclipseUpdateSiteExtension.class)
-                                       .eclipsePluginsDirectory
-        def dirs = project.repositories.getByName('flatDir').properties.get('dirs').collect()
-        Assert.assertFalse(
-              "the flatDir repository dirs should point to $eclipsePluginsDir",
-              dirs.empty || dirs[0].toString() != eclipsePluginsDir
-        )
+            def eclipsePluginsDir = project.extensions
+                                           .getByType(SeasideEclipseUpdateSiteExtension.class)
+                                           .eclipsePluginsDirectory
+            def dirs = project.repositories.getByName('flatDir').properties.get('dirs').collect()
+            Assert.assertFalse(
+                  "the flatDir repository dirs should point to $eclipsePluginsDir",
+                  dirs.empty || dirs[0].toString() != eclipsePluginsDir
+            )
+        }
     }
 
     @Test
