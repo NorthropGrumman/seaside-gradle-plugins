@@ -83,7 +83,11 @@ pipeline {
                 // Create the tag.
                 sh './gradlew createReleaseTag -PbootstrapRelease'
                 // Run the update.  Clean so the artifacts are built with the new version.
-                sh './gradlew clean build upload -x integrationTest -x functionalTest -x test'
+				withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
+                                                  passwordVariable: 'nexusPassword',
+                                                  usernameVariable: 'nexusUsername')]) {
+                	sh './gradlew clean build upload -x integrationTest -x functionalTest -x test -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword'
+				}
                 // Since we just did a clean, we need to run prepareForRelease again so the next step of pushing the
                 // tag will work.
                 sh './gradlew prepareForRelease'
