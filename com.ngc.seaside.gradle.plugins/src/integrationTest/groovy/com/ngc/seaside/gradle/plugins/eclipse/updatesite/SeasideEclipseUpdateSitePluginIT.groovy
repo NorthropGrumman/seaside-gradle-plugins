@@ -15,6 +15,7 @@ class SeasideEclipseUpdateSitePluginIT {
     private File projectDir
     private List<String> taskNames = [
           SeasideEclipseUpdateSitePlugin.ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME,
+          SeasideEclipseUpdateSitePlugin.ECLIPSE_UNZIP_ECLIPSE_TASK_NAME,
           SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_FEATURES_TASK_NAME,
           SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_SD_PLUGINS_TASK_NAME,
           SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME,

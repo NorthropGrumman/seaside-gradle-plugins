@@ -20,11 +20,6 @@ class DownloadEclipseTask extends DefaultTask {
             new URL(extension.getEclipseDownloadUrl()).withInputStream { is ->
                 destFile.withOutputStream { it << is }
             }
-
-            def copy = project.copySpec()
-            copy.from(project.zipTree(
-                  project.file(Paths.get(extension.cacheDirectory, "${extension.getEclipseVersion()}.zip"))))
-            copy.into(extension.cacheDirectory)
         }
     }
 }

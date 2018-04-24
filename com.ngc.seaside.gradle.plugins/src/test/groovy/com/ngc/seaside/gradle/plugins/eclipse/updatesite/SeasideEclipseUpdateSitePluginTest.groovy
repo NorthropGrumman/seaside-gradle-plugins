@@ -35,6 +35,10 @@ class SeasideEclipseUpdateSitePluginTest {
               SeasideEclipseUpdateSitePlugin.ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME
         )
         Assert.assertNotNull(
+              "unzip eclipse task name does not exist!",
+              SeasideEclipseUpdateSitePlugin.ECLIPSE_UNZIP_ECLIPSE_TASK_NAME
+        )
+        Assert.assertNotNull(
               "copy features task name does not exist!",
               SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_FEATURES_TASK_NAME
         )

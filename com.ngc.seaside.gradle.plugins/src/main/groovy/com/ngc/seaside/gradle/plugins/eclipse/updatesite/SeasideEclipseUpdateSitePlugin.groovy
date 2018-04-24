@@ -7,6 +7,7 @@ import com.ngc.seaside.gradle.util.EclipsePlugins
 import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.bundling.Zip
 
 import java.nio.file.Paths
 
@@ -15,6 +16,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
     public static final String ECLIPSE_UPDATE_SITE_EXTENSION_NAME = "eclipseUpdateSite"
     public static final String ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME = "downloadEclipse"
+    public static final String ECLIPSE_UNZIP_ECLIPSE_TASK_NAME = "unzipEclipse"
     public static final String ECLIPSE_COPY_FEATURES_TASK_NAME = "copyFeatures"
     public static final String ECLIPSE_COPY_SD_PLUGINS_TASK_NAME = "copySdPlugins"
     public static final String ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME = "copyEclipsePlugins"
@@ -81,6 +83,20 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               type: DownloadEclipseTask,
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "description of: $ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME")
+
+        project.task(
+              ECLIPSE_UNZIP_ECLIPSE_TASK_NAME,
+              type: Zip,
+              group: ECLIPSE_TASK_GROUP_NAME,
+              description: "description of: $ECLIPSE_UNZIP_ECLIPSE_TASK_NAME") {
+            project.afterEvaluate {
+                def eclipse = project.file(extension.eclipseArchiveName - ".zip")
+                if (!eclipse.exists()) {
+                    from project.zipTree(eclipse)
+                    into Paths.get(extension.cacheDirectory)
+                }
+            }
+        }
 
         project.task(
               ECLIPSE_COPY_FEATURES_TASK_NAME,
