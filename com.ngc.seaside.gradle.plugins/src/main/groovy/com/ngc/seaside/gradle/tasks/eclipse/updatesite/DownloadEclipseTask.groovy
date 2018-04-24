@@ -12,7 +12,7 @@ class DownloadEclipseTask extends DefaultTask {
     @TaskAction
     void downloadEclipse() {
         extension = project.extensions.getByType(SeasideEclipseUpdateSiteExtension.class)
-        def destFile = project.file(Paths.get(extension.cacheDirectory, "${extension.getEclipseVersion()}.zip"))
+        def destFile = project.file(extension.getEclipseArchiveName())
         destFile.getParentFile().mkdirs()
 
         if (!destFile.exists()) {
