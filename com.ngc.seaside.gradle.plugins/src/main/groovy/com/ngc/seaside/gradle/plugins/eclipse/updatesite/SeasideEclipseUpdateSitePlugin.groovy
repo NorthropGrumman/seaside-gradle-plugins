@@ -25,11 +25,14 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
     public String archiveName
     public String cacheDirectory
-    public String eclipsePluginsDirectory
     public String linuxDownloadUrl
     public String linuxEclipseVersion
     public String windowsDownloadUrl
     public String windowsEclipseVersion
+    public String eclipseVersion
+    public String eclipseArchiveName
+    public String eclipseDownloadUrl
+    public String eclipsePluginsDirectory
 
     private SeasideEclipseUpdateSiteExtension extension
 
@@ -38,9 +41,11 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
         project.configure(project) {
             createExtension(project)
 
-            project.repositories {
-                flatDir {
-                    dirs extension.eclipsePluginsDirectory
+            project.afterEvaluate {
+                project.repositories {
+                    flatDir {
+                        dirs extension.getEclipsePluginsDirectory()
+                    }
                 }
             }
 
@@ -69,11 +74,14 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     private void setExtensionProperties() {
         extension.archiveName = archiveName ?: extension.archiveName
         extension.cacheDirectory = cacheDirectory ?: extension.cacheDirectory
-        extension.eclipsePluginsDirectory = eclipsePluginsDirectory ?: extension.eclipsePluginsDirectory
         extension.linuxDownloadUrl = linuxDownloadUrl ?: extension.linuxDownloadUrl
         extension.linuxEclipseVersion = linuxEclipseVersion ?: extension.linuxEclipseVersion
         extension.windowsDownloadUrl = windowsDownloadUrl ?: extension.windowsDownloadUrl
         extension.windowsEclipseVersion = windowsEclipseVersion ?: extension.windowsEclipseVersion
+        extension.eclipseVersion = eclipseVersion ?: extension.getEclipseVersion()
+        extension.eclipseArchiveName = eclipseArchiveName ?: extension.getEclipseArchiveName()
+        extension.eclipseDownloadUrl = eclipseDownloadUrl ?: extension.getEclipseDownloadUrl()
+        extension.eclipsePluginsDirectory = eclipsePluginsDirectory ?: extension.getEclipsePluginsDirectory()
     }
 
 
