@@ -9,6 +9,10 @@ import java.nio.file.Paths
 class SeasideEclipseUpdateSiteExtension {
     public String archiveName
     public String cacheDirectory
+
+    public String eclipseVersion
+    public String eclipseArchiveName
+    public String eclipseDownloadUrl
     public String eclipsePluginsDirectory
 
     public String linuxDownloadUrl
@@ -18,8 +22,7 @@ class SeasideEclipseUpdateSiteExtension {
 
     SeasideEclipseUpdateSiteExtension(Project project) {
         archiveName = "${project.group}.${project.name}-${project.version}.zip"
-        cacheDirectory = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, "caches", "eclipse").toString()
-        eclipsePluginsDirectory = Paths.get(cacheDirectory, "plugins").toString()
+        cacheDirectory = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, "caches", "eclipse")
     }
 
     String getEclipseVersion() {
@@ -44,17 +47,27 @@ class SeasideEclipseUpdateSiteExtension {
         return OperatingSystem.current().isLinux() ? linuxDownloadUrl : windowsDownloadUrl
     }
 
+    String getEclipsePluginsDirectory() {
+        return Paths.get(cacheDirectory, getEclipseVersion(), "plugins")
+    }
+
+    String getEclipseArchiveName() {
+        return Paths.get(cacheDirectory, "${getEclipseVersion()}.zip")
+    }
+
     @Override
     String toString() {
         return "SeasideEclipseUpdateSiteExtension[" +
-              "\n\tarchiveName=" + archiveName +
-              "\n\tcacheDirectory=" + cacheDirectory +
-              "\n\teclipsePluginsDirectory=" + eclipsePluginsDirectory +
-              "\n\tlinuxDownloadUrl=" + linuxDownloadUrl +
-              "\n\tlinuxEclipseVersion=" + linuxEclipseVersion +
-              "\n\twindowsDownloadUrl=" + windowsDownloadUrl +
-              "\n\twindowsEclipseVersion=" + windowsEclipseVersion +
-              "\n\teclipseVersion=" + getEclipseVersion() +
-              "\n]"
+               "\n\tarchiveName=" + archiveName +
+               "\n\tcacheDirectory=" + cacheDirectory +
+               "\n\tlinuxDownloadUrl=" + linuxDownloadUrl +
+               "\n\tlinuxEclipseVersion=" + linuxEclipseVersion +
+               "\n\twindowsDownloadUrl=" + windowsDownloadUrl +
+               "\n\twindowsEclipseVersion=" + windowsEclipseVersion +
+               "\n\teclipseVersion=" + getEclipseVersion() +
+               "\n\teclipseArchiveName=" + getEclipseArchiveName() +
+               "\n\teclipseDownloadUrl=" + getEclipseDownloadUrl() +
+               "\n\teclipsePluginsDirectory=" + getEclipsePluginsDirectory() +
+               "\n]"
     }
 }
