@@ -8,6 +8,8 @@ import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 
+import java.nio.file.Paths
+
 class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
 
@@ -86,7 +88,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "description of: $ECLIPSE_COPY_FEATURES_TASK_NAME") {
             from project.configurations.features
-            into "${project.buildDir}/updatesite/features"
+            into Paths.get(project.buildDir.absolutePath, "updatesite", "features")
             rename { String name ->
                 EclipsePlugins.makeEclipseCompliantJarFileName(name)
             }
@@ -105,7 +107,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
                     "${artifact.moduleVersion.id.group}.${artifact.name}_${osgiVersion}.${artifact.extension}"
                 }
             }
-            into "${project.buildDir}/updatesite/plugins"
+            into Paths.get(project.buildDir.absolutePath, "updatesite", "plugins")
         }
 
         project.task(
