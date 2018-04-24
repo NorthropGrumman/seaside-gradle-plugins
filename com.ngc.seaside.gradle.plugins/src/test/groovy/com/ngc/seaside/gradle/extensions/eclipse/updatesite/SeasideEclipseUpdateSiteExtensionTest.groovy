@@ -25,6 +25,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
     private static final String TEST_CACHE_DIRECTORY_NAME = "$TEST_GRADLE_USER_HOME/$TEST_CACHES"
     private static final String TEST_LINUX_ECLIPSE_VERSION = "eclipse-dsl-oxygen-2-linux-gtk-x86_64"
     private static final String TEST_WINDOWS_ECLIPSE_VERSION = "eclipse-dsl-oxygen-2-win32-x86_64"
+    private static final String TEST_LINUX_ECLIPSE_DOWNLOAD_URL = "http://1.2.3.4/${TEST_LINUX_ECLIPSE_VERSION}.zip"
+    private static final String TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL = "http://1.2.3.4/${TEST_WINDOWS_ECLIPSE_VERSION}.zip"
     private static final String TEST_LINUX_ECLIPSE_PLUGINS_DIRECTORY_NAME =
           "$TEST_CACHE_DIRECTORY_NAME/$TEST_LINUX_ECLIPSE_VERSION/plugins"
     private static final String TEST_WINDOWS_ECLIPSE_PLUGINS_DIRECTORY_NAME =
@@ -55,6 +57,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
         extension = new SeasideEclipseUpdateSiteExtension(project)
         extension.linuxEclipseVersion = TEST_LINUX_ECLIPSE_VERSION
         extension.windowsEclipseVersion = TEST_WINDOWS_ECLIPSE_VERSION
+        extension.linuxDownloadUrl = TEST_LINUX_ECLIPSE_DOWNLOAD_URL
+        extension.windowsDownloadUrl = TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL
     }
 
     @Test
