@@ -1,9 +1,9 @@
 package com.ngc.seaside.gradle.plugins.eclipse.updatesite
 
+import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
 import org.junit.Before
 import org.junit.Test
 
@@ -24,7 +24,8 @@ class SeasideEclipseUpdateSitePluginFT {
 
     @Test
     void runsGradleBuildWithSuccess() {
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
+              .withNexusProperties()
               .withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()

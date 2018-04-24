@@ -1,9 +1,9 @@
 package com.ngc.seaside.gradle.plugins.eclipse.feature
 
+import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -25,7 +25,8 @@ class SeasideEclipseFeaturePluginFT {
 
     @Test
     void runsGradleBuildWithSuccess() {
-        BuildResult result = GradleRunner.create()
+        BuildResult result = SeasideGradleRunner.create()
+              .withNexusProperties()
               .withProjectDir(projectDir)
               .withPluginClasspath(pluginClasspath)
               .forwardOutput()
