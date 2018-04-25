@@ -5,16 +5,17 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class DownloadEclipseTask extends DefaultTask {
+    String eclipseArchiveName
+    String eclipseDownloadUrl
+
     @TaskAction
     void downloadEclipse() {
-        def extension = project.extensions.getByType(SeasideEclipseUpdateSiteExtension.class)
-
-        def destFile = project.file(extension.eclipseArchiveName)
+        def destFile = project.file(eclipseArchiveName)
         destFile.getParentFile().mkdirs()
 
         if (!destFile.exists()) {
-            println "Downloading Eclipse SDK from ${extension.eclipseDownloadUrl}..."
-            new URL(extension.eclipseDownloadUrl).withInputStream { is ->
+            println "Downloading Eclipse SDK from ${eclipseDownloadUrl}..."
+            new URL(eclipseDownloadUrl).withInputStream { is ->
                 destFile.withOutputStream { it << is }
             }
         }

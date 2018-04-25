@@ -49,6 +49,8 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
                         dirs extension.getEclipsePluginsDirectory()
                     }
                 }
+
+                configureTasks(project)
             }
 
             project.configurations {
@@ -86,6 +88,13 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
             extension.eclipseArchiveName = eclipseArchiveName ?: extension.eclipseArchiveName
             extension.eclipseDownloadUrl = eclipseDownloadUrl ?: extension.eclipseDownloadUrl
             extension.eclipsePluginsDirectory = eclipsePluginsDirectory ?: extension.eclipsePluginsDirectory
+        }
+    }
+
+    private void configureTasks(Project project) {
+        project.getTasks().getByName(ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME) {
+            eclipseArchiveName = extension.eclipseArchiveName
+            eclipseDownloadUrl = extension.eclipseDownloadUrl
         }
     }
 
