@@ -64,7 +64,7 @@ class SeasideEclipseUpdateSitePluginIT {
 
     @Test
     void configurationsExist() {
-        def configurationNames = ['features', 'eclipsePlugins', 'sdPlugins']
+        def configurationNames = ['features', 'eclipsePlugins', 'customPlugins']
         configurationNames.forEach({ name ->
             Assert.assertTrue(
                   "configuration $name do not exist!",

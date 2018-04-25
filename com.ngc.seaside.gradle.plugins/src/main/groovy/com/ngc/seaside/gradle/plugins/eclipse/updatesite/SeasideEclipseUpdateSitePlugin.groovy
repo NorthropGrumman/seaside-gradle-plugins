@@ -53,7 +53,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
             project.configurations {
                 features
-                sdPlugins {
+                customPlugins {
                     transitive = false
                 }
                 eclipsePlugins {
@@ -121,9 +121,9 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "description of: $ECLIPSE_COPY_SD_PLUGINS_TASK_NAME") {
-            from project.configurations.sdPlugins {
+            from project.configurations.customPlugins {
                 rename { String name ->
-                    def artifacts = project.configurations.sdPlugins.resolvedConfiguration.resolvedArtifacts
+                    def artifacts = project.configurations.customPlugins.resolvedConfiguration.resolvedArtifacts
                     def artifact = artifacts.find { it.file.name == name }
                     def osgiVersion = Versions.makeOsgiCompliantVersion("${artifact.moduleVersion.id.version}")
                     "${artifact.moduleVersion.id.group}.${artifact.name}_${osgiVersion}.${artifact.extension}"
