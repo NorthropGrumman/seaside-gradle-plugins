@@ -96,6 +96,11 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
             eclipseArchiveName = extension.eclipseArchiveName
             eclipseDownloadUrl = extension.eclipseDownloadUrl
         }
+
+        project.getTasks().getByName(ECLIPSE_UNZIP_ECLIPSE_TASK_NAME) {
+            eclipseArchiveName = extension.eclipseArchiveName
+            cacheDirectory = extension.cacheDirectory
+        }
     }
 
 

@@ -5,14 +5,15 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class UnzipEclipseTask extends DefaultTask {
+    String eclipseArchiveName
+    String cacheDirectory
+
     @TaskAction
     void unzipEclipse() {
-        def extension = project.extensions.getByType(SeasideEclipseUpdateSiteExtension.class)
-
-        if (!project.file(extension.eclipseArchiveName - ".zip").exists()) {
+        if (!project.file(eclipseArchiveName - ".zip").exists()) {
             project.copy {
-                from project.zipTree(project.file(extension.eclipseArchiveName))
-                into extension.cacheDirectory
+                from project.zipTree(project.file(eclipseArchiveName))
+                into cacheDirectory
             }
         }
     }
