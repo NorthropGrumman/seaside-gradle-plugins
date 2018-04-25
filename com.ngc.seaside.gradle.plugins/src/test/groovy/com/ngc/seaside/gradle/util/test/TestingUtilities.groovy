@@ -41,10 +41,11 @@ class TestingUtilities {
     }
 
     static void assertTaskSuccess(BuildResult result, String projectName, String taskName) {
-        Assert.assertEquals(
+        def taskOutcome = result.task(":$projectName:$taskName").outcome
+
+        Assert.assertTrue(
               "unexpected task outcome!",
-              TaskOutcome.SUCCESS,
-              result.task(":$projectName:$taskName").outcome
+              taskOutcome == TaskOutcome.SUCCESS || taskOutcome == TaskOutcome.UP_TO_DATE
         )
     }
 
