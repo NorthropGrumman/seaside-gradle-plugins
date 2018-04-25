@@ -63,8 +63,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
 
     @Test
     void hasArchiveNameProperty() {
-        Assert.assertNotNull("archiveName property doesn't exist!", extension.archiveName)
-        Assert.assertEquals("default archive name is incorrect!", extension.archiveName, TEST_ARCHIVE_NAME)
+        Assert.assertNotNull("updateSiteArchiveName property doesn't exist!", extension.updateSiteArchiveName)
+        Assert.assertEquals("default archive name is incorrect!", extension.updateSiteArchiveName, TEST_ARCHIVE_NAME)
     }
 
     @Test
@@ -94,8 +94,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
         )
         Assert.assertEquals(
               "incorrect eclipse version returned on linux",
-              extension.linuxEclipseVersion,
-              extension.getEclipseVersion()
+              TEST_LINUX_ECLIPSE_VERSION,
+              extension.linuxEclipseVersion
         )
     }
 
@@ -107,8 +107,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
         )
         Assert.assertEquals(
               "incorrect eclipse version returned on windows",
-              extension.windowsEclipseVersion,
-              extension.getEclipseVersion()
+              TEST_WINDOWS_ECLIPSE_VERSION,
+              extension.windowsEclipseVersion
         )
     }
 
@@ -120,8 +120,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
         )
         Assert.assertEquals(
               "incorrect eclipse download url returned for linux",
-              extension.linuxDownloadUrl,
-              extension.getEclipseDownloadUrl()
+              TEST_LINUX_ECLIPSE_DOWNLOAD_URL,
+              extension.linuxDownloadUrl
         )
     }
 
@@ -133,8 +133,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
         )
         Assert.assertEquals(
               "incorrect eclipse download url returned for windows",
-              extension.windowsDownloadUrl,
-              extension.getEclipseDownloadUrl()
+              TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL,
+              extension.windowsDownloadUrl
         )
     }
 
@@ -146,8 +146,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
         )
         Assert.assertEquals(
               "default eclipse plugins directory on Linux is incorrect!",
-              extension.getEclipsePluginsDirectory(),
-              TEST_LINUX_ECLIPSE_PLUGINS_DIRECTORY_NAME
+              TEST_LINUX_ECLIPSE_PLUGINS_DIRECTORY_NAME,
+              extension.getEclipsePluginsDirectory()
         )
     }
 
@@ -159,8 +159,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
         )
         Assert.assertEquals(
               "default eclipse plugins directory on Windows is incorrect!",
-              extension.getEclipsePluginsDirectory(),
-              TEST_WINDOWS_ECLIPSE_PLUGINS_DIRECTORY_NAME
+              TEST_WINDOWS_ECLIPSE_PLUGINS_DIRECTORY_NAME,
+              extension.getEclipsePluginsDirectory()
         )
     }
 
@@ -172,8 +172,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
         )
         Assert.assertEquals(
               "default eclipse archive name on Linux is incorrect!",
-              extension.getEclipseArchiveName(),
-              TEST_LINUX_ECLIPSE_ARCHIVE_NAME
+              TEST_LINUX_ECLIPSE_ARCHIVE_NAME,
+              extension.getEclipseArchiveName()
         )
     }
 
@@ -185,8 +185,8 @@ class SeasideEclipseUpdateSiteExtensionTest {
         )
         Assert.assertEquals(
               "default eclipse archive name on Windows is incorrect!",
-              extension.getEclipseArchiveName(),
-              TEST_WINDOWS_ECLIPSE_ARCHIVE_NAME
+              TEST_WINDOWS_ECLIPSE_ARCHIVE_NAME,
+              extension.getEclipseArchiveName()
         )
     }
 }

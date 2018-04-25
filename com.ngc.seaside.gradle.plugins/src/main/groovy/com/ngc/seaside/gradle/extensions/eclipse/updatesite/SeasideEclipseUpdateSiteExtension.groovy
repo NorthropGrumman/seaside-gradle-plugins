@@ -7,7 +7,7 @@ import org.gradle.internal.os.OperatingSystem
 import java.nio.file.Paths
 
 class SeasideEclipseUpdateSiteExtension {
-    public String archiveName
+    public String updateSiteArchiveName
     public String cacheDirectory
 
     public String eclipseVersion
@@ -21,53 +21,68 @@ class SeasideEclipseUpdateSiteExtension {
     public String windowsEclipseVersion
 
     SeasideEclipseUpdateSiteExtension(Project project) {
-        archiveName = "${project.group}.${project.name}-${project.version}.zip"
+        updateSiteArchiveName = "${project.group}.${project.name}-${project.version}.zip"
         cacheDirectory = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, "caches", "eclipse")
     }
 
     String getEclipseVersion() {
-        Preconditions.checkNotNull(linuxEclipseVersion, "linuxEclipseVersion must be defined!")
-        Preconditions.checkNotNull(windowsEclipseVersion, "windowsEclipseVersion must be defined!")
-        Preconditions.checkState(
-              OperatingSystem.current().isLinux() || OperatingSystem.current().isWindows(),
-              "supported operating systems are Linux and Windows!"
-        )
+        if (eclipseVersion == null) {
+            Preconditions.checkNotNull(linuxEclipseVersion, "linuxEclipseVersion must be defined!")
+            Preconditions.checkNotNull(windowsEclipseVersion, "windowsEclipseVersion must be defined!")
+            Preconditions.checkState(
+                  OperatingSystem.current().isLinux() || OperatingSystem.current().isWindows(),
+                  "supported operating systems are Linux and Windows!"
+            )
 
-        return OperatingSystem.current().isLinux() ? linuxEclipseVersion : windowsEclipseVersion
+            eclipseVersion = OperatingSystem.current().isLinux() ? linuxEclipseVersion : windowsEclipseVersion
+        }
+
+        return eclipseVersion
     }
 
     String getEclipseDownloadUrl() {
-        Preconditions.checkNotNull(linuxDownloadUrl, "linuxDownloadUrl must be defined!")
-        Preconditions.checkNotNull(windowsDownloadUrl, "windowsDownloadUrl must be defined!")
-        Preconditions.checkState(
-              OperatingSystem.current().isLinux() || OperatingSystem.current().isWindows(),
-              "supported operating systems are Linux and Windows!"
-        )
+        if (eclipseDownloadUrl == null) {
+            Preconditions.checkNotNull(linuxDownloadUrl, "linuxDownloadUrl must be defined!")
+            Preconditions.checkNotNull(windowsDownloadUrl, "windowsDownloadUrl must be defined!")
+            Preconditions.checkState(
+                  OperatingSystem.current().isLinux() || OperatingSystem.current().isWindows(),
+                  "supported operating systems are Linux and Windows!"
+            )
 
-        return OperatingSystem.current().isLinux() ? linuxDownloadUrl : windowsDownloadUrl
+            eclipseDownloadUrl = OperatingSystem.current().isLinux() ? linuxDownloadUrl : windowsDownloadUrl
+        }
+
+        return eclipseDownloadUrl
     }
 
     String getEclipsePluginsDirectory() {
-        return Paths.get(cacheDirectory, getEclipseVersion(), "plugins")
+        if (eclipsePluginsDirectory == null) {
+            eclipsePluginsDirectory = Paths.get(cacheDirectory, getEclipseVersion(), "plugins")
+        }
+
+        return eclipsePluginsDirectory
     }
 
     String getEclipseArchiveName() {
-        return Paths.get(cacheDirectory, "${getEclipseVersion()}.zip")
-    }
+        if (eclipseArchiveName == null) {
+            eclipseArchiveName = Paths.get(cacheDirectory, "${getEclipseVersion()}.zip")
+        }
 
+        return eclipseArchiveName
+    }
     @Override
     String toString() {
         return "SeasideEclipseUpdateSiteExtension[" +
-               "\n\tarchiveName=" + archiveName +
+               "\n\tupdateSiteArchiveName=" + updateSiteArchiveName +
                "\n\tcacheDirectory=" + cacheDirectory +
                "\n\tlinuxDownloadUrl=" + linuxDownloadUrl +
                "\n\tlinuxEclipseVersion=" + linuxEclipseVersion +
                "\n\twindowsDownloadUrl=" + windowsDownloadUrl +
                "\n\twindowsEclipseVersion=" + windowsEclipseVersion +
-               "\n\teclipseVersion=" + getEclipseVersion() +
-               "\n\teclipseArchiveName=" + getEclipseArchiveName() +
-               "\n\teclipseDownloadUrl=" + getEclipseDownloadUrl() +
-               "\n\teclipsePluginsDirectory=" + getEclipsePluginsDirectory() +
+               "\n\teclipseVersion=" + eclipseVersion +
+               "\n\teclipseArchiveName=" + eclipseArchiveName +
+               "\n\teclipseDownloadUrl=" + eclipseDownloadUrl +
+               "\n\teclipsePluginsDirectory=" + eclipsePluginsDirectory +
                "\n]"
     }
 }
