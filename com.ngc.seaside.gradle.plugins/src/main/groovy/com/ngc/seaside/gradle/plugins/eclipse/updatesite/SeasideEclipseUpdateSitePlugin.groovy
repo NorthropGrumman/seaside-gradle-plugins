@@ -109,20 +109,20 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME,
               type: DownloadEclipseTask,
               group: ECLIPSE_TASK_GROUP_NAME,
-              description: "description of: $ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME")
+              description: "Download the Eclipse SDK")
 
         project.task(
               ECLIPSE_UNZIP_ECLIPSE_TASK_NAME,
               type: UnzipEclipseTask,
               group: ECLIPSE_TASK_GROUP_NAME,
-              description: "description of: $ECLIPSE_UNZIP_ECLIPSE_TASK_NAME",
+              description: "Unzip the Eclipse SDK",
               dependsOn: ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME)
 
         project.task(
               ECLIPSE_COPY_FEATURES_TASK_NAME,
               type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
-              description: "description of: $ECLIPSE_COPY_FEATURES_TASK_NAME") {
+              description: "Copy the features jar to include it in the update site") {
             from project.configurations.features
             into Paths.get(project.buildDir.absolutePath, "updatesite", "features")
             rename { String name ->
@@ -134,7 +134,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               ECLIPSE_COPY_SD_PLUGINS_TASK_NAME,
               type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
-              description: "description of: $ECLIPSE_COPY_SD_PLUGINS_TASK_NAME") {
+              description: "Copy the custom plugins to include them in the update site") {
             from project.configurations.customPlugins {
                 rename { String name ->
                     def artifacts = project.configurations.customPlugins.resolvedConfiguration.resolvedArtifacts
@@ -150,7 +150,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME,
               type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
-              description: "description of: $ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME",
+              description: "Copy the Eclipse plugins to include them in the update site",
               dependsOn: ECLIPSE_UNZIP_ECLIPSE_TASK_NAME) {
             from project.configurations.eclipsePlugins
             into Paths.get(project.buildDir.absolutePath, "updatesite", "plugins")
@@ -160,7 +160,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               ECLIPSE_CREATE_METADATA_TASK_NAME,
               type: CreateMetadataTask,
               group: ECLIPSE_TASK_GROUP_NAME,
-              description: "description of: $ECLIPSE_CREATE_METADATA_TASK_NAME",
+              description: "Create metadata for the update site",
               dependsOn: [
                     ECLIPSE_UNZIP_ECLIPSE_TASK_NAME,
                     ECLIPSE_COPY_FEATURES_TASK_NAME,
@@ -172,7 +172,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               ECLIPSE_CREATE_ZIP_TASK_NAME,
               type: Zip,
               group: ECLIPSE_TASK_GROUP_NAME,
-              description: "description of: $ECLIPSE_CREATE_ZIP_TASK_NAME",
+              description: "Archive the update site",
               dependsOn: ECLIPSE_CREATE_METADATA_TASK_NAME) {
             from Paths.get(project.buildDir.absolutePath, "updatesite")
             destinationDir = project.buildDir
