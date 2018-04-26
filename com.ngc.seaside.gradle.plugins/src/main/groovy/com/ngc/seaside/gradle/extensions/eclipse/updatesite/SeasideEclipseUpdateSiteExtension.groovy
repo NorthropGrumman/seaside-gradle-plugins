@@ -6,19 +6,62 @@ import org.gradle.internal.os.OperatingSystem
 
 import java.nio.file.Paths
 
+/**
+ * Extension for the seaside eclipse update site plugin.
+ */
 class SeasideEclipseUpdateSiteExtension {
-    public String updateSiteArchiveName
-    public String cacheDirectory
+    
+    /**
+     * The archive name of the update site zip. By default this is {@code group.artifact-version.zip}.
+     */
+    String updateSiteArchiveName
 
-    public String eclipseVersion
-    public String eclipseArchiveName
-    public String eclipseDownloadUrl
-    public String eclipsePluginsDirectory
+    /**
+     * The directory used to cache the downloaded eclipse distribution. This property is optional.
+     */
+    String cacheDirectory
 
-    public String linuxDownloadUrl
-    public String linuxEclipseVersion
-    public String windowsDownloadUrl
-    public String windowsEclipseVersion
+    /**
+     * The name of the eclipse version. If not set, either {@link #linuxEclipseVersion} or
+     * {@link #windowsEclipseVersion} will be used.
+     */
+    String eclipseVersion
+
+    /**
+     * The name of the unzipped eclipse distribution. This property is optional.
+     */
+    String eclipseArchiveName
+
+    /**
+     * The download url to the eclipse distribution. If not set, either {@link #linuxDownloadUrl} or
+     * {@link #windowsDownloadUrl} will be used.
+     */
+    String eclipseDownloadUrl
+
+    /**
+     * The location of the plugins within the distribution. This property is optional.
+     */
+    String eclipsePluginsDirectory
+
+    /**
+     * The download url to the linux eclipse distribution.
+     */
+    String linuxDownloadUrl
+
+    /**
+     * The name of the linux eclipse version.
+     */
+    String linuxEclipseVersion
+
+    /**
+     * The download url to the windows eclipse distribution.
+     */
+    String windowsDownloadUrl
+
+    /**
+     * The name of the windows eclipse version.
+     */
+    String windowsEclipseVersion
 
     SeasideEclipseUpdateSiteExtension(Project project) {
         updateSiteArchiveName = "${project.group}.${project.name}-${project.version}.zip"
@@ -70,6 +113,7 @@ class SeasideEclipseUpdateSiteExtension {
 
         return eclipseArchiveName
     }
+
     @Override
     String toString() {
         return "SeasideEclipseUpdateSiteExtension[" +
