@@ -13,6 +13,29 @@ import org.gradle.api.tasks.bundling.Zip
 
 import java.nio.file.Paths
 
+/**
+ * Plugin used for building the update site of an Eclipse plugin.
+ *
+ * <p> This plugin creates the {@value #ECLIPSE_UPDATE_SITE_EXTENSION_NAME} extension name that uses
+ * {@link SeasideEclipseUpdateSiteExtension}. Projects that use this plugin must set the eclipse version and
+ * download url in the extension (or both the windows and linux counterparts).
+ *
+ * <p> This plugin adds the following configurations for update site dependencies:
+ * <ul>
+ * <li>features - feature jars that should be included in the update site. Example:
+ * <br> {@code features project(path: ':<project-name>.feature', configuration: 'feature')}
+ * </li>
+ * <li>sdPlugins - plugin projects that should be included in the update site. Example:
+ * <br> {@code sdPlugins project(':<project-name>')}
+ * <br> {@code sdPlugins project(':<project-name>.ide')}
+ * <br> {@code sdPlugins project(':<project-name>.ui')}
+ * </li>
+ * <li> eclipsePlugins - eclipse plugin jars that should be included in the update site. These jars must exist in the
+ * plugins folder of the {@link SeasideEclipseUpdateSiteExtension#getEclipseDownloadUrl eclipse download}. Example:
+ * <br> {@code eclipsePlugins name: 'org.eclipse.xtext.lib_2.12.0.v20170518-0757'}
+ * </li>
+ * </ul>
+ */
 class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
 

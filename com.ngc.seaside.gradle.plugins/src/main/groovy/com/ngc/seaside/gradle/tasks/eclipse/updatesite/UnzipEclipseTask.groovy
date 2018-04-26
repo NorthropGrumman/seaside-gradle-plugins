@@ -4,8 +4,18 @@ import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdate
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+/**
+ * Task for unzipping the downloaded Eclipse distribution.
+ */
 class UnzipEclipseTask extends DefaultTask {
+    /**
+     * The archive name of the Eclipse distribution.
+     */
     String eclipseArchiveName
+
+    /**
+     * The cached directory for the unzipped Eclipse distribution.
+     */
     String cacheDirectory
 
     @TaskAction

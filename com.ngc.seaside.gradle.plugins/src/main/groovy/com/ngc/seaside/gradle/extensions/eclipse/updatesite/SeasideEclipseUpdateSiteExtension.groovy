@@ -4,14 +4,29 @@ import org.gradle.api.Project
 
 import java.nio.file.Paths
 
+/**
+ * Extension for the seaside eclipse update site plugin.
+ */
 class SeasideEclipseUpdateSiteExtension {
-    public String updateSiteArchiveName
-    public String cacheDirectory
+    /**
+     * The archive name of the update site zip. By default this is {@code group.artifact-version.zip}.
+     */
+    String updateSiteArchiveName
 
-    public String linuxDownloadUrl
-    public String linuxEclipseVersion
-    public String windowsDownloadUrl
-    public String windowsEclipseVersion
+    /**
+     * The directory used to cache the downloaded eclipse distribution. This property is optional.
+     */
+    String cacheDirectory
+
+    /**
+     * The download url to the linux eclipse distribution.
+     */
+    String linuxDownloadUrl
+
+    /**
+     * The download url to the windows eclipse distribution.
+     */
+    String windowsDownloadUrl
 
     SeasideEclipseUpdateSiteExtension(Project project) {
         updateSiteArchiveName = "${project.group}.${project.name}-${project.version}.zip"
