@@ -15,7 +15,7 @@ import org.gradle.api.tasks.bundling.Zip
  * <p> This plugin creates the {@value #ECLIPSE_FEATURE_EXTENSION_NAME} extension name that uses 
  * {@link SeasideEclipseFeatureExtension}.
  */
-abstract class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
+class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
 
     public static final String ECLIPSE_FEATURE_EXTENSION_NAME = "eclipseFeature"
