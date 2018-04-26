@@ -4,8 +4,18 @@ import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdate
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+/**
+ * Task for downloading an Eclipse distribution.
+ */
 class DownloadEclipseTask extends DefaultTask {
+    /**
+     * The archive name of the Eclipse distribution.
+     */
     String eclipseArchiveName
+
+    /**
+     * The download url to the Eclipse distribution.
+     */
     String eclipseDownloadUrl
 
     @TaskAction
