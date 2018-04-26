@@ -1,6 +1,7 @@
 package com.ngc.seaside.gradle.extensions.eclipse.updatesite
 
 import com.google.common.base.Preconditions
+import com.ngc.seaside.gradle.util.eclipse.EclipsePropertyUtil
 import org.gradle.api.Project
 import org.gradle.internal.os.OperatingSystem
 
@@ -25,21 +26,6 @@ class SeasideEclipseUpdateSiteExtension {
         cacheDirectory = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, "caches", "eclipse")
     }
 
-    String getEclipseVersion() {
-        if (eclipseVersion == null) {
-            Preconditions.checkNotNull(linuxEclipseVersion, "linuxEclipseVersion must be defined!")
-            Preconditions.checkNotNull(windowsEclipseVersion, "windowsEclipseVersion must be defined!")
-            Preconditions.checkState(
-                  OperatingSystem.current().isLinux() || OperatingSystem.current().isWindows(),
-                  "supported operating systems are Linux and Windows!"
-            )
-
-            eclipseVersion = OperatingSystem.current().isLinux() ? linuxEclipseVersion : windowsEclipseVersion
-        }
-
-        return eclipseVersion
-    }
-
     String getEclipseDownloadUrl() {
         if (eclipseDownloadUrl == null) {
             Preconditions.checkNotNull(linuxDownloadUrl, "linuxDownloadUrl must be defined!")
@@ -57,7 +43,7 @@ class SeasideEclipseUpdateSiteExtension {
 
     String getEclipsePluginsDirectory() {
         if (eclipsePluginsDirectory == null) {
-            eclipsePluginsDirectory = Paths.get(cacheDirectory, getEclipseVersion(), "plugins")
+            eclipsePluginsDirectory = Paths.get(cacheDirectory, EclipsePropertyUtil.getEclipseVersion(), "plugins")
         }
 
         return eclipsePluginsDirectory
@@ -65,7 +51,7 @@ class SeasideEclipseUpdateSiteExtension {
 
     String getEclipseArchiveName() {
         if (eclipseArchiveName == null) {
-            eclipseArchiveName = Paths.get(cacheDirectory, "${getEclipseVersion()}.zip")
+            eclipseArchiveName = Paths.get(cacheDirectory, "${EclipsePropertyUtil.getEclipseVersion()}.zip")
         }
 
         return eclipseArchiveName
