@@ -28,14 +28,6 @@ class SeasideEclipseUpdateSiteExtensionTest {
     private static final String TEST_WINDOWS_ECLIPSE_VERSION = "eclipse-dsl-oxygen-2-win32-x86_64"
     private static final String TEST_LINUX_ECLIPSE_DOWNLOAD_URL = "http://1.2.3.4/${TEST_LINUX_ECLIPSE_VERSION}.zip"
     private static final String TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL = "http://1.2.3.4/${TEST_WINDOWS_ECLIPSE_VERSION}.zip"
-    private static final String TEST_LINUX_ECLIPSE_PLUGINS_DIRECTORY_NAME =
-          "$TEST_CACHE_DIRECTORY_NAME/$TEST_LINUX_ECLIPSE_VERSION/plugins"
-    private static final String TEST_WINDOWS_ECLIPSE_PLUGINS_DIRECTORY_NAME =
-          "$TEST_CACHE_DIRECTORY_NAME/$TEST_WINDOWS_ECLIPSE_VERSION/plugins"
-    private static final String TEST_LINUX_ECLIPSE_ARCHIVE_NAME =
-          "$TEST_CACHE_DIRECTORY_NAME/${TEST_LINUX_ECLIPSE_VERSION}.zip"
-    private static final String TEST_WINDOWS_ECLIPSE_ARCHIVE_NAME =
-          "$TEST_CACHE_DIRECTORY_NAME/${TEST_WINDOWS_ECLIPSE_VERSION}.zip"
 
     private SeasideEclipseUpdateSiteExtension extension
 
@@ -85,89 +77,5 @@ class SeasideEclipseUpdateSiteExtensionTest {
         Assert.assertNull("linuxEclipseVersion property has default value!", extension.linuxEclipseVersion)
         Assert.assertNull("windowsDownloadUrl property has default value!", extension.windowsDownloadUrl)
         Assert.assertNull("windowsEclipseVersion property has default value!", extension.windowsEclipseVersion)
-    }
-
-    @Ignore("ignore until the eclipse property util class is complete")
-    @Test
-    void returnsCorrectEclipseDownloadUrlOnLinux() {
-        Assume.assumeFalse(
-              "Current OS is Windows, skipping Linux test.",
-              System.getProperty("os.name").toLowerCase().startsWith("win")
-        )
-        Assert.assertEquals(
-              "incorrect eclipse download url returned for linux",
-              TEST_LINUX_ECLIPSE_DOWNLOAD_URL,
-              extension.linuxDownloadUrl
-        )
-    }
-
-    @Ignore("ignore until the eclipse property util class is complete")
-    @Test
-    void returnsCorrectEclipseDownloadUrlOnWindows() {
-        Assume.assumeFalse(
-              "Current OS is Linux, skipping Windows test.",
-              System.getProperty("os.name").toLowerCase().startsWith("linux")
-        )
-        Assert.assertEquals(
-              "incorrect eclipse download url returned for windows",
-              TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL,
-              extension.windowsDownloadUrl
-        )
-    }
-
-    @Ignore("ignore until the eclipse property util class is complete")
-    @Test
-    void returnsCorrectEclipsePluginsDirectoryOnLinux() {
-        Assume.assumeFalse(
-              "Current OS is Windows, skipping Linux test.",
-              System.getProperty("os.name").toLowerCase().startsWith("win")
-        )
-        Assert.assertEquals(
-              "default eclipse plugins directory on Linux is incorrect!",
-              TEST_LINUX_ECLIPSE_PLUGINS_DIRECTORY_NAME,
-              extension.getEclipsePluginsDirectory()
-        )
-    }
-
-    @Ignore("ignore until the eclipse property util class is complete")
-    @Test
-    void returnsCorrectEclipsePluginsDirectoryOnWindows() {
-        Assume.assumeFalse(
-              "Current OS is Linux, skipping Windows test.",
-              System.getProperty("os.name").toLowerCase().startsWith("linux")
-        )
-        Assert.assertEquals(
-              "default eclipse plugins directory on Windows is incorrect!",
-              TEST_WINDOWS_ECLIPSE_PLUGINS_DIRECTORY_NAME,
-              extension.getEclipsePluginsDirectory()
-        )
-    }
-
-    @Ignore("ignore until the eclipse property util class is complete")
-    @Test
-    void returnsCorrectEclipseArchiveNameOnLinux() {
-        Assume.assumeFalse(
-              "Current OS is Windows, skipping Linux test.",
-              System.getProperty("os.name").toLowerCase().startsWith("win")
-        )
-        Assert.assertEquals(
-              "default eclipse archive name on Linux is incorrect!",
-              TEST_LINUX_ECLIPSE_ARCHIVE_NAME,
-              extension.getEclipseArchiveName()
-        )
-    }
-
-    @Ignore("ignore until the eclipse property util class is complete")
-    @Test
-    void returnsCorrectEclipseArchiveNameOnWindows() {
-        Assume.assumeFalse(
-              "Current OS is Linux, skipping Windows test.",
-              System.getProperty("os.name").toLowerCase().startsWith("linux")
-        )
-        Assert.assertEquals(
-              "default eclipse archive name on Windows is incorrect!",
-              TEST_WINDOWS_ECLIPSE_ARCHIVE_NAME,
-              extension.getEclipseArchiveName()
-        )
     }
 }
