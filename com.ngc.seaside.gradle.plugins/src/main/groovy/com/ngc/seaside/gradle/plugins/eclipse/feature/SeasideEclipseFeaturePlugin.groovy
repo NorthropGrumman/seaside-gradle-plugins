@@ -7,7 +7,15 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
 
-class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
+/**
+ * Plugin used for building the feature project of an Eclipse plugin. Projects that use this plugin should include
+ * the file {@code feature.xml} in {@code src/main/resources}. By default, building a project with this plugin will
+ * build the Eclipse feature jar.
+ * 
+ * <p> This plugin creates the {@value #ECLIPSE_FEATURE_EXTENSION_NAME} extension name that uses 
+ * {@link SeasideEclipseFeatureExtension}.
+ */
+abstract class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
 
     public static final String ECLIPSE_FEATURE_EXTENSION_NAME = "eclipseFeature"
@@ -21,6 +29,7 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
     @Override
     void doApply(Project project) {
         project.configure(project) {
+            apply plugin: 'base'
             createExtension(project)
 
             project.configurations {
@@ -32,8 +41,6 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
             project.artifacts {
                 feature project.tasks.getByName(ECLIPSE_CREATE_JAR_TASK_NAME)
             }
-
-            defaultTasks = ["build"]
         }
     }
 
@@ -70,11 +77,5 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
             expand('osgiVersion': Versions.makeOsgiCompliantVersion("${project.version}"))
             destinationDir = project.file("${project.buildDir}/tmp")
         }
-
-        project.task("clean") {
-            project.delete(project.buildDir)
-        }
-
-        project.task("build").dependsOn(task)
     }
 }
