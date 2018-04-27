@@ -1,6 +1,5 @@
 package com.ngc.seaside.gradle.plugins.eclipse.updatesite
 
-import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdateSiteExtension
 import com.ngc.seaside.gradle.util.TaskResolver
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
@@ -92,8 +91,9 @@ class SeasideEclipseUpdateSitePluginIT {
                   project.repositories.empty || project.repositories.get(0).name != 'flatDir'
             )
 
-            def eclipsePluginsDir = project.extensions
-                                           .getByType(SeasideEclipseUpdateSiteExtension.class)
+            def eclipsePluginsDir = project.plugins
+                                           .getPlugin(SeasideEclipseUpdateSitePlugin.class)
+                                           .eclipseProperties
                                            .eclipsePluginsDirectory
             def dirs = project.repositories.getByName('flatDir').properties.get('dirs').collect()
             Assert.assertFalse(

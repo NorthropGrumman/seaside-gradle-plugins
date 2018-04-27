@@ -1,6 +1,5 @@
 package com.ngc.seaside.gradle.tasks.eclipse.updatesite
 
-import com.ngc.seaside.gradle.extensions.eclipse.updatesite.SeasideEclipseUpdateSiteExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 

@@ -7,6 +7,7 @@ import com.ngc.seaside.gradle.tasks.eclipse.updatesite.DownloadEclipseTask
 import com.ngc.seaside.gradle.tasks.eclipse.updatesite.UnzipEclipseTask
 import com.ngc.seaside.gradle.util.EclipsePlugins
 import com.ngc.seaside.gradle.util.Versions
+import com.ngc.seaside.gradle.util.eclipse.EclipsePropertyUtil
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
@@ -54,10 +55,8 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     public String linuxEclipseVersion
     public String windowsDownloadUrl
     public String windowsEclipseVersion
-    public String eclipseVersion
-    public String eclipseArchiveName
-    public String eclipseDownloadUrl
-    public String eclipsePluginsDirectory
+
+    protected EclipsePropertyUtil eclipseProperties
 
     private SeasideEclipseUpdateSiteExtension extension
 
@@ -67,9 +66,11 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
             createExtension(project)
 
             project.afterEvaluate {
+                eclipseProperties = new EclipsePropertyUtil(extension)
+
                 project.repositories {
                     flatDir {
-                        dirs extension.getEclipsePluginsDirectory()
+                        dirs eclipseProperties.eclipsePluginsDirectory
                     }
                 }
 
@@ -94,40 +95,33 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
     private void createExtension(Project project) {
         extension = project.extensions
-              .create(ECLIPSE_UPDATE_SITE_EXTENSION_NAME, SeasideEclipseUpdateSiteExtension, project)
-        setExtensionProperties(project)
+                           .create(ECLIPSE_UPDATE_SITE_EXTENSION_NAME, SeasideEclipseUpdateSiteExtension, project)
+        setExtensionProperties()
     }
 
-    private void setExtensionProperties(Project project) {
+    private void setExtensionProperties() {
         extension.updateSiteArchiveName = updateSiteArchiveName ?: extension.updateSiteArchiveName
         extension.cacheDirectory = cacheDirectory ?: extension.cacheDirectory
         extension.linuxDownloadUrl = linuxDownloadUrl ?: extension.linuxDownloadUrl
         extension.linuxEclipseVersion = linuxEclipseVersion ?: extension.linuxEclipseVersion
         extension.windowsDownloadUrl = windowsDownloadUrl ?: extension.windowsDownloadUrl
         extension.windowsEclipseVersion = windowsEclipseVersion ?: extension.windowsEclipseVersion
-
-        project.afterEvaluate {
-            extension.eclipseVersion = eclipseVersion ?: extension.eclipseVersion
-            extension.eclipseArchiveName = eclipseArchiveName ?: extension.eclipseArchiveName
-            extension.eclipseDownloadUrl = eclipseDownloadUrl ?: extension.eclipseDownloadUrl
-            extension.eclipsePluginsDirectory = eclipsePluginsDirectory ?: extension.eclipsePluginsDirectory
-        }
     }
 
     private void configureTasks(Project project) {
         project.getTasks().getByName(ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME) {
-            eclipseArchiveName = extension.eclipseArchiveName
-            eclipseDownloadUrl = extension.eclipseDownloadUrl
+            eclipseArchiveName = eclipseProperties.eclipseArchiveName
+            eclipseDownloadUrl = eclipseProperties.eclipseDownloadUrl
         }
 
         project.getTasks().getByName(ECLIPSE_UNZIP_ECLIPSE_TASK_NAME) {
-            eclipseArchiveName = extension.eclipseArchiveName
             cacheDirectory = extension.cacheDirectory
+            eclipseArchiveName = eclipseProperties.eclipseArchiveName
         }
 
         project.getTasks().getByName(ECLIPSE_CREATE_METADATA_TASK_NAME) {
             cacheDirectory = extension.cacheDirectory
-            eclipseVersion = extension.eclipseVersion
+            eclipseVersion = eclipseProperties.eclipseVersion
         }
 
         project.getTasks().getByName(ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME) {
@@ -138,7 +132,6 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
             }
         }
     }
-
 
     private static void createTasks(Project project) {
         project.task(
