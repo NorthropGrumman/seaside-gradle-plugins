@@ -43,10 +43,10 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
     public static final String ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME = "downloadEclipse"
     public static final String ECLIPSE_UNZIP_ECLIPSE_TASK_NAME = "unzipEclipse"
     public static final String ECLIPSE_COPY_FEATURES_TASK_NAME = "copyFeatures"
-    public static final String ECLIPSE_COPY_SD_PLUGINS_TASK_NAME = "copySdPlugins"
+    public static final String ECLIPSE_COPY_SD_PLUGINS_TASK_NAME = "copyCustomPlugins"
     public static final String ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME = "copyEclipsePlugins"
     public static final String ECLIPSE_CREATE_METADATA_TASK_NAME = "createMetadata"
-    public static final String ECLIPSE_CREATE_ZIP_TASK_NAME = "createZip"
+    public static final String ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME = "createZip"
 
     public String updateSiteArchiveName
     public String cacheDirectory
@@ -124,6 +124,19 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
             eclipseArchiveName = extension.eclipseArchiveName
             cacheDirectory = extension.cacheDirectory
         }
+
+        project.getTasks().getByName(ECLIPSE_CREATE_METADATA_TASK_NAME) {
+            cacheDirectory = extension.cacheDirectory
+            eclipseVersion = extension.eclipseVersion
+        }
+
+        project.getTasks().getByName(ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME) {
+            doLast {
+                from Paths.get(project.buildDir.absolutePath, "updatesite")
+                destinationDir = project.buildDir.absolutePath
+                archiveName = extension.updateSiteArchiveName
+            }
+        }
     }
 
 
@@ -192,20 +205,16 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               ])
 
         project.task(
-              ECLIPSE_CREATE_ZIP_TASK_NAME,
+              ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME,
               type: Zip,
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "Archive the update site",
-              dependsOn: ECLIPSE_CREATE_METADATA_TASK_NAME) {
-            from Paths.get(project.buildDir.absolutePath, "updatesite")
-            destinationDir = project.buildDir
-            archiveName = project.extensions.getByType(SeasideEclipseUpdateSiteExtension.class).updateSiteArchiveName
-        }
+              dependsOn: ECLIPSE_CREATE_METADATA_TASK_NAME)
 
         project.task("clean") {
             project.delete(project.buildDir)
         }
 
-        project.task("build").dependsOn(project.tasks.getByName(ECLIPSE_CREATE_ZIP_TASK_NAME))
+        project.task("build").dependsOn(project.tasks.getByName(ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME))
     }
 }

@@ -25,7 +25,7 @@ class SeasideEclipseUpdateSitePluginIT {
           SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_SD_PLUGINS_TASK_NAME,
           SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME,
           SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_METADATA_TASK_NAME,
-          SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_ZIP_TASK_NAME,
+          SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME,
     ]
 
     @Before
@@ -54,11 +54,11 @@ class SeasideEclipseUpdateSitePluginIT {
               project.tasks.getByName("clean")
         )
         Assert.assertTrue(
-              "build task does not depend on $SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_ZIP_TASK_NAME",
+              "build task does not depend on $SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME",
               project.tasks
                      .getByName("build")
                      .dependsOn
-                     .contains(project.tasks.getByName(SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_ZIP_TASK_NAME))
+                     .contains(project.tasks.getByName(SeasideEclipseUpdateSitePlugin.ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME))
         )
     }
 
