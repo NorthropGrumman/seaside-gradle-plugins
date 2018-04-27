@@ -16,12 +16,23 @@ class EclipsePropertyUtilTest {
     private static final String TEST_PROJECT_GROUP = "test.project.group"
     private static final String TEST_PROJECT_NAME = "test-project-name"
     private static final String TEST_GRADLE_USER_HOME = "/home/user/.gradle"
+    private static final String TEST_CACHES = "caches/eclipse"
+    private static final String TEST_CACHE_DIRECTORY_NAME = "$TEST_GRADLE_USER_HOME/$TEST_CACHES"
     private static final String TEST_LINUX_ECLIPSE_VERSION = "eclipse-dsl-oxygen-2-linux-gtk-x86_64"
     private static final String TEST_WINDOWS_ECLIPSE_VERSION = "eclipse-dsl-oxygen-2-win32-x86_64"
     private static final String TEST_LINUX_ECLIPSE_DOWNLOAD_URL = "http://1.2.3.4/${TEST_LINUX_ECLIPSE_VERSION}.zip"
     private static final String TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL = "http://1.2.3.4/${TEST_WINDOWS_ECLIPSE_VERSION}.zip"
+    private static final String TEST_LINUX_ECLIPSE_PLUGINS_DIRECTORY_NAME =
+          "$TEST_CACHE_DIRECTORY_NAME/$TEST_LINUX_ECLIPSE_VERSION/plugins"
+    private static final String TEST_WINDOWS_ECLIPSE_PLUGINS_DIRECTORY_NAME =
+          "$TEST_CACHE_DIRECTORY_NAME/$TEST_WINDOWS_ECLIPSE_VERSION/plugins"
+    private static final String TEST_LINUX_ECLIPSE_ARCHIVE_NAME =
+          "$TEST_CACHE_DIRECTORY_NAME/${TEST_LINUX_ECLIPSE_VERSION}.zip"
+    private static final String TEST_WINDOWS_ECLIPSE_ARCHIVE_NAME =
+          "$TEST_CACHE_DIRECTORY_NAME/${TEST_WINDOWS_ECLIPSE_VERSION}.zip"
 
     private SeasideEclipseUpdateSiteExtension extension
+    private EclipsePropertyUtil eclipseProperties
 
     @Before
     void before() {
@@ -42,6 +53,8 @@ class EclipsePropertyUtilTest {
         extension.windowsEclipseVersion = TEST_WINDOWS_ECLIPSE_VERSION
         extension.linuxDownloadUrl = TEST_LINUX_ECLIPSE_DOWNLOAD_URL
         extension.windowsDownloadUrl = TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL
+
+        eclipseProperties = new EclipsePropertyUtil(extension)
     }
 
     @Test
@@ -53,7 +66,7 @@ class EclipsePropertyUtilTest {
         assertEquals(
               "incorrect eclipse version returned on linux",
               TEST_LINUX_ECLIPSE_VERSION,
-              EclipsePropertyUtil.getEclipseVersion(extension)
+              eclipseProperties.eclipseVersion
         )
     }
 
@@ -66,7 +79,85 @@ class EclipsePropertyUtilTest {
         assertEquals(
               "incorrect eclipse version returned on windows",
               TEST_WINDOWS_ECLIPSE_VERSION,
-              EclipsePropertyUtil.getEclipseVersion(extension)
+              eclipseProperties.eclipseVersion
+        )
+    }
+
+    @Test
+    void returnsCorrectEclipseDownloadUrlOnLinux() {
+        assumeFalse(
+              "Current OS is Windows, skipping Linux test.",
+              System.getProperty("os.name").toLowerCase().startsWith("win")
+        )
+        assertEquals(
+              "incorrect eclipse download url returned for linux",
+              TEST_LINUX_ECLIPSE_DOWNLOAD_URL,
+              eclipseProperties.eclipseDownloadUrl
+        )
+    }
+
+    @Test
+    void returnsCorrectEclipseDownloadUrlOnWindows() {
+        assumeFalse(
+              "Current OS is Linux, skipping Windows test.",
+              System.getProperty("os.name").toLowerCase().startsWith("linux")
+        )
+        assertEquals(
+              "incorrect eclipse download url returned for windows",
+              TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL,
+              eclipseProperties.eclipseDownloadUrl
+        )
+    }
+
+    @Test
+    void returnsCorrectEclipsePluginsDirectoryOnLinux() {
+        assumeFalse(
+              "Current OS is Windows, skipping Linux test.",
+              System.getProperty("os.name").toLowerCase().startsWith("win")
+        )
+        assertEquals(
+              "default eclipse plugins directory on Linux is incorrect!",
+              TEST_LINUX_ECLIPSE_PLUGINS_DIRECTORY_NAME,
+              eclipseProperties.eclipsePluginsDirectory
+        )
+    }
+
+    @Test
+    void returnsCorrectEclipsePluginsDirectoryOnWindows() {
+        assumeFalse(
+              "Current OS is Linux, skipping Windows test.",
+              System.getProperty("os.name").toLowerCase().startsWith("linux")
+        )
+        assertEquals(
+              "default eclipse plugins directory on Windows is incorrect!",
+              TEST_WINDOWS_ECLIPSE_PLUGINS_DIRECTORY_NAME,
+              eclipseProperties.eclipsePluginsDirectory
+        )
+    }
+
+    @Test
+    void returnsCorrectEclipseArchiveNameOnLinux() {
+        assumeFalse(
+              "Current OS is Windows, skipping Linux test.",
+              System.getProperty("os.name").toLowerCase().startsWith("win")
+        )
+        assertEquals(
+              "default eclipse archive name on Linux is incorrect!",
+              TEST_LINUX_ECLIPSE_ARCHIVE_NAME,
+              eclipseProperties.eclipseArchiveName
+        )
+    }
+
+    @Test
+    void returnsCorrectEclipseArchiveNameOnWindows() {
+        assumeFalse(
+              "Current OS is Linux, skipping Windows test.",
+              System.getProperty("os.name").toLowerCase().startsWith("linux")
+        )
+        assertEquals(
+              "default eclipse archive name on Windows is incorrect!",
+              TEST_WINDOWS_ECLIPSE_ARCHIVE_NAME,
+              eclipseProperties.eclipseArchiveName
         )
     }
 }
