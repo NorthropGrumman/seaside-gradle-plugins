@@ -24,9 +24,19 @@ class SeasideEclipseUpdateSiteExtension {
     String linuxDownloadUrl
 
     /**
+     * The name of the linux eclipse version.
+     */
+    String linuxEclipseVersion
+
+    /**
      * The download url to the windows eclipse distribution.
      */
     String windowsDownloadUrl
+
+    /**
+     * The name of the windows eclipse version.
+     */
+    String windowsEclipseVersion
 
     SeasideEclipseUpdateSiteExtension(Project project) {
         updateSiteArchiveName = "${project.group}.${project.name}-${project.version}.zip"
