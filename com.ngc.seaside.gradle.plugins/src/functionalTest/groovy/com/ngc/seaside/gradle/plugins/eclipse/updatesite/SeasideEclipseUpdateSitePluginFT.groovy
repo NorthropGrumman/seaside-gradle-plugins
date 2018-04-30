@@ -38,8 +38,8 @@ class SeasideEclipseUpdateSitePluginFT {
 
         TestingUtilities.assertTaskSuccess(result, "service.heiverden", "build")
 
-        String projectPrefix = "com.ngc.seaside.service."
-        String projectBuildDir = Paths.get(projectDir.absolutePath, "${projectPrefix}heiverden", "build")
+        String projectPrefix = "com.ngc.seaside.service"
+        String projectBuildDir = Paths.get(projectDir.absolutePath, "${projectPrefix}.heiverden", "build")
         String updateSitePath = Paths.get(projectBuildDir, "updatesite")
         String featuresPath = Paths.get(updateSitePath, "features", "${projectPrefix}.nihao_1.2.3.SNAPSHOT.jar")
         String customPluginPath = Paths.get(updateSitePath, "plugins", "${projectPrefix}.helloworld_1.2.3.SNAPSHOT.jar")
