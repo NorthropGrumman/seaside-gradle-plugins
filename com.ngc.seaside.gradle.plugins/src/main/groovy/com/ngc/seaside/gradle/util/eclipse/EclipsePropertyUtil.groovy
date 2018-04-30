@@ -6,12 +6,21 @@ import org.gradle.internal.os.OperatingSystem
 
 import java.nio.file.Paths
 
+/**
+ * Utility class for providing values to the Eclipse updatesite plugin based on OS, etc.
+ */
 class EclipsePropertyUtil {
     private static final boolean IS_LINUX = OperatingSystem.current().isLinux()
     private static final boolean IS_WINDOWS = OperatingSystem.current().isWindows()
 
     private SeasideEclipseUpdateSiteExtension extension
 
+    /**
+     * Create an instance of EclipsePropertyUtil based on the SeasideEclipseUpdateSiteExtension. This class requires the
+     * extension to already have the required values set on it.
+     *
+     * @param extension the pre-populated extension for the Eclipse updatesite plugin
+     */
     EclipsePropertyUtil(SeasideEclipseUpdateSiteExtension extension) {
         Preconditions.checkNotNull(extension.linuxEclipseVersion, "linuxEclipseVersion not defined on extension!")
         Preconditions.checkNotNull(extension.windowsEclipseVersion, "windowsEclipseVersion not defined on extension!")
@@ -22,18 +31,34 @@ class EclipsePropertyUtil {
         this.extension = extension
     }
 
+    /**
+     * Get the OS-dependent eclipse version string.
+     * @return the OS-dependent eclipse version string
+     */
     String getEclipseVersion() {
         return IS_LINUX ? extension.linuxEclipseVersion : extension.windowsEclipseVersion
     }
 
+    /**
+     * Get the OS-dependent eclipse download url.
+     * @return the OS-dependent eclipse download url
+     */
     String getEclipseDownloadUrl() {
         return IS_LINUX ? extension.linuxDownloadUrl : extension.windowsDownloadUrl
     }
 
+    /**
+     * Get the default location where eclipse plugins are stored.
+     * @return the default eclipse plugins directory location
+     */
     String getEclipsePluginsDirectory() {
         return Paths.get(extension.cacheDirectory, eclipseVersion, "plugins")
     }
 
+    /**
+     * Get the default name of the eclipse SDK archive name.
+     * @return the default eclipse SDK archive name
+     */
     String getEclipseArchiveName() {
         return Paths.get(extension.cacheDirectory, "${eclipseVersion}.zip")
     }

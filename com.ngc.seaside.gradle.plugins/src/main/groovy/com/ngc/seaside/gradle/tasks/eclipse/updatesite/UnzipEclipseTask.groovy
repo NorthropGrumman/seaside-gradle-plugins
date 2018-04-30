@@ -17,6 +17,9 @@ class UnzipEclipseTask extends DefaultTask {
      */
     String cacheDirectory
 
+    /**
+     * Unzip the Eclipse SDK zip file, if an unzipped version of it doesn't already exist.
+     */
     @TaskAction
     void unzipEclipse() {
         if (!project.file(eclipseArchiveName - ".zip").exists()) {

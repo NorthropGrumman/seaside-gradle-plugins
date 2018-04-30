@@ -6,10 +6,23 @@ import org.gradle.internal.os.OperatingSystem
 
 import java.nio.file.Paths
 
+/**
+ * Task for creating the metadata for the Eclipse update site.
+ */
 class CreateMetadataTask extends DefaultTask {
+    /**
+     * The cached directory for the unzipped Eclipse distribution.
+     */
     String cacheDirectory
+
+    /**
+     * The name of the Eclipse version.
+     */
     String eclipseVersion
 
+    /**
+     * Create the metadata for the Eclipse update site.
+     */
     @TaskAction
     void createMetadata() {
         def fileExtension = OperatingSystem.current().isLinux() ? "" : ".exe"

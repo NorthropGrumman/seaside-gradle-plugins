@@ -44,7 +44,7 @@ class SeasideEclipseUpdateSitePluginTest {
         )
         Assert.assertNotNull(
               "copy sd plugins file task name does not exist!",
-              SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_SD_PLUGINS_TASK_NAME
+              SeasideEclipseUpdateSitePlugin.ECLIPSE_COPY_CUSTOM_PLUGINS_TASK_NAME
         )
         Assert.assertNotNull(
               "copy sd plugins file task name does not exist!",

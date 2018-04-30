@@ -17,6 +17,9 @@ class DownloadEclipseTask extends DefaultTask {
      */
     String eclipseDownloadUrl
 
+    /**
+     * Download the Eclipse SDK from the specified URL, if it doesn't already exist in the specified location.
+     */
     @TaskAction
     void downloadEclipse() {
         def destFile = project.file(eclipseArchiveName)

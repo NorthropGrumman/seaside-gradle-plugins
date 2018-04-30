@@ -38,6 +38,10 @@ class SeasideEclipseUpdateSiteExtension {
      */
     String windowsEclipseVersion
 
+    /**
+     * Create an instance of the SeasideEclipseUpdateSiteExtension
+     * @param project the project on which to create the extension
+     */
     SeasideEclipseUpdateSiteExtension(Project project) {
         updateSiteArchiveName = "${project.group}.${project.name}-${project.version}.zip"
         cacheDirectory = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, "caches", "eclipse")

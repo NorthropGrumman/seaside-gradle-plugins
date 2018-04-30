@@ -38,22 +38,79 @@ import java.nio.file.Paths
  * </ul>
  */
 class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
+    /**
+     * The eclipse task group name.
+     */
     public static final String ECLIPSE_TASK_GROUP_NAME = "Eclipse"
 
+    /**
+     * The eclipse updatesite extension name.
+     */
     public static final String ECLIPSE_UPDATE_SITE_EXTENSION_NAME = "eclipseUpdateSite"
+
+    /**
+     * The name of the task for downloading the eclipse SDK.
+     */
     public static final String ECLIPSE_DOWNLOAD_ECLIPSE_TASK_NAME = "downloadEclipse"
+
+    /**
+     * The name of the task for unzipping the eclipse SDK.
+     */
     public static final String ECLIPSE_UNZIP_ECLIPSE_TASK_NAME = "unzipEclipse"
+
+    /**
+     * The name of the task for copying features to the update site.
+     */
     public static final String ECLIPSE_COPY_FEATURES_TASK_NAME = "copyFeatures"
-    public static final String ECLIPSE_COPY_SD_PLUGINS_TASK_NAME = "copyCustomPlugins"
+
+    /**
+     * The name of the task for copying the custom plugins to the update site.
+     */
+    public static final String ECLIPSE_COPY_CUSTOM_PLUGINS_TASK_NAME = "copyCustomPlugins"
+
+    /**
+     * The name of the task for copying the eclipse plugins to the update site.
+     */
     public static final String ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME = "copyEclipsePlugins"
+
+    /**
+     * The name of the task for creating the eclipse metadata for the update site.
+     */
     public static final String ECLIPSE_CREATE_METADATA_TASK_NAME = "createMetadata"
+
+    /**
+     * The name of the task for creating the update site zip file.
+     */
     public static final String ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME = "createZip"
 
+    /**
+     * The name of the update site archive file.
+     */
     public String updateSiteArchiveName
+
+    /**
+     * The location of the cache directory.
+     */
     public String cacheDirectory
+
+    /**
+     * The download url from which to download the eclipse SDK for linux.
+     */
     public String linuxDownloadUrl
+
+    /**
+     * The version string for identifying eclipse on the filesystem in linux.
+     */
     public String linuxEclipseVersion
+
+    /**
+     * The download url from which to download the eclipse SDK for windows.
+     */
     public String windowsDownloadUrl
+
+    /**
+     * The version string for identifying eclipse on the filesystem in windows.
+     */
     public String windowsEclipseVersion
 
     protected EclipsePropertyUtil eclipseProperties
@@ -95,7 +152,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
 
     private void createExtension(Project project) {
         extension = project.extensions
-                           .create(ECLIPSE_UPDATE_SITE_EXTENSION_NAME, SeasideEclipseUpdateSiteExtension, project)
+              .create(ECLIPSE_UPDATE_SITE_EXTENSION_NAME, SeasideEclipseUpdateSiteExtension, project)
         setExtensionProperties()
     }
 
@@ -158,7 +215,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
         }
 
         project.task(
-              ECLIPSE_COPY_SD_PLUGINS_TASK_NAME,
+              ECLIPSE_COPY_CUSTOM_PLUGINS_TASK_NAME,
               type: Copy,
               group: ECLIPSE_TASK_GROUP_NAME,
               description: "Copy the custom plugins to include them in the update site") {
@@ -191,7 +248,7 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
               dependsOn: [
                     ECLIPSE_UNZIP_ECLIPSE_TASK_NAME,
                     ECLIPSE_COPY_FEATURES_TASK_NAME,
-                    ECLIPSE_COPY_SD_PLUGINS_TASK_NAME,
+                    ECLIPSE_COPY_CUSTOM_PLUGINS_TASK_NAME,
                     ECLIPSE_COPY_ECLIPSE_PLUGINS_TASK_NAME,
               ])
 
