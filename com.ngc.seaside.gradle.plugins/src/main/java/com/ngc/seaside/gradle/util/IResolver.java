@@ -1,8 +1,8 @@
-package com.ngc.seaside.gradle.api
+package com.ngc.seaside.gradle.util;
 
 /**
  * Resolver interface that creates implementation of find()
  */
-interface IResolver {
+public interface IResolver {
 
 }

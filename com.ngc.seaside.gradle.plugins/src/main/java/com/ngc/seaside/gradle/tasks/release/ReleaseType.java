@@ -1,9 +1,9 @@
-package com.ngc.seaside.gradle.tasks.release
+package com.ngc.seaside.gradle.tasks.release;
 
 /**
  * Defines the different types of releases that can be performed.
  */
-enum ReleaseType {
+public enum ReleaseType {
 
     /**
      * A snapshot release isn't a real release at all.  During this type of release, the version number is not modified.
