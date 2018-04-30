@@ -22,7 +22,7 @@ class UnzipEclipseTask extends DefaultTask {
         if (!project.file(eclipseArchiveName - ".zip").exists()) {
             project.copy {
                 from project.zipTree(project.file(eclipseArchiveName))
-                into cacheDirectory
+                into project.file(cacheDirectory)
             }
         }
     }
