@@ -4,11 +4,12 @@ import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.testkit.runner.BuildResult
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
 import java.nio.file.Paths
+
+import static org.junit.Assert.assertTrue
 
 class SeasideEclipseUpdateSitePluginFT {
     private List<File> pluginClasspath
@@ -37,27 +38,22 @@ class SeasideEclipseUpdateSitePluginFT {
 
         TestingUtilities.assertTaskSuccess(result, "service.heiverden", "build")
 
-        String projectName = "com.ngc.seaside.service.heiverden"
-        String projectBuildDir = Paths.get(pathToTheDestinationProjectDirectory().absolutePath, projectName, "build")
+        String projectPrefix = "com.ngc.seaside.service."
+        String projectBuildDir = Paths.get(projectDir.absolutePath, "${projectPrefix}heiverden", "build")
         String updateSitePath = Paths.get(projectBuildDir, "updatesite")
-        String featuresPath = Paths.get(updateSitePath, "features", "com.ngc.seaside.service.nihao_1.2.3.SNAPSHOT.jar")
-        String customPluginPath = Paths.get(
-              updateSitePath, "plugins", "com.ngc.seaside.service.helloworld_1.2.3.SNAPSHOT.jar")
+        String featuresPath = Paths.get(updateSitePath, "features", "${projectPrefix}.nihao_1.2.3.SNAPSHOT.jar")
+        String customPluginPath = Paths.get(updateSitePath, "plugins", "${projectPrefix}.helloworld_1.2.3.SNAPSHOT.jar")
         String eclipsePluginPath = Paths.get(updateSitePath, "plugins", "org.antlr.runtime_3.2.0.v201101311130.jar")
+        String artifactsPath = Paths.get(updateSitePath, "artifacts.jar")
+        String contentPath = Paths.get(updateSitePath, "content.jar")
         String updateSiteArchivePath = Paths.get(projectBuildDir, "com.ngc.seaside.test.test-name-1.0.0.zip")
 
-        Assert.assertTrue("$featuresPath directory was not created!", project.file(featuresPath).exists())
-        Assert.assertTrue("$customPluginPath directory was not created!", project.file(customPluginPath).exists())
-        Assert.assertTrue("$eclipsePluginPath directory was not created!", project.file(eclipsePluginPath).exists())
-        Assert.assertTrue(
-              "artifacts.jar directory was not created!",
-              project.file(Paths.get(updateSitePath, "artifacts.jar")).exists())
-        Assert.assertTrue(
-              "content.jar directory was not created!",
-              project.file(Paths.get(updateSitePath, "content.jar")).exists())
-        Assert.assertTrue(
-              "$updateSiteArchivePath directory was not created!",
-              project.file(updateSiteArchivePath).exists())
+        assertTrue("$featuresPath directory was not created!", project.file(featuresPath).exists())
+        assertTrue("$customPluginPath directory was not created!", project.file(customPluginPath).exists())
+        assertTrue("$eclipsePluginPath directory was not created!", project.file(eclipsePluginPath).exists())
+        assertTrue("$artifactsPath directory was not created!", project.file(artifactsPath).exists())
+        assertTrue("$contentPath directory was not created!", project.file(contentPath).exists())
+        assertTrue("$updateSiteArchivePath directory was not created!", project.file(updateSiteArchivePath).exists())
     }
 
     private static File sourceDirectoryWithTheTestProject() {
