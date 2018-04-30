@@ -115,19 +115,19 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
         }
 
         project.getTasks().getByName(ECLIPSE_UNZIP_ECLIPSE_TASK_NAME) {
-            cacheDirectory = extension.cacheDirectory
+            cacheDirectory = this.extension.cacheDirectory
             eclipseArchiveName = eclipseProperties.eclipseArchiveName
         }
 
         project.getTasks().getByName(ECLIPSE_CREATE_METADATA_TASK_NAME) {
-            cacheDirectory = extension.cacheDirectory
+            cacheDirectory = this.extension.cacheDirectory
             eclipseVersion = eclipseProperties.eclipseVersion
         }
 
         project.getTasks().getByName(ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME) {
             from Paths.get(project.buildDir.absolutePath, "updatesite")
-            destinationDir = project.buildDir.absolutePath
-            archiveName = extension.updateSiteArchiveName
+            destinationDir = project.buildDir
+            archiveName = this.extension.updateSiteArchiveName
         }
     }
 

@@ -37,12 +37,12 @@ class SeasideEclipseUpdateSitePluginFT {
 
         TestingUtilities.assertTaskSuccess(result, "service.heiverden", "build")
 
-        String updateSitePath = Paths.get(
-              pathToTheDestinationProjectDirectory().absolutePath,
-              "com.ngc.seaside.service.heiverden", "build", "updatesite")
+        String projectName = "com.ngc.seaside.service.heiverden"
+        String projectBuildDir = Paths.get(pathToTheDestinationProjectDirectory().absolutePath, projectName, "build")
+        String updateSitePath = Paths.get(projectBuildDir, "updatesite")
         String featuresPath = Paths.get(updateSitePath, "features")
         String pluginsPath = Paths.get(updateSitePath, "plugins")
-        String updateSiteArchivePath = Paths.get(updateSitePath, "com.ngc.seaside.test.test-name-1.0.0.zip")
+        String updateSiteArchivePath = Paths.get(projectBuildDir, "com.ngc.seaside.test.test-name-1.0.0.zip")
 
         Assert.assertTrue("$featuresPath directory was not created!", project.file(featuresPath).exists())
         Assert.assertTrue("$pluginsPath directory was not created!", project.file(pluginsPath).exists())
