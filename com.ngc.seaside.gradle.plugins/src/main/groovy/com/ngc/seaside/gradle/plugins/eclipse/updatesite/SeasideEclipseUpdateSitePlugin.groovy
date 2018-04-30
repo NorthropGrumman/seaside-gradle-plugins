@@ -125,11 +125,9 @@ class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
         }
 
         project.getTasks().getByName(ECLIPSE_CREATE_UPDATE_SITE_ZIP_TASK_NAME) {
-            doLast {
-                from Paths.get(project.buildDir.absolutePath, "updatesite")
-                destinationDir = project.buildDir.absolutePath
-                archiveName = extension.updateSiteArchiveName
-            }
+            from Paths.get(project.buildDir.absolutePath, "updatesite")
+            destinationDir = project.buildDir.absolutePath
+            archiveName = extension.updateSiteArchiveName
         }
     }
 
