@@ -1,0 +1,27 @@
+plugins {
+    id 'com.ngc.seaside.distribution.felixservice'
+}
+
+group = 'com.ngc.seaside'
+version = '1.0-SNAPSHOT'
+
+ext {
+    blocsCoreVersion = '2.1.1'
+}
+
+felixService {
+    systemProperties = ['foo': 'bar', 'hello': 'world']
+    programArgs = ['-foo', '-bar', '-hello', 'world']
+}
+
+configurations {
+   thirdParty {
+      transitive = false
+   }
+   bundles.extendsFrom thirdParty
+}
+
+dependencies {
+    bundles 'com.google.guava:guava:17.0'
+    thirdParty 'com.google.guava:guava:22.0'
+}
