@@ -136,4 +136,14 @@ public class VersionResolver implements IResolver {
       }
    }
 
+   /**
+    * Returns true if the given project's version is a snapshot, false otherwise.
+    * 
+    * @param project project
+    * @return true if the given project's version is a snapshot
+    */
+   public static boolean isSnapshot(Project project) {
+      return project.getVersion().toString().toUpperCase().endsWith(VERSION_SUFFIX);
+   }
+
 }

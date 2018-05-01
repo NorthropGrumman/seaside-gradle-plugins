@@ -4,6 +4,7 @@ import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.cpp.coverage.SeasideCppCoveragePlugin
 import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
+import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.BuildingExtension
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.StaticBuildConfiguration
 import com.ngc.seaside.gradle.tasks.cpp.dependencies.UnpackCppDistributionsTask
@@ -77,31 +78,6 @@ class SeasideCppParentPlugin extends AbstractProjectPlugin {
             createTasks(project)
 
             project.afterEvaluate {
-
-                repositories {
-                    mavenLocal()
-
-                    maven {
-                        url nexusConsolidated
-                    }
-                }
-
-                uploadArchives {
-                    repositories {
-                        mavenDeployer {
-                            // Use the main repo for full releases.
-                            repository(url: nexusReleases) {
-                                // Make sure that nexusUsername and nexusPassword are in your
-                                // ${gradle.user.home}/gradle.properties file.
-                                authentication(userName: nexusUsername, password: nexusPassword)
-                            }
-                            // If the version has SNAPSHOT in the name, use the snapshot repo.
-                            snapshotRepository(url: nexusSnapshots) {
-                                authentication(userName: nexusUsername, password: nexusPassword)
-                            }
-                        }
-                    }
-                }
 
                 ext {
                     // The default name of the bundle.
@@ -378,11 +354,12 @@ class SeasideCppParentPlugin extends AbstractProjectPlugin {
      * @param project
      */
     protected void applyPlugins(Project project) {
-        project.getPlugins().apply('cpp')
-        project.getPlugins().apply('maven')
-        project.getPlugins().apply('google-test-test-suite')
-        project.getPlugins().apply('org.sonarqube')
-        project.getPlugins().apply(SeasideCppCoveragePlugin)
-        project.getPlugins().apply(SeasideReleasePlugin)
+        project.plugins.apply('cpp')
+        project.plugins.apply('maven')
+        project.plugins.apply(SeasideRepositoryPlugin)
+        project.plugins.apply('google-test-test-suite')
+        project.plugins.apply('org.sonarqube')
+        project.plugins.apply(SeasideCppCoveragePlugin)
+        project.plugins.apply(SeasideReleasePlugin)
     }
 }

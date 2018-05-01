@@ -5,6 +5,7 @@ import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.analyze.SeasideCheckstylePlugin
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
+import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
 import com.ngc.seaside.gradle.util.GradleUtil
@@ -30,7 +31,6 @@ import org.gradle.api.tasks.bundling.Jar
  */
 class SeasideParentPlugin extends AbstractProjectPlugin {
 
-   public static final String REMOTE_MAVEN_REPOSITORY_NAME = 'NexusConsolidated'
    public static final String PARENT_TASK_GROUP_NAME = 'parent'
    public static final String SOURCE_JAR_TASK_NAME = 'sourcesJar'
    public static final String JAVADOC_JAR_TASK_NAME = 'javadocJar'
@@ -50,36 +50,10 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
       project.configure(project) {
          applyPlugins(project)
 
-         // Make sure that all required properties are set.
-         doRequireGradleProperties(project,
-                                   'nexusConsolidated',
-                                   'nexusReleases',
-                                   'nexusSnapshots',
-                                   'nexusUsername',
-                                   'nexusPassword')
-         doRequireSystemProperties(project)
          createTasks(project)
 
-         /**
-          * Add the standard repositories. All of the seaside content should be downloaded from
-          * the nexus consolidated repository.
-          */
-         repositories {
-            mavenLocal()
-
-            maven {
-               credentials {
-                  username nexusUsername
-                  password nexusPassword
-               }
-               name REMOTE_MAVEN_REPOSITORY_NAME
-               url nexusConsolidated
-            }
-         }
-
          project.afterEvaluate {
-            project.logger.
-                  lifecycle(String.format("%s: Setting project version to %s", project.name, project.version))
+            project.logger.lifecycle("${project.name}: Setting project version to ${project.version}")
             /**
              * Ensure to add the doclint option to the javadoc task if using Java 8.
              */
@@ -131,26 +105,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                   attributes('Bundle-Name': "$bundleName",
                              'Bundle-SymbolicName': "$bundleName",
                              'Bundle-Version': Versions.makeOsgiCompliantVersion("${project.version}"))
-               }
-            }
-
-            /**
-             * The nexus upload configuration.
-             */
-            uploadArchives {
-               repositories {
-                  mavenDeployer {
-                     // Use the main repo for full releases.
-                     repository(url: nexusReleases) {
-                        // Make sure that nexusUsername and nexusPassword are in your
-                        // ${gradle.user.home}/gradle.properties file.
-                        authentication(userName: nexusUsername, password: nexusPassword)
-                     }
-                     // If the version has SNAPSHOT in the name, use the snapshot repo.
-                     snapshotRepository(url: nexusSnapshots) {
-                        authentication(userName: nexusUsername, password: nexusPassword)
-                     }
-                  }
                }
             }
 
@@ -224,20 +178,9 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
    /**
     *
     * @param project
-    * @param propertyName
-    * @param propertyNames
-    */
-   protected static void doRequireGradleProperties(Project project, String propertyName, String... propertyNames) {
-      GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
-   }
-
-   /**
-    *
-    * @param project
     */
    protected static void doRequireSystemProperties(Project project) {
       GradleUtil.requireSystemProperties(project.properties, 'sonar.host.url')
-
    }
 
    /**
@@ -245,18 +188,19 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
     * @param project
     */
    private static void applyPlugins(Project project) {
-      project.logger.info(String.format("Applying plugins for %s", project.name))
-      project.getPlugins().apply('java')
-      project.getPlugins().apply('java-library')
-      project.getPlugins().apply('maven')
-      project.getPlugins().apply('eclipse')
-      project.getPlugins().apply('jacoco')
-      project.getPlugins().apply('org.sonarqube')
-      project.getPlugins().apply('com.github.ben-manes.versions')
-      project.getPlugins().apply('com.github.ksoichiro.console.reporter')
-      project.getPlugins().apply(SeasideReleasePlugin)
-      project.getPlugins().apply(SeasideCiPlugin)
-      project.getPlugins().apply(SeasideCheckstylePlugin)
+      project.logger.info("Applying plugins for ${project.name}")
+      project.plugins.apply('java')
+      project.plugins.apply('java-library')
+      project.plugins.apply('maven')
+      project.plugins.apply(SeasideRepositoryPlugin)
+      project.plugins.apply('eclipse')
+      project.plugins.apply('jacoco')
+      project.plugins.apply('org.sonarqube')
+      project.plugins.apply('com.github.ben-manes.versions')
+      project.plugins.apply('com.github.ksoichiro.console.reporter')
+      project.plugins.apply(SeasideReleasePlugin)
+      project.plugins.apply(SeasideCiPlugin)
+      project.plugins.apply(SeasideCheckstylePlugin)
    }
 
    /**
