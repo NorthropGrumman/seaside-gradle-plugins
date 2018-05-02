@@ -1,16 +1,31 @@
 package com.ngc.seaside.gradle.extensions.distribution;
 
+import com.ngc.seaside.gradle.plugins.distribution.SeasideFelixServiceDistributionPlugin;
+
+import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.UnknownConfigurationException;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import groovy.lang.Closure;
+
+/**
+ * Extension of the {@link SeasideFelixServiceDistributionPlugin}. This extension allows you to change the distribution
+ * name, the {@code config.properties} file, add system properties and program arguments to the distribution executable,
+ * modify the scripts used for starting the distribution, and adding more configurations for determining the
+ * distribution's bundles.
+ */
 public class SeasideFelixServiceDistributionExtension {
 
    public static final String NAME = "felixService";
@@ -20,11 +35,76 @@ public class SeasideFelixServiceDistributionExtension {
    private File configFile;
    private Map<String, String> systemProperties = new LinkedHashMap<>();
    private List<String> programArgs = new ArrayList<>();
-   private final ScriptConfiguration scriptHandler;
+   private Set<Configuration> bundleConfigurations = new LinkedHashSet<>();
+   private final ScriptConfiguration scriptConfiguration;
 
    public SeasideFelixServiceDistributionExtension(Project project) {
       this.project = project;
-      this.scriptHandler = new ScriptConfiguration(project);
+      this.scriptConfiguration = new ScriptConfiguration(project);
+   }
+
+   /**
+    * Returns the set of bundle configurations.
+    * 
+    * @return the set of bundle configurations
+    */
+   public Set<Configuration> getBundleConfigurations() {
+      return bundleConfigurations;
+   }
+
+   /**
+    * Sets the set of bundle configurations to the given configurations. Note that unlike
+    * {@link #bundleConfigurations(Iterable)} this replaces any previously defined includes. The elements can be
+    * either of type {@link CharSequence} or {@link Configuration}.
+    * 
+    * @param configurations bundle configurations
+    * @return this
+    */
+   public SeasideFelixServiceDistributionExtension setBundleConfigurations(Iterable<Object> configurations) {
+      this.bundleConfigurations.clear();
+      return bundleConfigurations(configurations);
+   }
+
+   /**
+    * Adds the given configuration to the set of bundle configurations. The object can be either of type
+    * {@link CharSequence} or {@link Configuration}.
+    * 
+    * @param configuration configuration to add
+    * @return this
+    */
+   public SeasideFelixServiceDistributionExtension bundleConfiguration(Object configuration) {
+      return bundleConfigurations(configuration);
+   }
+
+   /**
+    * Adds the given configurations to the set of bundle configurations. The elements can be either of type
+    * {@link CharSequence} or {@link Configuration}.
+    * 
+    * @param configurations configurations to add
+    * @return this
+    */
+   public SeasideFelixServiceDistributionExtension bundleConfigurations(Object... configurations) {
+      return bundleConfigurations(Arrays.asList(configurations));
+   }
+
+   /**
+    * Adds the given configurations to the set of bundle configurations. The elements can be either of type
+    * {@link CharSequence} or {@link Configuration}.
+    * 
+    * @param configurations configurations to add
+    * @return this
+    */
+   public SeasideFelixServiceDistributionExtension bundleConfigurations(Iterable<Object> configurations) {
+      for (Object configuration : configurations) {
+         if (configuration instanceof CharSequence) {
+            this.bundleConfigurations.add(project.getConfigurations().getByName(configuration.toString()));
+         } else if (configuration instanceof Configuration) {
+            this.bundleConfigurations.add((Configuration) configuration);
+         } else {
+            throw new UnknownConfigurationException("Unknown configuration: " + configuration);
+         }
+      }
+      return this;
    }
 
    /**
@@ -33,7 +113,29 @@ public class SeasideFelixServiceDistributionExtension {
     * @return the object for getting and setting the script files
     */
    public ScriptConfiguration getScripts() {
-      return scriptHandler;
+      return scriptConfiguration;
+   }
+
+   /**
+    * Executes the given action against the script configuration.
+    * 
+    * @param action the action to execute to configure the script files
+    * @return this
+    */
+   public SeasideFelixServiceDistributionExtension scripts(Action<ScriptConfiguration> action) {
+      action.execute(scriptConfiguration);
+      return this;
+   }
+
+   /**
+    * Calls the given closure against the script configuration.
+    * 
+    * @param c closure
+    * @return this
+    */
+   public SeasideFelixServiceDistributionExtension scripts(Closure<?> c) {
+      c.call(scriptConfiguration);
+      return this;
    }
 
    /**
@@ -202,4 +304,5 @@ public class SeasideFelixServiceDistributionExtension {
       return getProgramArgs().stream()
                              .collect(Collectors.joining(" "));
    }
+   
 }

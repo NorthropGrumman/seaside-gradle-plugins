@@ -1,4 +1,5 @@
 plugins {
+    id 'com.ngc.seaside.repository'
     id 'com.ngc.seaside.distribution.felixservice'
 }
 
@@ -9,19 +10,20 @@ ext {
     blocsCoreVersion = '2.1.1'
 }
 
-felixService {
-    systemProperties = ['foo': 'bar', 'hello': 'world']
-    programArgs = ['-foo', '-bar', '-hello', 'world']
-}
-
 configurations {
    thirdParty {
       transitive = false
    }
-   bundles.extendsFrom thirdParty
+}
+
+felixService {
+    systemProperties = ['foo': 'bar', 'hello': 'world']
+    programArgs = ['-foo', '-bar', '-hello', 'world']
+    bundleConfiguration 'thirdParty'
 }
 
 dependencies {
-    bundles 'com.google.guava:guava:17.0'
-    thirdParty 'com.google.guava:guava:22.0'
+    bundles 'org.apache.velocity:velocity:1.7' // commons-collections-3.2.1 dependency
+    bundles 'commons-collections:commons-collections:3.0'
+    thirdParty 'org.apache.velocity:velocity:1.5' // commons-collections-3.1 dependency
 }

@@ -14,6 +14,8 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.stream.Collectors
+
 import static com.ngc.seaside.gradle.plugins.distribution.SeasideFelixServiceDistributionPlugin.*
 class SeasideFelixServiceDistributionPluginFT {
 
@@ -53,10 +55,21 @@ class SeasideFelixServiceDistributionPluginFT {
       assertTrue(Files.isRegularFile(unzippedDir.resolve(BIN_DIRECTORY).resolve('start.bat')))
       assertTrue(Files.isRegularFile(unzippedDir.resolve(BIN_DIRECTORY).resolve('start.sh')))
       assertTrue(Files.isDirectory(unzippedDir.resolve(RESOURCES_DIRECTORY)))
+      assertTrue(Files.isRegularFile(unzippedDir.resolve(RESOURCES_DIRECTORY).resolve('example.scenario')))
       assertTrue(Files.isDirectory(unzippedDir.resolve(PLATFORM_DIRECTORY)))
       assertTrue(Files.list(unzippedDir.resolve(PLATFORM_DIRECTORY)).count() >= DEFAULT_PLATFORM_DEPENDENCIES.size());
       assertTrue(Files.isRegularFile(unzippedDir.resolve(CONFIG_DIRECTORY).resolve('config.properties')))
       assertTrue(Files.isDirectory(unzippedDir.resolve(BUNDLES_DIRECTORY)))
       assertTrue(Files.list(unzippedDir.resolve(BUNDLES_DIRECTORY)).count() >= DEFAULT_BUNDLE_DEPENDENCIES.size());
+      Set<String> bundles = Files.list(unzippedDir.resolve(BUNDLES_DIRECTORY))
+            .collect(Collectors.toSet())
+            .collect { it.fileName}
+            .collect { it.toString() }
+      assertTrue(bundles.toString(), 'org.apache.velocity.velocity-1.7.jar' in bundles)
+      assertTrue(bundles.toString(), 'org.apache.velocity.velocity-1.5.jar' in bundles)
+      assertTrue(bundles.toString(), 'commons-collections.commons-collections-3.2.1.jar' in bundles)
+      assertFalse(bundles.toString(), 'commons-collections.commons-collections-3.1.jar' in bundles)
+      assertFalse(bundles.toString(), 'commons-collections.commons-collections-3.0.jar' in bundles)
+      
    }
 }

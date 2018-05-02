@@ -2,7 +2,6 @@ package com.ngc.seaside.gradle.plugins.distribution;
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin;
 import com.ngc.seaside.gradle.extensions.distribution.SeasideFelixServiceDistributionExtension;
-import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin;
 import com.ngc.seaside.gradle.tasks.distribution.SimpleTemplateTask;
 
 import org.gradle.api.GradleException;
@@ -48,11 +47,11 @@ import java.util.Set;
  * </ul>
  * 
  * <p>
- * This plugin provides three configurations:
+ * This plugin provides two configurations:
  * <ul>
  * <li>{@value #BUNDLES_CONFIG_NAME} - bundles dependencies. This is the primary configuration used to add bundles
- * to the OSGi framework. You can create another bundle configuration with different settings by have the bundle
- * configuration {@link Configuration#extendsFrom(Configuration...) extend} the bundle configuration. For example:
+ * to the OSGi framework. You can create another bundle configuration with different settings by adding them to the
+ * extension; for example:
  * 
  * <pre>
  * apply plugin: 'com.ngc.seaside.distribution.felixservice'
@@ -60,7 +59,9 @@ import java.util.Set;
  *    thirdParty {
  *       transitive = false
  *    }
- *    bundles.extendsFrom thirdParty
+ * }
+ * felixService {
+ *    bundleConfiguration 'thirdParty' // bundle configuration already added by default
  * }
  * </pre>
  * 
@@ -144,7 +145,6 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    private void applyPlugins(Project project) {
       project.getPlugins().apply(BasePlugin.class);
       project.getPlugins().apply(MavenPlugin.class);
-      project.getPlugins().apply(SeasideRepositoryPlugin.class);
    }
 
    private void createConfigurations(Project project) {
@@ -156,13 +156,14 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          config.setTransitive(true);
          config.setDescription("Configuration for core bundle dependencies needed by the service distribution");
       });
-      project.getConfigurations().create(BUNDLES_CONFIG_NAME, config -> {
+      Configuration bundle = project.getConfigurations().create(BUNDLES_CONFIG_NAME, config -> {
          config.setTransitive(true);
          config.setDescription("Configuration for bundle dependencies needed by the service distribution");
          config.extendsFrom(core);
       });
       project.getExtensions()
-             .findByType(SeasideFelixServiceDistributionExtension.class);
+             .findByType(SeasideFelixServiceDistributionExtension.class)
+             .bundleConfiguration(bundle);
    }
 
    private void createExtension(Project project) {
@@ -170,7 +171,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          SeasideFelixServiceDistributionExtension.class,
          project);
    }
-
+   
    private void addDefaultDependencies(Project project) {
       project.getConfigurations().getByName(PLATFORM_CONFIG_NAME).defaultDependencies(dps -> {
          DependencyHandler h = project.getDependencies();
@@ -266,26 +267,26 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          tasks.getByName(LifecycleBasePlugin.BUILD_TASK_NAME).dependsOn(task);
          task.setDestinationDir(new File(project.getBuildDir(), DISTRIBUTION_DIRECTORY));
          task.setIncludeEmptyDirs(true);
-         
+
          project.afterEvaluate(__ -> {
             File skeleton = createDistributionSkeleton();
             task.setArchiveName(extension.getDistributionName());
             task.from(skeleton);
             task.from(createWindowsScript.getDestination(), spec -> spec.into(BIN_DIRECTORY));
             task.from(createLinuxScript.getDestination(), spec -> spec.into(BIN_DIRECTORY));
-            task.from(project.getConfigurations().getByName(PLATFORM_CONFIG_NAME), 
+            task.from(project.getConfigurations().getByName(PLATFORM_CONFIG_NAME),
                spec -> spec.into(PLATFORM_DIRECTORY));
             task.from(createConfig.getDestination(), spec -> spec.into(CONFIG_DIRECTORY));
-            task.from(RUNTIME_RESOURCES_DIRECTORY, spec -> spec.into(RESOURCES_DIRECTORY));
-            Set<ResolvedArtifact> resolvedArtifacts = project.getConfigurations()
-                                                             .getByName(BUNDLES_CONFIG_NAME)
-                                                             .getResolvedConfiguration()
-                                                             .getResolvedArtifacts();
-            for (ResolvedArtifact artifact : resolvedArtifacts) {
-               task.from(artifact.getFile(), spec -> {
-                  spec.into(BUNDLES_DIRECTORY);
-                  spec.rename(filename -> bundleFilename(artifact, filename));
-               });
+            task.from(project.file(RUNTIME_RESOURCES_DIRECTORY), spec -> spec.into(RESOURCES_DIRECTORY));
+            for (Configuration configuration : extension.getBundleConfigurations()) {
+               Set<ResolvedArtifact> resolvedArtifacts = configuration.getResolvedConfiguration()
+                                                                      .getResolvedArtifacts();
+               for (ResolvedArtifact artifact : resolvedArtifacts) {
+                  task.from(artifact.getFile(), spec -> {
+                     spec.into(BUNDLES_DIRECTORY);
+                     spec.rename(filename -> bundleFilename(artifact, filename));
+                  });
+               }
             }
          });
 
@@ -304,7 +305,8 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    /**
     * Creates the folder structure of the distribution. This is necessary so that if, for example, there are no
     * resources to be copied, the resources folder is still created.
-    * @return the temporary folder 
+    * 
+    * @return the temporary folder
     */
    private File createDistributionSkeleton() {
       try {
@@ -319,7 +321,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          throw new UncheckedIOException(e);
       }
    }
-   
+
    /**
     * Renames the bundle file to ensure that the group id is included in the filename.
     * 
