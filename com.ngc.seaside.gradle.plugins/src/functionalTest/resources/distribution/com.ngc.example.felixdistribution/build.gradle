@@ -23,7 +23,8 @@ felixService {
 }
 
 dependencies {
-    bundles 'org.apache.velocity:velocity:1.7' // commons-collections-3.2.1 dependency
-    bundles 'commons-collections:commons-collections:3.0'
-    thirdParty 'org.apache.velocity:velocity:1.5' // commons-collections-3.1 dependency
+    bundles 'org.eclipse.xtend:org.eclipse.xtend.lib:2.13.0' // org.eclipse.xtend.lib.macro-2.13.0 dependency
+    bundles 'org.eclipse.xtend:org.eclipse.xtend.lib.macro:2.11.0'
+    bundles 'commons-collections:commons-collections:3.0' // Not osgi compliant
+    thirdParty 'org.eclipse.xtend:org.eclipse.xtend.lib:2.12.0' // org.eclipse.xtend.lib.macro-2.12.0 dependency
 }

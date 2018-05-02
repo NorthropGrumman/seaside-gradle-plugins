@@ -4,10 +4,12 @@ import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin;
 import com.ngc.seaside.gradle.extensions.distribution.SeasideFelixServiceDistributionExtension;
 import com.ngc.seaside.gradle.tasks.distribution.SimpleTemplateTask;
 
+import org.apache.commons.io.IOUtils;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ExcludeRule;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
@@ -17,8 +19,11 @@ import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.bundling.Zip;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -27,6 +32,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * Plugin for creating an OSGi service distribution that can be deployed with Apache Felix.
@@ -132,6 +142,9 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
       "com.ngc.blocs:component.impl.common.componentutilities:$blocsCoreVersion",
       "com.ngc.blocs:service.notification.impl.common.notificationservice:$blocsCoreVersion",
       "com.ngc.blocs:service.thread.impl.common.threadservice:$blocsCoreVersion"));
+   public static final List<String> EXCLUDED_BUNDLES = Collections.unmodifiableList(Arrays.asList(
+      "org.osgi:org.osgi.core",
+      "org.osgi:org.osgi.enterprise"));
 
    @Override
    protected void doApply(Project project) {
@@ -149,7 +162,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
 
    private void createConfigurations(Project project) {
       project.getConfigurations().create(PLATFORM_CONFIG_NAME, config -> {
-         config.setTransitive(true);
+         config.setTransitive(false);
          config.setDescription("Configuration for dependencies required by the service distribution platform");
       });
       Configuration core = project.getConfigurations().create(CORE_BUNDLES_CONFIG_NAME, config -> {
@@ -161,9 +174,23 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          config.setDescription("Configuration for bundle dependencies needed by the service distribution");
          config.extendsFrom(core);
       });
-      project.getExtensions()
-             .findByType(SeasideFelixServiceDistributionExtension.class)
-             .bundleConfiguration(bundle);
+      SeasideFelixServiceDistributionExtension extension = project.getExtensions()
+                                                                  .findByType(
+                                                                     SeasideFelixServiceDistributionExtension.class);
+      extension.bundleConfiguration(bundle);
+
+      project.afterEvaluate(__ -> {
+         // Exclude certain bundles
+         for (Configuration configuration : extension.getBundleConfigurations()) {
+            for (String excludedBundle : EXCLUDED_BUNDLES) {
+               Map<String, String> properties = new LinkedHashMap<>();
+               String[] parts = excludedBundle.split(":");
+               properties.put(ExcludeRule.GROUP_KEY, parts[0]);
+               properties.put(ExcludeRule.MODULE_KEY, parts[1]);
+               configuration.exclude(properties);
+            }
+         }
+      });
    }
 
    private void createExtension(Project project) {
@@ -171,7 +198,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          SeasideFelixServiceDistributionExtension.class,
          project);
    }
-   
+
    private void addDefaultDependencies(Project project) {
       project.getConfigurations().getByName(PLATFORM_CONFIG_NAME).defaultDependencies(dps -> {
          DependencyHandler h = project.getDependencies();
@@ -282,10 +309,18 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
                Set<ResolvedArtifact> resolvedArtifacts = configuration.getResolvedConfiguration()
                                                                       .getResolvedArtifacts();
                for (ResolvedArtifact artifact : resolvedArtifacts) {
-                  task.from(artifact.getFile(), spec -> {
-                     spec.into(BUNDLES_DIRECTORY);
-                     spec.rename(filename -> bundleFilename(artifact, filename));
-                  });
+                  if (isOsgiArtifact(artifact)) {
+                     task.from(artifact.getFile(), spec -> {
+                        spec.into(BUNDLES_DIRECTORY);
+                        spec.rename(filename -> bundleFilename(artifact, filename));
+                     });
+                  } else {
+                     ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
+                     project.getLogger().info("Excluding '{}:{}:{}': not an OSGi bundle",
+                        id.getGroup(),
+                        id.getName(),
+                        id.getVersion());
+                  }
                }
             }
          });
@@ -338,6 +373,30 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
       }
       name.append('.').append(artifact.getExtension());
       return name.toString();
+   }
+
+   /**
+    * Returns {@code true} if the given artifact represents an OSGi compliant bundle.
+    * 
+    * @param artifact artifact
+    * @return {@code true} if the given artifact represents an OSGi compliant bundle
+    */
+   private boolean isOsgiArtifact(ResolvedArtifact artifact) {
+      File file = artifact.getFile();
+      try (ZipFile zipFile = new ZipFile(file)) {
+         ZipEntry entry = zipFile.stream()
+                                 .filter(e -> !e.isDirectory())
+                                 .filter(e -> e.getName().equals("META-INF/MANIFEST.MF"))
+                                 .findAny()
+                                 .orElseThrow(() -> new ZipException());
+         String content = IOUtils.toString(zipFile.getInputStream(entry), Charset.defaultCharset());
+         Pattern osgiPattern = Pattern.compile("^Bundle-SymbolicName:", Pattern.MULTILINE);
+         return osgiPattern.matcher(content).find();
+      } catch (ZipException e) {
+         return false;
+      } catch (IOException e) {
+         throw new UncheckedIOException(e);
+      }
    }
 
 }

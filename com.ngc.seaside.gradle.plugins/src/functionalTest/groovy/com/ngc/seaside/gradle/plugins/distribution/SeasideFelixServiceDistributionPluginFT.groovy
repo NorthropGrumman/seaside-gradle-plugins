@@ -65,11 +65,11 @@ class SeasideFelixServiceDistributionPluginFT {
             .collect(Collectors.toSet())
             .collect { it.fileName}
             .collect { it.toString() }
-      assertTrue(bundles.toString(), 'org.apache.velocity.velocity-1.7.jar' in bundles)
-      assertTrue(bundles.toString(), 'org.apache.velocity.velocity-1.5.jar' in bundles)
-      assertTrue(bundles.toString(), 'commons-collections.commons-collections-3.2.1.jar' in bundles)
-      assertFalse(bundles.toString(), 'commons-collections.commons-collections-3.1.jar' in bundles)
+      assertTrue(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib-2.13.0.jar' in bundles)
+      assertTrue(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib-2.12.0.jar' in bundles)
+      assertTrue(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib.macro-2.13.0.jar' in bundles)
+      assertFalse(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib.macro-2.11.0.jar' in bundles)
+      assertFalse(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib.macro-2.12.0.jar' in bundles)
       assertFalse(bundles.toString(), 'commons-collections.commons-collections-3.0.jar' in bundles)
-      
    }
 }
