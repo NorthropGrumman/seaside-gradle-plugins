@@ -71,5 +71,7 @@ class SeasideFelixServiceDistributionPluginFT {
       assertFalse(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib.macro-2.11.0.jar' in bundles)
       assertFalse(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib.macro-2.12.0.jar' in bundles)
       assertFalse(bundles.toString(), 'commons-collections.commons-collections-3.0.jar' in bundles)
+      assertFalse(bundles.toString(), 'org.osgi.org.osgi.core-5.0.jar' in bundles)
+      assertFalse(bundles.toString(), 'org.osgi.org.osgi.core-6.0.jar' in bundles)
    }
 }
