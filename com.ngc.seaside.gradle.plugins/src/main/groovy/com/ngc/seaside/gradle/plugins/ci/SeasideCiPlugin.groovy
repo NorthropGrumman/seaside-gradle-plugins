@@ -4,8 +4,10 @@ import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.ci.SeasideCiExtension
 import com.ngc.seaside.gradle.tasks.dependencies.PopulateMaven2Repository
 import com.ngc.seaside.gradle.util.PropertyUtils
+import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.tasks.bundling.Zip
 
 /**
@@ -46,6 +48,7 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
    public static final String NOTHING_TASK_NAME = 'nothing'
    public static final String POPULATE_M2_REPO_TASK_NAME = 'populateM2repo'
    public static final String CREATE_M2_REPO_ARCHIVE_TASK_NAME = 'm2repo'
+   public static final String CONTINUOUS_INTEGRATION_TASK_NAME = 'ci'
 
    /**
     * The default name of the directory that will contain the m2 dependencies.
@@ -86,6 +89,7 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
 
    @Override
    void doApply(Project project) {
+      project.getPlugins().apply('checkstyle')
       project.configure(project) {
          configureExtensions(project)
          createTasks(project)
@@ -128,6 +132,24 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             group: AUDITING_TASK_GROUP_NAME,
             description: 'Creates a ZIP archive of the populated m2 repository.'
       )
+
+      project.tasks.withType(Checkstyle) { task ->
+         enabled = project.gradle.startParameter.taskNames.contains(task.name) }
+
+      // do not make clean a dependency it seems to run after all the other task have been run
+      def buildTask = taskResolver.findTask("build")
+      def cleanTask = taskResolver.findTask("clean")
+      def installTask = taskResolver.findTask("install")
+      def checkStyleMain = taskResolver.findTask("checkstyleMain")
+      def checkStyleTest = taskResolver.findTask("checkstyleTest")
+      Task ci = project.task(
+            CONTINUOUS_INTEGRATION_TASK_NAME,
+            dependsOn: [buildTask, checkStyleMain, checkStyleTest, installTask],
+            type: DefaultTask,
+            group: AUDITING_TASK_GROUP_NAME,
+            description: 'does the checkStyleMain and checkStyleTest'
+      )
+
    }
 
    /**
