@@ -2,7 +2,6 @@ package com.ngc.seaside.gradle.plugins.eclipse.feature
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.eclipse.feature.SeasideEclipseFeatureExtension
-import com.ngc.seaside.gradle.util.Versions
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
@@ -65,6 +64,8 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
             project.artifacts {
                 feature project.tasks.getByName(ECLIPSE_CREATE_JAR_TASK_NAME)
             }
+
+            project.defaultTasks = ["build"]
         }
     }
 
@@ -94,14 +95,12 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
               description: "Create the eclipse feature file jar",
               dependsOn: ECLIPSE_COPY_FEATURE_FILE_TASK_NAME)
 
-        project.task(
-              ECLIPSE_COPY_FEATURE_FILE_TASK_NAME,
-              type: Copy,
-              group: ECLIPSE_TASK_GROUP_NAME,
-              description: "Copy the feature file to the correct location") {
-            from Paths.get("src", "main", "resources"), { include("feature.xml") }
-            expand("osgiVersion": Versions.makeOsgiCompliantVersion("${project.version}"))
-            destinationDir = project.file(Paths.get(project.buildDir.absolutePath, "tmp"))
-        }
+       project.task(
+             ECLIPSE_COPY_FEATURE_FILE_TASK_NAME,
+             type: Copy,
+             group: ECLIPSE_TASK_GROUP_NAME,
+             description: "Copy the feature file to the correct location")
+
+        project.getTasks().getByName("build").dependsOn(ECLIPSE_CREATE_JAR_TASK_NAME)
     }
 }
