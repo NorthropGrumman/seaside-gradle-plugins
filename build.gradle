@@ -1,4 +1,5 @@
 buildscript {
+    System.properties['javax.net.ssl.trustStore'] = rootProject.file('.gradle/cacerts/cacerts').absolutePath
     ext {
         bootstrapDirectory = "${project.buildDir}/bootstrapping"
         releaseInProgress = project.hasProperty('bootstrapRelease')

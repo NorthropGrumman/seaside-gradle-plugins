@@ -22,7 +22,8 @@
 target/
 
 # Gradle
-.gradle
+.gradle/*
+!.gradle/cacerts
 build/
 out/
 gradle-app.setting

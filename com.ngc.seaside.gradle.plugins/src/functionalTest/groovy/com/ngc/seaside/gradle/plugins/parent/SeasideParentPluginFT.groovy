@@ -42,18 +42,9 @@ class SeasideParentPluginFT {
         } catch(Exception e) {
             // ignore
         }
-        def sonarProperty = properties['systemProp.sonar.host.url']
+        String sonarProperty = properties['systemProp.sonar.host.url']
         if (sonarProperty != null) {
-            URL u = new URL(sonarProperty)
-            try {
-                HttpURLConnection huc = u.openConnection()
-                huc.requestMethod = "GET"
-                huc.connect()
-                def response = huc.responseCode
-                assumeTrue(response < 400)
-            } catch(Exception e) {
-                assumeNoException(e)
-            }
+            TestingUtilities.tryToConnectToUrl(sonarProperty)
         }
     }
 
