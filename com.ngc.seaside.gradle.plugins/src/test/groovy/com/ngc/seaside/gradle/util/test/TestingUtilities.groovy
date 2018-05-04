@@ -50,6 +50,10 @@ class TestingUtilities {
         )
     }
 
+    static assertFilePathsSame(String message, String expected, String actual) {
+        Assert.assertEquals(message, Paths.get(expected), Paths.get(actual))
+    }
+
     static void tryToConnectToUrl(String urlString) {
         def url = new URL(urlString)
         try {

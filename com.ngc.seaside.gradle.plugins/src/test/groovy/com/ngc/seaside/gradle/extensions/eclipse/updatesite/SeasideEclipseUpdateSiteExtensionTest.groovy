@@ -1,11 +1,10 @@
 package com.ngc.seaside.gradle.extensions.eclipse.updatesite
 
+import com.ngc.seaside.gradle.util.test.TestingUtilities
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 import org.junit.Assert
-import org.junit.Assume
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -63,10 +62,10 @@ class SeasideEclipseUpdateSiteExtensionTest {
     @Test
     void hasCacheDirectoryProperty() {
         Assert.assertNotNull("cacheDirectory property doesn't exist!", extension.cacheDirectory)
-        Assert.assertEquals(
+        TestingUtilities.assertFilePathsSame(
               "default cache directory is incorrect!",
-              extension.cacheDirectory,
-              TEST_CACHE_DIRECTORY_NAME
+              TEST_CACHE_DIRECTORY_NAME,
+              extension.cacheDirectory
         )
     }
 
