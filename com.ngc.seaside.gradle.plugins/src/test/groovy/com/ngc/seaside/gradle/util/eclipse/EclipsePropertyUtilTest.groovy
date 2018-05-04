@@ -34,9 +34,11 @@ class EclipsePropertyUtilTest {
     private SeasideEclipseUpdateSiteExtension extension
     private EclipsePropertyUtil eclipseProperties
 
+    private Project project
+
     @Before
     void before() {
-        def project = mock(Project.class)
+        project = mock(Project.class)
         when(project.group).thenReturn(TEST_PROJECT_GROUP)
         when(project.name).thenReturn(TEST_PROJECT_NAME)
         when(project.version).thenReturn(TEST_PROJECT_VERSION)
@@ -110,7 +112,25 @@ class EclipsePropertyUtilTest {
     }
 
     @Test
-    void returnsCorrectEclipsePluginsDirectoryOnLinux() {
+    void returnsCorrectEclipsePluginsDirectory() {
+        extension = new SeasideEclipseUpdateSiteExtension(project)
+        extension.linuxEclipseVersion = TEST_LINUX_ECLIPSE_VERSION
+        extension.windowsEclipseVersion = TEST_WINDOWS_ECLIPSE_VERSION
+        extension.linuxDownloadUrl = TEST_LINUX_ECLIPSE_DOWNLOAD_URL
+        extension.windowsDownloadUrl = TEST_WINDOWS_ECLIPSE_DOWNLOAD_URL
+        extension.eclipsePluginsDirectory = "/tmp/eclipse/plugins"
+
+        eclipseProperties = new EclipsePropertyUtil(extension)
+
+        assertEquals(
+              "configured eclipse plugins directory is incorrect!",
+              "/tmp/eclipse/plugins",
+              eclipseProperties.eclipsePluginsDirectory
+        )
+    }
+
+    @Test
+    void returnsCorrectDefaultEclipsePluginsDirectoryOnLinux() {
         assumeFalse(
               "Current OS is Windows, skipping Linux test.",
               System.getProperty("os.name").toLowerCase().startsWith("win")
@@ -123,7 +143,7 @@ class EclipsePropertyUtilTest {
     }
 
     @Test
-    void returnsCorrectEclipsePluginsDirectoryOnWindows() {
+    void returnsCorrectDefaultEclipsePluginsDirectoryOnWindows() {
         assumeFalse(
               "Current OS is Linux, skipping Windows test.",
               System.getProperty("os.name").toLowerCase().startsWith("linux")

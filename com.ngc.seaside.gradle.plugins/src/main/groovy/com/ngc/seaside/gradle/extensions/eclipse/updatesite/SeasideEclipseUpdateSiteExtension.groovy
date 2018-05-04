@@ -19,6 +19,11 @@ class SeasideEclipseUpdateSiteExtension {
     String cacheDirectory
 
     /**
+     * The directory in which eclipse plugins are stored. This property is optional.
+     */
+    String eclipsePluginsDirectory
+
+    /**
      * The download url to the linux eclipse distribution.
      */
     String linuxDownloadUrl

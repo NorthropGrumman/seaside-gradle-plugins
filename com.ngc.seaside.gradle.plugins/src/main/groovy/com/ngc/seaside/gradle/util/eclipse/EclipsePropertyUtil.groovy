@@ -48,16 +48,16 @@ class EclipsePropertyUtil {
     }
 
     /**
-     * Get the default location where eclipse plugins are stored.
-     * @return the default eclipse plugins directory location
+     * Get the location where eclipse plugins are stored.
+     * @return the eclipse plugins directory location
      */
     String getEclipsePluginsDirectory() {
-        return Paths.get(extension.cacheDirectory, eclipseVersion, "plugins")
+        return extension.eclipsePluginsDirectory ?: Paths.get(extension.cacheDirectory, eclipseVersion, "plugins")
     }
 
     /**
-     * Get the default name of the eclipse SDK archive name.
-     * @return the default eclipse SDK archive name
+     * Get the name of the eclipse SDK archive.
+     * @return the eclipse SDK archive name
      */
     String getEclipseArchiveName() {
         return Paths.get(extension.cacheDirectory, "${eclipseVersion}.zip")

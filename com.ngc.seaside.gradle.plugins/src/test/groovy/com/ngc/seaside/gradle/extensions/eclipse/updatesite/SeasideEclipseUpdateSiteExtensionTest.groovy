@@ -77,5 +77,7 @@ class SeasideEclipseUpdateSiteExtensionTest {
         Assert.assertNull("linuxEclipseVersion property has default value!", extension.linuxEclipseVersion)
         Assert.assertNull("windowsDownloadUrl property has default value!", extension.windowsDownloadUrl)
         Assert.assertNull("windowsEclipseVersion property has default value!", extension.windowsEclipseVersion)
+        Assert.assertNull(
+              "eclipsePluginsDirectory property has default value in extension!", extension.eclipsePluginsDirectory)
     }
 }
