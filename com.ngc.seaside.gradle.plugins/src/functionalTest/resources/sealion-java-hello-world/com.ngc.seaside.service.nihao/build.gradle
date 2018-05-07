@@ -4,9 +4,6 @@ plugins {
    id 'com.ngc.seaside.eclipse.feature'
 }
 
-tasks.getByName('copyFeatureFile') {
-   expand('osgiVersion': "1.2.3")
-}
-
 eclipseFeature {
+   templateProperties = ['osgiVersion' : '1.2.3']
 }

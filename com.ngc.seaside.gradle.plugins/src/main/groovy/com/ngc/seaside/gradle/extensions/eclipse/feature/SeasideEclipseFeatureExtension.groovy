@@ -12,10 +12,19 @@ class SeasideEclipseFeatureExtension {
     String archiveName
 
     /**
+     * Properties in the feature.xml file that will get expanded to their corresponding values when copied on build.
+     * @see groovy.text.SimpleTemplateEngine#SimpleTemplateEngine()
+     */
+    Map<String, ?> templateProperties
+
+    /**
      * Create an instance of the SeasideEclipseFeatureExtension
      * @param project the project on which to create the extension
      */
     SeasideEclipseFeatureExtension(Project project) {
         archiveName = "${project.group}.${project.name}-${project.version}.jar"
+        templateProperties = new LinkedHashMap()
     }
+    
+    
 }

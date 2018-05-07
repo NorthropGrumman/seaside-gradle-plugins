@@ -80,6 +80,9 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
     }
 
     private void configureTasks(Project project) {
+        project.getTasks().getByName(ECLIPSE_COPY_FEATURE_FILE_TASK_NAME) {
+           expand(this.extension.templateProperties)
+        }
         project.getTasks().getByName(ECLIPSE_CREATE_JAR_TASK_NAME) {
             from project.tasks[ECLIPSE_COPY_FEATURE_FILE_TASK_NAME].destinationDir
             destinationDir = project.file(project.buildDir)
