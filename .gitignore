@@ -23,7 +23,6 @@ target/
 
 # Gradle
 .gradle/*
-!.gradle/cacerts
 build/
 out/
 gradle-app.setting
