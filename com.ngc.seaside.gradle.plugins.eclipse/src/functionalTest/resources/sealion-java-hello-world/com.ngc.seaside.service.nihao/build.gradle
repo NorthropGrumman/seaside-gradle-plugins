@@ -1,0 +1,7 @@
+plugins {
+   id 'com.ngc.seaside.eclipse.feature'
+}
+
+eclipseFeature {
+   templateProperties = ['osgiVersion' : '1.2.3']
+}

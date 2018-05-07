@@ -1,7 +1,0 @@
-rootProject.name = 'sealion-java-hello-world'
-
-include 'com.ngc.seaside.service.helloworld'
-
-project(':com.ngc.seaside.service.helloworld').name = 'service.helloworld'
-
-

@@ -1,0 +1,18 @@
+plugins {
+    id 'com.ngc.seaside.parent'
+}
+
+dependencies {
+    /* log4j for app message logging */
+    compile "log4j:log4j:$log4jVersion"
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile "org.slf4j:slf4j-log4j12:$slf4jVersion"
+    testCompile "junit:junit:$junitVersion"
+}
+
+jar {
+    manifest {
+        // Bnd instructions to export the package.
+        attributes('Export-Package': 'com.ngc.seaside.service.bonjourlemonde.*')
+    }
+}

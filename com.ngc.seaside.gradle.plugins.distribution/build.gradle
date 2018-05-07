@@ -1,0 +1,15 @@
+dependencies {
+   api gradleApi()
+   implementation localGroovy()
+   implementation project(':gradle.plugins.base')
+   implementation project(':gradle.plugins.repository')
+   implementation project(':gradle.plugins.parent')
+   implementation project(':gradle.plugins.ci')
+   implementation "com.google.guava:guava:$guavaVersion"
+   implementation "commons-io:commons-io:$commonsIOVersion"
+   
+   testImplementation project(':gradle.plugins.testutils')
+   testImplementation "junit:junit:$junitVersion"
+   testImplementation "org.mockito:mockito-core:$mockitoVersion"
+   testImplementation "com.ngc.blocs:test.impl.common.testutilities:$blocsVersion"
+}

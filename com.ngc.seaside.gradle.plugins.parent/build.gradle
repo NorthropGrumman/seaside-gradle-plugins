@@ -1,0 +1,19 @@
+dependencies {
+   api gradleApi()
+   implementation localGroovy()
+   implementation project(':gradle.plugins.base')
+   implementation project(':gradle.plugins.repository')
+   implementation project(':gradle.plugins.ci')
+   implementation project(':gradle.plugins.checkstyle')
+   implementation project(':gradle.plugins.release')
+   implementation "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
+   implementation "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarQubeVersion"
+   implementation "com.github.ben-manes:gradle-versions-plugin:$dependencyUpdatesVersion"
+   implementation "com.github.ksoichiro:gradle-console-reporter:$consoleReporterVersion"
+   
+   testImplementation project(':gradle.plugins.testutils')
+   testImplementation "commons-io:commons-io:$commonsIOVersion"
+   testImplementation "junit:junit:$junitVersion"
+   testImplementation "org.mockito:mockito-core:$mockitoVersion"
+   testImplementation "com.ngc.blocs:test.impl.common.testutilities:$blocsVersion"
+}

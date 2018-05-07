@@ -1,7 +1,0 @@
-apply plugin: 'application'
-
-dependencies {
-    compile "com.ngc.blocs:service.api:$blocsVersion"
-    compile "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
-    compile "org.eclipse.xtext:org.eclipse.xtext.xbase:${xtextVersion}"
-}
