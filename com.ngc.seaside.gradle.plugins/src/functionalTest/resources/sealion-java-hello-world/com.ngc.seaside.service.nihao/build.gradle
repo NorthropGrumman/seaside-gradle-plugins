@@ -5,9 +5,7 @@ plugins {
 }
 
 tasks.getByName('copyFeatureFile') {
-   from Paths.get("src", "main", "resources"), { include("feature.xml") }
    expand('osgiVersion': "1.2.3")
-   into Paths.get(project.buildDir.absolutePath, "tmp")
 }
 
 eclipseFeature {

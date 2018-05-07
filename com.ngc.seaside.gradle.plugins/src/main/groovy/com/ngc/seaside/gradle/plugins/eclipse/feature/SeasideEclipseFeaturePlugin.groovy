@@ -81,7 +81,7 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
 
     private void configureTasks(Project project) {
         project.getTasks().getByName(ECLIPSE_CREATE_JAR_TASK_NAME) {
-            from Paths.get(project.buildDir.absolutePath, "tmp")
+            from project.tasks[ECLIPSE_COPY_FEATURE_FILE_TASK_NAME].destinationDir
             destinationDir = project.file(project.buildDir)
             archiveName = this.extension.archiveName
         }
@@ -99,7 +99,13 @@ class SeasideEclipseFeaturePlugin extends AbstractProjectPlugin {
              ECLIPSE_COPY_FEATURE_FILE_TASK_NAME,
              type: Copy,
              group: ECLIPSE_TASK_GROUP_NAME,
-             description: "Copy the feature file to the correct location")
+             description: "Copy the feature file to the correct location") {
+
+             from('src/main/resources') {
+                include 'feature.xml'
+             }
+             destinationDir = project.file("${project.buildDir}/tmp/eclipsefeature")
+        }
 
         project.getTasks().getByName("build").dependsOn(ECLIPSE_CREATE_JAR_TASK_NAME)
     }

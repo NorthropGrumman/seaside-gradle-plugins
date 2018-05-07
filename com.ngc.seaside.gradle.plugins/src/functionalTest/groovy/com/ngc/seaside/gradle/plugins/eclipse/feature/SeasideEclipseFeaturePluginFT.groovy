@@ -39,7 +39,7 @@ class SeasideEclipseFeaturePluginFT {
               "feature file not copied!",
               project.file(
                     TestingUtilities.turnListIntoPath(
-                          projectDir.absolutePath, "com.ngc.seaside.service.nihao", "build", "tmp", "feature.xml"
+                          projectDir.absolutePath, "com.ngc.seaside.service.nihao", "build", "tmp", "eclipsefeature", "feature.xml"
                     )).exists())
         Assert.assertTrue(
               "jar file file was not created!",
