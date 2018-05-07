@@ -37,10 +37,10 @@ class SeasideCheckstylePlugin extends AbstractProjectPlugin {
    private static void configureCheckstyleTask(Project project) {
       // Ensure that checkstyleMain or checkstyleTest can only be called when running the task from the command line.
       // We don't want checkstyle to run on ever build due to time.
-      project.tasks.withType(Checkstyle) { task ->
-         enabled = project.gradle.startParameter.taskNames.contains(task.name)
+      project.tasks.withType(Checkstyle) { //task ->
+         //enabled = project.gradle.startParameter.taskNames.contains(task.name)
 
-         if (project.gradle.startParameter.taskNames.contains(task.name)) {
+         //if (project.gradle.startParameter.taskNames.contains(task.name)) {
             CheckstyleExtension extension = project.getExtensions().getByType(CheckstyleExtension.class)
             File tempDir = File.createTempDir()
 
@@ -61,7 +61,7 @@ class SeasideCheckstylePlugin extends AbstractProjectPlugin {
 
             extension.configFile = output
             extension.configProperties = ["suppressionFile": suppressionsOutput.getAbsolutePath()]
-         }
+         //}
       }
    }
 

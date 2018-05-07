@@ -255,8 +255,9 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
       project.getPlugins().apply('com.github.ben-manes.versions')
       project.getPlugins().apply('com.github.ksoichiro.console.reporter')
       project.getPlugins().apply(SeasideReleasePlugin)
-      project.getPlugins().apply(SeasideCiPlugin)
       project.getPlugins().apply(SeasideCheckstylePlugin)
+      project.getPlugins().apply(SeasideCiPlugin)
+
    }
 
    /**

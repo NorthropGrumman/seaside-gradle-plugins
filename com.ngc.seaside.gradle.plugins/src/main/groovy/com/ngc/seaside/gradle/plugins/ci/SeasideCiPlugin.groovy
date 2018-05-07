@@ -2,12 +2,14 @@ package com.ngc.seaside.gradle.plugins.ci
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.ci.SeasideCiExtension
+import com.ngc.seaside.gradle.plugins.analyze.SeasideCheckstylePlugin
 import com.ngc.seaside.gradle.tasks.dependencies.PopulateMaven2Repository
 import com.ngc.seaside.gradle.util.PropertyUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Checkstyle
+import org.gradle.api.plugins.quality.CheckstylePlugin
 import org.gradle.api.tasks.bundling.Zip
 
 /**
@@ -133,15 +135,16 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             description: 'Creates a ZIP archive of the populated m2 repository.'
       )
 
-      project.tasks.withType(Checkstyle) { task ->
-         enabled = project.gradle.startParameter.taskNames.contains(task.name) }
-
       // do not make clean a dependency it seems to run after all the other task have been run
       def buildTask = taskResolver.findTask("build")
       def cleanTask = taskResolver.findTask("clean")
       def installTask = taskResolver.findTask("install")
       def checkStyleMain = taskResolver.findTask("checkstyleMain")
       def checkStyleTest = taskResolver.findTask("checkstyleTest")
+      //checkStyleMain.setProperty(SeasideCheckstylePlugin.CHECKSTYLE_FAIL_ON_ERROR_PROPERTY, "true")
+      //checkStyleTest.setProperty(SeasideCheckstylePlugin.CHECKSTYLE_FAIL_ON_ERROR_PROPERTY, "true")
+      checkStyleMain.setEnabled(true)
+
       Task ci = project.task(
             CONTINUOUS_INTEGRATION_TASK_NAME,
             dependsOn: [buildTask, checkStyleMain, checkStyleTest, installTask],
@@ -149,8 +152,8 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             group: AUDITING_TASK_GROUP_NAME,
             description: 'does the checkStyleMain and checkStyleTest'
       )
-
    }
+
 
    /**
     * Configures extensions for the plugin.
