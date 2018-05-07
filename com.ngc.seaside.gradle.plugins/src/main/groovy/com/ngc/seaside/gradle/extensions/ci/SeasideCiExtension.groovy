@@ -1,5 +1,6 @@
 package com.ngc.seaside.gradle.extensions.ci
 
+import com.ngc.seaside.gradle.extensions.repository.SeasideRepositoryExtension
 import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
 import org.gradle.api.artifacts.Configuration
 import org.gradle.testing.jacoco.plugins.JacocoPlugin
@@ -29,7 +30,7 @@ class SeasideCiExtension {
      * If no repository with this name is defined by the project, dependencies are resolved from the local maven
      * directory cache.
      */
-    String remoteM2RepositoryName = SeasideParentPlugin.REMOTE_MAVEN_REPOSITORY_NAME
+    String remoteM2RepositoryName = SeasideRepositoryExtension.DEFAULT_REMOTE_MAVEN_CONSOLIDATED_NAME
 
     /**
      * Configures the output directory that will contain the dependencies of the project if an offline maven2 directory

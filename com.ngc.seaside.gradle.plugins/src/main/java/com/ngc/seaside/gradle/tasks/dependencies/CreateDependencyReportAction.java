@@ -1,14 +1,9 @@
 package com.ngc.seaside.gradle.tasks.dependencies;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.PeekingIterator;
-
 import com.ngc.seaside.gradle.tasks.DefaultTaskAction;
 import com.ngc.seaside.gradle.util.GradleUtil;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.gradle.api.InvalidUserDataException;
 

@@ -4,6 +4,7 @@ import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.distribution.SeasideServiceDistributionExtension
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
+import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin
 import com.ngc.seaside.gradle.util.GradleUtil
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
@@ -12,10 +13,11 @@ import org.gradle.api.tasks.bundling.Tar
 import org.gradle.api.tasks.bundling.Zip
 
 /**
- * The seaside distribution plugin provides calls to common task, sets up the default dependencies for BLoCS and OSGi along
- * with providing nexus repository deployment settings.
+ * The seaside distribution plugin provides calls to common task, sets up the default dependencies for BLoCS and OSGi
+ * along with providing nexus repository deployment settings.
  *
- * The following properties are required in your ~/.gradle/gradle.properties file to use this plugin.
+ * <p> This plugin applies the {@link SeasideRepositoryPlugin}. By default, the following properties are required in
+ * your ~/.gradle/gradle.properties file to use this plugin.
  * <pre>
  *     nexusConsolidated : url to the maven public download site
  *                         usually a proxy to maven central and the releases and snapshots
@@ -23,13 +25,19 @@ import org.gradle.api.tasks.bundling.Zip
  *
  * To use this plugin in your gradle.build :
  * <pre>
- *    buildscript {*         repositories {*              mavenLocal()
+ *    buildscript {
+ *       repositories {
+ *          mavenLocal()
  *
- *              maven {*                  url nexusConsolidated
- *}*}*
- *        dependencies {*             classpath 'com.ngc.seaside:seaside.distribution:1.1-SNAPSHOT'
- *}*}*
- *      apply plugin: 'com.ngc.seaside.service-distribution'
+ *              maven {
+ *                 url nexusConsolidated
+ *              }
+ *       }
+ *       dependencies {
+ *          classpath 'com.ngc.seaside:seaside.distribution:1.1-SNAPSHOT'
+ *       }
+ *    }
+ *    apply plugin: 'com.ngc.seaside.service-distribution'
  * </pre>
  */
 class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
@@ -41,46 +49,12 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
         project.configure(project) {
             applyPlugins(project)
 
-            // Make sure that all required properties are set.
-            doRequireDistributionGradleProperties(project, 'nexusConsolidated',
-                                                  'nexusReleases',
-                                                  'nexusSnapshots',
-                                                  'nexusUsername',
-                                                  'nexusPassword')
-
             distributionExtension = project.extensions.
                     create("seasideDistribution", SeasideServiceDistributionExtension)
 
             configureConfigurations(project)
             configureAfterEvaluate(project)
             createTasks(project)
-
-            repositories {
-                mavenLocal()
-
-                maven {
-                    name SeasideParentPlugin.REMOTE_MAVEN_REPOSITORY_NAME
-                    url nexusConsolidated
-                }
-            }
-
-            // Configure the maven related tasks here because we can't move it into a closure
-            uploadArchives {
-                repositories {
-                    mavenDeployer {
-                        // Use the main repo for full releases.
-                        repository(url: nexusReleases) {
-                            // Make sure that nexusUsername and nexusPassword are in your
-                            // ${gradle.user.home}/gradle.properties file.
-                            authentication(userName: nexusUsername, password: nexusPassword)
-                        }
-                        // If the version has SNAPSHOT in the name, use the snapshot repo.
-                        snapshotRepository(url: nexusSnapshots) {
-                            authentication(userName: nexusUsername, password: nexusPassword)
-                        }
-                    }
-                }
-            }
 
             project.afterEvaluate {
                 artifacts {
@@ -89,11 +63,6 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
                 }
             }
         }
-    }
-
-    static void doRequireDistributionGradleProperties(Project project, String propertyName,
-                                                      String... propertyNames) {
-        GradleUtil.requireProperties(project.properties, propertyName, propertyNames)
     }
 
     void configureConfigurations(Project project) {
@@ -213,10 +182,11 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
      * @param project
      */
     static void applyPlugins(Project project) {
-        project.logger.info(String.format("Applying plugins for %s", project.name))
-        project.getPlugins().apply('java')
-        project.getPlugins().apply('maven')
-        project.getPlugins().apply(SeasideCiPlugin)
+        project.logger.info("Applying plugins for ${project.name}")
+        project.plugins.apply('java')
+        project.plugins.apply('maven')
+        project.plugins.apply(SeasideRepositoryPlugin)
+        project.plugins.apply(SeasideCiPlugin)
     }
 
 }

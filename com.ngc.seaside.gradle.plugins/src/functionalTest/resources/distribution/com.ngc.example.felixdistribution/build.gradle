@@ -1,0 +1,30 @@
+plugins {
+    id 'com.ngc.seaside.repository'
+    id 'com.ngc.seaside.distribution.felixservice'
+}
+
+group = 'com.ngc.seaside'
+version = '1.0-SNAPSHOT'
+
+ext {
+    blocsCoreVersion = '2.1.1'
+}
+
+configurations {
+   thirdParty {
+      transitive = false
+   }
+}
+
+felixService {
+    systemProperties = ['foo': 'bar', 'hello': 'world']
+    programArgs = ['-foo', '-bar', '-hello', 'world']
+    bundleConfiguration 'thirdParty'
+}
+
+dependencies {
+    bundles 'org.eclipse.xtend:org.eclipse.xtend.lib:2.13.0' // org.eclipse.xtend.lib.macro-2.13.0 dependency
+    bundles 'org.eclipse.xtend:org.eclipse.xtend.lib.macro:2.11.0'
+    bundles 'commons-collections:commons-collections:3.0' // Not osgi compliant
+    thirdParty 'org.eclipse.xtend:org.eclipse.xtend.lib:2.12.0' // org.eclipse.xtend.lib.macro-2.12.0 dependency
+}

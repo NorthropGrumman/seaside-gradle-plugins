@@ -2,8 +2,10 @@ package com.ngc.seaside.gradle.plugins.cpp.celix
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.cpp.celix.CelixDistributionExtension
-import com.ngc.seaside.gradle.util.GradleUtil
+import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin
 import com.ngc.seaside.gradle.tasks.cpp.celix.CreateCelixRunScriptTask
+import com.ngc.seaside.gradle.util.GradleUtil
+
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
@@ -37,45 +39,12 @@ class CelixDistributionPlugin extends AbstractProjectPlugin {
     @Override
     void doApply(Project p) {
         p.configure(p) {
-            // Make sure that all required properties are set.
-            doRequiredGradleProperties(p,
-                                       'nexusConsolidated',
-                                       'nexusReleases',
-                                       'nexusSnapshots',
-                                       'nexusUsername',
-                                       'nexusPassword')
-
             registerExtensions(p)
             applyPlugins(p)
             createConfigurations(p)
             createTasks(p)
 
             p.afterEvaluate {
-                repositories {
-                    mavenLocal()
-
-                    maven {
-                        url nexusConsolidated
-                    }
-                }
-
-                uploadArchives {
-                    repositories {
-                        mavenDeployer {
-                            // Use the main repo for full releases.
-                            repository(url: nexusReleases) {
-                                // Make sure that nexusUsername and nexusPassword are in your
-                                // ${gradle.user.home}/gradle.properties file.
-                                authentication(userName: nexusUsername, password: nexusPassword)
-                            }
-                            // If the version has SNAPSHOT in the name, use the snapshot repo.
-                            snapshotRepository(url: nexusSnapshots) {
-                                authentication(userName: nexusUsername, password: nexusPassword)
-                            }
-                        }
-                    }
-                }
-
                 postEvaluateConfigureTasks()
                 configureTaskDependencies()
 
@@ -95,7 +64,8 @@ class CelixDistributionPlugin extends AbstractProjectPlugin {
     }
 
     protected void applyPlugins(Project project) {
-        project.getPlugins().apply('maven')
+        project.plugins.apply('maven')
+        project.plugins.apply(SeasideRepositoryPlugin)
     }
 
     protected void createConfigurations(Project project) {
