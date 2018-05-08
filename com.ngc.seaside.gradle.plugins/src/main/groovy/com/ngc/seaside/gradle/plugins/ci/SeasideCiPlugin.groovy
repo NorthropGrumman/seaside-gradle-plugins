@@ -141,9 +141,12 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
       def installTask = taskResolver.findTask("install")
       def checkStyleMain = taskResolver.findTask("checkstyleMain")
       def checkStyleTest = taskResolver.findTask("checkstyleTest")
-      //checkStyleMain.setProperty(SeasideCheckstylePlugin.CHECKSTYLE_FAIL_ON_ERROR_PROPERTY, "true")
-      //checkStyleTest.setProperty(SeasideCheckstylePlugin.CHECKSTYLE_FAIL_ON_ERROR_PROPERTY, "true")
-      checkStyleMain.setEnabled(true)
+
+      project.extensions.configure('checkstyle', { checkstyle ->
+         checkstyle.ignoreFailures = false
+         checkstyle.maxErrors = 0
+         checkstyle.maxWarnings = 0
+      })
 
       Task ci = project.task(
             CONTINUOUS_INTEGRATION_TASK_NAME,
@@ -152,6 +155,7 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             group: AUDITING_TASK_GROUP_NAME,
             description: 'does the checkStyleMain and checkStyleTest'
       )
+
    }
 
 
