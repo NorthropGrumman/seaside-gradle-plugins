@@ -8,6 +8,7 @@ import com.ngc.seaside.gradle.util.PropertyUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.logging.configuration.ShowStacktrace
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstylePlugin
 import org.gradle.api.tasks.bundling.Zip
@@ -186,6 +187,13 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             destinationDir = ciExtension.m2ArchiveOutputDirectory ?: project.buildDir
             archiveName = ciExtension.m2ArchiveName
          }
+
+         if (project.gradle.startParameter.taskNames.contains(CONTINUOUS_INTEGRATION_TASK_NAME)) {
+
+            project.gradle.startParameter.setContinueOnFailure(true)
+            project.gradle.startParameter.setRefreshDependencies(true)
+            project.gradle.startParameter.setShowStacktrace(ShowStacktrace.INTERNAL_EXCEPTIONS)
+         }
       }
    }
 
@@ -229,6 +237,8 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
       def installTask = taskResolver.findTask("install")
       def checkStyleMain = taskResolver.findTask("checkstyleMain")
       def checkStyleTest = taskResolver.findTask("checkstyleTest")
+      checkStyleMain.setEnabled(true)
+      checkStyleTest.setEnabled(true)
 
       // this is the same as setting -Pfail-on-checkstyle-error=true
       project.extensions.configure('checkstyle', { checkstyle ->
@@ -237,14 +247,13 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
          checkstyle.maxWarnings = 0
       })
 
-      //-refresh-dependencies -S
-      // --continue
       project.task(
             CONTINUOUS_INTEGRATION_TASK_NAME,
             dependsOn: [buildTask, checkStyleMain, checkStyleTest, installTask],
-            type: DefaultTask,
+            type: Checkstyle,
             group: AUDITING_TASK_GROUP_NAME,
             description: 'does build, install checkStyleMain and checkStyleTest -Pfail-on-checkstyle-error=true'
       )
+
    }
 }
