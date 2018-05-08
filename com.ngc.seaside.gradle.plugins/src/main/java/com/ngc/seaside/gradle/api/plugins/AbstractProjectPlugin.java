@@ -27,12 +27,7 @@ public abstract class AbstractProjectPlugin implements IProjectPlugin {
                                   .create(VERSION_SETTINGS_CONVENTION_NAME, VersionResolver.class, project);
       }
       versionResolver.setEnforceVersionSuffix(false);
-      project.setVersion(new Object() {
-         @Override
-         public String toString() {
-            return versionResolver.getUpdatedProjectVersionForRelease(ReleaseType.SNAPSHOT);
-         }
-      });
+      project.setVersion(versionResolver.getUpdatedProjectVersionForRelease(ReleaseType.SNAPSHOT));
       doApply(project);
    }
 
