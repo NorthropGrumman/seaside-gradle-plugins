@@ -92,6 +92,7 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
    @Override
    void doApply(Project project) {
       project.getPlugins().apply('checkstyle')
+
       project.configure(project) {
          configureExtensions(project)
          createTasks(project)
@@ -135,26 +136,8 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             description: 'Creates a ZIP archive of the populated m2 repository.'
       )
 
-      // do not make clean a dependency it seems to run after all the other task have been run
-      def buildTask = taskResolver.findTask("build")
-      def cleanTask = taskResolver.findTask("clean")
-      def installTask = taskResolver.findTask("install")
-      def checkStyleMain = taskResolver.findTask("checkstyleMain")
-      def checkStyleTest = taskResolver.findTask("checkstyleTest")
 
-      project.extensions.configure('checkstyle', { checkstyle ->
-         checkstyle.ignoreFailures = false
-         checkstyle.maxErrors = 0
-         checkstyle.maxWarnings = 0
-      })
-
-      Task ci = project.task(
-            CONTINUOUS_INTEGRATION_TASK_NAME,
-            dependsOn: [buildTask, checkStyleMain, checkStyleTest, installTask],
-            type: DefaultTask,
-            group: AUDITING_TASK_GROUP_NAME,
-            description: 'does the checkStyleMain and checkStyleTest'
-      )
+      configureCiTask(project)
 
    }
 
@@ -237,5 +220,31 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             PropertyUtils.setProperties(project, updatePropertyName, updatePropertyValue)
          }
       }
+   }
+
+   private void configureCiTask(Project project) {
+
+      // do not make clean a dependency it seems to run after all the other task have been run
+      def buildTask = taskResolver.findTask("build")
+      def installTask = taskResolver.findTask("install")
+      def checkStyleMain = taskResolver.findTask("checkstyleMain")
+      def checkStyleTest = taskResolver.findTask("checkstyleTest")
+
+      // this is the same as setting -Pfail-on-checkstyle-error=true
+      project.extensions.configure('checkstyle', { checkstyle ->
+         checkstyle.ignoreFailures = false
+         checkstyle.maxErrors = 0
+         checkstyle.maxWarnings = 0
+      })
+
+      //-refresh-dependencies -S
+      // --continue
+      project.task(
+            CONTINUOUS_INTEGRATION_TASK_NAME,
+            dependsOn: [buildTask, checkStyleMain, checkStyleTest, installTask],
+            type: DefaultTask,
+            group: AUDITING_TASK_GROUP_NAME,
+            description: 'does build, install checkStyleMain and checkStyleTest -Pfail-on-checkstyle-error=true'
+      )
    }
 }
