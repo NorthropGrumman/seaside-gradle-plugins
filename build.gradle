@@ -57,7 +57,7 @@ subprojects {
     }
 
     group = 'com.ngc.seaside'
-    version = '2.9.1-SNAPSHOT'
+    version = '2.9.1'
 
     ext {
         junitVersion = '4.12'
