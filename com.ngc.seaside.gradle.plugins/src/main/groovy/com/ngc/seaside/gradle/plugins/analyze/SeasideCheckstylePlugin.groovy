@@ -1,7 +1,6 @@
 package com.ngc.seaside.gradle.plugins.analyze
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
-import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
@@ -39,8 +38,9 @@ class SeasideCheckstylePlugin extends AbstractProjectPlugin {
       // Ensure that checkstyleMain or checkstyleTest can only be called when running the task from the command line.
       // We don't want checkstyle to run on ever build due to time.
       project.tasks.withType(Checkstyle) { task ->
-         enabled = (project.gradle.startParameter.taskNames.contains(task.name) || project.gradle.startParameter.taskNames.contains("ci") )
-         
+         enabled = (project.gradle.startParameter.taskNames.contains(task.name) ||
+                    project.gradle.startParameter.taskNames.contains("ci"))
+
 
          if (project.gradle.startParameter.taskNames.contains(task.name)) {
             CheckstyleExtension extension = project.getExtensions().getByType(CheckstyleExtension.class)

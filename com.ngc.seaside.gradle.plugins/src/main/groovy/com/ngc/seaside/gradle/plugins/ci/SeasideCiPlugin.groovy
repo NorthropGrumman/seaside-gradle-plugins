@@ -2,15 +2,12 @@ package com.ngc.seaside.gradle.plugins.ci
 
 import com.ngc.seaside.gradle.api.plugins.AbstractProjectPlugin
 import com.ngc.seaside.gradle.extensions.ci.SeasideCiExtension
-import com.ngc.seaside.gradle.plugins.analyze.SeasideCheckstylePlugin
 import com.ngc.seaside.gradle.tasks.dependencies.PopulateMaven2Repository
 import com.ngc.seaside.gradle.util.PropertyUtils
-import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.logging.configuration.ShowStacktrace
 import org.gradle.api.plugins.quality.Checkstyle
-import org.gradle.api.plugins.quality.CheckstylePlugin
 import org.gradle.api.tasks.bundling.Zip
 
 /**
@@ -141,7 +138,6 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
       configureCiTask(project)
 
    }
-
 
    /**
     * Configures extensions for the plugin.
