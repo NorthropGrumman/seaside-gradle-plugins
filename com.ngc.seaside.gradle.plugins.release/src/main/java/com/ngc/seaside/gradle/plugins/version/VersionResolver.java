@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.plugins.version;
 
 import com.ngc.seaside.gradle.plugins.release.ReleaseType;
 import com.ngc.seaside.gradle.util.IResolver;
+import com.ngc.seaside.gradle.util.Versions;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -16,7 +17,6 @@ import java.util.regex.Pattern;
 
 public class VersionResolver implements IResolver {
 
-   public static final String VERSION_SUFFIX = "-SNAPSHOT";
    private static final Pattern PATTERN = Pattern.compile(
       "^(?<beginning> \\s*? version \\s*? = \\s*? ([\"']?) )" +
          " (?<version> \\d+?(?:\\.\\d+?)+? )" +
@@ -79,7 +79,7 @@ public class VersionResolver implements IResolver {
                String message = String.format("Missing project version (%s%s}) suffix: %s",
                   version,
                   suffix,
-                  VERSION_SUFFIX);
+                  Versions.VERSION_SUFFIX);
                throw new GradleException(message);
             } else if (suffix != null) {
                sb.append(suffix);
@@ -123,24 +123,14 @@ public class VersionResolver implements IResolver {
    public static IVersionUpgradeStrategy resolveVersionUpgradeStrategy(ReleaseType releaseType) {
       switch (releaseType) {
       case MAJOR:
-         return VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(VERSION_SUFFIX);
+         return VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(Versions.VERSION_SUFFIX);
       case MINOR:
-         return VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(VERSION_SUFFIX);
+         return VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(Versions.VERSION_SUFFIX);
       case PATCH:
-         return VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(VERSION_SUFFIX);
+         return VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(Versions.VERSION_SUFFIX);
       default:
          return VersionUpgradeStrategyFactory.createSnapshotVersionUpgradeStrategy();
       }
-   }
-
-   /**
-    * Returns true if the given project's version is a snapshot, false otherwise.
-    * 
-    * @param project project
-    * @return true if the given project's version is a snapshot
-    */
-   public static boolean isSnapshot(Project project) {
-      return project.getVersion().toString().toUpperCase().endsWith(VERSION_SUFFIX);
    }
 
 }

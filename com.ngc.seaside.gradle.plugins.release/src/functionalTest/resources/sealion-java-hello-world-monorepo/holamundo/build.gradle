@@ -10,7 +10,9 @@ plugins {
 }
 
 subprojects {
-    apply plugin: 'com.ngc.seaside.parent'
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'com.ngc.seaside.repository'
     versionSettings {
         versionFile = versionsFile
     }

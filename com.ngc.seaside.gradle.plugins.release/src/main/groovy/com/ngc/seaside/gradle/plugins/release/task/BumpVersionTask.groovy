@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions
 import com.ngc.seaside.gradle.plugins.release.ReleaseType
 import com.ngc.seaside.gradle.plugins.release.ReleaseUtil
 import com.ngc.seaside.gradle.plugins.version.VersionResolver
+import com.ngc.seaside.gradle.util.Versions
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -57,7 +58,7 @@ class BumpVersionTask extends DefaultTask {
     * @return The next beta release version.
     */
    String getVersionAfterRelease() {
-      return getUpdatedVersion() + resolver.VERSION_SUFFIX
+      return getUpdatedVersion() + Versions.VERSION_SUFFIX
    }
 
    /**

@@ -3,23 +3,14 @@ package com.ngc.seaside.gradle.plugins.repository;
 /**
  * Property details for a repository.
  */
-public class RepositoryConfiguration {
-
-   private String repositoryName;
-   private String repositoryProperty;
-   private String usernameProperty;
-   private String passwordProperty;
-   private boolean isRequired;
-   private boolean isAuthenticationRequired;
+public interface RepositoryConfiguration {
 
    /**
     * Returns the descriptive name of the repository.
     * 
     * @return the descriptive name of the repository.
     */
-   public String getName() {
-      return repositoryName;
-   }
+   String getName();
 
    /**
     * Sets the descriptive name of the repository.
@@ -27,39 +18,29 @@ public class RepositoryConfiguration {
     * @param repositoryName the descriptive name of the repository
     * @return this
     */
-   public RepositoryConfiguration setName(String repositoryName) {
-      this.repositoryName = repositoryName;
-      return this;
-   }
+   RepositoryConfiguration setName(String repositoryName);
 
    /**
     * Returns the property key for determining the url of the repository.
     * 
     * @return the property key for determining the url of the repository
     */
-   public String getUrlProperty() {
-      return repositoryProperty;
-   }
+   String getUrlProperty();
 
    /**
     * Sets the property key for determining the url of the repository.
     * 
-    * @param repositoryProperty the property key for determining the url of the repository
+    * @param urlProperty the property key for determining the url of the repository
     * @return this
     */
-   public RepositoryConfiguration setUrlProperty(String repositoryProperty) {
-      this.repositoryProperty = repositoryProperty;
-      return this;
-   }
+   RepositoryConfiguration setUrlProperty(String urlProperty);
 
    /**
     * Returns the property key for determining the username of the repository authentication.
     * 
     * @return the property key for determining the username of the repository authentication
     */
-   public String getUsernameProperty() {
-      return usernameProperty;
-   }
+   String getUsernameProperty();
 
    /**
     * Sets the property key for determining the username of the repository authentication.
@@ -67,19 +48,14 @@ public class RepositoryConfiguration {
     * @param usernameProperty the property key for determining the username of the repository authentication
     * @return this
     */
-   public RepositoryConfiguration setUsernameProperty(String usernameProperty) {
-      this.usernameProperty = usernameProperty;
-      return this;
-   }
+   RepositoryConfiguration setUsernameProperty(String usernameProperty);
 
    /**
     * Returns the property key for determining the password of the repository authentication.
     * 
     * @return the property key for determining the password of the repository authentication
     */
-   public String getPasswordProperty() {
-      return passwordProperty;
-   }
+   String getPasswordProperty();
 
    /**
     * Sets the property key for determining the password of the repository authentication.
@@ -87,19 +63,14 @@ public class RepositoryConfiguration {
     * @param passwordProperty the property key for determining the password of the repository authentication
     * @return this
     */
-   public RepositoryConfiguration setPasswordProperty(String passwordProperty) {
-      this.passwordProperty = passwordProperty;
-      return this;
-   }
+   RepositoryConfiguration setPasswordProperty(String passwordProperty);
 
    /**
     * Returns whether or not the repository's property is required to be set.
     * 
     * @return whether or not the repository's property is required to be set
     */
-   public boolean isRequired() {
-      return isRequired;
-   }
+   boolean isRequired();
 
    /**
     * Sets whether or not the repository's property is required to be set.
@@ -107,19 +78,15 @@ public class RepositoryConfiguration {
     * @param required whether or not the repository's property is required to be set
     * @return this
     */
-   public RepositoryConfiguration setRequired(boolean required) {
-      this.isRequired = required;
-      return this;
-   }
+   RepositoryConfiguration setRequired(boolean required);
 
    /**
     * Requires that the repository's property be set.
     * 
     * @return this
     */
-   public RepositoryConfiguration required() {
-      setRequired(true);
-      return this;
+   default RepositoryConfiguration required() {
+      return setRequired(true);
    }
 
    /**
@@ -127,9 +94,8 @@ public class RepositoryConfiguration {
     * 
     * @return this
     */
-   public RepositoryConfiguration optional() {
-      setRequired(false);
-      return this;
+   default RepositoryConfiguration optional() {
+      return setRequired(false);
    }
 
    /**
@@ -137,9 +103,7 @@ public class RepositoryConfiguration {
     * 
     * @return whether or not the repository's username and password properties are required to be set
     */
-   public boolean isAuthenticationRequired() {
-      return isAuthenticationRequired;
-   }
+   boolean isAuthenticationRequired();
 
    /**
     * Sets whether or not the repository's username and password properties are required to be set.
@@ -147,19 +111,15 @@ public class RepositoryConfiguration {
     * @param required whether or not the repository's username and password properties are required to be set
     * @return this
     */
-   public RepositoryConfiguration setAuthenticationRequired(boolean required) {
-      this.isAuthenticationRequired = required;
-      return this;
-   }
+   RepositoryConfiguration setAuthenticationRequired(boolean required);
 
    /**
     * Requires that the repository's username and password properties be set.
     * 
     * @return this
     */
-   public RepositoryConfiguration authenticationRequired() {
-      setAuthenticationRequired(true);
-      return this;
+   default RepositoryConfiguration authenticationRequired() {
+      return this.setAuthenticationRequired(true);
    }
 
    /**
@@ -167,8 +127,24 @@ public class RepositoryConfiguration {
     * 
     * @return this
     */
-   public RepositoryConfiguration authenticationOptional() {
-      setAuthenticationRequired(false);
+   default RepositoryConfiguration authenticationOptional() {
+      return this.setAuthenticationRequired(false);
+   }
+
+   /**
+    * Copies the given repository configuration to this configuration.
+    * 
+    * @param configuration other configuration
+    * @return this
+    */
+   default RepositoryConfiguration from(RepositoryConfiguration configuration) {
+      this.setName(configuration == null ? null : configuration.getName());
+      this.setUrlProperty(configuration == null ? null : configuration.getUrlProperty());
+      this.setUsernameProperty(configuration == null ? null : configuration.getUsernameProperty());
+      this.setPasswordProperty(configuration == null ? null : configuration.getPasswordProperty());
+      this.setAuthenticationRequired(configuration == null ? null : configuration.isAuthenticationRequired());
+      this.setRequired(configuration == null ? null : configuration.isRequired());
       return this;
    }
+
 }

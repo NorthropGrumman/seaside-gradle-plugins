@@ -1,7 +1,6 @@
-def nonPluginProjects = [project, project(':gradle.plugins.testutils')]
 
 dependencies {
-   (parent.subprojects - nonPluginProjects).each { pluginProject ->
+   parent.subprojects.findAll { it.isPlugin }.each { pluginProject ->
       api pluginProject
    }
 }

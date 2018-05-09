@@ -1,11 +1,18 @@
 package com.ngc.seaside.gradle.plugins.repository;
 
-import com.ngc.seaside.gradle.plugins.version.VersionResolver;
+import com.ngc.seaside.gradle.util.Versions;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.ProjectConfigurationException;
+import org.gradle.api.artifacts.dsl.RepositoryHandler;
+import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.MavenPlugin;
+import org.gradle.api.plugins.PluginInstantiationException;
+import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
+import org.gradle.api.publish.plugins.PublishingPlugin;
+import org.gradle.api.tasks.Upload;
 
 import java.util.Objects;
 
@@ -17,9 +24,10 @@ import groovy.lang.Closure;
  * snapshosts repositories.
  * 
  * <p>
- * By default, the extension will instruct the plugin to generate repositories for the project. If the
- * {@link MavenPlugin maven} plugin or {@link MavenPublishPlugin maven-publish} is applied, the plugin will by default
- * generate repositories for the respective plugin.
+ * By default, the extension will instruct the plugin to generate the maven local and consolidated repositories for the
+ * project. If the {@link MavenPlugin maven} plugin or {@link MavenPublishPlugin maven-publish} plugin is applied and
+ * the corresponding upload/publish task will run, the plugin will by default generate repositories for the respective
+ * plugin.
  */
 public class SeasideRepositoryExtension {
 
@@ -34,17 +42,25 @@ public class SeasideRepositoryExtension {
    public static final String DEFAULT_REMOTE_MAVEN_USERNAME_PROPERTY = "nexusUsername";
    public static final String DEFAULT_REMOTE_MAVEN_PASSWORD_PROPERTY = "nexusPassword";
 
+   private final static String MISSING_PROPERTY_ERROR_MESSAGE = "the property '%s' is not set!  Please ensure this property is set.  These type of properties"
+      + " can be set in $GRADLE_USER_HOME/gradle.properties.  Note that $GRADLE_USER_HOME is not necessarily"
+      + " the directory where Gradle is installed.  If $GRADLE_USER_HOME is not set, gradle.properties can"
+      + " usually be found in $USER/.gradle/.  You can check which properties are set by running"
+      + " 'gradle properties'.";
+
    private final Project project;
-   
+   private boolean configured = false;
+
    private boolean generateBuildScriptRepositories = false;
    private boolean generateProjectRepositories = true;
    private boolean generateMavenUploadRepositories = false;
    private boolean generateMavenPublishRepositories = false;
    private boolean includeMavenLocal = true;
+   private boolean automaticallyResolveUploadRequirements = true;
 
-   private RepositoryConfiguration consolidatedConfig;
-   private RepositoryConfiguration releasesConfig;
-   private RepositoryConfiguration snapshotsConfig;
+   private final RepositoryConfiguration consolidatedConfig;
+   private final RepositoryConfiguration releasesConfig;
+   private final RepositoryConfiguration snapshotsConfig;
 
    /**
     * Constructs the extension, setting the default values for the repository configuration.
@@ -53,9 +69,9 @@ public class SeasideRepositoryExtension {
     */
    public SeasideRepositoryExtension(Project project) {
       this.project = project;
-      consolidatedConfig = new RepositoryConfiguration();
-      releasesConfig = new RepositoryConfiguration();
-      snapshotsConfig = new RepositoryConfiguration();
+      consolidatedConfig = new DefaultRepositoryConfiguration();
+      releasesConfig = new DefaultRepositoryConfiguration();
+      snapshotsConfig = new DefaultRepositoryConfiguration();
 
       consolidatedConfig.setName(DEFAULT_REMOTE_MAVEN_CONSOLIDATED_NAME);
       consolidatedConfig.setUrlProperty(DEFAULT_REMOTE_MAVEN_CONSOLIDATED_PROPERTY);
@@ -82,6 +98,60 @@ public class SeasideRepositoryExtension {
       if (project.getPlugins().hasPlugin(MavenPublishPlugin.class)) {
          generateMavenPublishRepositories = true;
       }
+
+      project.getGradle().getTaskGraph().whenReady(graph -> {
+         if (automaticallyResolveUploadRequirements) {
+            boolean mavenUpload = graph.hasTask(BasePlugin.UPLOAD_ARCHIVES_TASK_NAME)
+               && project.getPlugins().hasPlugin(MavenPlugin.class);
+            boolean mavenPublish = graph.hasTask(PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME)
+               && project.getPlugins().hasPlugin(MavenPlugin.class);
+            if (mavenUpload || mavenPublish) {
+               RepositoryConfiguration uploadConfig = getUploadConfiguration();
+               if (!uploadConfig.isRequired()) {
+                  RepositoryConfiguration newUploadConfig = new DefaultRepositoryConfiguration(uploadConfig);
+                  newUploadConfig.setRequired(true);
+                  checkRepositoryConfigurations(newUploadConfig);
+                  if (mavenUpload) {
+                     configureMavenUploadRepositories(newUploadConfig);
+                  }
+                  if (mavenPublish) {
+                     configureMavenPublishRepositories(newUploadConfig);
+                  }
+               }
+            }
+         }
+      });
+   }
+
+   /**
+    * Configures the repositories for the project. This will automatically be done after the project is evaluated,
+    * but can be called explicitly to configure the repositories before the project is finished with its evaluation.
+    */
+   public void configure() {
+      if (configured) {
+         return;
+      }
+      RepositoryConfiguration consolidatedConfig = getConsolidatedConfiguration();
+      RepositoryConfiguration uploadConfig = new DefaultRepositoryConfiguration(getUploadConfiguration());
+      if (isGenerateMavenUploadRepositories() || isGenerateMavenPublishRepositories()) {
+         uploadConfig.setRequired(true);
+      }
+
+      checkRepositoryConfigurations(consolidatedConfig, releasesConfig, snapshotsConfig, uploadConfig);
+
+      if (isGenerateBuildScriptRepositories()) {
+         configureBuildScriptRepositories(consolidatedConfig);
+      }
+      if (isGenerateProjectRepositories()) {
+         configureProjectRepositories(consolidatedConfig);
+      }
+      if (isGenerateMavenUploadRepositories()) {
+         configureMavenUploadRepositories(uploadConfig);
+      }
+      if (isGenerateMavenPublishRepositories()) {
+         configureMavenPublishRepositories(uploadConfig);
+      }
+      configured = true;
    }
 
    /**
@@ -100,6 +170,7 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension setGenerateBuildScriptRepositories(boolean generateBuildScriptRepositories) {
+      checkNotConfigured();
       this.generateBuildScriptRepositories = generateBuildScriptRepositories;
       return this;
    }
@@ -120,6 +191,7 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension setGenerateProjectRepositories(boolean generateProjectRepositories) {
+      checkNotConfigured();
       this.generateProjectRepositories = generateProjectRepositories;
       return this;
    }
@@ -141,6 +213,7 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension setGenerateMavenUploadRepositories(boolean generateMavenUploadRepositories) {
+      checkNotConfigured();
       this.generateMavenUploadRepositories = generateMavenUploadRepositories;
       return this;
    }
@@ -162,6 +235,7 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension setGenerateMavenPublishRepositories(boolean generateMavenPublishRepositories) {
+      checkNotConfigured();
       this.generateMavenPublishRepositories = generateMavenPublishRepositories;
       return this;
    }
@@ -180,8 +254,37 @@ public class SeasideRepositoryExtension {
     * 
     * @param include whether or not the plugin should include maven local as a repository when creating repositories
     */
-   public void setIncludeMavenLocal(boolean include) {
+   public SeasideRepositoryExtension setIncludeMavenLocal(boolean include) {
+      checkNotConfigured();
       this.includeMavenLocal = include;
+      return this;
+   }
+
+   /**
+    * Sets whether or not the plugin should automatically resolve whether upload repository configurations are required
+    * or not. This means that the plugin will check whether or not the {@link MavenPlugin maven} plugin or
+    * {@link MavenPublishPlugin maven-publish} plugin have been applied and their corresponding upload/publish task will
+    * be executed. If the check passes, then the plugin will require either the snapshots or releases configuration
+    * properties (depending on the version) and will create the corresponding repository.
+    * 
+    * @return whether or not the plugin should automatically resolve the upload repository configurations
+    */
+   public boolean isAutomaticallyResolveUploadRequirements() {
+      return automaticallyResolveUploadRequirements;
+   }
+
+   /**
+    * Sets whether or not the plugin should automatically resolve whether upload repository configurations are required
+    * or not.
+    * 
+    * @see #isAutomaticallyResolveUploadRequirements()
+    * @param conditional whether or not the plugin should automatically resolve the upload repository configurations
+    * @return this
+    */
+   public SeasideRepositoryExtension setAutomaticallyResolveUploadRequirements(
+            boolean conditional) {
+      this.automaticallyResolveUploadRequirements = conditional;
+      return this;
    }
 
    /**
@@ -190,7 +293,7 @@ public class SeasideRepositoryExtension {
     * @return the repository configuration for the consolidated repository
     */
    public RepositoryConfiguration getConsolidatedConfiguration() {
-      return this.consolidatedConfig;
+      return new RepositoryConfigurationWrapper(this::checkNotConfigured, consolidatedConfig);
    }
 
    /**
@@ -199,7 +302,7 @@ public class SeasideRepositoryExtension {
     * @return the repository configuration for the releases repository
     */
    public RepositoryConfiguration getReleasesConfiguration() {
-      return this.releasesConfig;
+      return new RepositoryConfigurationWrapper(this::checkNotConfigured, releasesConfig);
    }
 
    /**
@@ -208,20 +311,20 @@ public class SeasideRepositoryExtension {
     * @return the repository configuration for the snapshots repository
     */
    public RepositoryConfiguration getSnapshotsConfiguration() {
-      return this.snapshotsConfig;
+      return new RepositoryConfigurationWrapper(this::checkNotConfigured, snapshotsConfig);
    }
 
    /**
     * Returns the repository configuration for the uploading repository. This will be either the
-    * {@link #getReleasesConfiguration() releases configuration} or 
+    * {@link #getReleasesConfiguration() releases configuration} or
     * {@link #getSnapshotsConfiguration() snapshots configuration} depending on the project version.
     * 
     * @return the repository configuration for the uploading repository
     */
    public RepositoryConfiguration getUploadConfiguration() {
-      return VersionResolver.isSnapshot(project) ? getSnapshotsConfiguration() : getReleasesConfiguration();
+      return Versions.isSnapshot(project) ? getSnapshotsConfiguration() : getReleasesConfiguration();
    }
-   
+
    /**
     * Sets the repository configuration for the consolidated repository.
     * 
@@ -229,7 +332,8 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension setConsolidatedConfiguration(RepositoryConfiguration configuration) {
-      this.consolidatedConfig = configuration;
+      checkNotConfigured();
+      this.consolidatedConfig.from(configuration);
       return this;
    }
 
@@ -240,8 +344,8 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension setReleasesConfiguration(RepositoryConfiguration configuration) {
-      Objects.requireNonNull(configuration, "configuration cannot be null");
-      this.releasesConfig = configuration;
+      checkNotConfigured();
+      this.releasesConfig.from(configuration);
       return this;
    }
 
@@ -252,8 +356,8 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension setSnapshotsConfiguration(RepositoryConfiguration configuration) {
-      Objects.requireNonNull(configuration, "configuration cannot be null");
-      this.snapshotsConfig = configuration;
+      checkNotConfigured();
+      this.snapshotsConfig.from(configuration);
       return this;
    }
 
@@ -264,22 +368,25 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension allRepositories(Action<RepositoryConfiguration> action) {
+      checkNotConfigured();
       Objects.requireNonNull(action, "action cannot be null");
-      applyAction(action, consolidatedConfig, releasesConfig, snapshotsConfig);
+      action.execute(
+         new RepositoryConfigurationWrapper(this::checkNotConfigured, consolidatedConfig, releasesConfig,
+            snapshotsConfig));
       return this;
    }
 
    /**
-    * Applies the given closure to the consolidated, releases, and snapshots repository configuration. The type of the closure
-    * is {@link RepositoryConfiguration}.
+    * Applies the given closure to the consolidated, releases, and snapshots repository configuration. The argument type
+    * of the closure is {@link RepositoryConfiguration}.
     * 
     * @param c closure to call
     * @return this
     */
    public SeasideRepositoryExtension allRepositories(Closure<?> c) {
+      checkNotConfigured();
       Objects.requireNonNull(c, "closure cannot be null");
-      applyAction(configuration -> c.call(configuration), consolidatedConfig, releasesConfig, snapshotsConfig);
-      return this;
+      return allRepositories(config -> c.call(config));
    }
 
    /**
@@ -289,22 +396,23 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension uploadRepositories(Action<RepositoryConfiguration> action) {
+      checkNotConfigured();
       Objects.requireNonNull(action, "action cannot be null");
-      applyAction(action, releasesConfig, snapshotsConfig);
+      action.execute(new RepositoryConfigurationWrapper(this::checkNotConfigured, releasesConfig, snapshotsConfig));
       return this;
    }
 
    /**
-    * Applies the given closure to the releases and snapshots repository configuration. The type of the closure
+    * Applies the given closure to the releases and snapshots repository configuration. The argument type of the closure
     * is {@link RepositoryConfiguration}.
     * 
     * @param c closure to call
     * @return this
     */
    public SeasideRepositoryExtension uploadRepositories(Closure<?> c) {
+      checkNotConfigured();
       Objects.requireNonNull(c, "closure cannot be null");
-      applyAction(configuration -> c.call(configuration), releasesConfig, snapshotsConfig);
-      return this;
+      return uploadRepositories(config -> c.call(config));
    }
 
    /**
@@ -314,21 +422,23 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension consolidated(Action<RepositoryConfiguration> action) {
+      checkNotConfigured();
       Objects.requireNonNull(action, "action cannot be null");
-      action.execute(consolidatedConfig);
+      action.execute(new RepositoryConfigurationWrapper(this::checkNotConfigured, consolidatedConfig));
       return this;
    }
 
    /**
-    * Applies the given closure to the consolidated repository configuration. The type of the closure
+    * Applies the given closure to the consolidated repository configuration. The argument type of the closure
     * is {@link RepositoryConfiguration}.
     * 
     * @param c closure to call
     * @return this
     */
    public SeasideRepositoryExtension consolidated(Closure<?> c) {
+      checkNotConfigured();
       Objects.requireNonNull(c, "closure cannot be null");
-      c.call(consolidatedConfig);
+      consolidated(config -> c.call(config));
       return this;
    }
 
@@ -339,21 +449,23 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension releases(Action<RepositoryConfiguration> action) {
+      checkNotConfigured();
       Objects.requireNonNull(action, "action cannot be null");
-      action.execute(releasesConfig);
+      action.execute(new RepositoryConfigurationWrapper(this::checkNotConfigured, releasesConfig));
       return this;
    }
 
    /**
-    * Applies the given closure to the releases repository configuration. The type of the closure
+    * Applies the given closure to the releases repository configuration. The argument type of the closure
     * is {@link RepositoryConfiguration}.
     * 
     * @param c closure to call
     * @return this
     */
    public SeasideRepositoryExtension releases(Closure<?> c) {
-      c.call(releasesConfig);
+      checkNotConfigured();
       Objects.requireNonNull(c, "closure cannot be null");
+      releases(config -> c.call(config));
       return this;
    }
 
@@ -364,94 +476,117 @@ public class SeasideRepositoryExtension {
     * @return this
     */
    public SeasideRepositoryExtension snapshots(Action<RepositoryConfiguration> action) {
+      checkNotConfigured();
       Objects.requireNonNull(action, "action cannot be null");
-      action.execute(snapshotsConfig);
+      action.execute(new RepositoryConfigurationWrapper(this::checkNotConfigured, snapshotsConfig));
       return this;
    }
 
    /**
-    * Applies the given closure to the snapshots repository configuration. The type of the closure
+    * Applies the given closure to the snapshots repository configuration. The argument type of the closure
     * is {@link RepositoryConfiguration}.
     * 
     * @param c closure to call
     * @return this
     */
    public SeasideRepositoryExtension snapshots(Closure<?> c) {
+      checkNotConfigured();
       Objects.requireNonNull(c, "closure cannot be null");
-      c.call(snapshotsConfig);
+      snapshots(config -> c.call(config));
       return this;
    }
 
-   private void applyAction(Action<RepositoryConfiguration> action, RepositoryConfiguration... configuration) {
-      RepositoryConfiguration combined = new RepositoryConfiguration() {
+   private void configureBuildScriptRepositories(RepositoryConfiguration config) {
+      project.getLogger().info("Creating consolidated repositories for build script");
+      RepositoryHandler handler = project.getBuildscript().getRepositories();
+      createRepositories(project, getConsolidatedConfiguration(), handler, isIncludeMavenLocal());
+   }
 
-         @Override
-         public RepositoryConfiguration setName(String repositoryName) {
-            for (RepositoryConfiguration d : configuration) {
-               d.setName(repositoryName);
+   private void configureProjectRepositories(RepositoryConfiguration config) {
+      project.getLogger().info("Creating consolidated repositories for project");
+      RepositoryHandler handler = project.getRepositories();
+      createRepositories(project, config, handler, isIncludeMavenLocal());
+   }
+
+   private void configureMavenUploadRepositories(RepositoryConfiguration uploadConfig) {
+      project.getPlugins().apply(MavenPlugin.class);
+      project.getLogger().info("Creating consolidated repositories for maven upload tasks");
+      Upload uploadArchives = (Upload) project.getTasks().getByName(BasePlugin.UPLOAD_ARCHIVES_TASK_NAME);
+      uploadArchives.repositories(handler -> createRepositories(project, uploadConfig, handler, false));
+   }
+
+   private void configureMavenPublishRepositories(RepositoryConfiguration uploadConfig) {
+      project.getPlugins().apply(MavenPublishPlugin.class);
+      project.getLogger().info("Creating consolidated repositories for maven publish");
+      project.getExtensions().configure(PublishingExtension.class, convention -> {
+         convention.repositories(handler -> createRepositories(project, uploadConfig, handler, false));
+      });
+   }
+
+   private void createRepositories(Project project, RepositoryConfiguration config, RepositoryHandler handler,
+            boolean includeMavenLocal) {
+      if (includeMavenLocal) {
+         handler.mavenLocal();
+      }
+      String repositoryName = config.getName();
+      String url = getProperty(project, config.getUrlProperty());
+      String username = getProperty(project, config.getUsernameProperty());
+      String password = getProperty(project, config.getPasswordProperty());
+      if (url != null) {
+         handler.maven(repo -> {
+            repo.setUrl(url);
+            if (repositoryName != null) {
+               repo.setName(repositoryName);
             }
-            return super.setName(repositoryName);
-         }
-
-         @Override
-         public RepositoryConfiguration setUrlProperty(String repositoryProperty) {
-            for (RepositoryConfiguration d : configuration) {
-               d.setUrlProperty(repositoryProperty);
+            if (config.isAuthenticationRequired() && username != null && password != null) {
+               repo.credentials(credentials -> {
+                  credentials.setUsername(username);
+                  credentials.setPassword(password);
+               });
             }
-            return super.setUrlProperty(repositoryProperty);
-         }
+         });
+      }
+   }
 
-         @Override
-         public RepositoryConfiguration setUsernameProperty(String usernameProperty) {
-            for (RepositoryConfiguration d : configuration) {
-               d.setUsernameProperty(usernameProperty);
+   private void checkRepositoryConfigurations(RepositoryConfiguration... configurations) {
+      for (RepositoryConfiguration config : configurations) {
+         if (config.isRequired()) {
+            requireProperty("url property", config.getUrlProperty());
+            if (config.isAuthenticationRequired()) {
+               requireProperty("username property", config.getUsernameProperty());
+               requireProperty("password proeprty", config.getPasswordProperty());
             }
-            return super.setUsernameProperty(usernameProperty);
          }
+      }
+   }
 
-         @Override
-         public RepositoryConfiguration setPasswordProperty(String passwordProperty) {
-            for (RepositoryConfiguration d : configuration) {
-               d.setPasswordProperty(passwordProperty);
-            }
-            return super.setPasswordProperty(passwordProperty);
-         }
+   private void requireProperty(String propertyName, String property) {
+      if (property == null) {
+         throw new ProjectConfigurationException(propertyName + " cannot be null", null);
+      }
+      if (!project.hasProperty(property)) {
+         throw new ProjectConfigurationException(String.format(MISSING_PROPERTY_ERROR_MESSAGE, property),
+            null);
+      }
+   }
 
-         @Override
-         public RepositoryConfiguration setRequired(boolean required) {
-            for (RepositoryConfiguration d : configuration) {
-               d.setRequired(required);
-            }
-            return super.setRequired(required);
-         }
+   private String getProperty(Project project, String key) {
+      if (key == null) {
+         return null;
+      }
+      Object value = project.findProperty(key);
+      if (value == null) {
+         return null;
+      }
+      return value.toString();
+   }
 
-         @Override
-         public RepositoryConfiguration setAuthenticationRequired(boolean required) {
-            for (RepositoryConfiguration d : configuration) {
-               d.setAuthenticationRequired(required);
-            }
-            return super.setAuthenticationRequired(required);
-         }
-
-         @Override
-         public RepositoryConfiguration required() {
-            for (RepositoryConfiguration d : configuration) {
-               d.required();
-            }
-            return super.required();
-         }
-
-         @Override
-         public RepositoryConfiguration optional() {
-            for (RepositoryConfiguration d : configuration) {
-               d.optional();
-            }
-            return super.optional();
-         }
-
-      };
-
-      action.execute(combined);
+   private void checkNotConfigured() {
+      if (configured) {
+         throw new PluginInstantiationException(
+            "The com.ngc.seaside.repository plugin has already configured the repositories; " + NAME
+               + " extension cannot not be modified");
+      }
    }
 
 }

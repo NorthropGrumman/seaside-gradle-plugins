@@ -4,6 +4,7 @@ import static org.mockito.Mockito.when
 
 import com.ngc.seaside.gradle.plugins.release.task.RemoveVersionSuffixTask
 import com.ngc.seaside.gradle.plugins.version.VersionResolver
+import com.ngc.seaside.gradle.util.Versions
 import com.ngc.seaside.gradle.util.test.GradleMocks
 import com.ngc.seaside.gradle.util.test.TaskBuilder
 
@@ -17,7 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner.Silent)
 class RemoveVersionSuffixTaskTest {
     private static final String TEST_UPGRADE_VERSION = "1.2.3"
-    private static final String TEST_VERSION_FROM_FILE = "${TEST_UPGRADE_VERSION}${VersionResolver.VERSION_SUFFIX}"
+    private static final String TEST_VERSION_FROM_FILE = "${TEST_UPGRADE_VERSION}${Versions.VERSION_SUFFIX}"
 
     private RemoveVersionSuffixTask task
 

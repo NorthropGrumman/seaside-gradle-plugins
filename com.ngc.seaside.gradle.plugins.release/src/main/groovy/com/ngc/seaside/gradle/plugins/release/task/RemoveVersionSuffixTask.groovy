@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.plugins.release.task
 import com.google.common.base.Preconditions
 import com.ngc.seaside.gradle.plugins.release.ReleaseUtil
 import com.ngc.seaside.gradle.plugins.version.VersionResolver
+import com.ngc.seaside.gradle.util.Versions
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -53,7 +54,7 @@ class RemoveVersionSuffixTask extends DefaultTask {
      * @return version used for the current release
      */
     String getVersionForRelease() {
-        return getCurrentVersion() - resolver.VERSION_SUFFIX
+        return getCurrentVersion() - Versions.VERSION_SUFFIX
     }
 
     /**

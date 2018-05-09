@@ -1,5 +1,7 @@
 package com.ngc.seaside.gradle.util;
 
+import org.gradle.api.Project;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,6 +13,8 @@ public class Versions {
    private final static Pattern THREE_DIGIT_REGEX = Pattern.compile("(\\d+\\.\\d+\\.\\d+)(-(\\w+))?");
 
    private final static Pattern TWO_DIGIT_REGEX = Pattern.compile("(\\d+\\.\\d+)(-(\\w+))?");
+
+   public static final String VERSION_SUFFIX = "-SNAPSHOT";
 
    private Versions() {
    }
@@ -42,5 +46,15 @@ public class Versions {
                String.format("cannot convert version %s to an OSGi compliant version string!", version));
       }
       return v;
+   }
+
+   /**
+    * Returns true if the given project's version is a snapshot, false otherwise.
+    * 
+    * @param project project
+    * @return true if the given project's version is a snapshot
+    */
+   public static boolean isSnapshot(Project project) {
+      return project.getVersion().toString().toUpperCase().endsWith(VERSION_SUFFIX);
    }
 }

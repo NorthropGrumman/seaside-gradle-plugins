@@ -12,7 +12,6 @@ dependencies {
    implementation "org.apache.maven.resolver:maven-resolver-transport-http:$aetherVersion"
    implementation "org.apache.maven.resolver:maven-resolver-transport-file:$aetherVersion"
 
-   testRuntime project(':gradle.plugins.repository')
    testImplementation project(':gradle.plugins.testutils')
    testImplementation "junit:junit:$junitVersion"
    testImplementation "org.mockito:mockito-core:$mockitoVersion"

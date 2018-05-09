@@ -2,7 +2,6 @@ dependencies {
    api gradleApi()
    implementation localGroovy()
    implementation project(':gradle.plugins.base')
-   implementation project(':gradle.plugins.release')
    
    testImplementation project(':gradle.plugins.testutils')
    testImplementation "junit:junit:$junitVersion"
