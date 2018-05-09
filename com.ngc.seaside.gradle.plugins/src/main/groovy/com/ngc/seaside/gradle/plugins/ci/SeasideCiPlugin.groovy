@@ -92,8 +92,6 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
 
    @Override
    void doApply(Project project) {
-      project.getPlugins().apply('base')
-      project.configurations.maybeCreate('install')
       project.getPlugins().apply('checkstyle')
 
       project.configure(project) {
@@ -190,6 +188,7 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             archiveName = ciExtension.m2ArchiveName
          }
 
+         //Sets up more configuration parameters for ci task will only do it if the ci task has been applied
          if (project.gradle.startParameter.taskNames.contains(CONTINUOUS_INTEGRATION_TASK_NAME)) {
 
             project.gradle.startParameter.setContinueOnFailure(true)
@@ -232,6 +231,13 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
       }
    }
 
+   /**
+    *
+    * A convince task that combines steps into one call.
+    * This task is strongly coupled to the SeasideCheckStylePlugin and CheckstylePlugin
+    *
+    * @param project to which this task will be added to
+    */
    private void configureCiTask(Project project) {
 
       // do not make clean a dependency it seems to run after all the other task have been run
@@ -239,8 +245,6 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
       def installTask = taskResolver.findTask("install")
       def checkStyleMain = taskResolver.findTask("checkstyleMain")
       def checkStyleTest = taskResolver.findTask("checkstyleTest")
-      checkStyleMain.setEnabled(true)
-      checkStyleTest.setEnabled(true)
 
       // this is the same as setting -Pfail-on-checkstyle-error=true
       project.extensions.configure('checkstyle', { checkstyle ->
@@ -252,9 +256,10 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
       project.task(
             CONTINUOUS_INTEGRATION_TASK_NAME,
             dependsOn: [buildTask, checkStyleMain, checkStyleTest, installTask],
-            type: Checkstyle,
+            type: Checkstyle, //made it of this type so that it works in conjuction with checksytle plugin
             group: AUDITING_TASK_GROUP_NAME,
-            description: 'does build, install checkStyleMain and checkStyleTest -Pfail-on-checkstyle-error=true'
+            description: 'does build, install, checkstyleMain, checkstyleTest, -Pfail-on-checkstyle-error=true, ' +
+                         '--refresh-dependencies, -S --continue'
       )
 
    }
