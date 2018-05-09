@@ -92,6 +92,8 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
 
    @Override
    void doApply(Project project) {
+      project.getPlugins().apply('base')
+      project.configurations.maybeCreate('install')
       project.getPlugins().apply('checkstyle')
 
       project.configure(project) {
