@@ -57,7 +57,7 @@ subprojects {
     }
 
     group = 'com.ngc.seaside'
-    version = '2.9.0-SNAPSHOT'
+    version = '2.10.0-SNAPSHOT'
 
     ext {
         junitVersion = '4.12'
@@ -190,10 +190,13 @@ subprojects {
 
     tasks.withType(Test).all { testTask ->
         testTask.systemProperty 'nexusConsolidated', nexusConsolidated
-        def trustStoreKey = 'javax.net.ssl.trustStore'
-        def trustStoreValue = System.properties[trustStoreKey]
-        if (trustStoreValue != null) {
-            testTask.systemProperty(trustStoreKey, trustStoreValue)
+        def systemProperties = ['javax.net.ssl.trustStore', 'http.proxyHost', 'http.proxyPort', 'http.nonProxyHosts',
+                                'https.proxyHost', 'https.proxyPort', 'https.nonProxyHosts']
+        for (String key : systemProperties) {
+           String value = System.properties[key]
+           if (value != null) {
+              testTask.systemProperty(key, value)
+           }
         }
     }
 }

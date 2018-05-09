@@ -38,9 +38,8 @@ public class Versions {
          v = qualifier == null ? String.format("%s.0", digits)
                                : String.format("%s.0.%s", digits, qualifier);
       } else {
-         throw new IllegalArgumentException("cannot conversion version "
-                                            + version
-                                            + " to an OSGi compliant version string!");
+         throw new IllegalArgumentException(
+               String.format("cannot convert version %s to an OSGi compliant version string!", version));
       }
       return v;
    }

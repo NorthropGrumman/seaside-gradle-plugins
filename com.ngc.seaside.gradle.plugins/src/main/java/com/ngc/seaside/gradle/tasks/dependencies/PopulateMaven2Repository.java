@@ -2,8 +2,6 @@ package com.ngc.seaside.gradle.tasks.dependencies;
 
 import com.google.common.base.Preconditions;
 
-import groovy.lang.Closure;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactResult;
@@ -28,6 +26,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
+
+import groovy.lang.Closure;
 
 /**
  * This task will create a directory in a maven2 layout for the dependencies of a project.  By default, it resolves all
@@ -182,7 +182,7 @@ public class PopulateMaven2Repository extends DefaultTask {
     * @param closure the closure to apply to the repository
     * @return the repository
     */
-   public MavenArtifactRepository maven(Closure closure) {
+   public MavenArtifactRepository maven(Closure<?> closure) {
       return maven(ConfigureUtil.configureUsing(closure));
    }
 

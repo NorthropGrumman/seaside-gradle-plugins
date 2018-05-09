@@ -22,7 +22,7 @@
 target/
 
 # Gradle
-.gradle
+.gradle/*
 build/
 out/
 gradle-app.setting

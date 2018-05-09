@@ -6,6 +6,7 @@ import org.junit.Assert
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Assume
 
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -41,7 +42,29 @@ class TestingUtilities {
     }
 
     static void assertTaskSuccess(BuildResult result, String projectName, String taskName) {
-        Assert.assertEquals(TaskOutcome.SUCCESS, result.task(":$projectName:$taskName").outcome)
+        def taskOutcome = result.task(":$projectName:$taskName").outcome
+
+        Assert.assertTrue(
+              "unexpected task outcome!",
+              taskOutcome == TaskOutcome.SUCCESS || taskOutcome == TaskOutcome.UP_TO_DATE
+        )
+    }
+
+    static assertFilePathsSame(String message, String expected, String actual) {
+        Assert.assertEquals(message, Paths.get(expected), Paths.get(actual))
+    }
+
+    static void tryToConnectToUrl(String urlString) {
+        def url = new URL(urlString)
+        try {
+            def connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 1000
+            connection.connect()
+            Assume.assumeTrue(connection.responseCode < 400)
+        } catch (Exception e) {
+            Assume.assumeNoException(e)
+        }
     }
 
     private static URL getThePluginClassPathResource(Class c) {

@@ -11,11 +11,11 @@ contained in a single JAR and versioned together to make them easier to use.
     * You may need to install `pip`, if it's not already available
         * Install with: `sudo yum install -y python2-pip`
     * This is a dependency for `cppcheck`
-    * If pip fails to connect, you call install pygments with 
+    * If pip fails to connect, you call install pygments with
     ```
     curl http://10.207.42.137/resources/pygments-2.2.0.tar.gz > pygments-2.2.0.tar.gz && sudo pip install --no-index --find-links . pygments
     ```
-    
+
 ## Notes on building this project
 * To build, you can run: `./gradlew build`
 * If you want to see which Gradle tasks are available for you to run, execute: `./gradlew tasks [--all]`
@@ -71,14 +71,14 @@ This plugin configures the following tasks:
 
 | Task | Description | Executed by default |
 |------|-------------|---------------------|
-| analyze | Runs Jacoco to compute code coverage and then runs Sonarqube | no | 
+| analyze | Runs Jacoco to compute code coverage and then runs Sonarqube | no |
 | downloadDependencies | Downloads all dependencies into the build/dependencies/ folder using maven2 layout. | no |
 | dependencyUpdates | Displays a report of the project dependencies that are up-to-date, exceed the latest version found, have upgrades, or failed to be resolved. | no |
 | dependencyReport | Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies | no |
 | cleanupDependencies | Remove unused dependencies from dependencies folder | no |
 
 # com.ngc.seaside:seaside.service-distribution
-The seaside gradle service distribution plugin provide the directory structure required to run a BLoCS application and all of its bundle dependencies. This plugin will then distribute and compress the bundles of files packaged, including blocs dependencies, jar files, and also resource files. 
+The seaside gradle service distribution plugin provide the directory structure required to run a BLoCS application and all of its bundle dependencies. This plugin will then distribute and compress the bundles of files packaged, including blocs dependencies, jar files, and also resource files.
 
 ## This plugin requires properties in your gradle.properties file (usually ~/.gradle/gradle.properties):
 * nexusUsername     : the username to use when uploading artifacts to nexus
@@ -127,7 +127,7 @@ dependencies {
 
     thirdParty 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
     thirdParty 'com.google.guava:guava:17.0'
-    
+
     platform "com.ngc.blocs:service.deployment.impl.common.autodeploymentservice:${blocsCoreVersion}"
     platform "org.eclipse.equinox:equinox-common:3.6.200.v20130402-1505"
 }
@@ -185,7 +185,7 @@ seasideApplication {
     }
     unix {
         startScript = 'src/main/output/bin/start'
-        // setting appHomeCmd here does nothing because 
+        // setting appHomeCmd here does nothing because
         // the custom startScript will overwrite the generated start script
         // appHomeCmd = "pwd -P"
     }
@@ -198,7 +198,7 @@ dependencies {
 
     thirdParty 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
     thirdParty 'com.google.guava:guava:17.0'
-    
+
     platform "com.ngc.blocs:service.deployment.impl.common.autodeploymentservice:${blocsCoreVersion}"
     platform "org.eclipse.equinox:equinox-common:3.6.200.v20130402-1505"
 }
@@ -241,7 +241,7 @@ releases and snapshots
 ## Using this plugin
 To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
 An example is below. Note: a newer version may exist. Check the Nexus repository for the latest version. If you want to
-execute a Dry Run you can either 
+execute a Dry Run you can either
 1. invoke Gradle with one of the release dry runs tasks: `releaseDryRun`, `releaseMinorDryRun`, `releaseMajorDryRun`
 1. or configure the build.gradle so the following properties are set to false inside the seasideRelease section:
 ```
@@ -270,13 +270,13 @@ buildscript {
 }
 
 subprojects {
-   
+
     apply plugin: 'com.ngc.seaside.parent'
     apply plugin: 'com.ngc.seaside.release'
 
     group = 'com.ngc.seaside'
     version = '1.2.3-SNAPSHOT'
-    
+
     seasideRelease {
             dependsOn subprojects*.build
             uploadArtifacts = true //'false' would be useful if you don't want to publish release to nexus also false for dry runs
@@ -296,7 +296,7 @@ subprojects {
 ```
 
 # com.ngc.seaside:seaside.ReleaseRootProjectPlugin
-The release plugin provides a gradle release plugin for my java gradle projects and essentially giving the ability to automate 
+The release plugin provides a gradle release plugin for my java gradle projects and essentially giving the ability to automate
 the necessary steps to release code to Nexus. This plugin will Initialize the project.version from a semantic version tag specified in the root build.gradle file of a project, prepare the build.gradle for next SNAPSHOT interation, push changes to Git remote(should work from any branch), and provide the default configuration for deploying these artifacts to Nexus.
 
 The release plugin includes the release, releaseMajorVersion, and releaseMinorVersion task. The release task will create a tagged non-SNAPSHOT release of the current version as specified in the root build.gradle file.The releaseMajorVersion task upgrades to next major version & creates a tagged non-SNAPSHOT release. The releaseMinorVersion task will upgrade to the next minor version & creates a tagged non-SNAPSHOT release.
@@ -320,14 +320,14 @@ In the root directory of the repo you should have a versions.gradle file that lo
 allprojects {
     //required for the plugin
     group = 'com.ngc.seaside'
-    
+
     //required for the plugin
     version = '2.0.0-SNAPSHOT'
 
     ext {
-    
+
         //This is the first verison that contains the
-        //new plugin 
+        //new plugin
         seasidePluginsVersion = '2.2.3-SNAPSHOT'
     }
 }
@@ -335,21 +335,21 @@ allprojects {
 You will need the following sections in your build.gradle for each subproject or at least at a level where you will need to use the plugin's tasks
 ```groovy
 buildscript {
-    //required 
+    //required
     ext {
         versionsFile = file('../versions.gradle')
     }
-    //required 
+    //required
     apply from: versionsFile, to: project
 
 }
 
-//required 
+//required
 apply plugin: 'com.ngc.seaside.release.root'
 
 subprojects {
     apply plugin: 'com.ngc.seaside.parent'
-    //required 
+    //required
     versionSettings {
         versionFile = versionsFile
     }
@@ -493,6 +493,57 @@ subprojects {
 
 You can also override these properties when you run the gradle command. For example:
 `gradlew genFullCoverageReport -PcoverageFilePath='build/my/coverage/data.info' -PcoverageXMLPath='build/my/cobertura/output.xml'`
+
+# com.ngc.seaside:seaside.eclipse.feature
+The seaside Eclipse Feature plugin packages an Eclipse feature.xml file for creating an Eclipse update site.
+
+## Using this plugin
+Below is an example of using the Eclipse Feature plugin.
+```java
+apply plugin: 'com.ngc.seaside.eclipse.features'
+
+eclipseFeature {
+   // (optional) set the name of the archive that is created containing the feature.
+   archiveName = 'some.archive-name-1.2.3.jar'
+}
+```
+
+# com.ngc.seaside:seaside.eclipse.updatesite
+The seaside Eclipse Update Site plugin packages a custom Eclipse update site.
+
+## Using this plugin
+Below is an example of using the Eclipse Update Site plugin.
+```java
+apply plugin: 'com.ngc.seaside.eclipse.updatesite'
+
+dependencies {
+    features project(path: ':some.service', configuration: 'feature')
+
+    customPlugins project(':some.other.service')
+
+    eclipsePlugins name: 'some.eclipse.plugin_1.2.3.v201801010000'
+}
+
+eclipseUpdateSite {
+   // (optional) set the name of the archive that is created containing the update site.
+   updateSiteArchiveName = 'some.archive-name-1.2.3.jar'
+
+   // (optional) set the cache directory into which the Eclipse SDK should be downloaded and extracted.
+   cacheDirectory = '/tmp'
+
+   // (required) the download url to the linux eclipse distribution.
+   linuxEclipseVersion = "eclipse-dsl-oxygen-2-linux-gtk-x86_64"
+
+   // (required) the name of the eclipse distribution version to download on linux.
+   linuxDownloadUrl = "http://10.207.42.137/resources/jellyfish/${linuxEclipseVersion}.zip"
+
+   // (required) the download url to the windows eclipse distribution.
+   windowsEclipseVersion = "eclipse-dsl-oxygen-2-win32-x86_64"
+
+   // (required) the name of the eclipse distribution version to download on windows.
+   windowsDownloadUrl = "http://10.207.42.137/resources/jellyfish/${windowsEclipseVersion}.zip"
+}
+```
 
 # Reference
 [seaside-gradle-plugins wiki](http://10.207.42.137/confluence/display/SEAS/seaside-gradle-plugins+-+Core+Gradle+plugins+for+Seaside+development)

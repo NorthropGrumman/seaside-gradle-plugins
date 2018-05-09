@@ -10,7 +10,6 @@ import org.gradle.testkit.runner.UnexpectedBuildSuccess;
 import java.io.File;
 import java.io.Writer;
 import java.net.URI;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,10 +38,13 @@ public class SeasideGradleRunner extends GradleRunner {
             "-PnexusSnapshots=test",
             "-PnexusUsername=test",
             "-PnexusPassword=test");
-      String trustStoreKey = "javax.net.ssl.trustStore";
-      String trustStoreValue = System.getProperty(trustStoreKey);
-      if (trustStoreValue != null) {
-         withArguments("-D" + trustStoreKey + "=" + trustStoreValue);
+      String[] properties = {"javax.net.ssl.trustStore", "http.proxyHost", "http.proxyPort", "http.nonProxyHosts",
+                             "https.proxyHost", "https.proxyPort", "https.nonProxyHosts"};
+      for (String propertyKey : properties) {
+         String propertyValue = System.getProperty(propertyKey);
+         if (propertyValue != null) {
+            withArguments("-D" + propertyKey + "=" + propertyValue);
+         }
       }
       return this;
    }
