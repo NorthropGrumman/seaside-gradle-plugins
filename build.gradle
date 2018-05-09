@@ -69,7 +69,7 @@ subprojects {
     }
 
     group = 'com.ngc.seaside'
-    version = '2.9.0-SNAPSHOT'
+    version = '2.10.0-SNAPSHOT'
 
     ext {
         junitVersion = '4.12'
@@ -209,18 +209,18 @@ subprojects {
            }
         }
     }
-    
+
     task copyPlugin(type: Copy) {
         from jar
         into "$bootstrapDirectory"
     }
-    
+
     task copyDependencies(type: Copy) {
         from configurations.compile
         into "$bootstrapDirectory"
     }
-    
-    task prepareForRelease(description: 'Prepares this project for a release.', 
+
+    task prepareForRelease(description: 'Prepares this project for a release.',
                            dependsOn: [copyPlugin, copyDependencies])
 }
 

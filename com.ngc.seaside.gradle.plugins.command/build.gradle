@@ -3,10 +3,9 @@ dependencies {
    implementation localGroovy()
    implementation project(':gradle.plugins.base')
 
-   testImplementation project(':gradle.plugins.repository')
+   testRuntime project(':gradle.plugins.repository')
    testImplementation project(':gradle.plugins.testutils')
    testImplementation "junit:junit:$junitVersion"
    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-   testImplementation "com.ngc.blocs:test.impl.common.testutilities:$blocsVersion"
    testImplementation "commons-io:commons-io:$commonsIOVersion"
 }

@@ -5,8 +5,8 @@ dependencies {
    implementation project(':gradle.plugins.base')
    implementation "com.google.guava:guava:$guavaVersion"
    
-   testImplementation project(':gradle.plugins.parent')
-   testImplementation project(':gradle.plugins.ci')
+   testRuntime project(':gradle.plugins.parent')
+   testRuntime project(':gradle.plugins.ci')
    testImplementation project(':gradle.plugins.testutils')
    testImplementation "junit:junit:$junitVersion"
    testImplementation "org.mockito:mockito-core:$mockitoVersion"

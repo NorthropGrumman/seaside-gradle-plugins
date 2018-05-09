@@ -11,14 +11,7 @@ import org.junit.Assume
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import net.bytebuddy.build.Plugin
-
 class TestingUtilities {
-    static List<File> getTestClassPath(Class c) {
-        URL r = getThePluginClassPathResource(c)
-        throwIfTheClasspathResourceIsNotFound(r)
-        return createNewFileForEachItemInClasspath(r)
-    }
 
     static File setUpTheTestProjectDirectory(File sourcePath, File destPath) {
         def testProjectDir = createTheTestProjectDirectory(destPath)

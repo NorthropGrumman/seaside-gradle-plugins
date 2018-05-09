@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 /**
  * Used to create the tags for new releases to our GitHub repository
- * */
+ */
 class CreateTagTask extends DefaultTask {
    private String tagPrefix
    private String tagName
