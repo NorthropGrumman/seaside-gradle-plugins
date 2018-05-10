@@ -6,8 +6,10 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.ProjectConfigurationException;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
+import org.gradle.api.internal.HasConvention;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.MavenPlugin;
+import org.gradle.api.plugins.MavenRepositoryHandlerConvention;
 import org.gradle.api.plugins.PluginInstantiationException;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
@@ -512,7 +514,52 @@ public class SeasideRepositoryExtension {
       project.getPlugins().apply(MavenPlugin.class);
       project.getLogger().info("Creating consolidated repositories for maven upload tasks");
       Upload uploadArchives = (Upload) project.getTasks().getByName(BasePlugin.UPLOAD_ARCHIVES_TASK_NAME);
-      uploadArchives.repositories(handler -> createRepositories(project, uploadConfig, handler, false));
+      MavenRepositoryHandlerConvention convention = ((HasConvention) uploadArchives.getRepositories()).getConvention()
+                                                                                                      .getPlugin(
+                                                                                                         MavenRepositoryHandlerConvention.class);
+      convention.mavenDeployer(deployer -> {
+         Object repo = getRemoteRepository(uploadConfig, deployer.getClass().getClassLoader());
+         if (repo != null) {
+            if (Versions.isSnapshot(project)) {
+               deployer.setSnapshotRepository(repo);
+            } else {
+               deployer.setRepository(repo);
+            }
+         }
+      });
+   }
+
+   private Object getRemoteRepository(RepositoryConfiguration config, ClassLoader loader) {
+      String repositoryName = config.getName();
+      String url = getProperty(project, config.getUrlProperty());
+      String username = getProperty(project, config.getUsernameProperty());
+      String password = getProperty(project, config.getPasswordProperty());
+      if (url == null) {
+         return null;
+      }
+      project.getLogger().info("Setting up remote repository {} with url {} and username {}", repositoryName, url, username);
+      try {
+         Class<?> remoteRepositoryClass = loader.loadClass("org.apache.maven.artifact.ant.RemoteRepository");
+         Class<?> authenticationClass = loader.loadClass("org.apache.maven.artifact.ant.Authentication");
+         Class<?> serverClass = loader.loadClass("org.apache.maven.settings.Server");
+
+         Object repo = remoteRepositoryClass.getConstructor().newInstance();
+
+         if (repositoryName != null) {
+            remoteRepositoryClass.getMethod("setId", String.class).invoke(repo, repositoryName);
+         }
+         remoteRepositoryClass.getMethod("setUrl", String.class).invoke(repo, url);
+         if (username != null && password != null) {
+            Object server = serverClass.getConstructor().newInstance();
+            serverClass.getMethod("setUsername", String.class).invoke(server, username);
+            serverClass.getMethod("setPassword", String.class).invoke(server, password);
+            Object authentication = authenticationClass.getConstructor(serverClass).newInstance(server);
+            remoteRepositoryClass.getMethod("addAuthentication", authenticationClass).invoke(repo, authentication);
+         }
+         return repo;
+      } catch (Exception e) {
+         throw new IllegalStateException(e);
+      }
    }
 
    private void configureMavenPublishRepositories(RepositoryConfiguration uploadConfig) {

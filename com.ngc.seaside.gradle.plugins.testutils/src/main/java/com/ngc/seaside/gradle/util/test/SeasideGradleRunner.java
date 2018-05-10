@@ -32,14 +32,18 @@ public class SeasideGradleRunner extends GradleRunner {
       if (value == null) {
          throw new IllegalStateException("nexusConsolidated property cannot be found");
       }
+      String nexusSnapshots = System.getProperty("nexusSnapshots", "test");
+      String nexusUsername = System.getProperty("nexusUsername", "test");
+      String nexusPassword = System.getProperty("nexusPassword", "test");
       this.withArguments(
             "-PnexusConsolidated=" + value,
             "-PnexusReleases=test",
-            "-PnexusSnapshots=test",
-            "-PnexusUsername=test",
-            "-PnexusPassword=test");
-      String[] properties = {"javax.net.ssl.trustStore", "http.proxyHost", "http.proxyPort", "http.nonProxyHosts",
-                             "https.proxyHost", "https.proxyPort", "https.nonProxyHosts", "sonar.host.url"};
+            "-PnexusSnapshots=" + nexusSnapshots,
+            "-PnexusUsername=" + nexusUsername,
+            "-PnexusPassword=" + nexusPassword);
+      String[] properties = { "javax.net.ssl.trustStore",
+               "http.proxyHost", "http.proxyPort", "http.nonProxyHosts", "https.proxyHost", "https.proxyPort",
+               "https.nonProxyHosts", "sonar.host.url" };
       for (String propertyKey : properties) {
          String propertyValue = System.getProperty(propertyKey);
          if (propertyValue != null) {
