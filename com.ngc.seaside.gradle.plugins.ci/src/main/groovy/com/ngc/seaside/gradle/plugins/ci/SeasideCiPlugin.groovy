@@ -5,6 +5,8 @@ import com.ngc.seaside.gradle.tasks.dependencies.PopulateMaven2Repository
 import com.ngc.seaside.gradle.util.PropertyUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.logging.configuration.ShowStacktrace
+import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.tasks.bundling.Zip
 
 /**
@@ -45,6 +47,7 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
    public static final String NOTHING_TASK_NAME = 'nothing'
    public static final String POPULATE_M2_REPO_TASK_NAME = 'populateM2repo'
    public static final String CREATE_M2_REPO_ARCHIVE_TASK_NAME = 'm2repo'
+   public static final String CONTINUOUS_INTEGRATION_TASK_NAME = 'ci'
 
    /**
     * The default name of the directory that will contain the m2 dependencies.
@@ -85,6 +88,8 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
 
    @Override
    void doApply(Project project) {
+      project.getPlugins().apply('checkstyle')
+
       project.configure(project) {
          configureExtensions(project)
          createTasks(project)
@@ -127,6 +132,10 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             group: AUDITING_TASK_GROUP_NAME,
             description: 'Creates a ZIP archive of the populated m2 repository.'
       )
+
+
+      configureCiTask(project)
+
    }
 
    /**
@@ -173,6 +182,14 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             destinationDir = ciExtension.m2ArchiveOutputDirectory ?: project.buildDir
             archiveName = ciExtension.m2ArchiveName
          }
+
+         //Sets up more configuration parameters for ci task will only do it if the ci task has been applied
+         if (project.gradle.startParameter.taskNames.contains(CONTINUOUS_INTEGRATION_TASK_NAME)) {
+
+            project.gradle.startParameter.setContinueOnFailure(true)
+            project.gradle.startParameter.setRefreshDependencies(true)
+            project.gradle.startParameter.setShowStacktrace(ShowStacktrace.INTERNAL_EXCEPTIONS)
+         }
       }
    }
 
@@ -207,5 +224,38 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             PropertyUtils.setProperties(project, updatePropertyName, updatePropertyValue)
          }
       }
+   }
+
+   /**
+    *
+    * A convince task that combines steps into one call.
+    * This task is strongly coupled to the SeasideCheckStylePlugin and CheckstylePlugin
+    *
+    * @param project to which this task will be added to
+    */
+   private void configureCiTask(Project project) {
+
+      // do not make clean a dependency it seems to run after all the other task have been run
+      def buildTask = taskResolver.findTask("build")
+      def installTask = taskResolver.findTask("install")
+      def checkStyleMain = taskResolver.findTask("checkstyleMain")
+      def checkStyleTest = taskResolver.findTask("checkstyleTest")
+
+      // this is the same as setting -Pfail-on-checkstyle-error=true
+      project.extensions.configure('checkstyle', { checkstyle ->
+         checkstyle.ignoreFailures = false
+         checkstyle.maxErrors = 0
+         checkstyle.maxWarnings = 0
+      })
+
+      project.task(
+            CONTINUOUS_INTEGRATION_TASK_NAME,
+            dependsOn: [buildTask, checkStyleMain, checkStyleTest, installTask],
+            type: Checkstyle, //made it of this type so that it works in conjuction with checksytle plugin
+            group: AUDITING_TASK_GROUP_NAME,
+            description: 'does build, install, checkstyleMain, checkstyleTest, -Pfail-on-checkstyle-error=true, ' +
+                         '--refresh-dependencies, -S --continue'
+      )
+
    }
 }
