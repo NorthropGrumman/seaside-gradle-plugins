@@ -88,8 +88,6 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
 
    @Override
    void doApply(Project project) {
-      project.getPlugins().apply('checkstyle')
-
       project.configure(project) {
          configureExtensions(project)
          createTasks(project)
@@ -234,28 +232,38 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
     * @param project to which this task will be added to
     */
    private void configureCiTask(Project project) {
-
-      // do not make clean a dependency it seems to run after all the other task have been run
-      def buildTask = taskResolver.findTask("build")
-      def installTask = taskResolver.findTask("install")
-      def checkStyleMain = taskResolver.findTask("checkstyleMain")
-      def checkStyleTest = taskResolver.findTask("checkstyleTest")
-
-      // this is the same as setting -Pfail-on-checkstyle-error=true
-      project.extensions.configure('checkstyle', { checkstyle ->
-         checkstyle.ignoreFailures = false
-         checkstyle.maxErrors = 0
-         checkstyle.maxWarnings = 0
-      })
-
-      project.task(
+      def ci = project.task(
             CONTINUOUS_INTEGRATION_TASK_NAME,
-            dependsOn: [buildTask, checkStyleMain, checkStyleTest, installTask],
             type: Checkstyle, //made it of this type so that it works in conjuction with checksytle plugin
             group: AUDITING_TASK_GROUP_NAME,
             description: 'does build, install, checkstyleMain, checkstyleTest, -Pfail-on-checkstyle-error=true, ' +
                          '--refresh-dependencies, -S --continue'
       )
+      // We do this after the project has been evaluated so the order the plugins are applied does not manner.
+      // Otherwise this plugin could not be applied to all the other tasks where created.
+      project.afterEvaluate {
+         if (project.extensions.findByName('checkstyle') != null) {
+            // this is the same as setting -Pfail-on-checkstyle-error=true
+            project.extensions.configure('checkstyle', { checkstyle ->
+               checkstyle.ignoreFailures = false
+               checkstyle.maxErrors = 0
+               checkstyle.maxWarnings = 0
+            })
+         }
+         // do not make clean a dependency it seems to run after all the other task have been run
+         def tasks = getOptionalTasks("build", "checkstyleMain", "checkstyleTest", "install")
+         ci.dependsOn(tasks)
+      }
+   }
 
+   private Collection<Task> getOptionalTasks(String... taskNames) {
+      def tasks = new ArrayList<>()
+      for (String name : taskNames) {
+         def task = taskResolver.findOptionalTask(name)
+         if (task != null) {
+            tasks.add(task)
+         }
+      }
+      return tasks
    }
 }

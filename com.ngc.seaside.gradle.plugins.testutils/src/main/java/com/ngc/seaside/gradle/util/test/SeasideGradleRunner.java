@@ -8,11 +8,18 @@ import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.gradle.testkit.runner.UnexpectedBuildSuccess;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 public class SeasideGradleRunner extends GradleRunner {
 
@@ -25,6 +32,38 @@ public class SeasideGradleRunner extends GradleRunner {
 
    public static SeasideGradleRunner create() {
       return new SeasideGradleRunner();
+   }
+
+   public SeasideGradleRunner withPropertiesFromGradleHome() {
+      Path gradleUserHome = Paths.get(System.getenv("GRADLE_USER_HOME"));
+      if (gradleUserHome == null) {
+         gradleUserHome = Paths.get(System.getProperty("user.home"), ".gradle");
+      }
+      if (!Files.isDirectory(gradleUserHome)) {
+         throw new IllegalStateException("could not find Gradle user home directory! Expected to find a directory in "
+                                               + gradleUserHome.toAbsolutePath());
+      }
+      Path gradleProperties = gradleUserHome.resolve("gradle.properties");
+      if (!Files.isRegularFile(gradleProperties)) {
+         throw new IllegalStateException("expected to find a regular file at " + gradleProperties.toAbsolutePath());
+      }
+      Properties properties = new Properties();
+      try (InputStream is = Files.newInputStream(gradleProperties)) {
+         properties.load(is);
+      } catch (IOException e) {
+         throw new RuntimeException(e.getMessage(), e);
+      }
+      for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+         String key = entry.getKey().toString();
+         String value = entry.getValue().toString();
+         if (key.startsWith("systemProp.")) {
+            key = key.substring("systemProp.".length());
+            withArguments(String.format("-D%s=%s", key, value));
+         } else {
+            withArguments(String.format("-P%s=%s", key, value));
+         }
+      }
+      return this;
    }
 
    public SeasideGradleRunner withNexusProperties() {
@@ -41,9 +80,10 @@ public class SeasideGradleRunner extends GradleRunner {
             "-PnexusSnapshots=" + nexusSnapshots,
             "-PnexusUsername=" + nexusUsername,
             "-PnexusPassword=" + nexusPassword);
-      String[] properties = { "javax.net.ssl.trustStore",
-               "http.proxyHost", "http.proxyPort", "http.nonProxyHosts", "https.proxyHost", "https.proxyPort",
-               "https.nonProxyHosts", "sonar.host.url" };
+      String[] properties = {"javax.net.ssl.trustStore",
+                             "http.proxyHost", "http.proxyPort", "http.nonProxyHosts", "https.proxyHost",
+                             "https.proxyPort",
+                             "https.nonProxyHosts", "sonar.host.url"};
       for (String propertyKey : properties) {
          String propertyValue = System.getProperty(propertyKey);
          if (propertyValue != null) {
