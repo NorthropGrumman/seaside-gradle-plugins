@@ -1,7 +1,0 @@
-rootProject.name = 'test-project'
-
-include("testSubproject")
-include("otherTestSubproject")
-
-project(':testSubproject').name = 'testSubproject'
-project(':otherTestSubproject').name = 'otherTestSubproject'

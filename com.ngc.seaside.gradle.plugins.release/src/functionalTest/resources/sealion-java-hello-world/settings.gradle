@@ -1,0 +1,10 @@
+rootProject.name = 'sealion-java-hello-world'
+
+include 'com.ngc.seaside.service.helloworld'
+project(':com.ngc.seaside.service.helloworld').name = 'service.helloworld'
+
+include 'com.ngc.seaside.service.holamundo'
+project(':com.ngc.seaside.service.holamundo').name = 'service.holamundo'
+
+include 'com.ngc.seaside.service.bonjourlemonde'
+project(':com.ngc.seaside.service.bonjourlemonde').name = 'service.bonjourlemonde'

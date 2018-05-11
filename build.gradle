@@ -43,17 +43,36 @@ buildscript {
     }
 }
 
+def nonPluginProjects = [project(':gradle.plugins'), project(':gradle.plugins.testutils'), project(':gradle.plugins.base')]
+
 /**
  * Project level build for the seaside-gradle-parent gradle plugin.
  */
 subprojects {
-
-    apply plugin: 'java'
+    ext {
+       isPlugin = !(project in nonPluginProjects)
+    }
+   
+    apply plugin: 'java-library'
     apply plugin: 'groovy'
     apply plugin: 'maven'
+    if (isPlugin) {
+        apply plugin: 'java-gradle-plugin'
+    }
+    apply plugin: 'com.github.ksoichiro.console.reporter'
 
     if (releaseInProgress) {
         apply plugin: 'com.ngc.seaside.release.root'
+    }
+
+    // Required in order to use implementation and api dependencies with groovy
+    configurations {
+        apiElements {
+            outgoing.variants.getByName('classes').artifact(
+                file: compileGroovy.destinationDir,
+                type: ArtifactTypeDefinition.JVM_CLASS_DIRECTORY,
+                builtBy: compileGroovy)
+        }
     }
 
     group = 'com.ngc.seaside'
@@ -148,28 +167,28 @@ subprojects {
         }
     }
 
-    task createClasspathManifest {
-        def outputDir = file("$buildDir/$name")
-
-        inputs.files sourceSets.main.runtimeClasspath
-        outputs.dir outputDir
-
-        doLast {
-            outputDir.mkdirs()
-            file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
-        }
+    configurations {
+       integrationTestCompile.extendsFrom testCompile
+       integrationTestImplementation.extendsFrom testImplementation
+       integrationTestRuntime.extendsFrom testRuntime
+       functionalTestCompile.extendsFrom testCompile
+       functionalTestImplementation.extendsFrom testImplementation
+       functionalTestRuntime.extendsFrom testRuntime
+       if (isPlugin) {
+          // Allows functional tests to apply plugins from other projects
+          testRuntimeClasspath.allDependencies.withType(ProjectDependency).all {
+             dependencyProject.sourceSets {
+                main {
+                   gradlePlugin.pluginSourceSet.runtimeClasspath += compileClasspath + output
+                }
+             }
+          }
+       }
     }
 
     dependencies {
         integrationTestCompile sourceSets.main.output
-        integrationTestCompile configurations.testCompile
-        integrationTestCompile sourceSets.test.output
-        integrationTestRuntime configurations.testRuntime
-
         functionalTestCompile sourceSets.main.output
-        functionalTestCompile configurations.testCompile
-        functionalTestCompile sourceSets.test.output
-        functionalTestRuntime configurations.testRuntime
     }
 
     tasks.getByName("test").group = "test"
@@ -191,7 +210,7 @@ subprojects {
     tasks.withType(Test).all { testTask ->
         testTask.systemProperty 'nexusConsolidated', nexusConsolidated
         def systemProperties = ['javax.net.ssl.trustStore', 'http.proxyHost', 'http.proxyPort', 'http.nonProxyHosts',
-                                'https.proxyHost', 'https.proxyPort', 'https.nonProxyHosts']
+                                'https.proxyHost', 'https.proxyPort', 'https.nonProxyHosts', 'sonar.host.url']
         for (String key : systemProperties) {
            String value = System.properties[key]
            if (value != null) {
@@ -199,6 +218,19 @@ subprojects {
            }
         }
     }
+
+    task copyPlugin(type: Copy) {
+        from jar
+        into "$bootstrapDirectory"
+    }
+
+    task copyDependencies(type: Copy) {
+        from configurations.compile
+        into "$bootstrapDirectory"
+    }
+
+    task prepareForRelease(description: 'Prepares this project for a release.',
+                           dependsOn: [copyPlugin, copyDependencies])
 }
 
 task clean() {

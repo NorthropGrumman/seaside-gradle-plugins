@@ -1,0 +1,13 @@
+apply plugin: 'groovy'
+dependencies {
+   implementation gradleApi()
+   implementation localGroovy()
+   implementation project(':gradle.plugins.base')
+   implementation "com.google.guava:guava:$guavaVersion"
+   
+   testRuntime project(':gradle.plugins.repository')
+   testImplementation project(':gradle.plugins.testutils')
+   testImplementation "junit:junit:$junitVersion"
+   testImplementation "org.mockito:mockito-core:$mockitoVersion"
+   testImplementation "commons-io:commons-io:$commonsIOVersion"
+}

@@ -1,0 +1,66 @@
+plugins {
+    id 'com.ngc.seaside.cpp.parent'
+    id 'com.ngc.seaside.cpp.coverage'
+}
+
+dependencies {
+    compile project(path: ':service.api', configuration: 'distribution')
+    compile "org.apache.celix:celix:$celixVersion@zip"
+
+    testCompile "com.google.test:gtest:$gTestVersion@zip"
+    testCompile "com.google.test:gmock:$gMockVersion@zip"
+}
+
+
+building {
+  headers('celix') {
+    dirs 'include/celix',
+         'include/celix/dependency_manager',
+         'include/celix/dependency_manager_cxx',
+         'include/celix/dfi'
+  }
+
+  api('service.api')
+
+  statically('celix') {
+    libs 'dependency_manager_cxx_static'
+    withArgs {
+      before = ['-Wl,--whole-archive']
+      after = ['-Wl,--no-whole-archive']
+    }
+  }
+
+  shared('celix') {
+    libs 'celix_framework', 'celix_utils'
+    version = '2'
+  }
+
+  shared('celix') {
+    libs 'celix_dfi'
+    version = '1'
+  }
+
+  statically('gtest')
+  statically('gmock')
+}
+
+model {
+    binaries {
+        all {
+            // Define toolchain-specific compiler and linker options
+            if (toolChain in Gcc) {
+                cppCompiler.args "-fPIC", "-std=gnu++11", "-pthread", "-Wall", "-Werror", "-fno-rtti", "-fprofile-arcs", "-ftest-coverage"
+                linker.args "-Wl,--no-undefined", "-pthread", "-lgcov", "--coverage"
+            }
+        }
+    }
+
+    testSuites {
+        mainTest(GoogleTestTestSuiteSpec) {
+            testing $.components.main
+            sources {
+                cpp.source.srcDir 'src/test/cpp'
+            }
+        }
+    }
+}

@@ -1,44 +1,13 @@
-// Dependencies
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
+   parent.subprojects.findAll { it.isPlugin }.each { pluginProject ->
+      compile pluginProject
+   }
 
-    compile "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarQubeVersion"
-    compile "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
-    compile "org.unbescape:unbescape:$unbescapeVersion"
-    compile "commons-io:commons-io:$commonsIOVersion"
-    compile "com.github.ben-manes:gradle-versions-plugin:$dependencyUpdatesVersion"
-    compile "com.github.ksoichiro:gradle-console-reporter:$consoleReporterVersion"
-    compile "com.google.guava:guava:$guavaVersion"
-
-    compile "org.eclipse.aether:aether-connector-basic:$aetherVersion"
-    compile "org.apache.maven:maven-resolver-provider:$mavenVersion"
-    compile "org.apache.maven:maven-settings-builder:$mavenVersion"
-    compile "org.apache.maven:maven-model:$mavenVersion"
-    compile "org.apache.maven.resolver:maven-resolver-transport-http:$aetherVersion"
-    compile "org.apache.maven.resolver:maven-resolver-transport-file:$aetherVersion"
-
-    testRuntime files(createClasspathManifest)
-
-    testCompile gradleTestKit()
-    testCompile "junit:junit:$junitVersion"
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
-    testCompile "com.ngc.blocs:test.impl.common.testutilities:$blocsVersion"
-}
-
-apply plugin: 'com.github.ksoichiro.console.reporter'
-
-task copyPlugin(type: Copy) {
-    from jar
-    into "$bootstrapDirectory"
-}
-
-task copyDependencies(type: Copy) {
-    from configurations.compile
-    into "$bootstrapDirectory"
-}
-
-task prepareForRelease(description: 'Prepares this project for a release.',
-                       dependsOn: [copyPlugin, copyDependencies]) {
-
+   // This is important, do not remove this dependency.  This plugin needs to have a direct dependency on Bnd even
+   // thought the parent plugin has the same dependency.  This forces this version of Bnd and OSGi to take precedence
+   // when buildscript dependencies are resolved.  If we don't do this, this version of Bnd may have lower precedence
+   // then another version of Bnd because it is a 2nd order dependencies.  This can cause errors when projects are
+   // building and older versions of OSGi show up on the classpath.  My making this a 1st order dependency, we remove
+   // this issue.
+   compile "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
 }

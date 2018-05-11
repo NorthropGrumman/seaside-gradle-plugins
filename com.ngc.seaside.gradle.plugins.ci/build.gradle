@@ -1,0 +1,19 @@
+dependencies {
+   api gradleApi()
+   implementation localGroovy()
+   implementation project(':gradle.plugins.base')
+   implementation project(':gradle.plugins.repository')
+   implementation "org.unbescape:unbescape:$unbescapeVersion"
+   implementation "commons-io:commons-io:$commonsIOVersion"
+   implementation "org.eclipse.aether:aether-connector-basic:$aetherVersion"
+   implementation "org.apache.maven:maven-resolver-provider:$mavenVersion"
+   implementation "org.apache.maven:maven-settings-builder:$mavenVersion"
+   implementation "org.apache.maven:maven-model:$mavenVersion"
+   implementation "org.apache.maven.resolver:maven-resolver-transport-http:$aetherVersion"
+   implementation "org.apache.maven.resolver:maven-resolver-transport-file:$aetherVersion"
+
+   testImplementation project(':gradle.plugins.testutils')
+   testImplementation "junit:junit:$junitVersion"
+   testImplementation "org.mockito:mockito-core:$mockitoVersion"
+   testImplementation "commons-io:commons-io:$commonsIOVersion"
+}

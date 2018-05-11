@@ -1,0 +1,4 @@
+rootProject.name = 'sealion-java-hello-world'
+
+include 'com.ngc.seaside.service.konnichiwamojuru'
+project(':com.ngc.seaside.service.konnichiwamojuru').name = 'service.konnichiwamojuru'

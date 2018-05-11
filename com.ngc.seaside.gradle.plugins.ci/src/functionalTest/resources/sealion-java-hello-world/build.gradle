@@ -1,0 +1,21 @@
+plugins {
+   id 'com.ngc.seaside.repository'
+   id 'com.ngc.seaside.ci'
+   id 'java'
+}
+
+ext {
+   junitVersion = '4.12'
+   slf4jVersion = '1.7.22'
+   log4jVersion = '1.2.17'
+}
+
+dependencies {
+  implementation "log4j:log4j:$log4jVersion"
+  implementation "org.slf4j:slf4j-api:$slf4jVersion"
+  implementation "org.slf4j:slf4j-log4j12:$slf4jVersion"
+  testImplementation "junit:junit:$junitVersion"
+}
+
+group = 'com.ngc.seaside'
+version = '1.2.3-SNAPSHOT'

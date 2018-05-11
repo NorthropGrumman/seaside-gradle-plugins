@@ -1,0 +1,7 @@
+dependencies {
+   implementation localGroovy()
+   implementation gradleTestKit()
+   implementation "junit:junit:$junitVersion"
+   implementation "org.mockito:mockito-core:$mockitoVersion"
+   implementation "commons-io:commons-io:$commonsIOVersion"
+}
