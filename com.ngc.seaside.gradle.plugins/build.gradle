@@ -1,6 +1,13 @@
-
 dependencies {
    parent.subprojects.findAll { it.isPlugin }.each { pluginProject ->
-      api pluginProject
+      compile pluginProject
    }
+
+   // This is important, do not remove this dependency.  This plugin needs to have a direct dependency on Bnd even
+   // thought the parent plugin has the same dependency.  This forces this version of Bnd and OSGi to take precedence
+   // when buildscript dependencies are resolved.  If we don't do this, this version of Bnd may have lower precedence
+   // then another version of Bnd because it is a 2nd order dependencies.  This can cause errors when projects are
+   // building and older versions of OSGi show up on the classpath.  My making this a 1st order dependency, we remove
+   // this issue.
+   compile "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
 }
