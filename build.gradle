@@ -46,6 +46,10 @@ buildscript {
 def nonPluginProjects = [project(':gradle.plugins'), project(':gradle.plugins.testutils'),
                          project(':gradle.plugins.base')]
 
+if (releaseInProgress) {
+   apply plugin: 'com.ngc.seaside.release.root'
+}
+
 /**
  * Project level build for the seaside-gradle-parent gradle plugin.
  */
@@ -64,10 +68,6 @@ subprojects {
 
    group = 'com.ngc.seaside'
    version = '2.11.0'
-
-   if (releaseInProgress) {
-      apply plugin: 'com.ngc.seaside.release.root'
-   }
 
    // Required in order to use implementation and api dependencies with groovy
    configurations {
