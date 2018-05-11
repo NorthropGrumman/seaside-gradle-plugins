@@ -1,240 +1,241 @@
 buildscript {
-    ext {
-        bootstrapDirectory = "${project.buildDir}/bootstrapping"
-        releaseInProgress = project.hasProperty('bootstrapRelease')
+   ext {
+      bootstrapDirectory = "${project.buildDir}/bootstrapping"
+      releaseInProgress = project.hasProperty('bootstrapRelease')
 
-        getSelfDependencies = { ->
-            // Put all files on in the bootstrapDirectory on the build classpath.
-            // Don't use project.file since we want to configure the error message if the file is not found.
-            def dir = new File("$bootstrapDirectory")
-            if (!dir.isDirectory() || dir.list().length == 0) {
-                throw new IllegalStateException(
-                      "Cannot perform a release because project has not already been built, please run 'gradle prepareForRelease' first!")
-            }
+      getSelfDependencies = { ->
+         // Put all files on in the bootstrapDirectory on the build classpath.
+         // Don't use project.file since we want to configure the error message if the file is not found.
+         def dir = new File("$bootstrapDirectory")
+         if (!dir.isDirectory() || dir.list().length == 0) {
+            throw new IllegalStateException(
+                  "Cannot perform a release because project has not already been built, please run 'gradle prepareForRelease' first!")
+         }
 
-            project.file("$bootstrapDirectory")
-                  .list()
-                  .toList()
-                   // Remove .jar extension.
-                  .collect { it.substring(0, it.length() - 4) } // 4 = '.jar'.length()
-        }
-    }
+         project.file("$bootstrapDirectory")
+               .list()
+               .toList()
+         // Remove .jar extension.
+               .collect { it.substring(0, it.length() - 4) } // 4 = '.jar'.length()
+      }
+   }
 
-    repositories {
-        mavenLocal()
+   repositories {
+      mavenLocal()
 
-        maven {
-            url nexusConsolidated
-        }
+      maven {
+         url nexusConsolidated
+      }
 
-        // Allows the build to reference its own artifact from a previous build.
-        flatDir {
-            dirs "${bootstrapDirectory}"
-        }
-    }
+      // Allows the build to reference its own artifact from a previous build.
+      flatDir {
+         dirs "${bootstrapDirectory}"
+      }
+   }
 
-    dependencies {
-        classpath 'com.github.ksoichiro:gradle-console-reporter:0.5.0'
-        if (releaseInProgress) {
-            getSelfDependencies().each { name ->
-                classpath name: "$name"
-            }
-        }
-    }
+   dependencies {
+      classpath 'com.github.ksoichiro:gradle-console-reporter:0.5.0'
+      if (releaseInProgress) {
+         getSelfDependencies().each { name ->
+            classpath name: "$name"
+         }
+      }
+   }
 }
 
-def nonPluginProjects = [project(':gradle.plugins'), project(':gradle.plugins.testutils'), project(':gradle.plugins.base')]
+def nonPluginProjects = [project(':gradle.plugins'), project(':gradle.plugins.testutils'),
+                         project(':gradle.plugins.base')]
 
 /**
  * Project level build for the seaside-gradle-parent gradle plugin.
  */
 subprojects {
-    ext {
-       isPlugin = !(project in nonPluginProjects)
-    }
-   
-    apply plugin: 'java-library'
-    apply plugin: 'groovy'
-    apply plugin: 'maven'
-    if (isPlugin) {
-        apply plugin: 'java-gradle-plugin'
-    }
-    apply plugin: 'com.github.ksoichiro.console.reporter'
+   ext {
+      isPlugin = !(project in nonPluginProjects)
+   }
 
-    if (releaseInProgress) {
-        apply plugin: 'com.ngc.seaside.release.root'
-    }
+   apply plugin: 'java-library'
+   apply plugin: 'groovy'
+   apply plugin: 'maven'
+   if (isPlugin) {
+      apply plugin: 'java-gradle-plugin'
+   }
+   apply plugin: 'com.github.ksoichiro.console.reporter'
 
-    // Required in order to use implementation and api dependencies with groovy
-    configurations {
-        apiElements {
-            outgoing.variants.getByName('classes').artifact(
-                file: compileGroovy.destinationDir,
-                type: ArtifactTypeDefinition.JVM_CLASS_DIRECTORY,
-                builtBy: compileGroovy)
-        }
-    }
+   group = 'com.ngc.seaside'
+   version = '2.11.0'
 
-    group = 'com.ngc.seaside'
-    version = '2.11.0'
+   if (releaseInProgress) {
+      apply plugin: 'com.ngc.seaside.release.root'
+   }
 
-    ext {
-        junitVersion = '4.12'
-        aQuteVersion = '3.2.0'
-        commonsIOVersion = '2.5'
-        unbescapeVersion = '1.1.3.RELEASE'
-        mockitoVersion = '2.7.14'
-        blocsVersion = '2.1.1'
-        sonarQubeVersion = '2.5'
-        dependencyUpdatesVersion = '0.15.0'
-        consoleReporterVersion = '0.5.0'
-        guavaVersion = '22.0'
-        aetherVersion = '1.1.0'
-        mavenVersion = '3.5.2'
-    }
+   // Required in order to use implementation and api dependencies with groovy
+   configurations {
+      apiElements {
+         outgoing.variants.getByName('classes').artifact(
+               file: compileGroovy.destinationDir,
+               type: ArtifactTypeDefinition.JVM_CLASS_DIRECTORY,
+               builtBy: compileGroovy)
+      }
+   }
 
-    repositories {
-        mavenLocal()
+   ext {
+      junitVersion = '4.12'
+      aQuteVersion = '3.2.0'
+      commonsIOVersion = '2.5'
+      unbescapeVersion = '1.1.3.RELEASE'
+      mockitoVersion = '2.7.14'
+      blocsVersion = '2.1.1'
+      sonarQubeVersion = '2.5'
+      dependencyUpdatesVersion = '0.15.0'
+      consoleReporterVersion = '0.5.0'
+      guavaVersion = '22.0'
+      aetherVersion = '1.1.0'
+      mavenVersion = '3.5.2'
+   }
 
-        maven {
-            url nexusConsolidated
-        }
-    }
+   repositories {
+      mavenLocal()
 
-    //Augment the name of the jar to prepend the group.
-    jar {
-        archiveName = "${project.group}.${project.name}-${project.version}.jar"
-    }
+      maven {
+         url nexusConsolidated
+      }
+   }
 
-    // Enable the creation of sources JAR which is used when uploading to Nexus.
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-        archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
-    }
+   //Augment the name of the jar to prepend the group.
+   jar {
+      archiveName = "${project.group}.${project.name}-${project.version}.jar"
+   }
 
-    // Enable the creation of a Javadoc JAR which is used when uploading to Nexus.
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from javadoc.destinationDir
-        archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
-    }
+   // Enable the creation of sources JAR which is used when uploading to Nexus.
+   task sourcesJar(type: Jar, dependsOn: classes) {
+      classifier = 'sources'
+      from sourceSets.main.allSource
+      archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
+   }
 
-    // Disable the annoying doclint capability of Java 8 which causes builds to fail if the JavaDocs aren't right.
-    if (JavaVersion.current().isJava8Compatible()) {
-        allprojects {
-            tasks.withType(Javadoc) {
-                options.addStringOption('Xdoclint:none', '-quiet')
+   // Enable the creation of a Javadoc JAR which is used when uploading to Nexus.
+   task javadocJar(type: Jar, dependsOn: javadoc) {
+      classifier = 'javadoc'
+      from javadoc.destinationDir
+      archiveName = "${project.group}.${project.name}-${project.version}-${classifier}.jar"
+   }
+
+   // Disable the annoying doclint capability of Java 8 which causes builds to fail if the JavaDocs aren't right.
+   if (JavaVersion.current().isJava8Compatible()) {
+      allprojects {
+         tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+         }
+      }
+   }
+
+   // Add the additional JAR artifacts, this results in them being included when uploading to Nexus.
+   artifacts {
+      archives sourcesJar
+      archives javadocJar
+   }
+
+   //define the nexus release repositories
+   uploadArchives {
+      repositories {
+         mavenDeployer {
+            // Use the main repo for full releases.
+            repository(url: nexusReleases) {
+               // Make sure that nexusUsername and nexusPassword are in your
+               // ${gradle.user.home}/gradle.properties file.
+               authentication(userName: nexusUsername, password: nexusPassword)
             }
-        }
-    }
-
-    // Add the additional JAR artifacts, this results in them being included when uploading to Nexus.
-    artifacts {
-        archives sourcesJar
-        archives javadocJar
-    }
-
-    //define the nexus release repositories
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                // Use the main repo for full releases.
-                repository(url: nexusReleases) {
-                    // Make sure that nexusUsername and nexusPassword are in your
-                    // ${gradle.user.home}/gradle.properties file.
-                    authentication(userName: nexusUsername, password: nexusPassword)
-                }
-                // If the version has SNAPSHOT in the name, use the snapshot repo.
-                snapshotRepository(url: nexusSnapshots) {
-                    authentication(userName: nexusUsername, password: nexusPassword)
-                }
+            // If the version has SNAPSHOT in the name, use the snapshot repo.
+            snapshotRepository(url: nexusSnapshots) {
+               authentication(userName: nexusUsername, password: nexusPassword)
             }
-        }
-    }
+         }
+      }
+   }
 
-    sourceSets {
-        integrationTest {
-            java.srcDir file('src/integrationTest/java')
-            groovy.srcDir file('src/integrationTest/groovy')
-            resources.srcDir file('src/integrationTest/resources')
-        }
+   sourceSets {
+      integrationTest {
+         java.srcDir file('src/integrationTest/java')
+         groovy.srcDir file('src/integrationTest/groovy')
+         resources.srcDir file('src/integrationTest/resources')
+      }
 
-        functionalTest {
-            java.srcDir file('src/functionalTest/java')
-            groovy.srcDir file('src/functionalTest/groovy')
-            resources.srcDir file('src/functionalTest/resources')
-        }
-    }
+      functionalTest {
+         java.srcDir file('src/functionalTest/java')
+         groovy.srcDir file('src/functionalTest/groovy')
+         resources.srcDir file('src/functionalTest/resources')
+      }
+   }
 
-    configurations {
-       integrationTestCompile.extendsFrom testCompile
-       integrationTestImplementation.extendsFrom testImplementation
-       integrationTestRuntime.extendsFrom testRuntime
-       functionalTestCompile.extendsFrom testCompile
-       functionalTestImplementation.extendsFrom testImplementation
-       functionalTestRuntime.extendsFrom testRuntime
-       if (isPlugin) {
-          // Allows functional tests to apply plugins from other projects
-          testRuntimeClasspath.allDependencies.withType(ProjectDependency).all {
-             dependencyProject.sourceSets {
-                main {
-                   gradlePlugin.pluginSourceSet.runtimeClasspath += compileClasspath + output
-                }
-             }
-          }
-       }
-    }
+   configurations {
+      integrationTestCompile.extendsFrom testCompile
+      integrationTestImplementation.extendsFrom testImplementation
+      integrationTestRuntime.extendsFrom testRuntime
+      functionalTestCompile.extendsFrom testCompile
+      functionalTestImplementation.extendsFrom testImplementation
+      functionalTestRuntime.extendsFrom testRuntime
+      if (isPlugin) {
+         // Allows functional tests to apply plugins from other projects
+         testRuntimeClasspath.allDependencies.withType(ProjectDependency).all {
+            dependencyProject.sourceSets {
+               main {
+                  gradlePlugin.pluginSourceSet.runtimeClasspath += compileClasspath + output
+               }
+            }
+         }
+      }
+   }
 
-    dependencies {
-        integrationTestCompile sourceSets.main.output
-        functionalTestCompile sourceSets.main.output
-    }
+   dependencies {
+      integrationTestCompile sourceSets.main.output
+      functionalTestCompile sourceSets.main.output
+   }
 
-    tasks.getByName("test").group = "test"
+   tasks.getByName("test").group = "test"
 
-    task integrationTest(type: Test, group: "test") {
-        testClassesDirs = sourceSets.integrationTest.output
-        classpath = sourceSets.integrationTest.runtimeClasspath
-    }
+   task integrationTest(type: Test, group: "test") {
+      testClassesDirs = sourceSets.integrationTest.output
+      classpath = sourceSets.integrationTest.runtimeClasspath
+   }
 
-    task functionalTest(type: Test, group: "test") {
-        testClassesDirs = sourceSets.functionalTest.output
-        classpath = sourceSets.functionalTest.runtimeClasspath
-    }
+   task functionalTest(type: Test, group: "test") {
+      testClassesDirs = sourceSets.functionalTest.output
+      classpath = sourceSets.functionalTest.runtimeClasspath
+   }
 
-    integrationTest.shouldRunAfter(test)
-    functionalTest.shouldRunAfter(integrationTest)
-    check.dependsOn(integrationTest, functionalTest)
+   integrationTest.shouldRunAfter(test)
+   functionalTest.shouldRunAfter(integrationTest)
+   check.dependsOn(integrationTest, functionalTest)
 
-    tasks.withType(Test).all { testTask ->
-        testTask.systemProperty 'nexusConsolidated', nexusConsolidated
-        def systemProperties = ['javax.net.ssl.trustStore', 'http.proxyHost', 'http.proxyPort', 'http.nonProxyHosts',
-                                'https.proxyHost', 'https.proxyPort', 'https.nonProxyHosts', 'sonar.host.url']
-        for (String key : systemProperties) {
-           String value = System.properties[key]
-           if (value != null) {
-              testTask.systemProperty(key, value)
-           }
-        }
-    }
+   tasks.withType(Test).all { testTask ->
+      testTask.systemProperty 'nexusConsolidated', nexusConsolidated
+      def systemProperties = ['javax.net.ssl.trustStore', 'http.proxyHost', 'http.proxyPort', 'http.nonProxyHosts',
+                              'https.proxyHost', 'https.proxyPort', 'https.nonProxyHosts', 'sonar.host.url']
+      for (String key : systemProperties) {
+         String value = System.properties[key]
+         if (value != null) {
+            testTask.systemProperty(key, value)
+         }
+      }
+   }
 
-    task copyPlugin(type: Copy) {
-        from jar
-        into "$bootstrapDirectory"
-    }
+   task copyPlugin(type: Copy) {
+      from jar
+      into "$bootstrapDirectory"
+   }
 
-    task copyDependencies(type: Copy) {
-        from configurations.compile
-        into "$bootstrapDirectory"
-    }
+   task copyDependencies(type: Copy) {
+      from configurations.compile
+      into "$bootstrapDirectory"
+   }
 
-    task prepareForRelease(description: 'Prepares this project for a release.',
-                           dependsOn: [copyPlugin, copyDependencies])
+   task prepareForRelease(description: 'Prepares this project for a release.',
+                          dependsOn: [copyPlugin, copyDependencies])
 }
 
 task clean() {
-    doLast {
-        delete "${project.buildDir}"
-    }
+   doLast {
+      delete "${project.buildDir}"
+   }
 }
