@@ -25,7 +25,7 @@ class SeasideCiPluginFT {
    void before() {
 
       File source = Paths.get("src/functionalTest/resources/sealion-java-hello-world").toFile()
-      Path targetPath = Paths.get("build/functionalTest/parent/sealion-java-hello-world")
+      Path targetPath = Paths.get("build/functionalTest/ci/sealion-java-hello-world")
       projectDir = Files.createDirectories(targetPath).toFile()
       FileUtils.copyDirectory(source, projectDir)
 

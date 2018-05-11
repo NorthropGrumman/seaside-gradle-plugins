@@ -1,5 +1,3 @@
-import com.ngc.seaside.gradle.tasks.dependencies.PopulateMaven2Repository
-
 buildscript {
    repositories {
       maven {
@@ -11,6 +9,11 @@ buildscript {
       // This allows us to test resolving build script configurations.
       classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5"
    }
+}
+
+plugins {
+   id 'com.ngc.seaside.repository'
+   id 'com.ngc.seaside.ci'
 }
 
 group = 'com.ngc.seaside'
@@ -91,15 +94,18 @@ dependencies {
    platform "org.eclipse.equinox:equinox-osgi:3.10.0"
 }
 
-task testM2repo(type: PopulateMaven2Repository) {
-   outputDirectory = project.file("${project.buildDir}/dependencies-m2")
-   remoteRepository = project.repositories.getByName('NexusConsolidated')
-   localRepository = mavenLocal()
-   // Comment out the line below to resolve dependencies for all configurations.
-   configurations = [project.configurations.getByName('thirdParty')]
+// Have to do after evaluate because the repo plugin does not configure repos until after the project is evaluated.
+afterEvaluate {
+   populateM2repo {
+      outputDirectory = project.file("${project.buildDir}/dependencies-m2")
+      remoteRepository = project.repositories.getByName('NexusConsolidated')
+      localRepository = mavenLocal()
+      // Comment out the line below to resolve dependencies for all configurations.
+      configurations = [project.configurations.getByName('thirdParty')]
 
-   createDependencyReportFile = true
-   dependencyInfoReportFile = project.file("${project.buildDir}/dependencies.tsv")
+      createDependencyReportFile = true
+      dependencyInfoReportFile = project.file("${project.buildDir}/dependencies.tsv")
 
-   deploymentScriptFile = project.file("${project.buildDir}/deploy.sh")
+      deploymentScriptFile = project.file("${project.buildDir}/deploy.sh")
+   }
 }

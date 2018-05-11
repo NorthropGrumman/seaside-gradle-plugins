@@ -7,6 +7,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 import java.nio.file.Files
@@ -16,7 +17,7 @@ import java.nio.file.Paths
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
 
-//@Ignore("This test can take a long time and requires network access.")
+@Ignore("This test can take a long time and requires network access.")
 class PopulateMaven2RepositoryFT {
 
    private File projectDir
@@ -39,12 +40,12 @@ class PopulateMaven2RepositoryFT {
             .withNexusProperties()
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments("clean", "testM2repo", "--stacktrace")
+            .withArguments("populateM2repo", "--stacktrace")
             .build()
 
       assertEquals("gradle task was not successful",
                    TaskOutcome.valueOf("SUCCESS"),
-                   result.task(":testM2repo").getOutcome())
+                   result.task(":populateM2repo").getOutcome())
 
       File m2repo = new File(projectDir, "build/dependencies-m2")
       assertTrue("m2 repo not created!",
