@@ -37,7 +37,7 @@ import java.util.Collections;
  * 
  * <p>
  * This plugin provides the {@value #DISTRIBUTION_CONFIG_NAME} configuration. Dependencies added to this configuration
- * must reference zip-formatted files. This default start scripts for this plugin's distribution assume that these
+ * must reference zip-formatted files. The default start scripts for this plugin's distribution assume that these
  * sub-distributions have start scripts in their {@code bin/} folder. The default start scripts can be overridden using
  * the extension.
  * 
