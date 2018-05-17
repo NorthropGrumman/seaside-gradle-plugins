@@ -38,10 +38,14 @@ class SeasideSystemDistributionPluginFT {
             .withNexusProperties()
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments("clean", "build", "-S")
+            .withArguments("clean", "build", "publishToMavenLocal", "-S")
             .build()
 
-      assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":build").getOutcome())
+      assertEquals(TaskOutcome.SUCCESS, result.task(":build").getOutcome())
+      assertEquals(TaskOutcome.SUCCESS, result.task(":publishToMavenLocal").getOutcome())
+      result.tasks.each {
+         assertNotEquals(TaskOutcome.FAILED, it.outcome)
+      }
 
       Path distDir = projectDir.resolve(Paths.get("build", DISTRIBUTION_DIRECTORY));
       Path zipFile = distDir.resolve("com.ngc.seaside.example.system.distribution-1.0-SNAPSHOT.zip")
@@ -54,5 +58,6 @@ class SeasideSystemDistributionPluginFT {
       assertTrue(Files.isDirectory(unzippedDir.resolve('com.ngc.seaside.threateval.tps.distribution-2.4.0')))
       assertTrue(Files.isRegularFile(unzippedDir.resolve('start.bat')))
       assertTrue(Files.isRegularFile(unzippedDir.resolve('start.sh')))
+      assertTrue(Files.isRegularFile(unzippedDir.resolve('example.resource')))
    }
 }
