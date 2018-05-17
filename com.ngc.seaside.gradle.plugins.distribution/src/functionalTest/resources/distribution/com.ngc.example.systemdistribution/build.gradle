@@ -11,8 +11,8 @@ ext {
 }
 
 dependencies {
-    distribution "com.ngc.seaside.threateval:etps.distribution:$threatEvalVersion"
-    distribution "com.ngc.seaside.threateval:ctps.distribution:$threatEvalVersion"
-    distribution "com.ngc.seaside.threateval:datps.distribution:$threatEvalVersion"
-    distribution "com.ngc.seaside.threateval:tps.distribution:$threatEvalVersion"
+    distribution "com.ngc.seaside.threateval:etps.distribution:$threatEvalVersion@zip"
+    distribution "com.ngc.seaside.threateval:ctps.distribution:$threatEvalVersion@zip"
+    distribution "com.ngc.seaside.threateval:datps.distribution:$threatEvalVersion@zip"
+    distribution "com.ngc.seaside.threateval:tps.distribution:$threatEvalVersion@zip"
 }
