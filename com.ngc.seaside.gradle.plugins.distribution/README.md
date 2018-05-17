@@ -58,7 +58,7 @@ sub-distributions.
 To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
 You can add dependencies using the ``distribution`` configuration. Dependencies added to this configuration
 must reference zip-formatted files. The default start scripts for this plugin's distribution assume that these
-sub-distributions have start scripts in their {@code bin/} folder. The default start scripts can be overridden using
+sub-distributions have start scripts in their ``bin/`` folder. The default start scripts can be overridden using
 the extension ``systemDistribution``.
 
 ```java
