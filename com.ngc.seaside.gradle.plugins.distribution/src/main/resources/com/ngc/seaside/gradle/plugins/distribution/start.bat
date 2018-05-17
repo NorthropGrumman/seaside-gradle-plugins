@@ -31,17 +31,17 @@ rem The arguments passed to Felix when it is started.
 set FELIX_OPTS="%NG_FW_HOME%/platform/cache" -b "%NG_FW_HOME%/platform" __FELIX_PROGRAM_ARGUMENTS__
 
 rem The main jar for running Felix
-for /f %%i in ('dir "%NG_FW_HOME%\platform\org.apache.felix.main-*.jar" /s /b') do set MAIN_JAR=%%i
+for /f %%i in ('dir "%NG_FW_HOME%\\platform\\org.apache.felix.main-*.jar" /s /b') do set MAIN_JAR=%%i
 
 rem Require JAVA_HOME to be set.
 if "%JAVA_HOME%" == "" goto :javaHomeNotSet
 
 rem Require Java 1.8
-for /f tokens^=2-5^ delims^=.-_^" %%j in ('"%JAVA_HOME%\bin\java" -fullversion 2^>^&1') do set "jver=%%j%%k%%l%%m"
+for /f tokens^=2-5^ delims^=.-_^" %%j in ('"%JAVA_HOME%\\bin\\java" -fullversion 2^>^&1') do set "jver=%%j%%k%%l%%m"
 if %jver% LSS 18000 goto :javaVersionError
 
 
-"%JAVA_HOME%\bin\java" %FRAMEWORK_OPTS% -jar "%MAIN_JAR%" %FELIX_OPTS%
+"%JAVA_HOME%\\bin\\java" %FRAMEWORK_OPTS% -jar "%MAIN_JAR%" %FELIX_OPTS%
 goto :eof
 
 :javaHomeNotSet

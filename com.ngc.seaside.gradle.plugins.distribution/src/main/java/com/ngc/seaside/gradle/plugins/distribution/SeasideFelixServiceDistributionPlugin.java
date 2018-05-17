@@ -3,16 +3,24 @@ package com.ngc.seaside.gradle.plugins.distribution;
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin;
 
 import org.apache.commons.io.IOUtils;
+import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ExcludeRule;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.file.CopySpec;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.MavenPlugin;
+import org.gradle.api.plugins.PluginContainer;
+import org.gradle.api.publish.PublishingExtension;
+import org.gradle.api.publish.maven.MavenPublication;
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.bundling.Zip;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
@@ -102,8 +110,8 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    public static final String BUNDLES_CONFIG_NAME = "bundles";
    public static final String CORE_BUNDLES_CONFIG_NAME = "coreBundles";
    public static final String BLOCS_CORE_VERSION_NAME = "blocsCoreVersion";
-   public static final String JVM_PROPERTIES_SCRIPT_IDENTIFIER = "__FELIX_JVM_PROPERTIES__";
-   public static final String PROGRAM_ARGUMENTS_SCRIPT_IDENTIFIER = "__FELIX_PROGRAM_ARGUMENTS__";
+   public static final String JVM_PROPERTIES_SCRIPT_IDENTIFIER = "FELIX_JVM_PROPERTIES";
+   public static final String PROGRAM_ARGUMENTS_SCRIPT_IDENTIFIER = "FELIX_PROGRAM_ARGUMENTS";
    public static final String BIN_DIRECTORY = "bin";
    public static final String PLATFORM_DIRECTORY = "platform";
    public static final String CONFIG_DIRECTORY = PLATFORM_DIRECTORY + "/configuration";
@@ -141,6 +149,8 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
       "org.osgi:org.osgi.core",
       "org.osgi:org.osgi.enterprise"));
 
+   public static final String ZIP_DISTRIBUTION_TASK = "createFelixDistribution";
+
    @Override
    protected void doApply(Project project) {
       applyPlugins(project);
@@ -148,6 +158,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
       createConfigurations(project);
       addDefaultDependencies(project);
       createTasks(project);
+      createArchives(project);
    }
 
    private void applyPlugins(Project project) {
@@ -235,55 +246,46 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
       SeasideFelixServiceDistributionExtension extension = project.getExtensions().findByType(
          SeasideFelixServiceDistributionExtension.class);
 
-      SimpleTemplateTask createWindowsScript = tasks.create("createWindowsScript", SimpleTemplateTask.class, task -> {
-         task.setDestination(new File(project.getBuildDir(), "tmp/distribution/start.bat"));
-         project.afterEvaluate(__ -> {
-            String jvmArguments = extension.getJvmArgumentsString();
-            String programArguments = extension.getProgramArgumentsString();
-            Map<String, String> templateProperties = new LinkedHashMap<>();
-            templateProperties.put(JVM_PROPERTIES_SCRIPT_IDENTIFIER, jvmArguments);
-            templateProperties.put(PROGRAM_ARGUMENTS_SCRIPT_IDENTIFIER, programArguments);
-            task.setTemplateProperties(templateProperties);
-            File windowsScript = extension.getScripts().getWindowsScript();
-            if (windowsScript == null) {
-               task.setTemplate(getClass().getResource("start.bat"));
-            } else {
-               task.setTemplate(windowsScript);
-            }
-         });
+      Action<ResourceCopyTask> taskAction = task -> task.setDestinationDir(task.getTemporaryDir());
+      ResourceCopyTask createWindowsScript = tasks.create("createWindowsScript", ResourceCopyTask.class, taskAction);
+
+      ResourceCopyTask createLinuxScript = tasks.create("createLinuxScript", ResourceCopyTask.class, taskAction);
+
+      ResourceCopyTask createConfig = tasks.create("createConfigProperties", ResourceCopyTask.class, taskAction);
+
+      project.afterEvaluate(__ -> {
+         String jvmArguments = extension.getJvmArgumentsString();
+         String programArguments = extension.getProgramArgumentsString();
+         Map<String, String> templateProperties = new LinkedHashMap<>();
+         templateProperties.put(JVM_PROPERTIES_SCRIPT_IDENTIFIER, jvmArguments);
+         templateProperties.put(PROGRAM_ARGUMENTS_SCRIPT_IDENTIFIER, programArguments);
+         File windowsScript = extension.getScripts().getWindowsScript();
+         Action<CopySpec> copyAction = spec -> spec.expand(templateProperties);
+         if (windowsScript == null) {
+            createWindowsScript.fromResource(
+               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.bat")),
+               copyAction);
+         } else {
+            createWindowsScript.from(windowsScript, copyAction);
+         }
+         File linuxScript = extension.getScripts().getLinuxScript();
+         if (linuxScript == null) {
+            createLinuxScript.fromResource(
+               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.sh")),
+               copyAction);
+         } else {
+            createLinuxScript.from(linuxScript, copyAction);
+         }
+         File configFile = extension.getConfigFile();
+         if (configFile == null) {
+            createConfig.fromResource(
+               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("config.properties")));
+         } else {
+            createConfig.from(configFile);
+         }
       });
 
-      SimpleTemplateTask createLinuxScript = tasks.create("createLinuxScript", SimpleTemplateTask.class, task -> {
-         task.setDestination(new File(project.getBuildDir(), "tmp/distribution/start.sh"));
-         project.afterEvaluate(__ -> {
-            String jvmArguments = extension.getJvmArgumentsString();
-            String programArguments = extension.getProgramArgumentsString();
-            Map<String, String> templateProperties = new LinkedHashMap<>();
-            templateProperties.put(JVM_PROPERTIES_SCRIPT_IDENTIFIER, jvmArguments);
-            templateProperties.put(PROGRAM_ARGUMENTS_SCRIPT_IDENTIFIER, programArguments);
-            task.setTemplateProperties(templateProperties);
-            File linuxScript = extension.getScripts().getLinuxScript();
-            if (linuxScript == null) {
-               task.setTemplate(getClass().getResource("start.sh"));
-            } else {
-               task.setTemplate(linuxScript);
-            }
-         });
-      });
-
-      SimpleTemplateTask createConfig = tasks.create("createConfigProperties", SimpleTemplateTask.class, task -> {
-         task.setDestination(new File(project.getBuildDir(), "tmp/distribution/config.properties"));
-         project.afterEvaluate(__ -> {
-            File configFile = extension.getConfigFile();
-            if (configFile == null) {
-               task.setTemplate(getClass().getResource("config.properties"));
-            } else {
-               task.setTemplate(configFile);
-            }
-         });
-      });
-
-      tasks.create("createDistribution", Zip.class, task -> {
+      tasks.create(ZIP_DISTRIBUTION_TASK, Zip.class, task -> {
          task.setDescription("Creates the distribution zip");
          task.dependsOn(createWindowsScript, createLinuxScript, createConfig);
          tasks.getByName(LifecycleBasePlugin.BUILD_TASK_NAME).dependsOn(task);
@@ -291,14 +293,15 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          task.setIncludeEmptyDirs(true);
 
          project.afterEvaluate(__ -> {
-            File skeleton = createDistributionSkeleton();
+            File skeleton = task.getTemporaryDir();
+            createDistributionSkeleton(skeleton.toPath());
             task.setArchiveName(extension.getDistributionName());
             task.from(skeleton);
-            task.from(createWindowsScript.getDestination(), spec -> spec.into(BIN_DIRECTORY));
-            task.from(createLinuxScript.getDestination(), spec -> spec.into(BIN_DIRECTORY));
+            task.from(createWindowsScript.getDestinationDir(), spec -> spec.into(BIN_DIRECTORY));
+            task.from(createLinuxScript.getDestinationDir(), spec -> spec.into(BIN_DIRECTORY));
+            task.from(createConfig.getDestinationDir(), spec -> spec.into(CONFIG_DIRECTORY));
             task.from(project.getConfigurations().getByName(PLATFORM_CONFIG_NAME),
                spec -> spec.into(PLATFORM_DIRECTORY));
-            task.from(createConfig.getDestination(), spec -> spec.into(CONFIG_DIRECTORY));
             task.from(project.file(RUNTIME_RESOURCES_DIRECTORY), spec -> spec.into(RESOURCES_DIRECTORY));
             for (Configuration configuration : extension.getBundleConfigurations()) {
                Set<ResolvedArtifact> resolvedArtifacts = configuration.getResolvedConfiguration()
@@ -338,15 +341,13 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
     * 
     * @return the temporary folder
     */
-   private File createDistributionSkeleton() {
+   private void createDistributionSkeleton(Path tempDirectory) {
       try {
-         Path skeleton = Files.createTempDirectory(null);
-         Files.createDirectories(skeleton.resolve(BIN_DIRECTORY));
-         Files.createDirectories(skeleton.resolve(PLATFORM_DIRECTORY));
-         Files.createDirectories(skeleton.resolve(RESOURCES_DIRECTORY));
-         Files.createDirectories(skeleton.resolve(CONFIG_DIRECTORY));
-         Files.createDirectories(skeleton.resolve(BUNDLES_DIRECTORY));
-         return skeleton.toFile();
+         Files.createDirectories(tempDirectory.resolve(BIN_DIRECTORY));
+         Files.createDirectories(tempDirectory.resolve(PLATFORM_DIRECTORY));
+         Files.createDirectories(tempDirectory.resolve(RESOURCES_DIRECTORY));
+         Files.createDirectories(tempDirectory.resolve(CONFIG_DIRECTORY));
+         Files.createDirectories(tempDirectory.resolve(BUNDLES_DIRECTORY));
       } catch (IOException e) {
          throw new UncheckedIOException(e);
       }
@@ -392,6 +393,25 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
       } catch (IOException e) {
          throw new UncheckedIOException(e);
       }
+   }
+
+   private void createArchives(Project project) {
+      Task zipDistribution = project.getTasks().getByName(ZIP_DISTRIBUTION_TASK);
+      PluginContainer plugins = project.getPlugins();
+      project.afterEvaluate(__ -> {
+         if (plugins.hasPlugin(MavenPlugin.class)) {
+            project.artifacts(handler -> handler.add(Dependency.ARCHIVES_CONFIGURATION, zipDistribution));
+         }
+         if (plugins.hasPlugin(MavenPublishPlugin.class)) {
+            project.getExtensions().configure(PublishingExtension.class, convention -> {
+               convention.publications(publications -> {
+                  publications.create("mavenDistribution",
+                     MavenPublication.class,
+                     publication -> publication.artifact(zipDistribution));
+               });
+            });
+         }
+      });
    }
 
 }
