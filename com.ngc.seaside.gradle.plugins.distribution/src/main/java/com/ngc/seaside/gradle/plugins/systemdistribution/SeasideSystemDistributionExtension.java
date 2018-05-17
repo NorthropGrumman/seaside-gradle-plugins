@@ -7,6 +7,10 @@ import org.gradle.api.Project;
 
 import groovy.lang.Closure;
 
+/**
+ * Extension of the {@link SeasideSystemDistributionPlugin}. This extension allows you to change the distribution
+ * name and modify the scripts used for starting the distribution.
+ */
 public class SeasideSystemDistributionExtension {
 
    public static final String NAME = "systemDistribution";

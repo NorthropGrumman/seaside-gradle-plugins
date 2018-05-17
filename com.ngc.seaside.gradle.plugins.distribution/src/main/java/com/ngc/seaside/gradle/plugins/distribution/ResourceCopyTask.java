@@ -20,7 +20,7 @@ import java.util.Optional;
 import groovy.lang.Closure;
 
 /**
- * An task extending the {@link Copy} task that includes copying non-file resources, including an {@link InputStream}
+ * A task extending the {@link Copy} task that includes copying non-file resources, including an {@link InputStream}
  * resource, a {@link URL} resource, and resources from {@link Class#getResource(String) classes} or
  * {@link ClassLoader#getResource(String) class loaders}.
  */
@@ -63,7 +63,8 @@ public class ResourceCopyTask extends Copy {
     * The following options are available for the given map:
     * </p>
     * <ul>
-    * <li>{@code resource}: The resource to copy. Accepts {@link InputStream}, {@link URL} or {@link CharSequence}.</li>
+    * <li>{@code resource}: The resource to copy. Accepts {@link InputStream}, {@link URL}, or a {@link CharSequence}
+    * for {@link Class#getResource(String) class} and {@link ClassLoader#getResource(String) class loader} resources.
     * <li>{@code name}: The filename of the resource. If not provided and {@code resource} is a {@link CharSequence},
     * the name will be the same as the resource.
     * <li>{@code class}: The {@link Class} to use if the {@code resource} is a {@link CharSequence}.</li>
@@ -86,7 +87,8 @@ public class ResourceCopyTask extends Copy {
     * The following options are available for the given map:
     * </p>
     * <ul>
-    * <li>{@code resource}: The resource to copy. Accepts {@link InputStream}, {@link URL} or {@link CharSequence}.</li>
+    * <li>{@code resource}: The resource to copy. Accepts {@link InputStream}, {@link URL}, or a {@link CharSequence}
+    * for {@link Class#getResource(String) class} and {@link ClassLoader#getResource(String) class loader} resources.
     * <li>{@code name}: The filename of the resource. If not provided and {@code resource} is a {@link CharSequence},
     * the name will be the same as the resource.
     * <li>{@code class}: The {@link Class} to use if the {@code resource} is a {@link CharSequence}.</li>

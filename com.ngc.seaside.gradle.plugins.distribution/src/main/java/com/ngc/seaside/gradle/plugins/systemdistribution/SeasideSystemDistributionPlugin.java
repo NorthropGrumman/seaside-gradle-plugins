@@ -23,11 +23,49 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import java.io.File;
 import java.util.Collections;
 
+/**
+ * Plugin for creating a distribution composed of sub-distributions.
+ * 
+ * <p>
+ * This plugin provides the
+ * {@value com.ngc.seaside.gradle.plugins.systemdistribution.SeasideSystemDistributionExtension#NAME} extension
+ * of type {@link SeasideSystemDistributionExtension}.
+ * 
+ * <p>
+ * When built, this plugin will produce a distribution zip. The zip will contain start scripts and the
+ * specified sub-distributions.
+ * 
+ * <p>
+ * This plugin provides the {@value #DISTRIBUTION_CONFIG_NAME} configuration. Dependencies added to this configuration
+ * must reference zip-formatted files. This default start scripts for this plugin's distribution assume that these
+ * sub-distributions have start scripts in their {@code bin/} folder. The default start scripts can be overridden using
+ * the extension.
+ * 
+ * <p>
+ * Example:
+ * 
+ * <pre>
+ * apply plugin: 'com.ngc.seaside.repository'
+ * apply plugin: 'com.ngc.seaside.distribution.system.distribution'
+ * 
+ * ext {
+ *    threatEvalVersion = '2.4.0'
+ * }
+ * 
+ * dependencies {
+ *    distribution "com.ngc.seaside.threateval:etps.distribution:$threatEvalVersion@zip"
+ *    distribution "com.ngc.seaside.threateval:ctps.distribution:$threatEvalVersion@zip"
+ *    distribution "com.ngc.seaside.threateval:datps.distribution:$threatEvalVersion@zip"
+ *    distribution "com.ngc.seaside.threateval:tps.distribution:$threatEvalVersion@zip"
+ * }
+ * </pre>
+ */
 public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
 
    public static final String DISTRIBUTION_DIRECTORY = "distribution";
    public static final String DISTRIBUTION_CONFIG_NAME = "distribution";
    public static final String ZIP_DISTRIBUTION_TASK = "createSystemDistribution";
+   public static final String RESOURCES_DIRECTORY = "src/main/resources";
 
    @Override
    protected void doApply(Project project) {
@@ -88,6 +126,7 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
          tasks.getByName(LifecycleBasePlugin.BUILD_TASK_NAME).dependsOn(task);
          task.setDestinationDir(new File(project.getBuildDir(), DISTRIBUTION_DIRECTORY));
          task.setIncludeEmptyDirs(true);
+         task.from(RESOURCES_DIRECTORY);
 
          project.afterEvaluate(__ -> {
             task.setArchiveName(extension.getDistributionName());
