@@ -398,19 +398,16 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    private void createArchives(Project project) {
       Task zipDistribution = project.getTasks().getByName(ZIP_DISTRIBUTION_TASK);
       PluginContainer plugins = project.getPlugins();
-      project.afterEvaluate(__ -> {
-         if (plugins.hasPlugin(MavenPlugin.class)) {
-            project.artifacts(handler -> handler.add(Dependency.ARCHIVES_CONFIGURATION, zipDistribution));
-         }
-         if (plugins.hasPlugin(MavenPublishPlugin.class)) {
-            project.getExtensions().configure(PublishingExtension.class, convention -> {
-               convention.publications(publications -> {
-                  publications.create("mavenDistribution",
-                     MavenPublication.class,
-                     publication -> publication.artifact(zipDistribution));
-               });
+      project.artifacts(handler -> handler.add(Dependency.ARCHIVES_CONFIGURATION, zipDistribution));
+      plugins.withType(MavenPublishPlugin.class, plugin -> {
+         project.getExtensions().configure(PublishingExtension.class, convention -> {
+            convention.publications(publications -> {
+               publications.create("mavenDistribution",
+                  MavenPublication.class,
+                  publication -> publication.artifact(zipDistribution));
             });
-         }
+         });
+         
       });
    }
 
