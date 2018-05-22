@@ -5,8 +5,6 @@ import com.ngc.seaside.gradle.plugins.distribution.ScriptConfiguration;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 
-import groovy.lang.Closure;
-
 /**
  * Extension of the {@link SeasideSystemDistributionPlugin}. This extension allows you to change the distribution
  * name and modify the scripts used for starting the distribution.
@@ -44,17 +42,6 @@ public class SeasideSystemDistributionExtension {
       return this;
    }
 
-   /**
-    * Calls the given closure against the script configuration.
-    * 
-    * @param c closure
-    * @return this
-    */
-   public SeasideSystemDistributionExtension scripts(Closure<?> c) {
-      c.call(scriptConfiguration);
-      return this;
-   }
-   
    /**
     * The filename of the distribution archive, including the filetype. The default is
     * {@code <project.group>.<project.name>-<project.version>.zip}.
