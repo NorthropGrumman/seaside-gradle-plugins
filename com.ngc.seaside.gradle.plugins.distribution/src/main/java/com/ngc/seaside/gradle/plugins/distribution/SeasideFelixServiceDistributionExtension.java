@@ -1,5 +1,7 @@
 package com.ngc.seaside.gradle.plugins.distribution;
 
+import com.ngc.seaside.gradle.plugins.distribution.SeasideFelixServiceDistributionPlugin;
+
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -15,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import groovy.lang.Closure;
 
 /**
  * Extension of the {@link SeasideFelixServiceDistributionPlugin}. This extension allows you to change the distribution
@@ -120,6 +124,17 @@ public class SeasideFelixServiceDistributionExtension {
     */
    public SeasideFelixServiceDistributionExtension scripts(Action<ScriptConfiguration> action) {
       action.execute(scriptConfiguration);
+      return this;
+   }
+
+   /**
+    * Calls the given closure against the script configuration.
+    * 
+    * @param c closure
+    * @return this
+    */
+   public SeasideFelixServiceDistributionExtension scripts(Closure<?> c) {
+      c.call(scriptConfiguration);
       return this;
    }
 
