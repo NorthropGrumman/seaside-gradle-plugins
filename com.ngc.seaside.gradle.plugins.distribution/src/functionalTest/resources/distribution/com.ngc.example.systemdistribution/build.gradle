@@ -1,0 +1,19 @@
+plugins {
+    id 'maven-publish'
+    id 'com.ngc.seaside.repository'
+    id 'com.ngc.seaside.distribution.system'
+}
+
+group = 'com.ngc.seaside'
+version = '1.0-SNAPSHOT'
+
+ext {
+   threatEvalVersion = '2.4.0'
+}
+
+dependencies {
+    distribution "com.ngc.seaside.threateval:etps.distribution:$threatEvalVersion@zip"
+    distribution "com.ngc.seaside.threateval:ctps.distribution:$threatEvalVersion@zip"
+    distribution "com.ngc.seaside.threateval:datps.distribution:$threatEvalVersion@zip"
+    distribution "com.ngc.seaside.threateval:tps.distribution:$threatEvalVersion@zip"
+}

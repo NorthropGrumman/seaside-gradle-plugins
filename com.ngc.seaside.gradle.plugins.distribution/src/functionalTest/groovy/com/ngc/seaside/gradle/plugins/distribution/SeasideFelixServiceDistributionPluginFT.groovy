@@ -31,18 +31,20 @@ class SeasideFelixServiceDistributionPluginFT {
       project = ProjectBuilder.builder().withProjectDir(projectDir.toFile()).build()
    }
 
-
    @Test
    void doesRunGradleBuildWithSuccess() {
       BuildResult result = SeasideGradleRunner.create().withProjectDir(project.projectDir)
             .withNexusProperties()
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments("clean", "build", "-S")
+            .withArguments("clean", "build", "publishToMavenLocal", "-S")
             .build()
 
-      assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":build").getOutcome())
-
+      assertEquals(TaskOutcome.SUCCESS, result.task(":build").getOutcome())
+      assertEquals(TaskOutcome.SUCCESS, result.task(":publishToMavenLocal").getOutcome())
+      result.tasks.each {
+         assertNotEquals(TaskOutcome.FAILED, it.outcome)
+      }
       Path distDir = projectDir.resolve(Paths.get("build", DISTRIBUTION_DIRECTORY));
       Path zipFile = distDir.resolve("com.ngc.seaside.example.felix.distribution-1.0-SNAPSHOT.zip")
       assertTrue("did not create ZIP!", Files.isRegularFile(zipFile))

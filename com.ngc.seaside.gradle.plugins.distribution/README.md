@@ -5,7 +5,8 @@ all the required dependencies, jars, scripts and resources needed to run the dis
 
 ## Using this plugin
 To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
-An example is below. Note: a newer version may exist. Check the Nexus repository for the latest version.
+You can add system properties and program arguments using the ``felixService`` extension. Dependencies can be added
+using the ``bundles`` configuration.
 
 ```java
 buildscript {
@@ -45,6 +46,51 @@ dependencies {
     bundles "com.ngc.seaside:service.transport.impl.provider.multicast:$starfishVersion"
     bundles "com.ngc.seaside:service.transport.impl.topic.zeromq:$starfishVersion"
     bundles "com.ngc.seaside:service.transport.impl.provider.zeromq:$starfishVersion"
+}
+```
+
+# com.ngc.seaside.distribution.system
+The seaside system distribution plugin provides the directory structure for running a distribution composed of multiple
+sub-distributions. This plugin will create a distribution zip containing start scripts and the specified
+sub-distributions.
+
+## Using this plugin
+To use the plugin you will need to add the classpath to your buildscript dependencies and then just apply the plugin.
+You can add dependencies using the ``distribution`` configuration. Dependencies added to this configuration
+must reference zip-formatted files. The default start scripts for this plugin's distribution assume that these
+sub-distributions have start scripts in their ``bin/`` folder. The default start scripts can be overridden using
+the extension ``systemDistribution``.
+
+```java
+buildscript {
+    repositories {
+        mavenLocal()
+
+        maven {
+            url nexusConsolidated
+        }
+    }
+
+    dependencies {
+        classpath "com.ngc.seaside:gradle.plugins:$seasidePluginsVersion"
+    }
+}
+
+apply plugin: 'com.ngc.seaside.repository'
+apply plugin: 'com.ngc.seaside.distribution.system'
+
+group = 'com.ngc.seaside'
+version = '1.0-SNAPSHOT'
+
+ext {
+    threatEvalVersion = '2.4.0'
+}
+
+dependencies {
+    distribution "com.ngc.seaside.threateval:etps.distribution:$threatEvalVersion@zip"
+    distribution "com.ngc.seaside.threateval:ctps.distribution:$threatEvalVersion@zip"
+    distribution "com.ngc.seaside.threateval:datps.distribution:$threatEvalVersion@zip"
+    distribution "com.ngc.seaside.threateval:tps.distribution:$threatEvalVersion@zip"
 }
 ```
 
