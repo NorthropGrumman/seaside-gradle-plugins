@@ -369,7 +369,6 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          Attribute<Boolean> attribute = Attribute.of(INCLUDE_CONFLICTING_VERSIONS_ATTRIBUTE_NAME, Boolean.class);
          final boolean shouldResolve = !configuration.getAttributes().contains(attribute)
                   || configuration.getAttributes().getAttribute(attribute);
-         project.getLogger().warn("Configuration - {}, ShouldResolve - {}", configuration.getName(), shouldResolve);
          dependencies.getResolutionResult().allDependencies(result -> {
             // Gradle doesn't have a built-in way of including all versions of the same module dependency.
             // This will create extra configurations with the versions of dependencies that are excluded and copy them
