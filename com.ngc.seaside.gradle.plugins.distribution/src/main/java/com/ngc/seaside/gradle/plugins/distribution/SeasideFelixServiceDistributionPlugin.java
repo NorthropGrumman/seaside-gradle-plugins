@@ -10,17 +10,25 @@ import org.gradle.api.Task;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.ExcludeRule;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.artifacts.component.ComponentSelector;
+import org.gradle.api.artifacts.component.ModuleComponentSelector;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.artifacts.result.ResolvedComponentResult;
+import org.gradle.api.artifacts.result.ResolvedDependencyResult;
+import org.gradle.api.attributes.Attribute;
 import org.gradle.api.file.CopySpec;
+import org.gradle.api.internal.artifacts.dependencies.DefaultResolvedVersionConstraint;
+import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelector;
+import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelectorScheme;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.MavenPlugin;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
+import org.gradle.api.tasks.AbstractCopyTask;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.bundling.Zip;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
@@ -41,6 +49,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import javax.inject.Inject;
+
 /**
  * Plugin for creating an OSGi service distribution that can be deployed with Apache Felix.
  * 
@@ -60,7 +70,7 @@ import java.util.zip.ZipFile;
  * </ul>
  * 
  * <p>
- * This plugin provides two configurations:
+ * This plugin provides the following configurations:
  * <ul>
  * <li>{@value #BUNDLES_CONFIG_NAME} - bundles dependencies. This is the primary configuration used to add bundles
  * to the OSGi framework. You can create another bundle configuration with different settings by adding them to the
@@ -77,6 +87,10 @@ import java.util.zip.ZipFile;
  *    bundleConfiguration 'thirdParty' // bundle configuration already added by default
  * }
  * </pre>
+ * 
+ * When the distribution is being created, the jar dependencies from the bundle configurations will be resolved. 
+ * Unlike the default way that Gradle handles configurations, this plugin will only copy jars that are OSGi compliant;
+ * it will also include all jar versions of a dependency when there are version conflicts - not just one. 
  * 
  * </li>
  * <li>{@value #CORE_BUNDLES_CONFIG_NAME} - core bundle dependencies. This configuration provides
@@ -147,9 +161,25 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
       "com.ngc.blocs:service.thread.impl.common.threadservice:$blocsCoreVersion"));
    public static final List<String> EXCLUDED_BUNDLES = Collections.unmodifiableList(Arrays.asList(
       "org.osgi:org.osgi.core",
-      "org.osgi:org.osgi.enterprise"));
+      "org.osgi:org.osgi.enterprise",
+      "org.osgi:osgi.core",
+      "org.osgi:osgi.enterprise"));
 
    public static final String ZIP_DISTRIBUTION_TASK = "createFelixDistribution";
+   
+   /**
+    * If a bundle configuration contains a {@link Boolean} attribute with the given name, and it is set to {@code true},
+    * the configuration will use its configured dependency resolution strategy and not include duplicate dependencies
+    * with differing versions.
+    */
+   public static final String INCLUDE_CONFLICTING_VERSIONS_ATTRIBUTE_NAME = "includeConflictingVersions";
+
+   private final VersionSelectorScheme versionSelectorscheme;
+
+   @Inject
+   public SeasideFelixServiceDistributionPlugin(VersionSelectorScheme versionSelectorscheme) {
+      this.versionSelectorscheme = versionSelectorscheme;
+   }
 
    @Override
    protected void doApply(Project project) {
@@ -184,19 +214,6 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
                                                                   .findByType(
                                                                      SeasideFelixServiceDistributionExtension.class);
       extension.bundleConfiguration(bundle);
-
-      project.afterEvaluate(__ -> {
-         // Exclude certain bundles
-         for (Configuration configuration : extension.getBundleConfigurations()) {
-            for (String excludedBundle : EXCLUDED_BUNDLES) {
-               Map<String, String> properties = new LinkedHashMap<>();
-               String[] parts = excludedBundle.split(":");
-               properties.put(ExcludeRule.GROUP_KEY, parts[0]);
-               properties.put(ExcludeRule.MODULE_KEY, parts[1]);
-               configuration.exclude(properties);
-            }
-         }
-      });
    }
 
    private void createExtension(Project project) {
@@ -304,22 +321,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
                spec -> spec.into(PLATFORM_DIRECTORY));
             task.from(project.file(RUNTIME_RESOURCES_DIRECTORY), spec -> spec.into(RESOURCES_DIRECTORY));
             for (Configuration configuration : extension.getBundleConfigurations()) {
-               Set<ResolvedArtifact> resolvedArtifacts = configuration.getResolvedConfiguration()
-                                                                      .getResolvedArtifacts();
-               for (ResolvedArtifact artifact : resolvedArtifacts) {
-                  if (isOsgiArtifact(artifact)) {
-                     task.from(artifact.getFile(), spec -> {
-                        spec.into(BUNDLES_DIRECTORY);
-                        spec.rename(filename -> bundleFilename(artifact, filename));
-                     });
-                  } else {
-                     ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
-                     project.getLogger().info("Excluding '{}:{}:{}': not an OSGi bundle",
-                        id.getGroup(),
-                        id.getName(),
-                        id.getVersion());
-                  }
-               }
+               copyBundleConfigurations(task, configuration);
             }
          });
 
@@ -354,6 +356,63 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    }
 
    /**
+    * Adds copy commands to the given task for the given configuration. This method ensures that only OSGi-compliant
+    * files are copied. It ensures that correctly-versioned dependencies are copied. The names of the copied files
+    * are also deconflicted by adding the group id to the filenames.
+    * @param task copy task
+    * @param configuration configuration
+    */
+   private void copyBundleConfigurations(AbstractCopyTask task, Configuration configuration) {
+      Project project = task.getProject();
+      task.getInputs().file(configuration);
+      configuration.getIncoming().afterResolve(dependencies -> {
+         Attribute<Boolean> attribute = Attribute.of(INCLUDE_CONFLICTING_VERSIONS_ATTRIBUTE_NAME, Boolean.class);
+         final boolean shouldResolve = !configuration.getAttributes().contains(attribute)
+                  || configuration.getAttributes().getAttribute(attribute);
+         dependencies.getResolutionResult().allDependencies(result -> {
+            // Gradle doesn't have a built-in way of including all versions of the same module dependency.
+            // This will create extra configurations with the versions of dependencies that are excluded and copy them
+            // to the given task
+            if (shouldResolve && result instanceof ResolvedDependencyResult) {
+               ComponentSelector requested = ((ResolvedDependencyResult) result).getRequested();
+               ResolvedComponentResult selected = ((ResolvedDependencyResult) result).getSelected();
+               if (requested instanceof ModuleComponentSelector) {
+                  ModuleComponentSelector c = (ModuleComponentSelector) requested;
+                  DefaultResolvedVersionConstraint constraint =
+                           new DefaultResolvedVersionConstraint(c.getVersionConstraint(), versionSelectorscheme);
+                  VersionSelector selector = constraint.getPreferredSelector();
+                  if (!selector.accept(selected.getModuleVersion().getVersion())) {
+                     Configuration detached = project.getConfigurations()
+                              .detachedConfiguration(project.getDependencies()
+                                       .module(String.format("%s:%s:%s", c.getGroup(), c.getModule(), c.getVersion())));
+                     copyBundleConfigurations(task, detached);
+                     detached.resolve();
+                  }
+               }
+            }
+         });
+
+         // Gets the resolved artifacts, checks that they're OSGi-compliant and renames them to prevent conflicts.
+         Set<ResolvedArtifact> resolvedArtifacts = configuration.getResolvedConfiguration()
+                  .getResolvedArtifacts();
+         for (ResolvedArtifact artifact : resolvedArtifacts) {
+            if (isOsgiArtifact(artifact)) {
+               task.from(artifact.getFile(), spec -> {
+                  spec.into(BUNDLES_DIRECTORY);
+                  spec.rename(filename -> bundleFilename(artifact, filename));
+               });
+            } else {
+               ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
+               project.getLogger().info("Excluding '{}:{}:{}': not an OSGi bundle",
+                        id.getGroup(),
+                        id.getName(),
+                        id.getVersion());
+            }
+         }
+      });
+   }
+
+   /**
     * Renames the bundle file to ensure that the group id is included in the filename.
     * 
     * @param artifact bundle artifact
@@ -372,12 +431,20 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    }
 
    /**
-    * Returns {@code true} if the given artifact represents an OSGi compliant bundle.
+    * Returns {@code true} if the given artifact represents an OSGi compliant bundle, but {@code false} if the bundle
+    * has been {@link #EXCLUDED_BUNDLES excluded}.
     * 
     * @param artifact artifact
     * @return {@code true} if the given artifact represents an OSGi compliant bundle
     */
    private boolean isOsgiArtifact(ResolvedArtifact artifact) {
+      ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
+      String ga = String.format("%s:%s", id.getGroup(), id.getName());
+      for (String excludedBundle : EXCLUDED_BUNDLES) {
+         if (excludedBundle.equals(ga)) {
+            return false;
+         }
+      }
       File file = artifact.getFile();
       try (ZipFile zipFile = new ZipFile(file)) {
          ZipEntry entry = zipFile.stream()
@@ -407,7 +474,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
                   publication -> publication.artifact(zipDistribution));
             });
          });
-         
+
       });
    }
 
