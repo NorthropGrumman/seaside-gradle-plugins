@@ -5,7 +5,7 @@ import org.gradle.api.Project;
 import groovy.lang.Closure;
 
 /**
- * The configuration for the {@link com.ngc.seaside.gradle.plugins.cpp.parent.SeasideCppParentPlugin}.
+ * The configuration for the {@link com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin}.
  * This configuration allows you to specify libraries within your dependencies with more fine grained control of the
  * linking arguments and headers.
  */
@@ -25,12 +25,12 @@ public class BuildingExtension {
    public BuildingExtensionDataStore getStorage() {
       return storage;
    }
-   
+
    public BuildingExtension setStorage(BuildingExtensionDataStore storage) {
       this.storage = storage;
       return this;
    }
-   
+
    /**
     * The headers with the closure only. This requires that you set the dependency name within the closure.
     *
