@@ -41,7 +41,7 @@ for /f tokens^=2-5^ delims^=.-_^" %%j in ('"%JAVA_HOME%\\bin\\java" -fullversion
 if %jver% LSS 18000 goto :javaVersionError
 
 
-"%JAVA_HOME%\\bin\\java" %FRAMEWORK_OPTS% -jar "%MAIN_JAR%" %FELIX_OPTS%
+"%JAVA_HOME%\\bin\\java" %* %FRAMEWORK_OPTS% -jar "%MAIN_JAR%" %FELIX_OPTS%
 goto :eof
 
 :javaHomeNotSet

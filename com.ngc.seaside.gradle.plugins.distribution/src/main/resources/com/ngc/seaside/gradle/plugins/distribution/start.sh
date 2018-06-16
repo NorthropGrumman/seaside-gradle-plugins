@@ -28,4 +28,4 @@ MAIN_JAR="\$( find "\$NG_FW_HOME/platform" -name 'org.apache.felix.main-*.jar' |
 # Require JAVA_HOME to be set.
 : \${JAVA_HOME:?"Environment variable JAVA_HOME not set!  This variable must be set."}
 
-"\$JAVA_HOME/bin/java" \$FRAMEWORK_OPTS -jar "\$MAIN_JAR" \$FELIX_OPTS
+"\$JAVA_HOME/bin/java" "\$@" \$FRAMEWORK_OPTS -jar "\$MAIN_JAR" \$FELIX_OPTS
