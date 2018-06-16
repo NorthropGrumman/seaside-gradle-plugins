@@ -123,7 +123,6 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    public static final String PLATFORM_CONFIG_NAME = "platform";
    public static final String BUNDLES_CONFIG_NAME = "bundles";
    public static final String CORE_BUNDLES_CONFIG_NAME = "coreBundles";
-   public static final String BLOCS_CORE_VERSION_NAME = "blocsCoreVersion";
    public static final String JVM_PROPERTIES_SCRIPT_IDENTIFIER = "FELIX_JVM_PROPERTIES";
    public static final String PROGRAM_ARGUMENTS_SCRIPT_IDENTIFIER = "FELIX_PROGRAM_ARGUMENTS";
    public static final String BIN_DIRECTORY = "bin";
@@ -133,16 +132,19 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    public static final String BUNDLES_DIRECTORY = "bundles";
    public static final String DISTRIBUTION_DIRECTORY = "distribution";
    public static final String RUNTIME_RESOURCES_DIRECTORY = "src/main/resources/runtime";
+   public static final String NON_INTERACTIVE_PROPERTY_NAME = "nonInteractive";
    public static final List<String> DEFAULT_PLATFORM_DEPENDENCIES = Collections.unmodifiableList(Arrays.asList(
       "org.apache.felix:org.apache.felix.configadmin:1.8.16",
-      "org.apache.felix:org.apache.felix.gogo.command:1.0.2",
-      "org.apache.felix:org.apache.felix.gogo.runtime:1.0.8",
-      "org.apache.felix:org.apache.felix.gogo.shell:1.0.0",
       "org.apache.felix:org.apache.felix.log:1.0.1",
       "org.apache.felix:org.apache.felix.main:5.6.10",
       "org.apache.felix:org.apache.felix.metatype:1.1.6",
       "org.apache.felix:org.apache.felix.scr:2.0.14",
       "com.ngc.blocs:service.deployment.impl.common.autodeploymentservice:$blocsCoreVersion"));
+   public static final List<String> DEFAULT_PLATFORM_INTERACTIVE_DEPENDENCIES =
+            Collections.unmodifiableList(Arrays.asList(
+                     "org.apache.felix:org.apache.felix.gogo.command:1.0.2",
+                     "org.apache.felix:org.apache.felix.gogo.runtime:1.0.8",
+                     "org.apache.felix:org.apache.felix.gogo.shell:1.0.0"));
    public static final List<String> DEFAULT_BUNDLE_DEPENDENCIES = Collections.unmodifiableList(Arrays.asList(
       "com.ngc.blocs:api:$blocsCoreVersion",
       "com.ngc.blocs:file.impl.common.fileutilities:$blocsCoreVersion",
@@ -237,6 +239,22 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
                gav = dependency.substring(0, dependency.lastIndexOf(':')) + ':' + version;
             }
             dps.add(h.create(gav));
+         }
+         Object nonInteractive = project.findProperty(NON_INTERACTIVE_PROPERTY_NAME);
+         if (nonInteractive == null || !Boolean.parseBoolean(nonInteractive.toString())) {
+            for (String dependency : DEFAULT_PLATFORM_INTERACTIVE_DEPENDENCIES) {
+               String gav = dependency;
+               String version = dependency.substring(dependency.lastIndexOf(':') + 1);
+               if (version.charAt(0) == '$') {
+                  Object property = project.findProperty(version.substring(1));
+                  if (property == null) {
+                     throw new GradleException(version.substring(1) + " property must be set");
+                  }
+                  version = property.toString();
+                  gav = dependency.substring(0, dependency.lastIndexOf(':')) + ':' + version;
+               }
+               dps.add(h.create(gav));
+            }
          }
       });
       project.getConfigurations().getByName(CORE_BUNDLES_CONFIG_NAME).defaultDependencies(dps -> {
