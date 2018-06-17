@@ -60,7 +60,7 @@ for folder in `ls -d $currentDir/*/`
 do
    printf "Entering $folder ...\n"
 
-   $folder/bin/start.sh $1 &
+   $folder/bin/start.sh "$@" &
 done
 
 trap 'shutdown' INT TERM KILL
