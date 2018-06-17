@@ -18,5 +18,5 @@
 @echo off
 for /d %%D in ("%~dp0\*") DO (
  echo Entering "%%~nD" ...
- start "%%~nD" /B %%~fD\bin\start.bat
+ start "%%~nD" /B %%~fD\bin\start.bat %*
 )
