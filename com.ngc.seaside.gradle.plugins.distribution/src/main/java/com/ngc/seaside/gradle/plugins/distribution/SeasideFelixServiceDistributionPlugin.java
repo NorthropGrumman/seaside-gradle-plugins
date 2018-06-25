@@ -134,6 +134,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    public static final String RUNTIME_RESOURCES_DIRECTORY = "src/main/resources/runtime";
    public static final List<String> DEFAULT_PLATFORM_DEPENDENCIES = Collections.unmodifiableList(Arrays.asList(
       "org.apache.felix:org.apache.felix.configadmin:1.8.16",
+      "org.apache.felix:org.apache.felix.eventadmin:1.5.0",
       "org.apache.felix:org.apache.felix.gogo.command:1.0.2",
       "org.apache.felix:org.apache.felix.gogo.runtime:1.0.8",
       "org.apache.felix:org.apache.felix.gogo.shell:1.0.0",
