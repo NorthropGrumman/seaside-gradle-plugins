@@ -6,7 +6,6 @@ import org.junit.Assert
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Assume
 
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -53,17 +52,17 @@ class TestingUtilities {
         Assert.assertEquals(message, Paths.get(expected), Paths.get(actual))
     }
 
-    static void tryToConnectToUrl(String urlString) {
+    static boolean tryToConnectToUrl(String urlString) {
         def url = new URL(urlString)
         try {
             def connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.connectTimeout = 1000
             connection.connect()
-            Assume.assumeTrue(connection.responseCode < 400)
+            return connection.responseCode < 400
         } catch (Exception e) {
-            Assume.assumeNoException(e)
         }
+        return false
     }
 
     private static URL getThePluginClassPathResource(Class c) {
