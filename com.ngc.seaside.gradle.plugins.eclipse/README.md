@@ -39,12 +39,12 @@ eclipseUpdateSite {
    linuxEclipseVersion = "eclipse-dsl-oxygen-2-linux-gtk-x86_64"
 
    // (required) the name of the eclipse distribution version to download on linux.
-   linuxDownloadUrl = "http://10.207.42.137/resources/jellyfish/${linuxEclipseVersion}.zip"
+   linuxDownloadUrl = "https://nexusrepomgr.ms.northgrum.com/repository/raw-ng-repo/ceacide/${linuxEclipseVersion}.zip"
 
    // (required) the download url to the windows eclipse distribution.
    windowsEclipseVersion = "eclipse-dsl-oxygen-2-win32-x86_64"
 
    // (required) the name of the eclipse distribution version to download on windows.
-   windowsDownloadUrl = "http://10.207.42.137/resources/jellyfish/${windowsEclipseVersion}.zip"
+   windowsDownloadUrl = "https://nexusrepomgr.ms.northgrum.com/repository/raw-ng-repo/ceacide/${windowsEclipseVersion}.zip"
 }
 ```
