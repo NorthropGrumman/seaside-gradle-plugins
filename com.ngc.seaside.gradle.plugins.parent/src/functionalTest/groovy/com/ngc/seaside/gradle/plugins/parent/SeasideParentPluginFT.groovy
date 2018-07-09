@@ -8,6 +8,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 
@@ -19,6 +20,7 @@ class SeasideParentPluginFT {
 
    private File projectDir
    private Project project
+   private boolean sonarqubeEnabled = false
 
    @Before
    void before() {
@@ -38,7 +40,7 @@ class SeasideParentPluginFT {
       }
       String sonarProperty = properties['systemProp.sonar.host.url']
       if (sonarProperty != null) {
-         TestingUtilities.tryToConnectToUrl(sonarProperty)
+         sonarqubeEnabled = TestingUtilities.tryToConnectToUrl(sonarProperty)
       }
    }
 
@@ -56,6 +58,7 @@ class SeasideParentPluginFT {
 
    @Test
    void doesRunGradleAnalyzeBuildWithSuccess() {
+      Assume.assumeTrue(sonarqubeEnabled)
 
       BuildResult result = SeasideGradleRunner.create().withProjectDir(projectDir)
             .withNexusProperties()
