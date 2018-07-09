@@ -14,6 +14,6 @@ eclipseUpdateSite {
     updateSiteArchiveName = "com.ngc.seaside.test.test-name-1.0.0.zip"
     linuxEclipseVersion = "eclipse-dsl-oxygen-2-linux-gtk-x86_64"
     windowsEclipseVersion = "eclipse-dsl-oxygen-2-win32-x86_64"
-    linuxDownloadUrl = "http://10.207.42.137/resources/jellyfish/${linuxEclipseVersion}.zip"
-    windowsDownloadUrl = "http://10.207.42.137/resources/jellyfish/${windowsEclipseVersion}.zip"
+    linuxDownloadUrl = "https://nexusrepomgr.ms.northgrum.com/repository/raw-ng-repo/ceacide/${linuxEclipseVersion}.zip"
+    windowsDownloadUrl = "https://nexusrepomgr.ms.northgrum.com/repository/raw-ng-repo/ceacide/${windowsEclipseVersion}.zip"
 }
