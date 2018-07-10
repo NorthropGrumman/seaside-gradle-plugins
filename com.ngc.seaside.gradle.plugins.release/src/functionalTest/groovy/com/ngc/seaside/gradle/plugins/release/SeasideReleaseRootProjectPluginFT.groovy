@@ -134,6 +134,7 @@ class SeasideReleaseRootProjectPluginFT {
 
     private void setupTestingGitRepo() {
         project.exec ReleaseUtil.git("init", projectDir.absolutePath)
+        project.exec ReleaseUtil.git("config", "--local", "core.hookspath", "\"\"")
         project.exec ReleaseUtil.git("add", ".")
         project.exec ReleaseUtil.git("commit", "-m", "initial commit")
     }

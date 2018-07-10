@@ -62,6 +62,11 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
                   options.addStringOption('Xdoclint:none', '-quiet')
                }
             }
+            if (JavaVersion.current().isJava9Compatible()) {
+               taskResolver.findTask('javadoc') {
+                  options.addBooleanOption('html5', true)
+               }
+            }
 
             /**
              *
