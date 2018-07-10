@@ -36,18 +36,9 @@ for /f %%i in ('dir "%NG_FW_HOME%\\platform\\org.apache.felix.main-*.jar" /s /b'
 rem Require JAVA_HOME to be set.
 if "%JAVA_HOME%" == "" goto :javaHomeNotSet
 
-rem Require Java 1.8
-for /f tokens^=2-5^ delims^=.-_^" %%j in ('"%JAVA_HOME%\\bin\\java" -fullversion 2^>^&1') do set "jver=%%j%%k%%l%%m"
-if %jver% LSS 18000 goto :javaVersionError
-
-
 "%JAVA_HOME%\\bin\\java" %* %FRAMEWORK_OPTS% -jar "%MAIN_JAR%" %FELIX_OPTS%
 goto :eof
 
 :javaHomeNotSet
 echo The required environment variable JAVA_HOME is not set!
-goto :eof
-
-:javaVersionError
-echo Java 1.8 is required for BLoCS!
 goto :eof
