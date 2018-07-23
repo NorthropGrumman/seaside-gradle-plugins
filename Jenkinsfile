@@ -22,6 +22,7 @@ pipeline {
       stage('Build') {
          steps {
             echo "build url = ${env}"
+            sh 'printenv'
             sh 'chmod +x gradlew && ./gradlew clean build -xtest -xintegrationTest -xfunctionalTest'
          }
       }
