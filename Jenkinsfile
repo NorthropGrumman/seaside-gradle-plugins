@@ -80,8 +80,7 @@ pipeline {
                         jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
                   )
                   sh 'mkdir -p build'
-                  sh "curl -L -k -u '\$lifecycleUsername:\$lifecyclePassword' '${policyEvaluationResult.applicationCompositionReportUrl}/pdf' > build/Nexus-Lifecycle-Report.pdf"
-                  sh " ${policyEvaluationResult.applicationCompositionReportUrl}"
+                  sh "curl -s -S -L -k -u '\$lifecycleUsername:\$lifecyclePassword' '${policyEvaluationResult.applicationCompositionReportUrl}/pdf' > build/Nexus-Lifecycle-Report.pdf"
                   //echo "url = ${policyEvaluationResult.applicationCompositionReportUrl}"
                   //currentBuild.result = 'SUCCESS'
 
