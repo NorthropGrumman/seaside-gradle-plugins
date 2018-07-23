@@ -21,4 +21,4 @@ REPORT_URL=$(grep "$SEARCH_STRING" $LOGFILE | tail -1 | awk '{print $NF}')
 
 export no_proxy=".northgrum.com"
 echo "Downloading Nexus Lifecycle PDF report at '${REPORT_URL}/pdf'"
-curl -s -S -L -k -u "$USERNAME:$PASSWORD" "${REPORT_URL}/pdf" > OUTPUT_FILE
+curl -L -k -u "$USERNAME:$PASSWORD" "${REPORT_URL}/pdf" > OUTPUT_FILE
