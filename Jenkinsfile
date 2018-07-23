@@ -13,6 +13,9 @@ pipeline {
       booleanParam(name: 'performRelease',
                    defaultValue: false,
                    description: 'If true, a release build will be performed.  Releases can only be performed from master.')
+      booleanParam(name: 'nexusLifecycle',
+                   description: 'If true, Nexus Lifecycle will scan for security issues.',
+                   defaultValue: false)
    }
 
    stages {
@@ -56,6 +59,32 @@ pipeline {
          post {
             always {
                junit '**/build/test-results/functionalTest/*.xml'
+            }
+         }
+      }
+
+      stage('Nexus Lifecycle') {
+         when {
+            expression { params.nexusLifecycle }
+         }
+         steps {
+            // Evaluate the items for security, license, and other issues via Nexus Lifecycle.
+            script {
+               def policyEvaluationResult = nexusPolicyEvaluation(
+                     failBuildOnNetworkError: false,
+                     iqApplication: 'noalert',
+                     iqStage: 'build',
+                     jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
+               )
+               currentBuild.result = 'SUCCESS'
+            }
+            withCredentials([usernamePassword(credentialsId: 'ngc-nexus-lifecycle-pipelines',
+                                              passwordVariable: 'lifecyclePassword',
+                                              usernameVariable: 'lifecycleUsername')]) {
+               sh 'chmod +x downloadNexusLifecycleReport.sh'
+               sh 'mkdir -p build'
+               sh "curl ${BUILD_URL}consoleText >> build/jenkinsPipeline.log"
+               sh './downloadNexusLifecycleReport.sh build/jenkinsPipeline.log build/ s$lifecycleUsername $lifecyclePassword'
             }
          }
       }
