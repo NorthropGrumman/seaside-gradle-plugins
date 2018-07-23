@@ -21,7 +21,7 @@ pipeline {
    stages {
       stage('Build') {
          steps {
-            echo "build url = ${env.BUILD_URL}"
+            echo "build url = ${env}"
             sh 'chmod +x gradlew && ./gradlew clean build -xtest -xintegrationTest -xfunctionalTest'
          }
       }
