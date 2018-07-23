@@ -72,7 +72,7 @@ pipeline {
             script {
                nexusPolicyEvaluation(
                      failBuildOnNetworkError: false,
-                     iqApplication: 'seaside-apps',
+                     iqApplication: 'seaside-gradle-plugins',
                      iqStage: 'build',
                      jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
                )
@@ -148,11 +148,13 @@ pipeline {
       }
 
       stage('Archive') {
-         archiveArtifacts allowEmptyArchive: true,
-                          artifacts: 'build/Nexus-Lifecycle-Report.pdf',
-                          caseSensitive: false,
-                          defaultExcludes: false,
-                          onlyIfSuccessful: true
+         steps {
+            archiveArtifacts allowEmptyArchive: true,
+                             artifacts: 'build/Nexus-Lifecycle-Report.pdf',
+                             caseSensitive: false,
+                             defaultExcludes: false,
+                             onlyIfSuccessful: true
+         }
       }
    }
 
