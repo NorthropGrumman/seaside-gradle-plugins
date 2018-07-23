@@ -72,7 +72,7 @@ pipeline {
             script {
                nexusPolicyEvaluation(
                      failBuildOnNetworkError: false,
-                     iqApplication: 'jenkins',
+                     iqApplication: 'seaside-apps',
                      iqStage: 'build',
                      jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
                )
@@ -83,8 +83,8 @@ pipeline {
                                               usernameVariable: 'lifecycleUsername')]) {
                sh 'chmod +x downloadNexusLifecycleReport.sh'
                sh 'mkdir -p build'
-               sh "curl ${env.BUILD_URL}consoleText >> build/jenkinsPipeline.log"
-               sh './downloadNexusLifecycleReport.sh build/jenkinsPipeline.log build/ $lifecycleUsername $lifecyclePassword'
+               sh "curl -s -S ${env.BUILD_URL}consoleText >> build/jenkinsPipeline.log"
+               sh './downloadNexusLifecycleReport.sh build/jenkinsPipeline.log build/Nexus-Lifecycle-Report.pdf $lifecycleUsername $lifecyclePassword'
             }
          }
       }
@@ -145,6 +145,14 @@ pipeline {
                }
             }
          }
+      }
+
+      stage('Archive') {
+         archiveArtifacts allowEmptyArchive: true,
+                          artifacts: 'build/Nexus-Lifecycle-Report.pdf',
+                          caseSensitive: false,
+                          defaultExcludes: false,
+                          onlyIfSuccessful: true
       }
    }
 
