@@ -69,23 +69,27 @@ pipeline {
          }
          steps {
             // Evaluate the items for security, license, and other issues via Nexus Lifecycle.
-            script {
-               def policyEvaluationResult = nexusPolicyEvaluation(
-                     failBuildOnNetworkError: false,
-                     iqApplication: 'seaside-gradle-plugins',
-                     iqStage: 'build',
-                     jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
-               )
-               echo "url = ${policyEvaluationResult.applicationCompositionReportUrl}"
-               currentBuild.result = 'SUCCESS'
-            }
             withCredentials([usernamePassword(credentialsId: 'ngc-nexus-lifecycle-pipelines',
                                               passwordVariable: 'lifecyclePassword',
                                               usernameVariable: 'lifecycleUsername')]) {
-               sh 'chmod +x downloadNexusLifecycleReport.sh'
-               sh 'mkdir -p build'
-               sh "curl -s -S ${env.BUILD_URL}consoleText >> build/jenkinsPipeline.log"
-               sh './downloadNexusLifecycleReport.sh build/jenkinsPipeline.log build/Nexus-Lifecycle-Report.pdf $lifecycleUsername $lifecyclePassword'
+               script {
+                  def policyEvaluationResult = nexusPolicyEvaluation(
+                        failBuildOnNetworkError: false,
+                        iqApplication: 'seaside-gradle-plugins',
+                        iqStage: 'build',
+                        jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
+                  )
+                  sh 'mkdir -p build'
+                  sh "curl -L -k -u '\$lifecycleUsername:\$lifecyclePassword' '${policyEvaluationResult.applicationCompositionReportUrl}/pdf' > build/Nexus-Lifecycle-Report.pdf"
+                  sh " ${policyEvaluationResult.applicationCompositionReportUrl}"
+                  //echo "url = ${policyEvaluationResult.applicationCompositionReportUrl}"
+                  //currentBuild.result = 'SUCCESS'
+
+               }
+               //sh 'chmod +x downloadNexusLifecycleReport.sh'
+               //sh 'mkdir -p build'
+               //sh "curl -s -S ${env.BUILD_URL}consoleText >> build/jenkinsPipeline.log"
+               //sh './downloadNexusLifecycleReport.sh build/jenkinsPipeline.log build/Nexus-Lifecycle-Report.pdf $lifecycleUsername $lifecyclePassword'
             }
          }
       }
