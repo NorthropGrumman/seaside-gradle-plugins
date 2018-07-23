@@ -25,43 +25,43 @@ pipeline {
          }
       }
 
-      stage('Unit Test') {
-         steps {
-            sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
-         }
-
-         post {
-            always {
-               junit '**/build/test-results/test/*.xml'
-            }
-         }
-      }
-
-      stage('Integration Test') {
-         steps {
-            sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest'
-         }
-         post {
-            always {
-               junit '**/build/test-results/integrationTest/*.xml'
-            }
-         }
-      }
-
-      stage('Functional Test') {
-         steps {
-            withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
-                                              passwordVariable: 'nexusPassword',
-                                              usernameVariable: 'nexusUsername')]) {
-               sh './gradlew functionalTest -PtestIgnoreFailures=true -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword'
-            }
-         }
-         post {
-            always {
-               junit '**/build/test-results/functionalTest/*.xml'
-            }
-         }
-      }
+//      stage('Unit Test') {
+//         steps {
+//            sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
+//         }
+//
+//         post {
+//            always {
+//               junit '**/build/test-results/test/*.xml'
+//            }
+//         }
+//      }
+//
+//      stage('Integration Test') {
+//         steps {
+//            sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest'
+//         }
+//         post {
+//            always {
+//               junit '**/build/test-results/integrationTest/*.xml'
+//            }
+//         }
+//      }
+//
+//      stage('Functional Test') {
+//         steps {
+//            withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
+//                                              passwordVariable: 'nexusPassword',
+//                                              usernameVariable: 'nexusUsername')]) {
+//               sh './gradlew functionalTest -PtestIgnoreFailures=true -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword'
+//            }
+//         }
+//         post {
+//            always {
+//               junit '**/build/test-results/functionalTest/*.xml'
+//            }
+//         }
+//      }
 
       stage('Nexus Lifecycle') {
          when {
@@ -70,12 +70,13 @@ pipeline {
          steps {
             // Evaluate the items for security, license, and other issues via Nexus Lifecycle.
             script {
-               nexusPolicyEvaluation(
+               def policyEvaluationResult = nexusPolicyEvaluation(
                      failBuildOnNetworkError: false,
                      iqApplication: 'seaside-gradle-plugins',
                      iqStage: 'build',
                      jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
                )
+               echo "url = ${policyEvaluationResult.applicationCompositionReportUrl}"
                currentBuild.result = 'SUCCESS'
             }
             withCredentials([usernamePassword(credentialsId: 'ngc-nexus-lifecycle-pipelines',
