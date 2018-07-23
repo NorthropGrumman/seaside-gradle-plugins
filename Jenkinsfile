@@ -21,6 +21,7 @@ pipeline {
    stages {
       stage('Build') {
          steps {
+            echo "build url = ${env.BUILD_URL}"
             sh 'chmod +x gradlew && ./gradlew clean build -xtest -xintegrationTest -xfunctionalTest'
          }
       }
@@ -70,7 +71,7 @@ pipeline {
          steps {
             // Evaluate the items for security, license, and other issues via Nexus Lifecycle.
             script {
-               def policyEvaluationResult = nexusPolicyEvaluation(
+               nexusPolicyEvaluation(
                      failBuildOnNetworkError: false,
                      iqApplication: 'noalert',
                      iqStage: 'build',
