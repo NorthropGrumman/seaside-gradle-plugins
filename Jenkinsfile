@@ -80,15 +80,8 @@ pipeline {
                         jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
                   )
                   sh 'mkdir -p build'
-                  sh "curl -s -S -L -k -u '\$lifecycleUsername:\$lifecyclePassword' '${policyEvaluationResult.applicationCompositionReportUrl}/pdf' > build/Nexus-Lifecycle-Report.pdf"
-                  //echo "url = ${policyEvaluationResult.applicationCompositionReportUrl}"
-                  //currentBuild.result = 'SUCCESS'
-
+                  sh "curl -s -S -L -k -u \"\$lifecycleUsername:\$lifecyclePassword\" '${policyEvaluationResult.applicationCompositionReportUrl}/pdf' > build/Nexus-Lifecycle-Report.pdf"
                }
-               //sh 'chmod +x downloadNexusLifecycleReport.sh'
-               //sh 'mkdir -p build'
-               //sh "curl -s -S ${env.BUILD_URL}consoleText >> build/jenkinsPipeline.log"
-               //sh './downloadNexusLifecycleReport.sh build/jenkinsPipeline.log build/Nexus-Lifecycle-Report.pdf $lifecycleUsername $lifecyclePassword'
             }
          }
       }
