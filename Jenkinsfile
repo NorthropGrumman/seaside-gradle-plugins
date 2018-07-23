@@ -21,8 +21,6 @@ pipeline {
    stages {
       stage('Build') {
          steps {
-            echo "build url = ${env}"
-            sh 'printenv'
             sh 'chmod +x gradlew && ./gradlew clean build -xtest -xintegrationTest -xfunctionalTest'
          }
       }
@@ -86,7 +84,7 @@ pipeline {
                sh 'chmod +x downloadNexusLifecycleReport.sh'
                sh 'mkdir -p build'
                sh "curl ${env.BUILD_URL}consoleText >> build/jenkinsPipeline.log"
-               sh './downloadNexusLifecycleReport.sh build/jenkinsPipeline.log build/ s$lifecycleUsername $lifecyclePassword'
+               sh './downloadNexusLifecycleReport.sh build/jenkinsPipeline.log build/ $lifecycleUsername $lifecyclePassword'
             }
          }
       }
