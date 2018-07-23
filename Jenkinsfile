@@ -81,10 +81,9 @@ pipeline {
             withCredentials([usernamePassword(credentialsId: 'ngc-nexus-lifecycle-pipelines',
                                               passwordVariable: 'lifecyclePassword',
                                               usernameVariable: 'lifecycleUsername')]) {
-               echo "build url = $BUILD_URL"
                sh 'chmod +x downloadNexusLifecycleReport.sh'
                sh 'mkdir -p build'
-               sh "curl ${BUILD_URL}consoleText >> build/jenkinsPipeline.log"
+               sh "curl ${env.BUILD_URL}consoleText >> build/jenkinsPipeline.log"
                sh './downloadNexusLifecycleReport.sh build/jenkinsPipeline.log build/ s$lifecycleUsername $lifecyclePassword'
             }
          }
