@@ -72,7 +72,7 @@ pipeline {
             script {
                nexusPolicyEvaluation(
                      failBuildOnNetworkError: false,
-                     iqApplication: 'seaside-apps',
+                     iqApplication: 'jenkins',
                      iqStage: 'build',
                      jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
                )
