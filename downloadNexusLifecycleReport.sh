@@ -10,7 +10,7 @@ then
   echo 'You must pass in the path to the Jenkins log file'
   exit
 fi
-if [ -z "OUTPUT_FILE" ]
+if [ -z "$OUTPUT_FILE" ]
 then
   echo 'You must specify the output file for the PDF report.'
   exit
@@ -21,4 +21,4 @@ REPORT_URL=$(grep "$SEARCH_STRING" $LOGFILE | tail -1 | awk '{print $NF}')
 
 export no_proxy=".northgrum.com"
 echo "Downloading Nexus Lifecycle PDF report at '${REPORT_URL}/pdf'"
-curl -L -k -u "$USERNAME:$PASSWORD" "${REPORT_URL}/pdf" > OUTPUT_FILE
+curl -L -k -u "$USERNAME:$PASSWORD" "${REPORT_URL}/pdf" > $OUTPUT_FILE
