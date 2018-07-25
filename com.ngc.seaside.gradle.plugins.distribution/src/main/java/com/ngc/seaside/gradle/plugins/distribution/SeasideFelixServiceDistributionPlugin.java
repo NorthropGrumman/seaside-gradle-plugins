@@ -1,6 +1,9 @@
 package com.ngc.seaside.gradle.plugins.distribution;
 
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin;
+import com.ngc.seaside.gradle.plugins.ci.SeasideCiExtension;
+import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin;
+import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin;
 
 import org.apache.commons.io.IOUtils;
 import org.gradle.api.Action;
@@ -194,6 +197,10 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    private void applyPlugins(Project project) {
       project.getPlugins().apply(BasePlugin.class);
       project.getPlugins().apply(MavenPlugin.class);
+      // Apply the ci and repo plugin so we can use the populateM2task to collect the dependencies required to build
+      // a distribution project.
+      project.getPlugins().apply(SeasideRepositoryPlugin.class);
+      project.getPlugins().apply(SeasideCiPlugin.class);
    }
 
    private void createConfigurations(Project project) {
@@ -210,10 +217,17 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          config.setDescription("Configuration for bundle dependencies needed by the service distribution");
          config.extendsFrom(core);
       });
-      SeasideFelixServiceDistributionExtension extension = project.getExtensions()
-                                                                  .findByType(
-                                                                     SeasideFelixServiceDistributionExtension.class);
+      SeasideFelixServiceDistributionExtension extension =
+            project.getExtensions().findByType(SeasideFelixServiceDistributionExtension.class);
       extension.bundleConfiguration(bundle);
+
+      // Setup the populateM2task so it will resolve the configurations created above.  This is because these
+      // configurations use default dependencies and we need to explicitly resolve these configurations to get the
+      // dependencies.
+      SeasideCiExtension seasideCi = project.getExtensions().getByType(SeasideCiExtension.class);
+      seasideCi.forceResolutionOf(PLATFORM_CONFIG_NAME);
+      seasideCi.forceResolutionOf(core);
+      seasideCi.forceResolutionOf(bundle);
    }
 
    private void createExtension(Project project) {

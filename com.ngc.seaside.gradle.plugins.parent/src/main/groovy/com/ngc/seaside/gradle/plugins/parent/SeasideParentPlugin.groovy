@@ -199,7 +199,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
       project.plugins.apply('maven')
       project.plugins.apply(SeasideRepositoryPlugin)
       project.plugins.apply('eclipse')
-      project.plugins.apply('jacoco')
       project.plugins.apply('org.sonarqube')
       project.plugins.apply('com.github.ben-manes.versions')
       project.plugins.apply('com.github.ksoichiro.console.reporter')
@@ -239,12 +238,11 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
        * analyzeBuild task for sonarqube
        */
       def buildTask = taskResolver.findTask("build")
-      def jacocoReportTask = taskResolver.findTask("jacocoTestReport")
       def sonarqubeTask = taskResolver.findTask("sonarqube")
       project.task(ANALYZE_TASK_NAME)
       taskResolver.findTask(ANALYZE_TASK_NAME).setGroup(PARENT_TASK_GROUP_NAME)
-      taskResolver.findTask(ANALYZE_TASK_NAME).dependsOn([buildTask, jacocoReportTask, sonarqubeTask])
-      taskResolver.findTask(ANALYZE_TASK_NAME).setDescription('Runs jacocoTestReport and sonarqube')
+      taskResolver.findTask(ANALYZE_TASK_NAME).dependsOn([buildTask, sonarqubeTask])
+      taskResolver.findTask(ANALYZE_TASK_NAME).setDescription('Runs sonarqube')
 
       /**
        * downloadDependencies task
