@@ -142,6 +142,8 @@ public class ExternalP2Repository {
    void configure() {
       Path mirrorSite = getCacheMirrorSiteDirectory().get().getAsFile().toPath();
       try {
+         Files.createDirectories(mirrorSite.resolve("features"));
+         Files.createDirectories(mirrorSite.resolve("plugins"));
          Files.list(mirrorSite.resolve("features")).map(Path::toAbsolutePath)
                   .map(ExternalP2Repository::fromJar).forEach(features::add);
          Files.list(mirrorSite.resolve("plugins")).map(Path::toAbsolutePath).map(ExternalPlugin::new)
