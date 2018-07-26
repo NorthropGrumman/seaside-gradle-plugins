@@ -141,15 +141,21 @@ public class ExternalP2Repository {
 
    void configure() {
       Path mirrorSite = getCacheMirrorSiteDirectory().get().getAsFile().toPath();
-      try {
-         Files.createDirectories(mirrorSite.resolve("features"));
-         Files.createDirectories(mirrorSite.resolve("plugins"));
-         Files.list(mirrorSite.resolve("features")).map(Path::toAbsolutePath)
-                  .map(ExternalP2Repository::fromJar).forEach(features::add);
-         Files.list(mirrorSite.resolve("plugins")).map(Path::toAbsolutePath).map(ExternalPlugin::new)
-                  .forEach(plugins::add);
-      } catch (IOException e) {
-         throw new UncheckedIOException(e);
+      if (Files.isDirectory(mirrorSite)) {
+         try {
+            Path featureDir = mirrorSite.resolve("features");
+            if (Files.isDirectory(featureDir)) {
+               Files.list(featureDir).map(Path::toAbsolutePath)
+                        .map(ExternalP2Repository::fromJar).forEach(features::add);
+            }
+            Path pluginsDir = mirrorSite.resolve("plugins");
+            if (Files.isDirectory(pluginsDir)) {
+               Files.list(pluginsDir).map(Path::toAbsolutePath).map(ExternalPlugin::new)
+                        .forEach(plugins::add);
+            }
+         } catch (IOException e) {
+            throw new UncheckedIOException(e);
+         }
       }
    }
 

@@ -35,8 +35,8 @@ public class BaseEclipseExtension {
    public BaseEclipseExtension(Project project) {
       this.project = project;
       this.cacheDirectory = project.getLayout().directoryProperty();
-      this.cacheDirectory
-               .set(new File(project.getGradle().getGradleUserHomeDir(), DEFAULT_ECLIPSE_CACHE_DIRECTORY_NAME));
+      this.cacheDirectory.set(new File(project.getGradle().getGradleUserHomeDir(), DEFAULT_ECLIPSE_CACHE_DIRECTORY_NAME)
+               .getAbsoluteFile());
    }
 
    /**
