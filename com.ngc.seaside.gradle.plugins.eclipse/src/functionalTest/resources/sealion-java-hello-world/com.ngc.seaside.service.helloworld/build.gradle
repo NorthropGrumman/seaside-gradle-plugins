@@ -1,13 +1,13 @@
 plugins {
     id 'com.ngc.seaside.repository'
     id 'java'
+    id 'osgi'
 }
 
 dependencies {
     /* log4j for app message logging */
     compile "log4j:log4j:$log4jVersion"
-    compile "org.slf4j:slf4j-api:$slf4jVersion"
-    compile "org.slf4j:slf4j-log4j12:$slf4jVersion"
+    compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.13.0'
     testCompile "junit:junit:$junitVersion"
 }
 

@@ -1,11 +1,51 @@
+configurations { dtd2java }
+
 dependencies {
    api gradleApi()
    implementation localGroovy()
    implementation project(':gradle.plugins.base')
    implementation "com.google.guava:guava:$guavaVersion"
+   implementation "commons-io:commons-io:$commonsIOVersion"
+   implementation "org.glassfish.jaxb:jaxb-runtime:$jaxbVersion"
+   runtime "javax.activation:activation:1.1.1"
+   dtd2java "org.glassfish.jaxb:jaxb-runtime:$jaxbVersion"
+   dtd2java "org.glassfish.jaxb:jaxb-xjc:$jaxbVersion"
+   dtd2java "org.glassfish.jaxb:jaxb-runtime:$jaxbVersion"
+   dtd2java "javax.activation:activation:1.1.1"
 
    testRuntime project(':gradle.plugins.repository')
    testImplementation project(':gradle.plugins.testutils')
    testImplementation "junit:junit:$junitVersion"
    testImplementation "org.mockito:mockito-core:$mockitoVersion"
 }
+
+ext {
+   jaxbTargetDir = file("${buildDir}/classes/javagen")
+   dtdBasePackage = 'org.eclipse.updatesite'
+   dtdFiles = [file("${projectDir}/src/main/resources/category.dtd"), file("${projectDir}/src/main/resources/feature.dtd")]
+}
+
+task dtd2java() {
+   doFirst { jaxbTargetDir.mkdirs() }
+   doLast {
+      dtdFiles.each { dtd ->
+         def dtdPackage = "${dtdBasePackage}." + dtd.name.take(dtd.name.lastIndexOf('.'))
+         ant {
+            taskdef(name: 'xjc', classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.dtd2java.asPath)
+            xjc(package: dtdPackage,
+                destdir: jaxbTargetDir,
+                schema: dtd,
+                fork: true, {
+                   arg line: '-XautoNameResolution -dtd'
+                   jvmarg value: '-DenableExternalEntityProcessing=true'
+                }
+            )
+         }
+      }
+   }
+   inputs.files dtdFiles
+   outputs.dir jaxbTargetDir
+   compileJava.dependsOn dtd2java
+   sourceSets.main.java.srcDirs jaxbTargetDir
+}
+
