@@ -70,7 +70,7 @@ public class EclipseFeatureInclude implements Serializable {
     * Sets whether or not the included feature is required.
     * 
     * @param required whether or not the included feature is required
-    * @return
+    * @return this
     */
    public EclipseFeatureInclude setRequired(boolean required) {
       this.required = required;

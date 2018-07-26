@@ -19,7 +19,7 @@ public class EclipseFeatureTest {
    @Test
    public void testFromXml() throws IOException {
       Path featureXml = Paths.get("src", "test", "resources",
-               EclipseFeatureTest.class.getPackageName().replace('.', '/'), "feature.xml");
+               EclipseFeatureTest.class.getPackage().getName().replace('.', '/'), "feature.xml");
       Reader reader = Files.newBufferedReader(featureXml);
       EclipseFeature feature = EclipseFeature.fromXml(reader);
       assertEquals("com.ngc.seaside.systemdescriptor.feature", feature.getId());
