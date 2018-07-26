@@ -2,7 +2,6 @@ package com.ngc.seaside.gradle.plugins.ci
 
 import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryExtension
 import org.gradle.api.artifacts.Configuration
-import org.gradle.testing.jacoco.plugins.JacocoPlugin
 
 /**
  * An extension used to configure the {@link com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin}.
@@ -18,11 +17,6 @@ class SeasideCiExtension {
      * The names of the configurations that must be resolved when populating the M2 repository.
      */
     private final Collection<String> configurationsToResolve = new HashSet<>()
-
-    SeasideCiExtension() {
-        configurationsToResolve.add(JacocoPlugin.AGENT_CONFIGURATION_NAME)
-        configurationsToResolve.add(JacocoPlugin.ANT_CONFIGURATION_NAME)
-    }
 
     /**
      * The name of the remote repository to use to resolve dependencies when populating and offline maven2 directory.
@@ -93,9 +87,7 @@ class SeasideCiExtension {
     }
 
     /**
-     * Gets the names of the configurations that must be resolved when populating the M2 repository.  The default
-     * configurations include {@link JacocoPlugin#AGENT_CONFIGURATION_NAME} and
-     * {@link JacocoPlugin#ANT_CONFIGURATION_NAME}.
+     * Gets the names of the configurations that must be resolved when populating the M2 repository.
      */
     Collection<String> getConfigurationsToResolve() {
         return configurationsToResolve

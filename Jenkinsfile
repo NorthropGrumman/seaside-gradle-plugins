@@ -13,6 +13,9 @@ pipeline {
       booleanParam(name: 'performRelease',
                    defaultValue: false,
                    description: 'If true, a release build will be performed.  Releases can only be performed from master.')
+      booleanParam(name: 'nexusLifecycle',
+                   description: 'If true, Nexus Lifecycle will scan for security issues.',
+                   defaultValue: false)
    }
 
    stages {
@@ -56,6 +59,29 @@ pipeline {
          post {
             always {
                junit '**/build/test-results/functionalTest/*.xml'
+            }
+         }
+      }
+
+      stage('Nexus Lifecycle') {
+         when {
+            expression { params.nexusLifecycle }
+         }
+         steps {
+            // Evaluate the items for security, license, and other issues via Nexus Lifecycle.
+            withCredentials([usernamePassword(credentialsId: 'ngc-nexus-lifecycle-pipelines',
+                                              passwordVariable: 'lifecyclePassword',
+                                              usernameVariable: 'lifecycleUsername')]) {
+               script {
+                  def policyEvaluationResult = nexusPolicyEvaluation(
+                        failBuildOnNetworkError: false,
+                        iqApplication: 'seaside-gradle-plugins',
+                        iqStage: 'build',
+                        jobCredentialsId: 'ngc-nexus-lifecycle-pipelines'
+                  )
+                  sh 'mkdir -p build'
+                  sh "curl -s -S -L -k -u \"\$lifecycleUsername:\$lifecyclePassword\" '${policyEvaluationResult.applicationCompositionReportUrl}/pdf' > build/Nexus-Lifecycle-Report.pdf"
+               }
             }
          }
       }
@@ -115,6 +141,16 @@ pipeline {
                   sh 'git config --unset credential.helper'
                }
             }
+         }
+      }
+
+      stage('Archive') {
+         steps {
+            archiveArtifacts allowEmptyArchive: true,
+                             artifacts: 'build/Nexus-Lifecycle-Report.pdf',
+                             caseSensitive: false,
+                             defaultExcludes: false,
+                             onlyIfSuccessful: true
          }
       }
    }
