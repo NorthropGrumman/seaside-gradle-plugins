@@ -186,7 +186,7 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
 
             project.gradle.startParameter.setContinueOnFailure(true)
             project.gradle.startParameter.setRefreshDependencies(true)
-            project.gradle.startParameter.setShowStacktrace(ShowStacktrace.INTERNAL_EXCEPTIONS)
+            project.gradle.startParameter.setShowStacktrace(ShowStacktrace.ALWAYS_FULL)
          }
       }
    }
