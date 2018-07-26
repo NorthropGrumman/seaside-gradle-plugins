@@ -48,7 +48,11 @@ under the License.
 
    <!--| The path to the local repository maven will use to store artifacts.-->
    <!--| Default: ${user.home}/.m2/repository-->
-   <localRepository>build-link/dependencies</localRepository>
+   <!-- The deploy.sh script assumes the local Maven repository *already* contains the dependencies for
+        Maven itself.  See
+        https://github.ms.northgrum.com/CEACIDE/third-party/blob/maven/com.ngc.seaside.thirdparty.maven/build.gradle
+        for a list of all required Maven dependencies.
+     -->
 
    <!-- servers
     | This is a list of authentication profiles, keyed by the server-id used within the system.
