@@ -63,7 +63,7 @@ eclipseUpdateSite {
 }
 ```
 
-# com.ngc.seaside.eclipse.pw
+# com.ngc.seaside.eclipse.p2
 The seaside Eclipse p2 plugin manages remote p2 repositories.
 
 This plugin allows you to access remote p2 repositories and leverage feature and plugins in external update sites.
