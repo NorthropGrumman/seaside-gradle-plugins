@@ -2,6 +2,7 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.google.guava:guava:$guavaVersion"
+    implementation "commons-io:commons-io:$commonsIOVersion"
     
     testImplementation project(':gradle.plugins.testutils')
     testImplementation "junit:junit:$junitVersion"

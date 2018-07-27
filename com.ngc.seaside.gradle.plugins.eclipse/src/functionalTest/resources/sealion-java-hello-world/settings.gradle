@@ -3,8 +3,5 @@ rootProject.name = 'sealion-java-hello-world'
 include 'com.ngc.seaside.service.helloworld'
 project(':com.ngc.seaside.service.helloworld').name = 'service.helloworld'
 
-include 'com.ngc.seaside.service.nihao'
-project(':com.ngc.seaside.service.nihao').name = 'service.nihao'
-
 include 'com.ngc.seaside.service.heiverden'
 project(':com.ngc.seaside.service.heiverden').name = 'service.heiverden'

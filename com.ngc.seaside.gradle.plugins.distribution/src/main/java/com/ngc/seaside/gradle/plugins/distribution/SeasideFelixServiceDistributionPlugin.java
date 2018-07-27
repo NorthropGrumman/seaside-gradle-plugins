@@ -4,8 +4,9 @@ import com.ngc.seaside.gradle.api.AbstractProjectPlugin;
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiExtension;
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin;
 import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin;
+import com.ngc.seaside.gradle.util.OsgiResolver;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -13,17 +14,9 @@ import org.gradle.api.Task;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.ModuleVersionIdentifier;
-import org.gradle.api.artifacts.ResolvedArtifact;
-import org.gradle.api.artifacts.component.ComponentSelector;
-import org.gradle.api.artifacts.component.ModuleComponentSelector;
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
-import org.gradle.api.artifacts.result.ResolvedComponentResult;
-import org.gradle.api.artifacts.result.ResolvedDependencyResult;
-import org.gradle.api.attributes.Attribute;
 import org.gradle.api.file.CopySpec;
-import org.gradle.api.internal.artifacts.dependencies.DefaultResolvedVersionConstraint;
-import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelector;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelectorScheme;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.MavenPlugin;
@@ -38,7 +31,6 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -46,11 +38,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -91,9 +79,9 @@ import javax.inject.Inject;
  * }
  * </pre>
  * 
- * When the distribution is being created, the jar dependencies from the bundle configurations will be resolved. 
+ * When the distribution is being created, the jar dependencies from the bundle configurations will be resolved.
  * Unlike the default way that Gradle handles configurations, this plugin will only copy jars that are OSGi compliant;
- * it will also include all jar versions of a dependency when there are version conflicts - not just one. 
+ * it will also include all jar versions of a dependency when there are version conflicts - not just one.
  * 
  * </li>
  * <li>{@value #CORE_BUNDLES_CONFIG_NAME} - core bundle dependencies. This configuration provides
@@ -136,40 +124,35 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    public static final String DISTRIBUTION_DIRECTORY = "distribution";
    public static final String RUNTIME_RESOURCES_DIRECTORY = "src/main/resources/runtime";
    public static final List<String> DEFAULT_PLATFORM_DEPENDENCIES = Collections.unmodifiableList(Arrays.asList(
-      "org.apache.felix:org.apache.felix.configadmin:1.8.16",
-      "org.apache.felix:org.apache.felix.eventadmin:1.5.0",
-      "org.apache.felix:org.apache.felix.gogo.command:1.0.2",
-      "org.apache.felix:org.apache.felix.gogo.runtime:1.0.8",
-      "org.apache.felix:org.apache.felix.gogo.shell:1.0.0",
-      "org.apache.felix:org.apache.felix.log:1.0.1",
-      "org.apache.felix:org.apache.felix.main:5.6.10",
-      "org.apache.felix:org.apache.felix.metatype:1.1.6",
-      "org.apache.felix:org.apache.felix.scr:2.0.14",
-      "com.ngc.blocs:service.deployment.impl.common.autodeploymentservice:$blocsCoreVersion"));
+            "org.apache.felix:org.apache.felix.configadmin:1.8.16",
+            "org.apache.felix:org.apache.felix.eventadmin:1.5.0",
+            "org.apache.felix:org.apache.felix.gogo.command:1.0.2",
+            "org.apache.felix:org.apache.felix.gogo.runtime:1.0.8",
+            "org.apache.felix:org.apache.felix.gogo.shell:1.0.0",
+            "org.apache.felix:org.apache.felix.log:1.0.1",
+            "org.apache.felix:org.apache.felix.main:5.6.10",
+            "org.apache.felix:org.apache.felix.metatype:1.1.6",
+            "org.apache.felix:org.apache.felix.scr:2.0.14",
+            "com.ngc.blocs:service.deployment.impl.common.autodeploymentservice:$blocsCoreVersion"));
    public static final List<String> DEFAULT_BUNDLE_DEPENDENCIES = Collections.unmodifiableList(Arrays.asList(
-      "com.ngc.blocs:api:$blocsCoreVersion",
-      "com.ngc.blocs:file.impl.common.fileutilities:$blocsCoreVersion",
-      "com.ngc.blocs:security.impl.common.securityutilities:$blocsCoreVersion",
-      "com.ngc.blocs:jaxb.impl.common.jaxbutilities:$blocsCoreVersion",
-      "com.ngc.blocs:xml.resource.impl.common.xmlresource:$blocsCoreVersion",
-      "com.ngc.blocs:service.log.impl.common.logservice:$blocsCoreVersion",
-      "com.ngc.blocs:service.api:$blocsCoreVersion",
-      "com.ngc.blocs:service.event.impl.common.eventservice:$blocsCoreVersion",
-      "com.ngc.blocs:service.resource.impl.common.resourceservice:$blocsCoreVersion",
-      "com.ngc.blocs:notification.impl.common.notificationsupport:$blocsCoreVersion",
-      "com.ngc.blocs:properties.resource.impl.common.propertiesresource:$blocsCoreVersion",
-      "com.ngc.blocs:service.framework.impl.common.frameworkmgmtservice:$blocsCoreVersion",
-      "com.ngc.blocs:component.impl.common.componentutilities:$blocsCoreVersion",
-      "com.ngc.blocs:service.notification.impl.common.notificationservice:$blocsCoreVersion",
-      "com.ngc.blocs:service.thread.impl.common.threadservice:$blocsCoreVersion"));
-   public static final List<String> EXCLUDED_BUNDLES = Collections.unmodifiableList(Arrays.asList(
-      "org.osgi:org.osgi.core",
-      "org.osgi:org.osgi.enterprise",
-      "org.osgi:osgi.core",
-      "org.osgi:osgi.enterprise"));
+            "com.ngc.blocs:api:$blocsCoreVersion",
+            "com.ngc.blocs:file.impl.common.fileutilities:$blocsCoreVersion",
+            "com.ngc.blocs:security.impl.common.securityutilities:$blocsCoreVersion",
+            "com.ngc.blocs:jaxb.impl.common.jaxbutilities:$blocsCoreVersion",
+            "com.ngc.blocs:xml.resource.impl.common.xmlresource:$blocsCoreVersion",
+            "com.ngc.blocs:service.log.impl.common.logservice:$blocsCoreVersion",
+            "com.ngc.blocs:service.api:$blocsCoreVersion",
+            "com.ngc.blocs:service.event.impl.common.eventservice:$blocsCoreVersion",
+            "com.ngc.blocs:service.resource.impl.common.resourceservice:$blocsCoreVersion",
+            "com.ngc.blocs:notification.impl.common.notificationsupport:$blocsCoreVersion",
+            "com.ngc.blocs:properties.resource.impl.common.propertiesresource:$blocsCoreVersion",
+            "com.ngc.blocs:service.framework.impl.common.frameworkmgmtservice:$blocsCoreVersion",
+            "com.ngc.blocs:component.impl.common.componentutilities:$blocsCoreVersion",
+            "com.ngc.blocs:service.notification.impl.common.notificationservice:$blocsCoreVersion",
+            "com.ngc.blocs:service.thread.impl.common.threadservice:$blocsCoreVersion"));
 
    public static final String ZIP_DISTRIBUTION_TASK = "createFelixDistribution";
-   
+
    /**
     * If a bundle configuration contains a {@link Boolean} attribute with the given name, and it is set to {@code true},
     * the configuration will use its configured dependency resolution strategy and not include duplicate dependencies
@@ -232,8 +215,8 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
 
    private void createExtension(Project project) {
       project.getExtensions().create(SeasideFelixServiceDistributionExtension.NAME,
-         SeasideFelixServiceDistributionExtension.class,
-         project);
+               SeasideFelixServiceDistributionExtension.class,
+               project);
    }
 
    private void addDefaultDependencies(Project project) {
@@ -275,7 +258,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    private void createTasks(Project project) {
       TaskContainer tasks = project.getTasks();
       SeasideFelixServiceDistributionExtension extension = project.getExtensions().findByType(
-         SeasideFelixServiceDistributionExtension.class);
+               SeasideFelixServiceDistributionExtension.class);
 
       Action<ResourceCopyTask> taskAction = task -> task.setDestinationDir(task.getTemporaryDir());
       ResourceCopyTask createWindowsScript = tasks.create("createWindowsScript", ResourceCopyTask.class, taskAction);
@@ -294,23 +277,24 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          Action<CopySpec> copyAction = spec -> spec.expand(templateProperties);
          if (windowsScript == null) {
             createWindowsScript.fromResource(
-               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.bat")),
-               copyAction);
+                     Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.bat")),
+                     copyAction);
          } else {
             createWindowsScript.from(windowsScript, copyAction);
          }
          File linuxScript = extension.getScripts().getLinuxScript();
          if (linuxScript == null) {
             createLinuxScript.fromResource(
-               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.sh")),
-               copyAction);
+                     Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.sh")),
+                     copyAction);
          } else {
             createLinuxScript.from(linuxScript, copyAction);
          }
          File configFile = extension.getConfigFile();
          if (configFile == null) {
             createConfig.fromResource(
-               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("config.properties")));
+                     Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY,
+                              getClass().getResource("config.properties")));
          } else {
             createConfig.from(configFile);
          }
@@ -332,7 +316,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
             task.from(createLinuxScript.getDestinationDir(), spec -> spec.into(BIN_DIRECTORY));
             task.from(createConfig.getDestinationDir(), spec -> spec.into(CONFIG_DIRECTORY));
             task.from(project.getConfigurations().getByName(PLATFORM_CONFIG_NAME),
-               spec -> spec.into(PLATFORM_DIRECTORY));
+                     spec -> spec.into(PLATFORM_DIRECTORY));
             task.from(project.file(RUNTIME_RESOURCES_DIRECTORY), spec -> spec.into(RESOURCES_DIRECTORY));
             for (Configuration configuration : extension.getBundleConfigurations()) {
                copyBundleConfigurations(task, configuration);
@@ -373,107 +357,39 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
     * Adds copy commands to the given task for the given configuration. This method ensures that only OSGi-compliant
     * files are copied. It ensures that correctly-versioned dependencies are copied. The names of the copied files
     * are also deconflicted by adding the group id to the filenames.
+    * 
     * @param task copy task
     * @param configuration configuration
     */
    private void copyBundleConfigurations(AbstractCopyTask task, Configuration configuration) {
       Project project = task.getProject();
-      task.getInputs().file(configuration);
-      configuration.getIncoming().afterResolve(dependencies -> {
-         Attribute<Boolean> attribute = Attribute.of(INCLUDE_CONFLICTING_VERSIONS_ATTRIBUTE_NAME, Boolean.class);
-         final boolean shouldResolve = !configuration.getAttributes().contains(attribute)
-                  || configuration.getAttributes().getAttribute(attribute);
-         dependencies.getResolutionResult().allDependencies(result -> {
-            // Gradle doesn't have a built-in way of including all versions of the same module dependency.
-            // This will create extra configurations with the versions of dependencies that are excluded and copy them
-            // to the given task
-            if (shouldResolve && result instanceof ResolvedDependencyResult) {
-               ComponentSelector requested = ((ResolvedDependencyResult) result).getRequested();
-               ResolvedComponentResult selected = ((ResolvedDependencyResult) result).getSelected();
-               if (requested instanceof ModuleComponentSelector) {
-                  ModuleComponentSelector c = (ModuleComponentSelector) requested;
-                  DefaultResolvedVersionConstraint constraint =
-                           new DefaultResolvedVersionConstraint(c.getVersionConstraint(), versionSelectorscheme);
-                  VersionSelector selector = constraint.getPreferredSelector();
-                  if (!selector.accept(selected.getModuleVersion().getVersion())) {
-                     Configuration detached = project.getConfigurations()
-                              .detachedConfiguration(project.getDependencies()
-                                       .module(String.format("%s:%s:%s", c.getGroup(), c.getModule(), c.getVersion())));
-                     copyBundleConfigurations(task, detached);
-                     detached.resolve();
-                  }
-               }
-            }
-         });
-
-         // Gets the resolved artifacts, checks that they're OSGi-compliant and renames them to prevent conflicts.
-         Set<ResolvedArtifact> resolvedArtifacts = configuration.getResolvedConfiguration()
-                  .getResolvedArtifacts();
-         for (ResolvedArtifact artifact : resolvedArtifacts) {
-            if (isOsgiArtifact(artifact)) {
-               task.from(artifact.getFile(), spec -> {
-                  spec.into(BUNDLES_DIRECTORY);
-                  spec.rename(filename -> bundleFilename(artifact, filename));
-               });
+      OsgiResolver osgiResolver = new OsgiResolver(project, versionSelectorscheme);
+      osgiResolver.resolveAllVersions(configuration, (identifier, file) -> {
+         Optional<String> symbolicName = OsgiResolver.getOsgiSymbolicName(file);
+         if (symbolicName.isPresent()) {
+            String group;
+            String module;
+            String version;
+            if (identifier instanceof ModuleComponentIdentifier) {
+               group = ((ModuleComponentIdentifier) identifier).getGroup();
+               module = ((ModuleComponentIdentifier) identifier).getModule();
+               version = ((ModuleComponentIdentifier) identifier).getVersion();
             } else {
-               ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
-               project.getLogger().info("Excluding '{}:{}:{}': not an OSGi bundle",
-                        id.getGroup(),
-                        id.getName(),
-                        id.getVersion());
+               group = null;
+               module = identifier.getDisplayName();
+               version = null;
             }
+            String filename = getFilename(group, module, version);
+            task.from(file, spec -> {
+               spec.into(BUNDLES_DIRECTORY);
+               spec.rename(__ -> filename + "." + FilenameUtils.getExtension(file.getName()));
+            });
+         } else {
+            project.getLogger().info("Excluding file {} from dependency '{}': not an OSGi bundle",
+                     identifier.getDisplayName());
          }
       });
-   }
-
-   /**
-    * Renames the bundle file to ensure that the group id is included in the filename.
-    * 
-    * @param artifact bundle artifact
-    * @param filename artifact filename
-    * @return the renamed bundle filename
-    */
-   private String bundleFilename(ResolvedArtifact artifact, String filename) {
-      StringBuilder name = new StringBuilder();
-      ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
-      name.append(id.getGroup()).append('.').append(id.getName()).append('-').append(id.getVersion());
-      if (artifact.getClassifier() != null) {
-         name.append('-').append(artifact.getClassifier());
-      }
-      name.append('.').append(artifact.getExtension());
-      return name.toString();
-   }
-
-   /**
-    * Returns {@code true} if the given artifact represents an OSGi compliant bundle, but {@code false} if the bundle
-    * has been {@link #EXCLUDED_BUNDLES excluded}.
-    * 
-    * @param artifact artifact
-    * @return {@code true} if the given artifact represents an OSGi compliant bundle
-    */
-   private boolean isOsgiArtifact(ResolvedArtifact artifact) {
-      ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
-      String ga = String.format("%s:%s", id.getGroup(), id.getName());
-      for (String excludedBundle : EXCLUDED_BUNDLES) {
-         if (excludedBundle.equals(ga)) {
-            return false;
-         }
-      }
-      File file = artifact.getFile();
-      try (ZipFile zipFile = new ZipFile(file)) {
-         ZipEntry entry = zipFile.stream()
-                                 .filter(e -> !e.isDirectory())
-                                 .filter(e -> e.getName().equals("META-INF/MANIFEST.MF"))
-                                 .findAny()
-                                 .orElseThrow(() -> new ZipException());
-         String content = IOUtils.toString(zipFile.getInputStream(entry), Charset.defaultCharset());
-         Pattern osgiPattern = Pattern.compile("^Bundle-SymbolicName:", Pattern.MULTILINE);
-         return osgiPattern.matcher(content).find();
-      } catch (ZipException e) {
-         return false;
-      } catch (IOException e) {
-         throw new UncheckedIOException(e);
-      }
+      task.getInputs().file(configuration);
    }
 
    private void createArchives(Project project) {
@@ -484,12 +400,32 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          project.getExtensions().configure(PublishingExtension.class, convention -> {
             convention.publications(publications -> {
                publications.create("mavenDistribution",
-                  MavenPublication.class,
-                  publication -> publication.artifact(zipDistribution));
+                        MavenPublication.class,
+                        publication -> publication.artifact(zipDistribution));
             });
          });
 
       });
+   }
+
+   /**
+    * Returns a filename given the group, module, and version.
+    * 
+    * @param group group, may be null
+    * @param module module, cannot be null
+    * @param version version, may be null
+    * @return a filename
+    */
+   private static String getFilename(String group, String module, String version) {
+      StringBuilder filename = new StringBuilder();
+      if (group != null) {
+         filename.append(group.replaceAll("(/<>:\"\\\\\\|\\?\\*)+", "_")).append('.');
+      }
+      filename.append(module.replaceAll("(/<>:\"\\\\\\|\\?\\*)+", "_"));
+      if (version != null) {
+         filename.append('-').append(version.replaceAll("(/<>:\"\\\\\\|\\?\\*)+", "_"));
+      }
+      return filename.toString();
    }
 
 }
