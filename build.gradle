@@ -67,7 +67,7 @@ subprojects {
    apply plugin: 'com.github.ksoichiro.console.reporter'
 
    group = 'com.ngc.seaside'
-   version = '2.17.0-SNAPSHOT'
+   version = '2.17.0'
 
    // Required in order to use implementation and api dependencies with groovy
    configurations {
