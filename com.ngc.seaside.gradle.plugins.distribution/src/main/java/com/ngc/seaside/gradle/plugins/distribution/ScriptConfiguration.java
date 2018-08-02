@@ -1,7 +1,8 @@
 package com.ngc.seaside.gradle.plugins.distribution;
 
+import com.google.common.base.Preconditions;
+
 import org.gradle.api.Project;
-import org.gradle.internal.impldep.com.google.api.client.repackaged.com.google.common.base.Preconditions;
 
 import java.io.File;
 

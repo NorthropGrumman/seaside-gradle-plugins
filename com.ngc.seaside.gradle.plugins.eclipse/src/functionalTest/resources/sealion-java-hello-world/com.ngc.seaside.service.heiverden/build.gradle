@@ -12,10 +12,12 @@ eclipseDistribution {
    enablePluginsRepository()
 
    // Exclude transitive plugin dependencies that are already bundled with eclipse
-   configurations {
-      plugin {
-         pluginsDirectory.eachFileMatch({ it.endsWith '.jar' }) {
-            exclude module: it.name.substring(0, it.name.indexOf('_'))
+   unzipEclipse.doLast {
+      configurations {
+         plugin {
+            pluginsDirectory.eachFileMatch({ it.endsWith '.jar' }) {
+               exclude module: it.name.substring(0, it.name.indexOf('_'))
+            }
          }
       }
    }

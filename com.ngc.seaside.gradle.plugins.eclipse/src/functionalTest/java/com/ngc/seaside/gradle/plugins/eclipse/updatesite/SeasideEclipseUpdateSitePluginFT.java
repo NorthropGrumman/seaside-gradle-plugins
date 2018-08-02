@@ -34,7 +34,7 @@ public class SeasideEclipseUpdateSitePluginFT {
                .withProjectDir(projectDir)
                .withPluginClasspath()
                .forwardOutput()
-               .withArguments("clean", "build", "--profile")
+               .withArguments("clean", "build")
                .build();
 
       TestingUtilities.assertTaskSuccess(result, "service.heiverden", "build");
