@@ -32,7 +32,7 @@ public class UnzipEclipseTask extends DefaultTask {
          getProject().getLogger().lifecycle("Unzipping Eclipse SDK from " + distribution + "...");
          getProject().copy(spec -> {
             spec.from(getProject().zipTree(distribution));
-            spec.into(unzippedDirectory);
+            spec.into(unzippedDirectory.getParentFile());
          });
       }
    }
