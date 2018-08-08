@@ -14,9 +14,9 @@ import org.gradle.api.Task;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.file.CopySpec;
+import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelectorScheme;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.MavenPlugin;
@@ -306,6 +306,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          tasks.getByName(LifecycleBasePlugin.BUILD_TASK_NAME).dependsOn(task);
          task.setDestinationDir(new File(project.getBuildDir(), DISTRIBUTION_DIRECTORY));
          task.setIncludeEmptyDirs(true);
+         task.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
 
          project.afterEvaluate(__ -> {
             File skeleton = task.getTemporaryDir();
@@ -367,19 +368,8 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
       osgiResolver.resolveAllVersions(configuration, (identifier, file) -> {
          Optional<String> symbolicName = OsgiResolver.getOsgiSymbolicName(file);
          if (symbolicName.isPresent()) {
-            String group;
-            String module;
-            String version;
-            if (identifier instanceof ModuleComponentIdentifier) {
-               group = ((ModuleComponentIdentifier) identifier).getGroup();
-               module = ((ModuleComponentIdentifier) identifier).getModule();
-               version = ((ModuleComponentIdentifier) identifier).getVersion();
-            } else {
-               group = null;
-               module = identifier.getDisplayName();
-               version = null;
-            }
-            String filename = getFilename(group, module, version);
+            String version = OsgiResolver.getOsgiVersion(file).get();
+            String filename = symbolicName.get() + "_" + version;
             task.from(file, spec -> {
                spec.into(BUNDLES_DIRECTORY);
                spec.rename(__ -> filename + "." + FilenameUtils.getExtension(file.getName()));
@@ -406,26 +396,6 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          });
 
       });
-   }
-
-   /**
-    * Returns a filename given the group, module, and version.
-    * 
-    * @param group group, may be null
-    * @param module module, cannot be null
-    * @param version version, may be null
-    * @return a filename
-    */
-   private static String getFilename(String group, String module, String version) {
-      StringBuilder filename = new StringBuilder();
-      if (group != null) {
-         filename.append(group.replaceAll("(/<>:\"\\\\\\|\\?\\*)+", "_")).append('.');
-      }
-      filename.append(module.replaceAll("(/<>:\"\\\\\\|\\?\\*)+", "_"));
-      if (version != null) {
-         filename.append('-').append(version.replaceAll("(/<>:\"\\\\\\|\\?\\*)+", "_"));
-      }
-      return filename.toString();
    }
 
 }

@@ -64,13 +64,13 @@ class SeasideFelixServiceDistributionPluginFT {
             .collect(Collectors.toSet())
             .collect { it.fileName}
             .collect { it.toString() }
-      assertTrue(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib-2.13.0.jar' in bundles)
-      assertTrue(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib-2.12.0.jar' in bundles)
-      assertTrue(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib.macro-2.13.0.jar' in bundles)
-      assertTrue(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib.macro-2.11.0.jar' in bundles)
-      assertFalse(bundles.toString(), 'org.eclipse.xtend.org.eclipse.xtend.lib.macro-2.12.0.jar' in bundles)
-      assertFalse(bundles.toString(), 'commons-collections.commons-collections-3.0.jar' in bundles)
-      assertFalse(bundles.toString(), 'org.osgi.org.osgi.core-5.0.jar' in bundles)
-      assertFalse(bundles.toString(), 'org.osgi.org.osgi.core-6.0.jar' in bundles)
+      def jars = ['org.eclipse.xtend.lib_2.13.0', 'org.eclipse.xtend.lib_2.12.0', 'org.eclipse.xtend.lib.macro_2.13.0', 'org.eclipse.xtend.lib.macro_2.11.0']
+      for (def jar : jars) {
+         assertTrue("Expected ${jar} to be included in the bundles", bundles.any{ it.contains jar })
+      }
+      def nonjars = ['org.eclipse.xtend.lib.macro_2.12.0', 'commons-collections_3.0']
+      for (def jar : nonjars) {
+         assertFalse("Expected ${jar} not to be included in the bundles", bundles.any{ it.contains jar })
+      }
    }
 }
