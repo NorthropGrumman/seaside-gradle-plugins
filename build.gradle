@@ -79,6 +79,11 @@ subprojects {
       }
    }
 
+   plugins.withId('java') {
+      sourceCompatibility = '1.8'
+      targetCompatibility = '1.8'
+   }
+
    ext {
       jaxbVersion = '2.3.0.1'
       junitVersion = '4.12'
