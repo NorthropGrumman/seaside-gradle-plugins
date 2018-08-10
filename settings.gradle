@@ -12,6 +12,9 @@ project(':com.ngc.seaside.gradle.plugins.repository').name = 'gradle.plugins.rep
 include('com.ngc.seaside.gradle.plugins.distribution')
 project(':com.ngc.seaside.gradle.plugins.distribution').name = 'gradle.plugins.distribution'
 
+include('com.ngc.seaside.gradle.plugins.dependency.lock')
+project(':com.ngc.seaside.gradle.plugins.dependency.lock').name = 'gradle.plugins.dependency.lock'
+
 include('com.ngc.seaside.gradle.plugins.eclipse')
 project(':com.ngc.seaside.gradle.plugins.eclipse').name = 'gradle.plugins.eclipse'
 
