@@ -25,11 +25,10 @@ public class DependencyLockPluginFT {
    @Test(expected = TaskInstantiationException.class)
    public void doesThrowExceptionWhenWriteLocksFlagNotProvided() {
       SeasideGradleRunner.create()
-            .withNexusProperties()
             .withProjectDir(projectDir)
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments(ResolveAndLockAllDependenciesTask.RESOLVE_AND_LOCK_ALL_DEPENDENCIES_TASK_NAME)
+            .withArguments("clean", ResolveAndLockAllDependenciesTask.TASK_NAME)
             .build();
    }
 
@@ -41,8 +40,7 @@ public class DependencyLockPluginFT {
 
    private static File pathToTheDestinationProjectDirectory() {
       return TestingUtilities.turnListIntoPath(
-            "build", "functionalTest",
-            "dependency-lock", "sealion-java-hello-world-monorepo"
+            "build", "functionalTest", "dependency-lock", "sealion-java-hello-world-monorepo"
       );
    }
 }
