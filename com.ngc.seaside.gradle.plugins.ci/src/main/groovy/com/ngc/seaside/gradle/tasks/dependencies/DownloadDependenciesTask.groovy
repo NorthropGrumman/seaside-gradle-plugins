@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.tasks.dependencies
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ModuleIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.tasks.TaskAction
 import org.gradle.jvm.JvmLibrary
@@ -307,6 +308,22 @@ class DownloadDependenciesTask extends DefaultTask {
 
         String toString() {
             return getDisplayName()
+        }
+
+        @Override
+        ModuleIdentifier getModuleIdentifier() {
+            return new ModuleIdentifier() {
+
+                @Override
+                String getGroup() {
+                    return _group
+                }
+
+                @Override
+                String getName() {
+                    return _module
+                }
+            }
         }
     }
 }
