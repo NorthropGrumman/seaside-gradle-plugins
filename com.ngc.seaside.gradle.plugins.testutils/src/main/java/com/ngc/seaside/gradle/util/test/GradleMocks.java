@@ -11,6 +11,7 @@ import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.internal.DefaultDomainObjectSet;
+import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskDependency;
@@ -43,6 +44,7 @@ public class GradleMocks {
       when(project.getServices()).thenReturn(registry);
       when(project.getProjectPath()).thenReturn(projectPath);
       when(project.getIdentityPath()).thenReturn(projectPath);
+      when(project.getGradle()).thenReturn(newGradle(projectPath));
 
       ConfigurationContainer configs = mock(ConfigurationContainer.class);
       when(project.getConfigurations()).thenReturn(configs);
@@ -88,6 +90,14 @@ public class GradleMocks {
       doAnswer(answer).when(logger).trace(anyString());
 
       return logger;
+   }
+
+   public static GradleInternal newGradle(Path projectPath) {
+      GradleInternal gradle = mock(GradleInternal.class);
+
+      when(gradle.getIdentityPath()).thenReturn(projectPath);
+
+      return gradle;
    }
 
    private static class MockedDependencySet extends DefaultDomainObjectSet<Dependency> implements DependencySet {
