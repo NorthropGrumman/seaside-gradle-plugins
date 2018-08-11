@@ -25,10 +25,10 @@ public class DependencyLockPluginFT {
    @Test(expected = TaskInstantiationException.class)
    public void doesThrowExceptionWhenWriteLocksFlagNotProvided() {
       SeasideGradleRunner.create()
-            .withProjectDir(projectDir)
+            .withProjectDir(TestingUtilities.turnListIntoPath(projectDir.toString(), "helloworld"))
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments("clean", ResolveAndLockAllDependenciesTask.TASK_NAME)
+            .withArguments(ResolveAndLockAllDependenciesTask.TASK_NAME)
             .build();
    }
 
