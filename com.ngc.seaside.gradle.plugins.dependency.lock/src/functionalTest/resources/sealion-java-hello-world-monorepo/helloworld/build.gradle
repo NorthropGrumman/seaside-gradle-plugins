@@ -5,15 +5,7 @@ buildscript {
     apply from: versionsFile, to: project
 }
 
-plugins {
-    id 'com.ngc.seaside.release.root'
-}
-
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
-    apply plugin: 'com.ngc.seaside.repository'
-    versionSettings {
-        versionFile = versionsFile
-    }
 }
