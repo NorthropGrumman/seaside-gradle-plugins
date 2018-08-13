@@ -2,6 +2,15 @@ plugins {
    id 'com.ngc.seaside.dependency.lock'
 }
 
+allprojects {
+   repositories {
+      mavenLocal()
+      maven {
+         url nexusConsolidated
+      }
+   }
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
