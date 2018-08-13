@@ -32,7 +32,7 @@ public class DependencyLockPluginIT {
 
    @Test
    public void doesApplyDependencyLockPlugin() {
-      Task task = resolver.findTask(ResolveAndLockAllDependenciesTask.NAME);
+      Task task = resolver.findTask(DependencyLockPlugin.RESOLVE_AND_LOCK_DEPENDENCIES_TASK_NAME);
       Assert.assertNotNull(task);
       Assert.assertEquals("task group is incorrect!",
                           DependencyLockPlugin.DEPENDENCY_LOCK_PLUGIN_GROUP,

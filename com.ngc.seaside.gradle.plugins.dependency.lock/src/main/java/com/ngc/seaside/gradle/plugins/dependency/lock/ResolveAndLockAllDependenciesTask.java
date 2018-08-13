@@ -7,7 +7,6 @@ import org.gradle.api.tasks.TaskInstantiationException;
 
 public class ResolveAndLockAllDependenciesTask extends DefaultTask {
 
-   public static final String NAME = "resolveAndLockAllDependencies";
    public static final String DESCRIPTION = "Resolve all dependencies and write a lock file containing their GAVs";
 
    @TaskAction
@@ -18,8 +17,7 @@ public class ResolveAndLockAllDependenciesTask extends DefaultTask {
 
    private void checkForWriteDependencyLocks() {
       if (!getProject().getGradle().getStartParameter().isWriteDependencyLocks()) {
-         throw new TaskInstantiationException(String.format("%s task must be run with --write-locks",
-                                                            ResolveAndLockAllDependenciesTask.NAME));
+         throw new TaskInstantiationException(String.format("%s task must be run with --write-locks", getName()));
       }
    }
 

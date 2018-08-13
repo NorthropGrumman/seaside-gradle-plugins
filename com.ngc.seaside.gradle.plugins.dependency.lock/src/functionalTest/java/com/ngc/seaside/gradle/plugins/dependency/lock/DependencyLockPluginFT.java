@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import java.io.File;
 
+import static com.ngc.seaside.gradle.util.test.TestingUtilities.assertTaskSuccess;
+
 public class DependencyLockPluginFT {
 
    private File projectDir;
@@ -30,13 +32,14 @@ public class DependencyLockPluginFT {
             .withProjectDir(projectDir)
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments(ResolveAndLockAllDependenciesTask.NAME)
+            .withArguments(DependencyLockPlugin.RESOLVE_AND_LOCK_DEPENDENCIES_TASK_NAME)
             .buildAndFail();
 
       Assert.assertTrue(
             "did not receive expected exception!",
             result.getOutput()
-                  .contains(ResolveAndLockAllDependenciesTask.NAME + " task must be run with --write-locks"));
+                  .contains(String.format("%s task must be run with --write-locks",
+                                          DependencyLockPlugin.RESOLVE_AND_LOCK_DEPENDENCIES_TASK_NAME)));
    }
 
    @Test
@@ -49,19 +52,19 @@ public class DependencyLockPluginFT {
             .withArguments("clean", "build", "install")
             .build();
 
-      TestingUtilities.assertTaskSuccess(result, "hello", "install");
-      TestingUtilities.assertTaskSuccess(result, "goodbye", "install");
+      assertTaskSuccess(result, "hello", "install");
+      assertTaskSuccess(result, "goodbye", "install");
 
       result = SeasideGradleRunner.create()
             .withNexusProperties()
             .withProjectDir(projectDir)
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments(ResolveAndLockAllDependenciesTask.NAME, "--write-locks")
+            .withArguments(DependencyLockPlugin.RESOLVE_AND_LOCK_DEPENDENCIES_TASK_NAME, "--write-locks")
             .build();
 
-      TestingUtilities.assertTaskSuccess(result, "hello", ResolveAndLockAllDependenciesTask.NAME);
-      TestingUtilities.assertTaskSuccess(result, "goodbye", ResolveAndLockAllDependenciesTask.NAME);
+      assertTaskSuccess(result, "hello", DependencyLockPlugin.RESOLVE_AND_LOCK_DEPENDENCIES_TASK_NAME);
+      assertTaskSuccess(result, "goodbye", DependencyLockPlugin.RESOLVE_AND_LOCK_DEPENDENCIES_TASK_NAME);
 
       result = SeasideGradleRunner.create()
             .withNexusProperties()
@@ -71,8 +74,8 @@ public class DependencyLockPluginFT {
             .withArguments("clean", "build", "--offline")
             .build();
 
-      TestingUtilities.assertTaskSuccess(result, "hello", "build");
-      TestingUtilities.assertTaskSuccess(result, "goodbye", "build");
+      assertTaskSuccess(result, "hello", "build");
+      assertTaskSuccess(result, "goodbye", "build");
    }
 
    private static File sourceDirectoryWithTheTestProject() {
