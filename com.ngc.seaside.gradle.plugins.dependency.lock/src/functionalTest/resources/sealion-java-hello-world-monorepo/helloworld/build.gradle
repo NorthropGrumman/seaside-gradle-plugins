@@ -1,11 +1,16 @@
-buildscript {
-    ext {
-        versionsFile = file('../versions.gradle')
-    }
-    apply from: versionsFile, to: project
+plugins {
+   id 'com.ngc.seaside.dependency.lock'
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
+    apply plugin: 'com.ngc.seaside.dependency.lock'
+
+    group = 'com.ngc.seaside.functional.tests'
+    version = '1.2.3-SNAPSHOT'
+
+    ext {
+       log4jVersion = '1.2.17'
+    }
 }

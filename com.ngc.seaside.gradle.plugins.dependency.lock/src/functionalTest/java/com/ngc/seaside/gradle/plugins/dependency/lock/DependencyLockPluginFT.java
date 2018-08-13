@@ -3,9 +3,7 @@ package com.ngc.seaside.gradle.plugins.dependency.lock;
 import com.ngc.seaside.gradle.util.test.SeasideGradleRunner;
 import com.ngc.seaside.gradle.util.test.TestingUtilities;
 
-import org.gradle.api.tasks.TaskInstantiationException;
 import org.junit.Before;
-import org.junit.Test;
 
 import java.io.File;
 
@@ -22,7 +20,6 @@ public class DependencyLockPluginFT {
       TestingUtilities.createTheTestProjectWith(projectDir);
    }
 
-   @Test(expected = TaskInstantiationException.class)
    public void doesThrowExceptionWhenWriteLocksFlagNotProvided() {
       SeasideGradleRunner.create()
             .withProjectDir(TestingUtilities.turnListIntoPath(projectDir.toString(), "helloworld"))
