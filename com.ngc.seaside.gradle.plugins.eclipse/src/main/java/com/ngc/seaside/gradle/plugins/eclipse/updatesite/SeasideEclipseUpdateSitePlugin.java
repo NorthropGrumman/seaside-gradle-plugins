@@ -33,6 +33,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -223,7 +224,7 @@ public class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
                }
                try (FileSystem zipfs = FileSystems.newFileSystem(zipUri,
                         Collections.singletonMap("create", String.valueOf(Files.notExists(jarFile))))) {
-                  Files.copy(xml.toPath(), zipfs.getPath("feature.xml"));
+                  Files.copy(xml.toPath(), zipfs.getPath("feature.xml"), StandardCopyOption.REPLACE_EXISTING);
                } catch (IOException e) {
                   throw new TaskExecutionException(task, e);
                }
