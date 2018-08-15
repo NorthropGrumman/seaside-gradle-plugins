@@ -1,0 +1,3 @@
+rootProject.name = 'holamundo'
+include 'hola'
+include 'adios'

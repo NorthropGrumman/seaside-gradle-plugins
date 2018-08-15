@@ -1,16 +1,11 @@
 package com.ngc.seaside.gradle.util.test;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.internal.DefaultDomainObjectSet;
+import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskDependency;
@@ -20,6 +15,12 @@ import org.mockito.stubbing.Answer;
 
 import java.io.PrintStream;
 import java.util.Arrays;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Contains factory methods for creating mocked Gradle API elements.
@@ -43,6 +44,10 @@ public class GradleMocks {
       when(project.getServices()).thenReturn(registry);
       when(project.getProjectPath()).thenReturn(projectPath);
       when(project.getIdentityPath()).thenReturn(projectPath);
+
+      GradleInternal gradle = mock(GradleInternal.class);
+      when(project.getGradle()).thenReturn(gradle);
+      when(project.getGradle().getIdentityPath()).thenReturn(projectPath);
 
       ConfigurationContainer configs = mock(ConfigurationContainer.class);
       when(project.getConfigurations()).thenReturn(configs);

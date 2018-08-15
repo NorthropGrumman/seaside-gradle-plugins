@@ -2,6 +2,7 @@ package com.ngc.seaside.gradle.util.test;
 
 import org.gradle.api.internal.AbstractTask;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.internal.project.taskfactory.TaskIdentity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
@@ -71,8 +72,7 @@ public class TaskBuilder<T extends AbstractTask> {
       }
 
       return AbstractTask.injectIntoNewInstance(project,
-                                                taskName,
-                                                taskClazz,
+                                                TaskIdentity.create(taskName, taskClazz, project),
                                                 () -> taskSupplier.get());
    }
 
