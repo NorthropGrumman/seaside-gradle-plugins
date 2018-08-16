@@ -4,7 +4,6 @@ import aQute.bnd.gradle.BundleTaskConvention
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.checkstyle.SeasideCheckstylePlugin
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
-import com.ngc.seaside.gradle.plugins.dependency.lock.DependencyLockPlugin
 import com.ngc.seaside.gradle.plugins.release.SeasideReleasePlugin
 import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin
 import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
@@ -203,7 +202,6 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
       project.plugins.apply('org.sonarqube')
       project.plugins.apply('com.github.ben-manes.versions')
       project.plugins.apply('com.github.ksoichiro.console.reporter')
-      project.plugins.apply(DependencyLockPlugin)
       project.plugins.apply(SeasideReleasePlugin)
       project.plugins.apply(SeasideCiPlugin)
       project.plugins.apply(SeasideCheckstylePlugin)

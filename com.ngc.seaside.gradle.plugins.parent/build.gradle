@@ -5,7 +5,6 @@ dependencies {
    implementation project(':gradle.plugins.repository')
    implementation project(':gradle.plugins.ci')
    implementation project(':gradle.plugins.checkstyle')
-   implementation project(':gradle.plugins.dependency.lock')
    implementation project(':gradle.plugins.release')
    implementation "biz.aQute.bnd:biz.aQute.bnd.gradle:$aQuteVersion"
    implementation "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarQubeVersion"
