@@ -13,6 +13,11 @@ import java.io.File;
  */
 public class UnzipEclipseTask extends DefaultTask {
 
+   /**
+    * Used to set executable permissions on the eclipse executable.  Equivalent to unix file permissions: rwxr-xr-x.
+    */
+   private static final int UNIX_EXECUTABLE_PERMISSIONS = 493;
+
    private RegularFileProperty eclipseArchive;
    private DirectoryProperty unzippedDistributionDirectory;
 
@@ -28,10 +33,16 @@ public class UnzipEclipseTask extends DefaultTask {
    void unzipEclipse() {
       File distribution = eclipseArchive.get().getAsFile();
       File unzippedDirectory = unzippedDistributionDirectory.get().getAsFile();
+
       if (!unzippedDirectory.exists()) {
          getProject().getLogger().lifecycle("Unzipping Eclipse SDK from " + distribution + "...");
          getProject().copy(spec -> {
             spec.from(getProject().zipTree(distribution));
+            spec.eachFile(file -> {
+               if (file.getName().equals("eclipse")) {
+                  file.setMode(UNIX_EXECUTABLE_PERMISSIONS);
+               }
+            });
             spec.into(unzippedDirectory.getParentFile());
          });
       }
@@ -39,7 +50,7 @@ public class UnzipEclipseTask extends DefaultTask {
 
    /**
     * Returns the property of the Eclipse distribution archive zip file.
-    * 
+    *
     * @return the property of the Eclipse distribution archive zip file
     */
    @Internal
@@ -49,12 +60,11 @@ public class UnzipEclipseTask extends DefaultTask {
 
    /**
     * Returns the property of the directory for the unzipped Eclipse distribution.
-    * 
+    *
     * @return the property of the directory for the unzipped Eclipse distribution
     */
    @Internal
    public DirectoryProperty getUnzippedDistributionDirectory() {
       return unzippedDistributionDirectory;
    }
-
 }
