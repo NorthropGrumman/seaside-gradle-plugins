@@ -44,13 +44,13 @@ import javax.inject.Inject;
 
 /**
  * Plugin for creating an OSGi service distribution that can be deployed with Apache Felix.
- * 
+ *
  * <p>
  * This plugin provides the
  * {@value com.ngc.seaside.gradle.plugins.distribution.SeasideFelixServiceDistributionExtension#NAME} extension
  * of type {@link SeasideFelixServiceDistributionExtension}. This extension allows for adding system properties and
  * program arguments to the start scripts and changing the default {@code config.properties} file.
- * 
+ *
  * <p>
  * When built, this plugin will produce a distribution zip with the following layout:
  * <ul>
@@ -59,14 +59,14 @@ import javax.inject.Inject;
  * <li>resources - contains all of the resources found in the project's {@code src/main/resources/runtime} folder</li>
  * <li>platform - contains all of the platform jars necessary for running Apache Felix</li>
  * </ul>
- * 
+ *
  * <p>
  * This plugin provides the following configurations:
  * <ul>
  * <li>{@value #BUNDLES_CONFIG_NAME} - bundles dependencies. This is the primary configuration used to add bundles
  * to the OSGi framework. You can create another bundle configuration with different settings by adding them to the
  * extension; for example:
- * 
+ *
  * <pre>
  * apply plugin: 'com.ngc.seaside.distribution.felixservice'
  * configurations {
@@ -78,11 +78,11 @@ import javax.inject.Inject;
  *    bundleConfiguration 'thirdParty' // bundle configuration already added by default
  * }
  * </pre>
- * 
+ *
  * When the distribution is being created, the jar dependencies from the bundle configurations will be resolved.
  * Unlike the default way that Gradle handles configurations, this plugin will only copy jars that are OSGi compliant;
  * it will also include all jar versions of a dependency when there are version conflicts - not just one.
- * 
+ *
  * </li>
  * <li>{@value #CORE_BUNDLES_CONFIG_NAME} - core bundle dependencies. This configuration provides
  * {@link Configuration#defaultDependencies(org.gradle.api.Action) default dependencies}. This means if you explicitly
@@ -94,7 +94,7 @@ import javax.inject.Inject;
  * add any dependencies to the platform configuration, the default dependencies will not be included. If you want to
  * add more dependencies while including all of the defaults, create a new configuration and have the platform
  * configuration extend it:
- * 
+ *
  * <pre>
  * apply plugin: 'com.ngc.seaside.distribution.felixservice'
  * configurations {
@@ -105,7 +105,7 @@ import javax.inject.Inject;
  *    extraPlatform "org.apache.felix:org.apache.felix.new.dependency:$felixVersion"
  * }
  * </pre>
- * 
+ *
  * </li>
  * </ul>
  */
@@ -124,32 +124,32 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    public static final String DISTRIBUTION_DIRECTORY = "distribution";
    public static final String RUNTIME_RESOURCES_DIRECTORY = "src/main/resources/runtime";
    public static final List<String> DEFAULT_PLATFORM_DEPENDENCIES = Collections.unmodifiableList(Arrays.asList(
-            "org.apache.felix:org.apache.felix.configadmin:1.8.16",
-            "org.apache.felix:org.apache.felix.eventadmin:1.5.0",
-            "org.apache.felix:org.apache.felix.gogo.command:1.0.2",
-            "org.apache.felix:org.apache.felix.gogo.runtime:1.0.8",
-            "org.apache.felix:org.apache.felix.gogo.shell:1.0.0",
-            "org.apache.felix:org.apache.felix.log:1.0.1",
-            "org.apache.felix:org.apache.felix.main:5.6.10",
-            "org.apache.felix:org.apache.felix.metatype:1.1.6",
-            "org.apache.felix:org.apache.felix.scr:2.0.14",
-            "com.ngc.blocs:service.deployment.impl.common.autodeploymentservice:$blocsCoreVersion"));
+         "org.apache.felix:org.apache.felix.configadmin:1.8.16",
+         "org.apache.felix:org.apache.felix.eventadmin:1.5.0",
+         "org.apache.felix:org.apache.felix.gogo.command:1.0.2",
+         "org.apache.felix:org.apache.felix.gogo.runtime:1.0.8",
+         "org.apache.felix:org.apache.felix.gogo.shell:1.0.0",
+         "org.apache.felix:org.apache.felix.log:1.0.1",
+         "org.apache.felix:org.apache.felix.main:5.6.10",
+         "org.apache.felix:org.apache.felix.metatype:1.1.6",
+         "org.apache.felix:org.apache.felix.scr:2.0.14",
+         "com.ngc.blocs:service.deployment.impl.common.autodeploymentservice:$blocsCoreVersion"));
    public static final List<String> DEFAULT_BUNDLE_DEPENDENCIES = Collections.unmodifiableList(Arrays.asList(
-            "com.ngc.blocs:api:$blocsCoreVersion",
-            "com.ngc.blocs:file.impl.common.fileutilities:$blocsCoreVersion",
-            "com.ngc.blocs:security.impl.common.securityutilities:$blocsCoreVersion",
-            "com.ngc.blocs:jaxb.impl.common.jaxbutilities:$blocsCoreVersion",
-            "com.ngc.blocs:xml.resource.impl.common.xmlresource:$blocsCoreVersion",
-            "com.ngc.blocs:service.log.impl.common.logservice:$blocsCoreVersion",
-            "com.ngc.blocs:service.api:$blocsCoreVersion",
-            "com.ngc.blocs:service.event.impl.common.eventservice:$blocsCoreVersion",
-            "com.ngc.blocs:service.resource.impl.common.resourceservice:$blocsCoreVersion",
-            "com.ngc.blocs:notification.impl.common.notificationsupport:$blocsCoreVersion",
-            "com.ngc.blocs:properties.resource.impl.common.propertiesresource:$blocsCoreVersion",
-            "com.ngc.blocs:service.framework.impl.common.frameworkmgmtservice:$blocsCoreVersion",
-            "com.ngc.blocs:component.impl.common.componentutilities:$blocsCoreVersion",
-            "com.ngc.blocs:service.notification.impl.common.notificationservice:$blocsCoreVersion",
-            "com.ngc.blocs:service.thread.impl.common.threadservice:$blocsCoreVersion"));
+         "com.ngc.blocs:api:$blocsCoreVersion",
+         "com.ngc.blocs:file.impl.common.fileutilities:$blocsCoreVersion",
+         "com.ngc.blocs:security.impl.common.securityutilities:$blocsCoreVersion",
+         "com.ngc.blocs:jaxb.impl.common.jaxbutilities:$blocsCoreVersion",
+         "com.ngc.blocs:xml.resource.impl.common.xmlresource:$blocsCoreVersion",
+         "com.ngc.blocs:service.log.impl.common.logservice:$blocsCoreVersion",
+         "com.ngc.blocs:service.api:$blocsCoreVersion",
+         "com.ngc.blocs:service.event.impl.common.eventservice:$blocsCoreVersion",
+         "com.ngc.blocs:service.resource.impl.common.resourceservice:$blocsCoreVersion",
+         "com.ngc.blocs:notification.impl.common.notificationsupport:$blocsCoreVersion",
+         "com.ngc.blocs:properties.resource.impl.common.propertiesresource:$blocsCoreVersion",
+         "com.ngc.blocs:service.framework.impl.common.frameworkmgmtservice:$blocsCoreVersion",
+         "com.ngc.blocs:component.impl.common.componentutilities:$blocsCoreVersion",
+         "com.ngc.blocs:service.notification.impl.common.notificationservice:$blocsCoreVersion",
+         "com.ngc.blocs:service.thread.impl.common.threadservice:$blocsCoreVersion"));
 
    public static final String ZIP_DISTRIBUTION_TASK = "createFelixDistribution";
 
@@ -215,8 +215,8 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
 
    private void createExtension(Project project) {
       project.getExtensions().create(SeasideFelixServiceDistributionExtension.NAME,
-               SeasideFelixServiceDistributionExtension.class,
-               project);
+                                     SeasideFelixServiceDistributionExtension.class,
+                                     project);
    }
 
    private void addDefaultDependencies(Project project) {
@@ -258,7 +258,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    private void createTasks(Project project) {
       TaskContainer tasks = project.getTasks();
       SeasideFelixServiceDistributionExtension extension = project.getExtensions().findByType(
-               SeasideFelixServiceDistributionExtension.class);
+            SeasideFelixServiceDistributionExtension.class);
 
       Action<ResourceCopyTask> taskAction = task -> task.setDestinationDir(task.getTemporaryDir());
       ResourceCopyTask createWindowsScript = tasks.create("createWindowsScript", ResourceCopyTask.class, taskAction);
@@ -277,24 +277,24 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          Action<CopySpec> copyAction = spec -> spec.expand(templateProperties);
          if (windowsScript == null) {
             createWindowsScript.fromResource(
-                     Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.bat")),
-                     copyAction);
+                  Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.bat")),
+                  copyAction);
          } else {
             createWindowsScript.from(windowsScript, copyAction);
          }
          File linuxScript = extension.getScripts().getLinuxScript();
          if (linuxScript == null) {
             createLinuxScript.fromResource(
-                     Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.sh")),
-                     copyAction);
+                  Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.sh")),
+                  copyAction);
          } else {
             createLinuxScript.from(linuxScript, copyAction);
          }
          File configFile = extension.getConfigFile();
          if (configFile == null) {
             createConfig.fromResource(
-                     Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY,
-                              getClass().getResource("config.properties")));
+                  Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY,
+                                           getClass().getResource("config.properties")));
          } else {
             createConfig.from(configFile);
          }
@@ -317,7 +317,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
             task.from(createLinuxScript.getDestinationDir(), spec -> spec.into(BIN_DIRECTORY));
             task.from(createConfig.getDestinationDir(), spec -> spec.into(CONFIG_DIRECTORY));
             task.from(project.getConfigurations().getByName(PLATFORM_CONFIG_NAME),
-                     spec -> spec.into(PLATFORM_DIRECTORY));
+                      spec -> spec.into(PLATFORM_DIRECTORY));
             task.from(project.file(RUNTIME_RESOURCES_DIRECTORY), spec -> spec.into(RESOURCES_DIRECTORY));
             for (Configuration configuration : extension.getBundleConfigurations()) {
                copyBundleConfigurations(task, configuration);
@@ -339,7 +339,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    /**
     * Creates the folder structure of the distribution. This is necessary so that if, for example, there are no
     * resources to be copied, the resources folder is still created.
-    * 
+    *
     * @return the temporary folder
     */
    private void createDistributionSkeleton(Path tempDirectory) {
@@ -358,8 +358,8 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
     * Adds copy commands to the given task for the given configuration. This method ensures that only OSGi-compliant
     * files are copied. It ensures that correctly-versioned dependencies are copied. The names of the copied files
     * are also deconflicted by adding the group id to the filenames.
-    * 
-    * @param task copy task
+    *
+    * @param task          copy task
     * @param configuration configuration
     */
    private void copyBundleConfigurations(AbstractCopyTask task, Configuration configuration) {
@@ -376,7 +376,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
             });
          } else {
             project.getLogger().info("Excluding file {} from dependency '{}': not an OSGi bundle",
-                     identifier.getDisplayName());
+                                     identifier.getDisplayName());
          }
       });
       task.getInputs().file(configuration);
@@ -390,8 +390,8 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          project.getExtensions().configure(PublishingExtension.class, convention -> {
             convention.publications(publications -> {
                publications.create("mavenDistribution",
-                        MavenPublication.class,
-                        publication -> publication.artifact(zipDistribution));
+                                   MavenPublication.class,
+                                   publication -> publication.artifact(zipDistribution));
             });
          });
 
