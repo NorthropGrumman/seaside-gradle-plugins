@@ -52,6 +52,7 @@ public class SeasideEclipseUpdateSitePluginFT {
       Path artifactsPath = updateSitePath.resolve("artifacts.jar");
       Path contentPath = updateSitePath.resolve("content.jar");
       Path updateSiteArchivePath = projectBuildDir.resolve("com.ngc.seaside.service.heiverden-1.2.3-SNAPSHOT.zip");
+      Path misVersioned3rdPartyItemPath = pluginsPath.resolve("org.glassfish.javax.json_1.1.0.jar");
 
       assertTrue(featuresPath + " directory was not created!", project.file(featuresPath).exists());
       assertTrue(internalFeature + " file was not created!", project.file(internalFeature).exists());
@@ -60,6 +61,8 @@ public class SeasideEclipseUpdateSitePluginFT {
       assertTrue(artifactsPath + " directory was not created!", project.file(artifactsPath).exists());
       assertTrue(contentPath + " directory was not created!", project.file(contentPath).exists());
       assertTrue(updateSiteArchivePath + " directory was not created!", project.file(updateSiteArchivePath).exists());
+      assertTrue(misVersioned3rdPartyItemPath + " file was not created!",
+                 project.file(misVersioned3rdPartyItemPath).exists());
    }
 
    private static File sourceDirectoryWithTheTestProject() {

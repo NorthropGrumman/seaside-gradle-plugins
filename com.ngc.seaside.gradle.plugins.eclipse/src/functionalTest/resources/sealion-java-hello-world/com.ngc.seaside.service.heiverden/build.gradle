@@ -57,6 +57,11 @@ eclipseUpdateSite {
          version = '0.0.0'
          unpack = false
       }
+      plugin {
+         id = 'org.glassfish.javax.json'
+         version = '0.0.0'
+         unpack = false
+      }
       include {
          id = 'cucumber.eclipse.feature'
          name = 'Cucumber Eclipse Feature'
@@ -86,5 +91,6 @@ p2.remoteRepository('https://cucumber.io/cucumber-eclipse/update-site') {
 dependencies {
    plugin project(':service.helloworld')
    plugin name: 'org.antlr.runtime_3.2.0.v201101311130'
+   plugin 'org.glassfish:javax.json:1.1'
 }
 
