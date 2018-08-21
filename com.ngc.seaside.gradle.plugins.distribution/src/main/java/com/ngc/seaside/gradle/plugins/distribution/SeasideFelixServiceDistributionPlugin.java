@@ -180,6 +180,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
    private void applyPlugins(Project project) {
       project.getPlugins().apply(BasePlugin.class);
       project.getPlugins().apply(MavenPlugin.class);
+      project.getPlugins().apply(MavenPublishPlugin.class);
       // Apply the ci and repo plugin so we can use the populateM2task to collect the dependencies required to build
       // a distribution project.
       project.getPlugins().apply(SeasideRepositoryPlugin.class);
