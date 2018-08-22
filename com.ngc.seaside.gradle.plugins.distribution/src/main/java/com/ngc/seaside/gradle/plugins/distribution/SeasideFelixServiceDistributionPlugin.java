@@ -17,6 +17,7 @@ import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.DuplicatesStrategy;
+import org.gradle.api.file.FileCopyDetails;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelectorScheme;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.MavenPlugin;
@@ -160,6 +161,11 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
     */
    public static final String INCLUDE_CONFLICTING_VERSIONS_ATTRIBUTE_NAME = "includeConflictingVersions";
 
+   /**
+    * Used to set executable permissions on the eclipse executable.  Equivalent to unix file permissions: rwxr-xr-x.
+    */
+   private static final int UNIX_EXECUTABLE_PERMISSIONS = 493;
+
    private final VersionSelectorScheme versionSelectorscheme;
 
    @Inject
@@ -274,7 +280,9 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
          templateProperties.put(JVM_PROPERTIES_SCRIPT_IDENTIFIER, jvmArguments);
          templateProperties.put(PROGRAM_ARGUMENTS_SCRIPT_IDENTIFIER, programArguments);
          File windowsScript = extension.getScripts().getWindowsScript();
-         Action<CopySpec> copyAction = spec -> spec.expand(templateProperties);
+         Action<CopySpec> copyAction =
+               spec -> spec.expand(templateProperties).eachFile(this::setExecuteBitOnShellScripts);
+
          if (windowsScript == null) {
             createWindowsScript.fromResource(
                   Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.bat")),
@@ -398,4 +406,9 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
       });
    }
 
+   private void setExecuteBitOnShellScripts(FileCopyDetails f) {
+      if (f.getName().endsWith(".sh")) {
+         f.setMode(UNIX_EXECUTABLE_PERMISSIONS);
+      }
+   }
 }
