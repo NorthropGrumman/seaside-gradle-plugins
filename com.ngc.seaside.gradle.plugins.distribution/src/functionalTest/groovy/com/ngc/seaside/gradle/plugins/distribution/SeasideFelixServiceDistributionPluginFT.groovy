@@ -75,10 +75,10 @@ class SeasideFelixServiceDistributionPluginFT {
          assertFalse("Expected ${jar} not to be included in the bundles", bundles.any { it.contains jar })
       }
 
-      def linuxStartScript = Files.getPosixFilePermissions(unzippedDir.resolve(BIN_DIRECTORY).resolve('start.sh'))
+      def linuxStartScriptPermissions = Files.getPosixFilePermissions(unzippedDir.resolve(BIN_DIRECTORY).resolve('start.sh'))
       assertEquals(
             "linux start script has incorrect permissions",
             "rwxr-xr-x",
-            PosixFilePermissions.toString(linuxStartScript))
+            PosixFilePermissions.toString(linuxStartScriptPermissions))
    }
 }
