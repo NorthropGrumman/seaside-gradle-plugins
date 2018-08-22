@@ -1,10 +1,6 @@
 package com.ngc.seaside.gradle.plugins.distribution
 
-import static com.ngc.seaside.gradle.plugins.systemdistribution.SeasideSystemDistributionPlugin.*
-import static org.junit.Assert.*
-
 import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
-
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -16,7 +12,10 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.stream.Collectors
+
+import static com.ngc.seaside.gradle.plugins.systemdistribution.SeasideSystemDistributionPlugin.DISTRIBUTION_DIRECTORY
+import static org.junit.Assert.*
+
 class SeasideSystemDistributionPluginFT {
 
    private Path projectDir
