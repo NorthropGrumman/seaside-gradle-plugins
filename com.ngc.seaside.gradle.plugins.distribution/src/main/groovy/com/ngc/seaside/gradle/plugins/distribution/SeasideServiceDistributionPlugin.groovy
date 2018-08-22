@@ -4,6 +4,7 @@ import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
 import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin
 import org.gradle.api.Project
+import org.gradle.api.file.CopySpec
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Compression
 import org.gradle.api.tasks.bundling.Tar
@@ -38,6 +39,11 @@ import org.gradle.api.tasks.bundling.Zip
  * </pre>
  */
 class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
+
+   /**
+    * Used to set executable permissions on the eclipse executable.  Equivalent to unix file permissions: rwxr-xr-x.
+    */
+   private static final int UNIX_EXECUTABLE_PERMISSIONS = 493
 
    private SeasideServiceDistributionExtension distributionExtension
 
@@ -114,10 +120,15 @@ class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
          into { distributionExtension.distributionDir }
       }
 
-      project.task('copyResources', type: Copy, dependsOn: [taskResolver.findTask('copyConfig')]) {
-         from 'src/main/resources'
-         exclude '**/config.ini'
-         into { distributionExtension.distributionDir }
+      project.task('copyResources', type: Copy, dependsOn: [taskResolver.findTask('copyConfig')]) { CopySpec spec ->
+         spec.from 'src/main/resources'
+         spec.exclude '**/config.ini'
+         spec.eachFile { f ->
+            if (f.name.equals("start")) {
+               f.mode = UNIX_EXECUTABLE_PERMISSIONS
+            }
+         }
+         spec.into { distributionExtension.distributionDir }
       }
 
       project.task('copyPlatformBundles', type: Copy) {
