@@ -12,6 +12,7 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermissions
 
 import static com.ngc.seaside.gradle.plugins.systemdistribution.SeasideSystemDistributionPlugin.DISTRIBUTION_DIRECTORY
 import static org.junit.Assert.*
@@ -58,5 +59,9 @@ class SeasideSystemDistributionPluginFT {
       assertTrue(Files.isRegularFile(unzippedDir.resolve('start.bat')))
       assertTrue(Files.isRegularFile(unzippedDir.resolve('start.sh')))
       assertTrue(Files.isRegularFile(unzippedDir.resolve('example.resource')))
+      assertEquals(
+            "linux start script has incorrect permissions",
+            "rwxr-xr-x",
+            PosixFilePermissions.toString(Files.getPosixFilePermissions(unzippedDir.resolve('start.sh'))))
    }
 }
