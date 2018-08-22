@@ -30,7 +30,10 @@ public class SeasideServiceDistributionPluginIT {
       assertNotNull(resolver.findTask("copyBundles"));
       assertNotNull(resolver.findTask("tar"));
       assertNotNull(resolver.findTask("zip"));
-      assertNotNull(resolver.findTask("buildDist"));
+      assertNotNull(resolver.findTask("buildDist"));   
+      assertNotNull(resolver.findTask("install"));
+      assertNotNull(resolver.findTask("upload"));
+      assertNotNull(resolver.findTask("uploadArchives"));
    }
 
 }
