@@ -13,6 +13,7 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermissions
 
 class SeasideServiceDistributionPluginFT {
 
@@ -21,8 +22,8 @@ class SeasideServiceDistributionPluginFT {
 
    @Before
    void before() {
-      File source = Paths.get("src/functionalTest/resources/distribution/com.ngc.example.distribution").toFile()
-      Path targetPath = Paths.get("build/functionalTest/distribution/com.ngc.example.distribution")
+      File source = Paths.get('src/functionalTest/resources/distribution/com.ngc.example.distribution').toFile()
+      Path targetPath = Paths.get('build/functionalTest/distribution/com.ngc.example.distribution')
       projectDir = Files.createDirectories(targetPath).toFile()
       FileUtils.copyDirectory(source, projectDir)
 
@@ -36,15 +37,24 @@ class SeasideServiceDistributionPluginFT {
             .withNexusProperties()
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments("clean", "build")
+            .withArguments('clean', 'build')
             .build()
 
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":build").getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf('SUCCESS'), result.task(':build').getOutcome())
 
-      Assert.assertTrue("did not create ZIP!",
-                        Files.isRegularFile(projectDir.toPath().resolve(Paths.get(
-                              "build",
-                              "distribution",
-                              "com.ngc.seaside.example.distribution-1.0-SNAPSHOT.zip"))))
+      Path distDir = projectDir.toPath().resolve(Paths.get('build', 'distribution'))
+      Path zipFile = distDir.resolve('com.ngc.seaside.example.distribution-1.0-SNAPSHOT.zip')
+      Path unzippedDir = distDir.resolve('com.ngc.seaside.example.distribution-1.0-SNAPSHOT')
+      Path binDir = unzippedDir.resolve('bin')
+      Path linuxStartScript = binDir.resolve('start')
+
+      Assert.assertTrue('did not create ZIP!', Files.isRegularFile(zipFile))
+      Assert.assertTrue("${unzippedDir} does not exist", Files.isDirectory(unzippedDir))
+      Assert.assertTrue("${binDir}/bin does not exist", Files.isDirectory(binDir))
+      Assert.assertTrue("${linuxStartScript} does not exist", Files.isRegularFile(linuxStartScript))
+      Assert.assertEquals(
+            'linux start script has incorrect permissions',
+            'rwxr-xr-x',
+            PosixFilePermissions.toString(Files.getPosixFilePermissions(linuxStartScript)))
    }
 }
