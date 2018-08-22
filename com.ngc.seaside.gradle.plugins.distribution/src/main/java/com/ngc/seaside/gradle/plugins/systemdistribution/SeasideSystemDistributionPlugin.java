@@ -10,8 +10,9 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.file.CopySpec;
+import org.gradle.api.file.FileCopyDetails;
 import org.gradle.api.plugins.BasePlugin;
-import org.gradle.api.plugins.MavenPlugin;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
@@ -67,6 +68,11 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
    public static final String ZIP_DISTRIBUTION_TASK = "createSystemDistribution";
    public static final String RESOURCES_DIRECTORY = "src/main/resources";
 
+   /**
+    * Used to set executable permissions on the eclipse executable.  Equivalent to unix file permissions: rwxr-xr-x.
+    */
+   private static final int UNIX_EXECUTABLE_PERMISSIONS = 493;
+
    @Override
    protected void doApply(Project project) {
       applyPlugins(project);
@@ -111,12 +117,14 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
          } else {
             createWindowsScript.from(windowsScript);
          }
+
+         Action<CopySpec> copyAction = spec -> spec.eachFile(this::setExecuteBitOnShellScripts);
          File linuxScript = extension.getScripts().getLinuxScript();
          if (linuxScript == null) {
             createLinuxScript.fromResource(
-               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.sh")));
+               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.sh")), copyAction);
          } else {
-            createLinuxScript.from(linuxScript);
+            createLinuxScript.from(linuxScript, copyAction);
          }
       });
 
@@ -180,5 +188,11 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
          });
          
       });
+   }
+
+   private void setExecuteBitOnShellScripts(FileCopyDetails f) {
+      if (f.getName().endsWith(".sh")) {
+         f.setMode(UNIX_EXECUTABLE_PERMISSIONS);
+      }
    }
 }
