@@ -12,8 +12,10 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermissions
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
 
 class SeasideApplicationPluginFT {
 
@@ -47,11 +49,14 @@ class SeasideApplicationPluginFT {
    }
 
    private void verifyBashScript() {
-      List<String> contents = Files.readAllLines(targetPath.resolve(Paths.get("build",
-                                                                              "distributions",
-                                                                              "application-ft-1.0.0-SNAPSHOT",
-                                                                              "bin",
-                                                                              "application-ft")))
+      Path linuxStartScript = targetPath.resolve(Paths.get("build",
+                                                           "distributions",
+                                                           "application-ft-1.0.0-SNAPSHOT",
+                                                           "bin",
+                                                           "application-ft"))
+      assertTrue("${linuxStartScript} does not exist!", Files.isRegularFile(linuxStartScript))
+
+      List<String> contents = Files.readAllLines(linuxStartScript)
       String properties = contents.stream()
             .filter({ l -> l.startsWith("DEFAULT_JVM_OPTS") })
             .findFirst()
@@ -59,6 +64,11 @@ class SeasideApplicationPluginFT {
       assertEquals("properties not correct!",
                    "DEFAULT_JVM_OPTS=' \"-DMY_PROP=\$APP_HOME\"  \"-DappHome=\$APP_HOME\" '",
                    properties)
+
+      assertEquals(
+            "linux start script has incorrect permissions",
+            "rwxr-xr-x",
+            PosixFilePermissions.toString(Files.getPosixFilePermissions(linuxStartScript)))
    }
 
    private void verifyBatScript() {
