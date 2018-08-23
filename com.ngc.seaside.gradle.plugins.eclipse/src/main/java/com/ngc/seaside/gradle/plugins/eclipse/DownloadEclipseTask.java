@@ -36,8 +36,9 @@ public class DownloadEclipseTask extends DefaultTask {
       destFile.getParentFile().mkdirs();
 
       if (!destFile.exists()) {
-         getProject().getLogger().lifecycle("Downloading Eclipse SDK from " + eclipseDownloadUrl.get() + "...");
-         try (InputStream is = new URL(eclipseDownloadUrl.get()).openStream()) {
+         String url = eclipseDownloadUrl.get();
+         getProject().getLogger().lifecycle("Downloading Eclipse SDK from " + url + "...");
+         try (InputStream is = new URL(url).openStream()) {
             FileUtils.copyInputStreamToFile(is, destFile);
          } catch (IOException e) {
             throw new TaskExecutionException(this, e);

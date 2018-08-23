@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * not executed by default. This plugin requires the {@link BaseEclipseExtension#setLinuxVersion(String) eclipse
  * version} and the {@link BaseEclipseExtension#setLinuxDownloadUrl(String) download url} to be set in the
  * {@link BaseEclipseExtension extension}.
- * 
+ *
  * <p>
  * Example:
  * <pre>
@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  *    enablePluginsRepository() // creates a directory repository pointing to the downloaded eclipse distribution
  * }
  * </pre>
- * 
+ *
  * @see BaseEclipseExtension
  */
 public class BaseEclipsePlugin extends AbstractProjectPlugin {
@@ -57,13 +57,13 @@ public class BaseEclipsePlugin extends AbstractProjectPlugin {
    public static final String UNZIP_ECLIPSE_TASK_NAME = "unzipEclipse";
 
    private static final Pattern FILE_NAME_REGEX = Pattern.compile("(?<name>\\w+?(?:\\.\\w+?)*?)[\\.\\-_]"
-            + "(?<version>\\d+?(?:\\.\\d+?)*?(?:[\\.\\-_]\\w+?)?)\\.(?<extension>jar)");
+                                                                        + "(?<version>\\d+?(?:\\.\\d+?)*?(?:[\\.\\-_]\\w+?)?)\\.(?<extension>jar)");
    private static final Pattern VERSION_REGEX = Pattern.compile("\\d+?(?:\\.\\d+?)*?(?:[\\-_]\\w+?)?");
 
    @Override
    protected void doApply(Project project) {
       BaseEclipseExtension extension =
-               project.getExtensions().create(EXTENSION_NAME, BaseEclipseExtension.class, project);
+            project.getExtensions().create(EXTENSION_NAME, BaseEclipseExtension.class, project);
 
       TaskContainer tasks = project.getTasks();
       DownloadEclipseTask downloadTask = tasks.create(DOWNLOAD_ECLIPSE_TASK_NAME, DownloadEclipseTask.class, task -> {
@@ -94,7 +94,7 @@ public class BaseEclipsePlugin extends AbstractProjectPlugin {
    /**
     * Returns a valid eclipse file name for the given OSGi bundle jar, or {@link Optional#empty()} if the file is not a
     * valid OSGi bundle.
-    * 
+    *
     * @param file OSGi bundle jar
     * @return a valid eclipse file name
     */
@@ -102,8 +102,13 @@ public class BaseEclipsePlugin extends AbstractProjectPlugin {
       Optional<String> symbolicName = OsgiResolver.getOsgiSymbolicName(file);
       if (symbolicName.isPresent()) {
          String version = OsgiResolver.getOsgiVersion(file).get();
+         // In some cases, the version in the bundle's manifest is only a major and minor version.  IE, 1.1.  In this
+         // case, Eclipse still demands a patch version number.  So we insert a version of .0 if necessary.
+         if (version.split("\\.").length == 2) {
+            version += ".0";
+         }
          String name = symbolicName.get() + "_" + version + "."
-                  + FilenameUtils.getExtension(file.getName());
+               + FilenameUtils.getExtension(file.getName());
          return Optional.of(name);
       }
       return Optional.empty();
@@ -112,7 +117,7 @@ public class BaseEclipsePlugin extends AbstractProjectPlugin {
    /**
     * Returns a valid eclipse file name for the given file name, or {@link Optional#empty()} if a valid file name cannot
     * be created.
-    * 
+    *
     * @param fileName file name
     * @return a valid eclipse file name
     */
@@ -130,7 +135,7 @@ public class BaseEclipsePlugin extends AbstractProjectPlugin {
    /**
     * Returns a valid eclispe version for the given version, or {@link Optional#empty()} if a valid version cannot be
     * created.
-    * 
+    *
     * @param version version
     * @return a valid eclipse version
     */
