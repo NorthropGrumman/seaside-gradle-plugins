@@ -10,8 +10,9 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.file.CopySpec;
+import org.gradle.api.file.FileCopyDetails;
 import org.gradle.api.plugins.BasePlugin;
-import org.gradle.api.plugins.MavenPlugin;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
@@ -25,33 +26,33 @@ import java.util.Collections;
 
 /**
  * Plugin for creating a distribution composed of sub-distributions.
- * 
+ *
  * <p>
  * This plugin provides the
  * {@value com.ngc.seaside.gradle.plugins.systemdistribution.SeasideSystemDistributionExtension#NAME} extension
  * of type {@link SeasideSystemDistributionExtension}.
- * 
+ *
  * <p>
  * When built, this plugin will produce a distribution zip. The zip will contain start scripts and the
  * specified sub-distributions.
- * 
+ *
  * <p>
  * This plugin provides the {@value #DISTRIBUTION_CONFIG_NAME} configuration. Dependencies added to this configuration
  * must reference zip-formatted files. The default start scripts for this plugin's distribution assume that these
  * sub-distributions have start scripts in their {@code bin/} folder. The default start scripts can be overridden using
  * the extension.
- * 
+ *
  * <p>
  * Example:
- * 
+ *
  * <pre>
  * apply plugin: 'com.ngc.seaside.repository'
  * apply plugin: 'com.ngc.seaside.distribution.system.distribution'
- * 
+ *
  * ext {
  *    threatEvalVersion = '2.4.0'
  * }
- * 
+ *
  * dependencies {
  *    distribution "com.ngc.seaside.threateval:etps.distribution:$threatEvalVersion@zip"
  *    distribution "com.ngc.seaside.threateval:ctps.distribution:$threatEvalVersion@zip"
@@ -66,6 +67,11 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
    public static final String DISTRIBUTION_CONFIG_NAME = "distribution";
    public static final String ZIP_DISTRIBUTION_TASK = "createSystemDistribution";
    public static final String RESOURCES_DIRECTORY = "src/main/resources";
+
+   /**
+    * Used to set executable permissions on the eclipse executable.  Equivalent to unix file permissions: rwxr-xr-x.
+    */
+   private static final int UNIX_EXECUTABLE_PERMISSIONS = 493;
 
    @Override
    protected void doApply(Project project) {
@@ -82,8 +88,8 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
 
    private void createExtension(Project project) {
       project.getExtensions().create(SeasideSystemDistributionExtension.NAME,
-         SeasideSystemDistributionExtension.class,
-         project);
+                                     SeasideSystemDistributionExtension.class,
+                                     project);
    }
 
    private void createConfigurations(Project project) {
@@ -93,7 +99,7 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
    private void configureTasks(Project project) {
       TaskContainer tasks = project.getTasks();
       SeasideSystemDistributionExtension extension = project.getExtensions().findByType(
-         SeasideSystemDistributionExtension.class);
+            SeasideSystemDistributionExtension.class);
       Configuration distConfig = project.getConfigurations().getByName(DISTRIBUTION_CONFIG_NAME);
 
       Action<ResourceCopyTask> taskAction = task -> task.setDestinationDir(task.getTemporaryDir());
@@ -105,18 +111,20 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
          File windowsScript = extension.getScripts().getWindowsScript();
          if (windowsScript == null) {
             createWindowsScript.fromResource(
-               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.bat")));
+                  Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.bat")));
             createWindowsScript.fromResource(
-               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("stop.bat")));
+                  Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("stop.bat")));
          } else {
             createWindowsScript.from(windowsScript);
          }
+         Action<CopySpec> copyAction = spec -> spec.eachFile(this::setExecuteBitOnShellScripts);
          File linuxScript = extension.getScripts().getLinuxScript();
          if (linuxScript == null) {
             createLinuxScript.fromResource(
-               Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.sh")));
+                  Collections.singletonMap(ResourceCopyTask.RESOURCE_KEY, getClass().getResource("start.sh")),
+                  copyAction);
          } else {
-            createLinuxScript.from(linuxScript);
+            createLinuxScript.from(linuxScript, copyAction);
          }
       });
 
@@ -147,12 +155,11 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
             });
          });
       });
-
    }
 
    /**
     * Renames the bundle file to ensure that the group id is included in the filename.
-    * 
+    *
     * @param artifact bundle artifact
     * @return the renamed bundle filename
     */
@@ -174,11 +181,16 @@ public class SeasideSystemDistributionPlugin extends AbstractProjectPlugin {
          project.getExtensions().configure(PublishingExtension.class, convention -> {
             convention.publications(publications -> {
                publications.create("mavenDistribution",
-                  MavenPublication.class,
-                  publication -> publication.artifact(zipDistribution));
+                                   MavenPublication.class,
+                                   publication -> publication.artifact(zipDistribution));
             });
          });
-         
       });
+   }
+
+   private void setExecuteBitOnShellScripts(FileCopyDetails f) {
+      if (f.getName().endsWith(".sh")) {
+         f.setMode(UNIX_EXECUTABLE_PERMISSIONS);
+      }
    }
 }

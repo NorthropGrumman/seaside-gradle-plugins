@@ -1,51 +1,63 @@
 package com.ngc.seaside.gradle.plugins.distribution
 
 import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
-
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermissions
 
 class SeasideServiceDistributionPluginFT {
 
-    private File projectDir
-    private Project project
+   private File projectDir
+   private Project project
 
-    @Before
-    void before() {
-        File source = Paths.get("src/functionalTest/resources/distribution/com.ngc.example.distribution").toFile()
-        Path targetPath = Paths.get("build/functionalTest/distribution/com.ngc.example.distribution")
-        projectDir = Files.createDirectories(targetPath).toFile()
-        FileUtils.copyDirectory(source, projectDir)
+   @Before
+   void before() {
+      File source = Paths.get('src/functionalTest/resources/distribution/com.ngc.example.distribution').toFile()
+      Path targetPath = Paths.get('build/functionalTest/distribution/com.ngc.example.distribution')
+      projectDir = Files.createDirectories(targetPath).toFile()
+      FileUtils.copyDirectory(source, projectDir)
 
-        project = ProjectBuilder.builder().withProjectDir(projectDir).build()
-    }
+      project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+   }
 
 
-    @Test
-    void doesRunGradleBuildWithSuccess() {
-        BuildResult result = SeasideGradleRunner.create().withProjectDir(project.projectDir)
-              .withNexusProperties()
-              .withPluginClasspath()
-              .forwardOutput()
-              .withArguments("clean", "build")
-              .build()
+   @Test
+   void doesRunGradleBuildWithSuccess() {
+      BuildResult result = SeasideGradleRunner.create().withProjectDir(project.projectDir)
+            .withNexusProperties()
+            .withPluginClasspath()
+            .forwardOutput()
+            .withArguments('clean', 'build')
+            .build()
 
-        Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":build").getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf('SUCCESS'), result.task(':build').getOutcome())
 
-        Assert.assertTrue("did not create ZIP!",
-                          Files.isRegularFile(projectDir.toPath().resolve(Paths.get(
-                                "build",
-                                "distribution",
-                                "com.ngc.seaside.example.distribution-1.0-SNAPSHOT.zip"))))
-    }
+      Path distDir = projectDir.toPath().resolve(Paths.get('build', 'distribution'))
+      Path zipFile = distDir.resolve('com.ngc.seaside.example.distribution-1.0-SNAPSHOT.zip')
+      Path unzippedDir = distDir.resolve('com.ngc.seaside.example.distribution-1.0-SNAPSHOT')
+      Path binDir = unzippedDir.resolve('bin')
+      Path linuxStartScript = binDir.resolve('start')
+
+      Assert.assertTrue('did not create ZIP!', Files.isRegularFile(zipFile))
+      Assert.assertTrue("${unzippedDir} does not exist", Files.isDirectory(unzippedDir))
+      Assert.assertTrue("${binDir}/bin does not exist", Files.isDirectory(binDir))
+      Assert.assertTrue("${linuxStartScript} does not exist", Files.isRegularFile(linuxStartScript))
+      Assume.assumeTrue("only check file permissions on Linux", OperatingSystem.current().isLinux());
+      Assert.assertEquals(
+            'linux start script has incorrect permissions',
+            'rwxr-xr-x',
+            PosixFilePermissions.toString(Files.getPosixFilePermissions(linuxStartScript)))
+   }
 }

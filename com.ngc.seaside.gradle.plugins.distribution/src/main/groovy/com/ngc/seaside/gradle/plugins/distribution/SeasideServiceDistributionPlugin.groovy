@@ -2,10 +2,9 @@ package com.ngc.seaside.gradle.plugins.distribution
 
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
 import com.ngc.seaside.gradle.plugins.ci.SeasideCiPlugin
-import com.ngc.seaside.gradle.plugins.parent.SeasideParentPlugin
 import com.ngc.seaside.gradle.plugins.repository.SeasideRepositoryPlugin
-import com.ngc.seaside.gradle.util.GradleUtil
 import org.gradle.api.Project
+import org.gradle.api.file.CopySpec
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Compression
 import org.gradle.api.tasks.bundling.Tar
@@ -28,9 +27,9 @@ import org.gradle.api.tasks.bundling.Zip
  *       repositories {
  *          mavenLocal()
  *
- *              maven {
- *                 url nexusConsolidated
- *              }
+ *          maven {
+ *             url nexusConsolidated
+ *          }
  *       }
  *       dependencies {
  *          classpath 'com.ngc.seaside:seaside.distribution:1.1-SNAPSHOT'
@@ -41,151 +40,158 @@ import org.gradle.api.tasks.bundling.Zip
  */
 class SeasideServiceDistributionPlugin extends AbstractProjectPlugin {
 
-    private SeasideServiceDistributionExtension distributionExtension
+   /**
+    * Used to set executable permissions on the eclipse executable.  Equivalent to unix file permissions: rwxr-xr-x.
+    */
+   private static final int UNIX_EXECUTABLE_PERMISSIONS = 493
 
-    @Override
-    void doApply(Project project) {
-        project.configure(project) {
-            applyPlugins(project)
+   private SeasideServiceDistributionExtension distributionExtension
 
-            distributionExtension = project.extensions.
-                    create("seasideDistribution", SeasideServiceDistributionExtension)
+   @Override
+   void doApply(Project project) {
+      project.configure(project) {
+         applyPlugins(project)
 
-            configureConfigurations(project)
-            configureAfterEvaluate(project)
-            createTasks(project)
+         distributionExtension = project.extensions.
+               create("seasideDistribution", SeasideServiceDistributionExtension)
 
-            project.afterEvaluate {
-                artifacts {
-                    archives taskResolver.findTask("tar")
-                    archives taskResolver.findTask("zip")
-                }
+         configureConfigurations(project)
+         configureAfterEvaluate(project)
+         createTasks(project)
+
+         project.afterEvaluate {
+            artifacts {
+               archives taskResolver.findTask("tar")
+               archives taskResolver.findTask("zip")
             }
-        }
-    }
+         }
+      }
+   }
 
-    void configureConfigurations(Project project) {
-        project.configurations {
-            bundles {
-                transitive = false
+   void configureConfigurations(Project project) {
+      project.configurations {
+         bundles {
+            transitive = false
+         }
+         blocs {
+            transitive = false
+         }
+         thirdParty {
+            transitive = true
+         }
+         platform {
+            transitive = false
+         }
+         archives
+      }
+   }
+
+   void configureAfterEvaluate(Project project) {
+      project.afterEvaluate {
+         taskResolver.findTask('tar') { tar ->
+            archiveName = "${distributionExtension.distributionName}.tar.gz"
+            destinationDir = project.file("${distributionExtension.distributionDestDir}")
+         }
+
+         taskResolver.findTask('zip') { zip ->
+            archiveName = "${distributionExtension.distributionName}.zip"
+            destinationDir = project.file("${distributionExtension.distributionDestDir}")
+         }
+      }
+   }
+
+   /**
+    * Create project tasks for this plugin
+    * @param project
+    */
+   void createTasks(Project project) {
+
+      taskResolver.findTask('clean') {
+         doLast {
+            project.getLogger().debug("Removing build distribution directory '${distributionExtension.buildDir}'.")
+            project.delete(distributionExtension.buildDir)
+         }
+      }
+
+      project.task('copyConfig', type: Copy) {
+         from 'src/main/resources'
+         include '**/config.ini'
+         expand(project.properties)
+         into { distributionExtension.distributionDir }
+      }
+
+      project.task('copyResources', type: Copy, dependsOn: [taskResolver.findTask('copyConfig')]) { CopySpec spec ->
+         spec.from 'src/main/resources'
+         spec.exclude '**/config.ini'
+         spec.eachFile { f ->
+            if (f.name.equals("start")) {
+               f.mode = UNIX_EXECUTABLE_PERMISSIONS
             }
-            blocs {
-                transitive = false
+         }
+         spec.into { distributionExtension.distributionDir }
+      }
+
+      project.task('copyPlatformBundles', type: Copy) {
+         from project.configurations.getByName("platform")
+         into { "${distributionExtension.distributionDir}/platform" }
+      }
+
+      project.task('tar', type: Tar) {
+         from { "${distributionExtension.distributionDir}" }
+         compression = Compression.GZIP
+      }
+
+      project.task('zip', type: Zip) {
+         from { "${distributionExtension.distributionDir}" }
+      }
+
+      project.task('copyThirdPartyBundles', type: Copy) {
+         from project.configurations.getByName("thirdParty")
+         into { "${distributionExtension.distributionDir}/bundles" }
+      }
+
+      project.task('copyBlocsBundles', type: Copy) {
+         from project.configurations.getByName("blocs") {
+            rename { name ->
+               def artifacts = project.configurations.blocs.resolvedConfiguration.resolvedArtifacts
+               def artifact = artifacts.find { it.file.name == name }
+               "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
             }
-            thirdParty {
-                transitive = true
+         }
+         into { "${distributionExtension.distributionDir}/bundles" }
+      }
+
+      project.task('copyBundles', type: Copy) {
+         from project.configurations.getByName("bundles") {
+            rename { name ->
+               def artifacts = project.configurations.bundles.resolvedConfiguration.resolvedArtifacts
+               def artifact = artifacts.find { it.file.name == name }
+               "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
             }
-            platform {
-                transitive = false
-            }
-            archives
-        }
-    }
+         }
+         into { "${distributionExtension.distributionDir}/bundles" }
+      }
 
-    void configureAfterEvaluate(Project project) {
-        project.afterEvaluate {
-            taskResolver.findTask('tar') { tar ->
-                archiveName = "${distributionExtension.distributionName}.tar.gz"
-                destinationDir = project.file("${distributionExtension.distributionDestDir}")
-            }
+      project.task('buildDist', dependsOn: [taskResolver.findTask("copyResources"),
+                                            taskResolver.findTask("copyPlatformBundles"),
+                                            taskResolver.findTask("copyThirdPartyBundles"),
+                                            taskResolver.findTask("copyBlocsBundles"),
+                                            taskResolver.findTask("copyBundles"),
+                                            taskResolver.findTask("tar"),
+                                            taskResolver.findTask("zip")])
+      taskResolver.findTask("assemble").dependsOn(taskResolver.findTask("buildDist"))
+   }
 
-            taskResolver.findTask('zip') { zip ->
-                archiveName = "${distributionExtension.distributionName}.zip"
-                destinationDir = project.file("${distributionExtension.distributionDestDir}")
-            }
-        }
-    }
-
-    /**
-     * Create project tasks for this plugin
-     * @param project
-     */
-    void createTasks(Project project) {
-
-        taskResolver.findTask('clean') {
-            doLast {
-                project.getLogger().debug("Removing build distribution directory '${distributionExtension.buildDir}'.")
-
-                project.delete(distributionExtension.buildDir)
-            }
-        }
-
-        project.task('copyConfig', type: Copy) {
-            from 'src/main/resources'
-            include '**/config.ini'
-            expand(project.properties)
-            into { distributionExtension.distributionDir }
-        }
-
-        project.task('copyResources', type: Copy, dependsOn: [taskResolver.findTask('copyConfig')]) {
-
-            from 'src/main/resources'
-            exclude '**/config.ini'
-            into { distributionExtension.distributionDir }
-        }
-
-        project.task('copyPlatformBundles', type: Copy) {
-            from project.configurations.getByName("platform")
-            into { "${distributionExtension.distributionDir}/platform" }
-        }
-
-        project.task('tar', type: Tar) {
-            from { "${distributionExtension.distributionDir}" }
-            compression = Compression.GZIP
-        }
-
-        project.task('zip', type: Zip) {
-            from { "${distributionExtension.distributionDir}" }
-        }
-
-        project.task('copyThirdPartyBundles', type: Copy) {
-            from project.configurations.getByName("thirdParty")
-            into { "${distributionExtension.distributionDir}/bundles" }
-        }
-
-        project.task('copyBlocsBundles', type: Copy) {
-            from project.configurations.getByName("blocs") {
-                rename { name ->
-                    def artifacts = project.configurations.blocs.resolvedConfiguration.resolvedArtifacts
-                    def artifact = artifacts.find { it.file.name == name }
-                    "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
-                }
-            }
-            into { "${distributionExtension.distributionDir}/bundles" }
-        }
-
-        project.task('copyBundles', type: Copy) {
-            from project.configurations.getByName("bundles") {
-                rename { name ->
-                    def artifacts = project.configurations.bundles.resolvedConfiguration.resolvedArtifacts
-                    def artifact = artifacts.find { it.file
-                                                            .name == name }
-                    "${artifact.moduleVersion.id.group}.${artifact.name}-${artifact.moduleVersion.id.version}.${artifact.extension}"
-                }
-            }
-            into { "${distributionExtension.distributionDir}/bundles" }
-        }
-
-        project.task('buildDist', dependsOn: [taskResolver.findTask("copyResources"),
-                                              taskResolver.findTask("copyPlatformBundles"),
-                                              taskResolver.findTask("copyThirdPartyBundles"),
-                                              taskResolver.findTask("copyBlocsBundles"),
-                                              taskResolver.findTask("copyBundles"),
-                                              taskResolver.findTask("tar"),
-                                              taskResolver.findTask("zip")])
-        taskResolver.findTask("assemble").dependsOn(taskResolver.findTask("buildDist"))
-    }
-
-    /**
-     * Applies additional plugins to the project the project
-     * @param project
-     */
-    static void applyPlugins(Project project) {
-        project.logger.info("Applying plugins for ${project.name}")
-        project.plugins.apply('java')
-        project.plugins.apply('maven')
-        project.plugins.apply(SeasideRepositoryPlugin)
-        project.plugins.apply(SeasideCiPlugin)
-    }
+   /**
+    * Applies additional plugins to the project the project
+    * @param project
+    */
+   static void applyPlugins(Project project) {
+      project.logger.info("Applying plugins for ${project.name}")
+      project.plugins.apply('java')
+      project.plugins.apply('maven')
+      project.plugins.apply(SeasideRepositoryPlugin)
+      project.plugins.apply(SeasideCiPlugin)
+   }
 
 }
