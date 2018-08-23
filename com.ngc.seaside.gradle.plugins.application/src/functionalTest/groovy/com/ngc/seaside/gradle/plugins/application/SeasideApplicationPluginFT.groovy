@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.plugins.application
 import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
@@ -16,6 +17,7 @@ import java.nio.file.attribute.PosixFilePermissions
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
+import static org.junit.Assume.assumeTrue
 
 class SeasideApplicationPluginFT {
 
@@ -65,6 +67,7 @@ class SeasideApplicationPluginFT {
                    "DEFAULT_JVM_OPTS=' \"-DMY_PROP=\$APP_HOME\"  \"-DappHome=\$APP_HOME\" '",
                    properties)
 
+      assumeTrue("only check file permissions on Linux", OperatingSystem.current().isLinux());
       assertEquals(
             "linux start script has incorrect permissions",
             "rwxr-xr-x",

@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.plugins.distribution
 import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
@@ -16,6 +17,7 @@ import java.nio.file.attribute.PosixFilePermissions
 
 import static com.ngc.seaside.gradle.plugins.systemdistribution.SeasideSystemDistributionPlugin.DISTRIBUTION_DIRECTORY
 import static org.junit.Assert.*
+import static org.junit.Assume.assumeTrue
 
 class SeasideSystemDistributionPluginFT {
 
@@ -59,6 +61,8 @@ class SeasideSystemDistributionPluginFT {
       assertTrue(Files.isRegularFile(unzippedDir.resolve('start.bat')))
       assertTrue(Files.isRegularFile(unzippedDir.resolve('start.sh')))
       assertTrue(Files.isRegularFile(unzippedDir.resolve('example.resource')))
+
+      assumeTrue("only check file permissions on Linux", OperatingSystem.current().isLinux());
       assertEquals(
             "linux start script has incorrect permissions",
             "rwxr-xr-x",

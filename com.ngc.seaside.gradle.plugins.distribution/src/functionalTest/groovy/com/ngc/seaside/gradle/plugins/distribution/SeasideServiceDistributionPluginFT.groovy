@@ -3,10 +3,12 @@ package com.ngc.seaside.gradle.plugins.distribution
 import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Assert
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 
@@ -52,6 +54,7 @@ class SeasideServiceDistributionPluginFT {
       Assert.assertTrue("${unzippedDir} does not exist", Files.isDirectory(unzippedDir))
       Assert.assertTrue("${binDir}/bin does not exist", Files.isDirectory(binDir))
       Assert.assertTrue("${linuxStartScript} does not exist", Files.isRegularFile(linuxStartScript))
+      Assume.assumeTrue("only check file permissions on Linux", OperatingSystem.current().isLinux());
       Assert.assertEquals(
             'linux start script has incorrect permissions',
             'rwxr-xr-x',

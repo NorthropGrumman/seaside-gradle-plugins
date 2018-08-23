@@ -3,6 +3,7 @@ package com.ngc.seaside.gradle.plugins.distribution
 import com.ngc.seaside.gradle.util.test.SeasideGradleRunner
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
@@ -17,6 +18,7 @@ import java.util.stream.Collectors
 
 import static com.ngc.seaside.gradle.plugins.distribution.SeasideFelixServiceDistributionPlugin.*
 import static org.junit.Assert.*
+import static org.junit.Assume.assumeTrue
 
 class SeasideFelixServiceDistributionPluginFT {
 
@@ -75,6 +77,7 @@ class SeasideFelixServiceDistributionPluginFT {
          assertFalse("Expected ${jar} not to be included in the bundles", bundles.any { it.contains jar })
       }
 
+      assumeTrue("only check file permissions on Linux", OperatingSystem.current().isLinux());
       def linuxStartScript = unzippedDir.resolve(BIN_DIRECTORY).resolve('start.sh')
       assertEquals(
             "linux start script has incorrect permissions",
