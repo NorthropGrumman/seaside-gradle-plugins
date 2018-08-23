@@ -27,7 +27,7 @@ find ./ -name "*.sh" -exec chmod +x {} \;
 printf "Starting services...\n"
 for folder in `ls -d $currentDir/*/`; do
    printf "Entering $folder ...\n"
-   $folder/bin/start.sh "$@" &
+   $folder/bin/start.sh -Dgosh.args=--nointeractive "$@" &
 done
 
 wait
