@@ -179,7 +179,7 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
 
    private void applyPlugins(Project project) {
       project.getPlugins().apply(BasePlugin.class);
-      project.getPlugins().apply(MavenPlugin.class);
+      project.getPlugins().apply(MavenPublishPlugin.class);
       // Apply the ci and repo plugin so we can use the populateM2task to collect the dependencies required to build
       // a distribution project.
       project.getPlugins().apply(SeasideRepositoryPlugin.class);
@@ -299,6 +299,25 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
             createConfig.from(configFile);
          }
       });
+
+      // Warnings for Maven tasks being deprecated
+      tasks.maybeCreate("install")
+               .dependsOn("publishToMavenLocal")
+               .doFirst(install -> {
+                  install.getLogger().warn("The install task will be deprecated with the Gradle maven plugin.");
+               });
+
+      tasks.maybeCreate("upload")
+               .dependsOn("publish")
+               .doFirst(upload -> {
+                  upload.getLogger().warn("The upload task will be deprecated with the Gradle maven plugin.");
+               });
+      
+      tasks.maybeCreate("uploadArchives")
+               .dependsOn("publish")
+               .doFirst(uploadArchives -> {
+                  uploadArchives.getLogger().warn("The upload archives task will be deprecated with the Gradle maven plugin.");
+               });
 
       tasks.create(ZIP_DISTRIBUTION_TASK, Zip.class, task -> {
          task.setDescription("Creates the distribution zip");
