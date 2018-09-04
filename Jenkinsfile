@@ -86,6 +86,8 @@ pipeline {
          }
       }
 
+      // This stage only checks the build.gradle files.  The first build stage checks the source files for each
+      // sub-project.
       stage('License Check') {
          steps {
             // This project consumes its own plugins.
