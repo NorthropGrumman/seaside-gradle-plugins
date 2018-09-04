@@ -41,6 +41,8 @@ ext {
    dtdFiles = [file("${projectDir}/src/main/resources/category.dtd"), file("${projectDir}/src/main/resources/feature.dtd")]
 }
 
+licenseMain.exclude('build/')
+
 task dtd2java() {
    doFirst { jaxbTargetDir.mkdirs() }
    doLast {
