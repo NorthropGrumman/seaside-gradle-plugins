@@ -44,13 +44,13 @@ pipeline {
    stages {
       stage('Build') {
          steps {
-            sh 'chmod +x gradlew && ./gradlew clean license build -xtest -xintegrationTest -xfunctionalTest'
+            sh 'chmod +x gradlew && ./gradlew clean license build -xtest -xintegrationTest -xfunctionalTest -s'
          }
       }
 
       stage('Unit Test') {
          steps {
-            sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
+            sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest -s'
          }
 
          post {
@@ -62,7 +62,7 @@ pipeline {
 
       stage('Integration Test') {
          steps {
-            sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest'
+            sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest -s'
          }
          post {
             always {
@@ -76,7 +76,7 @@ pipeline {
             withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
                                               passwordVariable: 'nexusPassword',
                                               usernameVariable: 'nexusUsername')]) {
-               sh './gradlew functionalTest -PtestIgnoreFailures=true -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword'
+               sh './gradlew functionalTest -PtestIgnoreFailures=true -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword -s'
             }
          }
          post {
