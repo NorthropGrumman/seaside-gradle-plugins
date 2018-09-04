@@ -86,6 +86,14 @@ pipeline {
          }
       }
 
+      stage('License Check') {
+         steps {
+            // This project consumes its own plugins.
+            sh './gradlew prepareForRelease'
+            sh './gradlew license -PbootstrapRelease'
+         }
+      }
+
       stage('Nexus Lifecycle') {
          when {
             expression { params.nexusLifecycle }
@@ -128,8 +136,8 @@ pipeline {
          }
          steps {
             // Prepare for a release by building the plugins if necessary and set them up on disk so this
-            // project's own build can reference them.
-            sh './gradlew prepareForRelease'
+            // project's own build can reference them.  This is done in the License Check task so we don't need to do it
+            // again.
             // Remove the version suffice.  Use -PbootstrapRelease to tell the build to put its own artifacts on
             // the classpath.
             sh './gradlew removeVersionSuffix -PbootstrapRelease'
