@@ -55,8 +55,8 @@ public class SeasideRepositoryExtension {
 
    private boolean generateBuildScriptRepositories = false;
    private boolean generateProjectRepositories = true;
-   private boolean generateMavenUploadRepositories = false;
-   private boolean generateMavenPublishRepositories = false;
+   private Boolean generateMavenUploadRepositories;
+   private Boolean generateMavenPublishRepositories;
    private boolean includeMavenLocal = true;
    private boolean automaticallyResolveUploadRequirements = true;
 
@@ -94,19 +94,23 @@ public class SeasideRepositoryExtension {
          configuration.setRequired(false);
          configuration.setAuthenticationRequired(true);
       });
-      if (project.getPlugins().hasPlugin(MavenPlugin.class)) {
-         generateMavenUploadRepositories = true;
-      }
-      if (project.getPlugins().hasPlugin(MavenPublishPlugin.class)) {
-         generateMavenPublishRepositories = true;
-      }
+      project.getPlugins().withType(MavenPlugin.class, __ -> {
+         if (generateMavenUploadRepositories == null) {
+            generateMavenUploadRepositories = true;
+         }
+      });
+      project.getPlugins().withType(MavenPublishPlugin.class, __ -> {
+         if (generateMavenPublishRepositories == null) {
+            generateMavenPublishRepositories = true;
+         }
+      });
 
       project.getGradle().getTaskGraph().whenReady(graph -> {
          if (automaticallyResolveUploadRequirements) {
             boolean mavenUpload = graph.hasTask(BasePlugin.UPLOAD_ARCHIVES_TASK_NAME)
                && project.getPlugins().hasPlugin(MavenPlugin.class);
             boolean mavenPublish = graph.hasTask(PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME)
-               && project.getPlugins().hasPlugin(MavenPlugin.class);
+               && project.getPlugins().hasPlugin(MavenPublishPlugin.class);
             if (mavenUpload || mavenPublish) {
                RepositoryConfiguration uploadConfig = getUploadConfiguration();
                if (!uploadConfig.isRequired()) {
@@ -204,7 +208,7 @@ public class SeasideRepositoryExtension {
     * @return whether or not the plugin should generate repositories for the project's maven upload repositories
     */
    public boolean isGenerateMavenUploadRepositories() {
-      return generateMavenUploadRepositories;
+      return generateMavenUploadRepositories == null ? false : generateMavenUploadRepositories;
    }
 
    /**
@@ -226,7 +230,7 @@ public class SeasideRepositoryExtension {
     * @return whether or not the plugin should generate repositories for the project's maven publish repositories
     */
    public boolean isGenerateMavenPublishRepositories() {
-      return generateMavenPublishRepositories;
+      return generateMavenPublishRepositories == null ? false : generateMavenPublishRepositories;
    }
 
    /**
