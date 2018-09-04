@@ -27,7 +27,7 @@ pipeline {
    stages {
       stage('Build') {
          steps {
-            sh 'chmod +x gradlew && ./gradlew clean build -xtest -xintegrationTest -xfunctionalTest'
+            sh 'chmod +x gradlew && ./gradlew clean license build -xtest -xintegrationTest -xfunctionalTest'
          }
       }
 
