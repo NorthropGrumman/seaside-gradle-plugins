@@ -1,3 +1,14 @@
+plugins {
+   id 'com.ngc.seaside.root.parent'
+}
+
+license {
+   header = file('EXAMPLE_LICENSE')
+   ext.exampleProperty = 'Hello World'
+}
+
+licenseCheckGradleScripts.enabled = false
+
 subprojects {
    group = 'com.ngc.seaside'
    version = '1.2.3-SNAPSHOT'
@@ -7,5 +18,14 @@ subprojects {
       slf4jVersion = '1.7.22'
       log4jVersion = '1.2.17'
       cucumberVersion = '1.2.5'
+   }
+
+   plugins.withId('com.github.hierynomus.license') {
+      licenseMain.enabled = false
+
+      license {
+         header = file('EXAMPLE_LICENSE')
+         ext.exampleProperty = 'Hello World'
+      }
    }
 }

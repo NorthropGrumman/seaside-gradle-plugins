@@ -10,6 +10,7 @@ import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
 import com.ngc.seaside.gradle.util.GradleUtil
 import com.ngc.seaside.gradle.util.Versions
+import nl.javadude.gradle.plugins.license.LicensePlugin
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
@@ -205,6 +206,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
       project.plugins.apply(SeasideReleasePlugin)
       project.plugins.apply(SeasideCiPlugin)
       project.plugins.apply(SeasideCheckstylePlugin)
+      project.plugins.apply(LicensePlugin)
    }
 
    /**

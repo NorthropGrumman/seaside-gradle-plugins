@@ -84,6 +84,8 @@ subprojects {
       targetCompatibility = '1.8'
    }
 
+
+
    ext {
       jaxbVersion = '2.3.0.1'
       junitVersion = '4.12'
@@ -99,6 +101,7 @@ subprojects {
       guavaVersion = '22.0'
       aetherVersion = '1.1.0'
       mavenVersion = '3.5.2'
+      licensePluginVersion = '0.14.0'
    }
 
    repositories {

@@ -10,6 +10,7 @@ dependencies {
    implementation "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonarQubeVersion"
    implementation "com.github.ben-manes:gradle-versions-plugin:$dependencyUpdatesVersion"
    implementation "com.github.ksoichiro:gradle-console-reporter:$consoleReporterVersion"
+   implementation "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:$licensePluginVersion"
    
    testImplementation project(':gradle.plugins.testutils')
    testImplementation "commons-io:commons-io:$commonsIOVersion"
