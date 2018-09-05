@@ -41,7 +41,10 @@ ext {
    dtdFiles = [file("${projectDir}/src/main/resources/category.dtd"), file("${projectDir}/src/main/resources/feature.dtd")]
 }
 
-licenseMain.exclude('build/')
+license {
+   // Ignore generated sources from DTDs when checking licenses..
+   exclude "${dtdBasePackage}/".replace('.', '/')
+}
 
 task dtd2java() {
    doFirst { jaxbTargetDir.mkdirs() }
