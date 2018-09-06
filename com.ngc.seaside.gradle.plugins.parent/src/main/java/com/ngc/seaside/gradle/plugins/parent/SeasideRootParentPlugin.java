@@ -29,7 +29,7 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
 /**
  * A plugin that is applied to a <i>root</i> project (not sub-projects).  This plugin mostly just configures licenses
- * for all Gradle files that make up an entire project.
+ * for all Gradle files that make up an entire project and applies the {@link LicensePlugin} to all subprojects.
  */
 public class SeasideRootParentPlugin extends AbstractProjectPlugin {
 
@@ -62,6 +62,7 @@ public class SeasideRootParentPlugin extends AbstractProjectPlugin {
    protected void doApply(Project project) {
       applyPlugins(project);
       configureLicense(project);
+      configureSubprojects(project);
       createTasks(project);
    }
 
@@ -73,6 +74,10 @@ public class SeasideRootParentPlugin extends AbstractProjectPlugin {
    private void configureLicense(Project project) {
       LicenseExtension license = project.getExtensions().getByType(LicenseExtension.class);
       license.mapping("gradle", "SLASHSTAR_STYLE");
+   }
+
+   private void configureSubprojects(Project project) {
+      project.getSubprojects().forEach(subproject -> subproject.getPlugins().apply(LicensePlugin.class));
    }
 
    private void createTasks(Project project) {

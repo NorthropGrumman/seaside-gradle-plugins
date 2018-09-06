@@ -33,4 +33,12 @@ jar {
    }
 }
 
+licenseMain.enabled = false
+
+license {
+   header = file('EXAMPLE_LICENSE')
+   ext.exampleProperty = 'Hello World'
+}
+
+
 
