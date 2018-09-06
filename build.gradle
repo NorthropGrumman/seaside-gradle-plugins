@@ -1,3 +1,19 @@
+/*
+ * UNCLASSIFIED
+ * Northrop Grumman Proprietary
+ * ____________________________
+ *
+ * Copyright (C) 2018, Northrop Grumman Systems Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains the property of
+ * Northrop Grumman Systems Corporation. The intellectual and technical concepts
+ * contained herein are proprietary to Northrop Grumman Systems Corporation and
+ * may be covered by U.S. and Foreign Patents or patents in process, and are
+ * protected by trade secret or copyright law. Dissemination of this information
+ * or reproduction of this material is strictly forbidden unless prior written
+ * permission is obtained from Northrop Grumman.
+ */
 buildscript {
    ext {
       bootstrapDirectory = "${project.buildDir}/bootstrapping"
@@ -35,6 +51,7 @@ buildscript {
 
    dependencies {
       classpath 'com.github.ksoichiro:gradle-console-reporter:0.5.0'
+      classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0'
       if (releaseInProgress) {
          getSelfDependencies().each { name ->
             classpath name: "$name"
@@ -46,8 +63,15 @@ buildscript {
 def nonPluginProjects = [project(':gradle.plugins'), project(':gradle.plugins.testutils'),
                          project(':gradle.plugins.base')]
 
+apply plugin: 'base'
 if (releaseInProgress) {
    apply plugin: 'com.ngc.seaside.release.root'
+   apply plugin: 'com.ngc.seaside.root.parent'
+
+   license {
+      header = file('LICENSE')
+      ext.year = Calendar.getInstance().get(Calendar.YEAR)
+   }
 }
 
 /**
@@ -61,10 +85,10 @@ subprojects {
    apply plugin: 'java-library'
    apply plugin: 'groovy'
    apply plugin: 'maven'
+   apply plugin: 'com.github.hierynomus.license'
    if (isPlugin) {
       apply plugin: 'java-gradle-plugin'
    }
-   apply plugin: 'com.github.ksoichiro.console.reporter'
 
    group = 'com.ngc.seaside'
    version = '2.19.0-SNAPSHOT'
@@ -84,6 +108,13 @@ subprojects {
       targetCompatibility = '1.8'
    }
 
+   plugins.withId('com.github.hierynomus.license') {
+      license {
+         header = file('LICENSE')
+         ext.year = Calendar.getInstance().get(Calendar.YEAR)
+      }
+   }
+
    ext {
       jaxbVersion = '2.3.0.1'
       junitVersion = '4.12'
@@ -99,6 +130,7 @@ subprojects {
       guavaVersion = '22.0'
       aetherVersion = '1.1.0'
       mavenVersion = '3.5.2'
+      licensePluginVersion = '0.14.0'
    }
 
    repositories {
@@ -246,10 +278,4 @@ subprojects {
 
    task prepareForRelease(description: 'Prepares this project for a release.',
                           dependsOn: [copyPlugin, copyDependencies])
-}
-
-task clean() {
-   doLast {
-      delete "${project.buildDir}"
-   }
 }

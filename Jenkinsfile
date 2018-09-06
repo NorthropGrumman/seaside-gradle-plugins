@@ -1,3 +1,20 @@
+/*
+ * UNCLASSIFIED
+ * Northrop Grumman Proprietary
+ * ____________________________
+ *
+ * Copyright (C) ${year}, Northrop Grumman Systems Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains the property of
+ * Northrop Grumman Systems Corporation. The intellectual and technical concepts
+ * contained herein are proprietary to Northrop Grumman Systems Corporation and
+ * may be covered by U.S. and Foreign Patents or patents in process, and are
+ * protected by trade secret or copyright law. Dissemination of this information
+ * or reproduction of this material is strictly forbidden unless prior written
+ * permission is obtained from Northrop Grumman.
+ */
+
 pipeline {
    agent {
       label {
@@ -27,13 +44,13 @@ pipeline {
    stages {
       stage('Build') {
          steps {
-            sh 'chmod +x gradlew && ./gradlew clean build -xtest -xintegrationTest -xfunctionalTest'
+            sh 'chmod +x gradlew && ./gradlew clean license build -xtest -xintegrationTest -xfunctionalTest -s'
          }
       }
 
       stage('Unit Test') {
          steps {
-            sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest'
+            sh './gradlew test -PtestIgnoreFailures=true -xintegrationTest -xfunctionalTest -s'
          }
 
          post {
@@ -45,7 +62,7 @@ pipeline {
 
       stage('Integration Test') {
          steps {
-            sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest'
+            sh './gradlew integrationTest -PtestIgnoreFailures=true -xfunctionalTest -s'
          }
          post {
             always {
@@ -59,13 +76,23 @@ pipeline {
             withCredentials([usernamePassword(credentialsId: 'ngc-nexus-repo-mgr-pipelines',
                                               passwordVariable: 'nexusPassword',
                                               usernameVariable: 'nexusUsername')]) {
-               sh './gradlew functionalTest -PtestIgnoreFailures=true -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword'
+               sh './gradlew functionalTest -PtestIgnoreFailures=true -PnexusUsername=$nexusUsername -PnexusPassword=$nexusPassword -s'
             }
          }
          post {
             always {
                junit '**/build/test-results/functionalTest/*.xml'
             }
+         }
+      }
+
+      // This stage only checks the build.gradle files.  The first build stage checks the source files for each
+      // sub-project.
+      stage('License Check') {
+         steps {
+            // This project consumes its own plugins.
+            sh './gradlew prepareForRelease'
+            sh './gradlew license -PbootstrapRelease'
          }
       }
 
@@ -111,8 +138,8 @@ pipeline {
          }
          steps {
             // Prepare for a release by building the plugins if necessary and set them up on disk so this
-            // project's own build can reference them.
-            sh './gradlew prepareForRelease'
+            // project's own build can reference them.  This is done in the License Check task so we don't need to do it
+            // again.
             // Remove the version suffice.  Use -PbootstrapRelease to tell the build to put its own artifacts on
             // the classpath.
             sh './gradlew removeVersionSuffix -PbootstrapRelease'

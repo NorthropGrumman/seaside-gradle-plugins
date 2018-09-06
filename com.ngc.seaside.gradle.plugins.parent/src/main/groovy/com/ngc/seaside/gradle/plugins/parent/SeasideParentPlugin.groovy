@@ -1,3 +1,19 @@
+/*
+ * UNCLASSIFIED
+ * Northrop Grumman Proprietary
+ * ____________________________
+ *
+ * Copyright (C) 2018, Northrop Grumman Systems Corporation
+ * All Rights Reserved.
+ *
+ * NOTICE:  All information contained herein is, and remains the property of
+ * Northrop Grumman Systems Corporation. The intellectual and technical concepts
+ * contained herein are proprietary to Northrop Grumman Systems Corporation and
+ * may be covered by U.S. and Foreign Patents or patents in process, and are
+ * protected by trade secret or copyright law. Dissemination of this information
+ * or reproduction of this material is strictly forbidden unless prior written
+ * permission is obtained from Northrop Grumman.
+ */
 package com.ngc.seaside.gradle.plugins.parent
 
 import aQute.bnd.gradle.BundleTaskConvention
@@ -10,6 +26,7 @@ import com.ngc.seaside.gradle.tasks.dependencies.DependencyReportTask
 import com.ngc.seaside.gradle.tasks.dependencies.DownloadDependenciesTask
 import com.ngc.seaside.gradle.util.GradleUtil
 import com.ngc.seaside.gradle.util.Versions
+import nl.javadude.gradle.plugins.license.LicensePlugin
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
@@ -205,6 +222,7 @@ class SeasideParentPlugin extends AbstractProjectPlugin {
       project.plugins.apply(SeasideReleasePlugin)
       project.plugins.apply(SeasideCiPlugin)
       project.plugins.apply(SeasideCheckstylePlugin)
+      project.plugins.apply(LicensePlugin)
    }
 
    /**
