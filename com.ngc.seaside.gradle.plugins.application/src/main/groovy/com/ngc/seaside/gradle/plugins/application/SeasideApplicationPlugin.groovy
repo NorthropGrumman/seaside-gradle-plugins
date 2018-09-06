@@ -142,6 +142,7 @@ class SeasideApplicationPlugin extends AbstractProjectPlugin {
                // the command too long and Windows was balking at it.
                windowsScript.text = windowsScript.text.replaceFirst('(set CLASSPATH=)(.*)(?=\r\n)',
                                                                     '$1' + '"%APP_HOME%\\\\lib\\\\*"')
+               unixScript.text = unixScript.text.replaceFirst('(?m)^CLASSPATH=.*?$', 'CLASSPATH=\\$APP_HOME/lib/*')
 
                // Override generated start script with custom windows start script
                if (applicationExtension.windows.startScript != null) {
