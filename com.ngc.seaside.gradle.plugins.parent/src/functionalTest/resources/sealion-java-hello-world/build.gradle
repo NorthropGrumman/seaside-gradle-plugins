@@ -35,13 +35,4 @@ subprojects {
       log4jVersion = '1.2.17'
       cucumberVersion = '1.2.5'
    }
-
-   plugins.withId('com.github.hierynomus.license') {
-      licenseMain.enabled = false
-
-      license {
-         header = file('EXAMPLE_LICENSE')
-         ext.exampleProperty = 'Hello World'
-      }
-   }
 }
