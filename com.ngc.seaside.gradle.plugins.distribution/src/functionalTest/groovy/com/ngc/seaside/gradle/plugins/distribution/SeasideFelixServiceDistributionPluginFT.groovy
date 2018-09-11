@@ -93,7 +93,10 @@ class SeasideFelixServiceDistributionPluginFT {
          assertFalse("Expected ${jar} not to be included in the bundles", bundles.any { it.contains jar })
       }
 
-      assumeTrue("only check file permissions on Linux", OperatingSystem.current().isLinux());
+      assertFalse("blacklisted JAR org.apache.commons.collections_3.2.2 should not be included in the bundles!",
+                  bundles.any { it.contains 'org.apache.commons.collections_3.2.2' })
+
+      assumeTrue("only check file permissions on Linux", OperatingSystem.current().isLinux())
       def linuxStartScript = unzippedDir.resolve(BIN_DIRECTORY).resolve('start.sh')
       assertEquals(
             "linux start script has incorrect permissions",

@@ -16,16 +16,16 @@
  */
 package com.ngc.seaside.gradle.plugins.distribution;
 
-import com.ngc.seaside.gradle.plugins.distribution.SeasideFelixServiceDistributionPlugin;
-
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.UnknownConfigurationException;
+import org.gradle.api.provider.SetProperty;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -53,10 +53,12 @@ public class SeasideFelixServiceDistributionExtension {
    private List<String> programArgs = new ArrayList<>();
    private Set<Configuration> bundleConfigurations = new LinkedHashSet<>();
    private final ScriptConfiguration scriptConfiguration;
+   private final SetProperty<String> blacklist;
 
    public SeasideFelixServiceDistributionExtension(Project project) {
       this.project = project;
       this.scriptConfiguration = new ScriptConfiguration(project);
+      this.blacklist = project.getObjects().setProperty(String.class);
    }
 
    /**
@@ -320,5 +322,40 @@ public class SeasideFelixServiceDistributionExtension {
       return getProgramArgs().stream()
                              .collect(Collectors.joining(" "));
    }
-   
+
+   /**
+    * Gets the GAVs of components that should not be included in the distribution.
+    *
+    * @return the GAVs of components that should not be included in the distribution
+    */
+   public SetProperty<String> getBlacklist() {
+      return blacklist;
+   }
+
+   /**
+    * Adds the given GAVs to the blacklist.  Components with these coordinates will not be included in the distribution.
+    *
+    * @param gavs the GAVs to add to the blacklist
+    */
+   public void blacklist(String... gavs) {
+      Arrays.stream(gavs).forEach(blacklist::add);
+   }
+
+   /**
+    * Sets the GAVs of components that should not be included in the distribution.
+    *
+    * @param blacklist the GAVs of components that should not be included in the distribution
+    */
+   public void setBlacklist(Collection<String> blacklist) {
+      this.blacklist.set(blacklist);
+   }
+
+   /**
+    * Sets the GAVs of components that should not be included in the distribution.
+    *
+    * @param blacklist the GAVs of components that should not be included in the distribution
+    */
+   public void setBlacklist(SetProperty<String> blacklist) {
+      this.blacklist.set(blacklist);
+   }
 }

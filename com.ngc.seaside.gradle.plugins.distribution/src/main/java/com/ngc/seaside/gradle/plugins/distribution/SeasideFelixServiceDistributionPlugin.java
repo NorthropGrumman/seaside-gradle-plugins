@@ -279,8 +279,8 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
 
    private void createTasks(Project project) {
       TaskContainer tasks = project.getTasks();
-      SeasideFelixServiceDistributionExtension extension = project.getExtensions().findByType(
-            SeasideFelixServiceDistributionExtension.class);
+      SeasideFelixServiceDistributionExtension extension = project.getExtensions()
+            .getByType(SeasideFelixServiceDistributionExtension.class);
 
       Action<ResourceCopyTask> taskAction = task -> task.setDestinationDir(task.getTemporaryDir());
       ResourceCopyTask createWindowsScript = tasks.create("createWindowsScript", ResourceCopyTask.class, taskAction);
@@ -407,18 +407,26 @@ public class SeasideFelixServiceDistributionPlugin extends AbstractProjectPlugin
     */
    private void copyBundleConfigurations(AbstractCopyTask task, Configuration configuration) {
       Project project = task.getProject();
+      SeasideFelixServiceDistributionExtension extension = project.getExtensions()
+            .getByType(SeasideFelixServiceDistributionExtension.class);
+
       OsgiResolver osgiResolver = new OsgiResolver(project, versionSelectorscheme);
       osgiResolver.resolveAllVersions(configuration, (identifier, file) -> {
          Optional<String> symbolicName = OsgiResolver.getOsgiSymbolicName(file);
-         if (symbolicName.isPresent()) {
+         if (symbolicName.isPresent() && !extension.getBlacklist().get().contains(identifier.getDisplayName())) {
             String version = OsgiResolver.getOsgiVersion(file).get();
             String filename = symbolicName.get() + "_" + version;
             task.from(file, spec -> {
                spec.into(BUNDLES_DIRECTORY);
                spec.rename(__ -> filename + "." + FilenameUtils.getExtension(file.getName()));
             });
-         } else {
+         } else if (!symbolicName.isPresent()) {
             project.getLogger().info("Excluding file {} from dependency '{}': not an OSGi bundle",
+                                     file,
+                                     identifier.getDisplayName());
+         } else {
+            project.getLogger().info("Excluding file {} from dependency '{}': component is blacklisted",
+                                     file,
                                      identifier.getDisplayName());
          }
       });
