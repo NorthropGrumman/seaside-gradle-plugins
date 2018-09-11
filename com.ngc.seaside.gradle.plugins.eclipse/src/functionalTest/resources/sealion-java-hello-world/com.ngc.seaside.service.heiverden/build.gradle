@@ -91,6 +91,8 @@ eclipseUpdateSite {
       description = 'Eclipse Plugin for the Seaside System Descriptor'
       feature sdFeature
    }
+
+   blacklist 'commons-collections:commons-collections:3.2.2'
 }
 
 p2.remoteRepository('https://cucumber.io/cucumber-eclipse/update-site') {
@@ -108,5 +110,6 @@ dependencies {
    plugin project(':service.helloworld')
    plugin name: 'org.antlr.runtime_3.2.0.v201101311130'
    plugin 'org.glassfish:javax.json:1.1'
+   plugin 'commons-beanutils:commons-beanutils:1.9.3'
 }
 
