@@ -86,7 +86,7 @@ import static com.ngc.seaside.gradle.plugins.eclipse.BaseEclipsePlugin.UNZIP_ECL
  *    plugins name: 'org.eclipse.xtext.lib_2.12.0.v20170518-0757'
  * }
  * </pre>
- * 
+ *
  * <p>
  * Features can be added using {@link SeasideEclipseUpdateSiteExtension#feature(Action)}.
  * Example:
@@ -119,7 +119,7 @@ import static com.ngc.seaside.gradle.plugins.eclipse.BaseEclipsePlugin.UNZIP_ECL
  *    }
  * }
  * </pre>
- * 
+ *
  * <p>
  * Features can be categorized using {@link SeasideEclipseUpdateSiteExtension#category(Action)}.
  * Example:
@@ -137,7 +137,7 @@ import static com.ngc.seaside.gradle.plugins.eclipse.BaseEclipsePlugin.UNZIP_ECL
  *    }
  * }
  * </pre>
- * 
+ *
  * @see BaseEclipsePlugin
  * @see SeasideEclipseP2Plugin
  * @see SeasideEclipseUpdateSiteExtension
@@ -261,11 +261,18 @@ public class SeasideEclipseUpdateSitePlugin extends AbstractProjectPlugin {
          OsgiResolver osgiResolver = new OsgiResolver(project, versionSelectorscheme);
          osgiResolver.resolveAllVersions(plugins, (identifier, file) -> {
             Optional<String> name = BaseEclipsePlugin.getValidEclipseName(file);
-            if (name.isPresent()) {
+            if (name.isPresent() && !extension.getBlacklist().get().contains(identifier.getDisplayName())) {
                task.from(file, spec -> spec.rename(___ -> name.get()));
+            } else if (!name.isPresent()) {
+               project.getLogger().info(
+                     "Excluding file {} from dependency '{}': not an OSGi bundle",
+                     file,
+                     identifier.getDisplayName());
             } else {
-               project.getLogger().info("Excluding file {} from dependency '{}': not an OSGi bundle",
-                        file, identifier.getDisplayName());
+               project.getLogger().info(
+                     "Excluding file {} from dependency '{}': component is blacklisted",
+                     file,
+                     identifier.getDisplayName());
             }
          });
          task.into(pluginsDirectory);

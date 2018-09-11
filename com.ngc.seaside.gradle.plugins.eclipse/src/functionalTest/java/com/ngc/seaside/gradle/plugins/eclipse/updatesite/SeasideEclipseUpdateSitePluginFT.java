@@ -28,6 +28,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class SeasideEclipseUpdateSitePluginFT {
@@ -69,6 +70,7 @@ public class SeasideEclipseUpdateSitePluginFT {
       Path contentPath = updateSitePath.resolve("content.jar");
       Path updateSiteArchivePath = projectBuildDir.resolve("com.ngc.seaside.service.heiverden-1.2.3-SNAPSHOT.zip");
       Path misVersioned3rdPartyItemPath = pluginsPath.resolve("org.glassfish.javax.json_1.1.0.jar");
+      Path blacklistedComponentPath = pluginsPath.resolve("org.apache.commons.collections_3.2.2.jar");
 
       assertTrue(featuresPath + " directory was not created!", project.file(featuresPath).exists());
       assertTrue(internalFeature + " file was not created!", project.file(internalFeature).exists());
@@ -79,6 +81,8 @@ public class SeasideEclipseUpdateSitePluginFT {
       assertTrue(updateSiteArchivePath + " directory was not created!", project.file(updateSiteArchivePath).exists());
       assertTrue(misVersioned3rdPartyItemPath + " file was not created!",
                  project.file(misVersioned3rdPartyItemPath).exists());
+      assertFalse(blacklistedComponentPath + " file should not be created since it was blacklisted!",
+                  project.file(blacklistedComponentPath).exists());
    }
 
    private static File sourceDirectoryWithTheTestProject() {
