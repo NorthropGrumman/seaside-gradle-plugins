@@ -91,7 +91,7 @@ subprojects {
    }
 
    group = 'com.ngc.seaside'
-   version = '2.20.2'
+   version = '2.21.0-SNAPSHOT'
 
    // Required in order to use implementation and api dependencies with groovy
    configurations {
