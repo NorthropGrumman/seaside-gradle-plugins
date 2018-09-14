@@ -39,6 +39,7 @@ public class VersionResolver implements IResolver {
          " (?<suffix> [-\\.][A-Za-z]+ )?" +
          " (?<ending> \\2\\s*? )$",
       Pattern.MULTILINE | Pattern.COMMENTS);
+   private static final String DEFAULT_VERSION_FILENAME = "../versions.gradle";
 
    private Logger logger;
    private File versionFile;
@@ -49,7 +50,10 @@ public class VersionResolver implements IResolver {
       project = p;
       VersionResolver resolver = project.getExtensions().findByType(VersionResolver.class);
       if (resolver == null) {
-         File versionFileForRootProject = project.getRootProject().file("../versions.gradle");
+         String versionFilename = project.hasProperty("versionsFile")
+                                  ? project.property("versionsFile").toString()
+                                  : DEFAULT_VERSION_FILENAME;
+         File versionFileForRootProject = project.getRootProject().file(versionFilename);
          versionFile = versionFileForRootProject != null && versionFileForRootProject.exists()
                   ? versionFileForRootProject
                   : project.getRootProject().getBuildFile();
