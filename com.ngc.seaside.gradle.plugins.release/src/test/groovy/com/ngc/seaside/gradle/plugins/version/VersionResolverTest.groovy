@@ -21,6 +21,7 @@ import org.gradle.api.logging.Logger
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
 class VersionResolverTest {
@@ -52,7 +53,17 @@ class VersionResolverTest {
    }
 
    @Test
-   void doesGetVersionFileName() {
+   void doesGetDefaultVersionFileName() {
+      Assert.assertNotNull(resolver.versionFile)
+      Assert.assertEquals(file, resolver.versionFile)
+   }
+
+   @Test
+   void doesGetCustomVersionFileName() {
+      Mockito.when(project.hasProperty(ArgumentMatchers.anyString())).thenReturn(true)
+      Mockito.when(project.property(ArgumentMatchers.anyString())).thenReturn("custom.gradle")
+      resolver = new VersionResolver(project)
+
       Assert.assertNotNull(resolver.versionFile)
       Assert.assertEquals(file, resolver.versionFile)
    }
