@@ -78,12 +78,21 @@ class BumpVersionTask extends DefaultTask {
    }
 
    /**
-    * Get the type of release (i.e. major, minor, patch, snapshot) to be used for setting the updated version.
+    * Gets the type of release (i.e. major, minor, patch, snapshot) to be used for setting the updated version.
     *
     * @return The type of release to be performed.
     */
    ReleaseType getReleaseType() {
       return releaseType
+   }
+
+   /**
+    * Sets the type of release (i.e. major, minor, patch, snapshot) to be used for setting the updated version.
+    *
+    * @param type the type of release (i.e. major, minor, patch, snapshot) to be used for setting the updated version
+    */
+   void setReleaseType(ReleaseType type) {
+      this.releaseType = Preconditions.checkNotNull(type, "type may not be null!")
    }
 
    /**

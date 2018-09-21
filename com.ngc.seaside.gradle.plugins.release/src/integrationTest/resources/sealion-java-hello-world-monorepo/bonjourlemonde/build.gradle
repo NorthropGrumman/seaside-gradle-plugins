@@ -25,6 +25,9 @@ plugins {
     id 'com.ngc.seaside.release.root'
 }
 
+// Minor is the default value, just testing the setter.
+bumpTheVersion.releaseType = com.ngc.seaside.gradle.plugins.release.ReleaseType.MINOR
+
 subprojects {
     apply plugin: 'com.ngc.seaside.parent'
     versionSettings {
