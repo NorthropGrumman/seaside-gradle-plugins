@@ -34,11 +34,12 @@ import java.util.regex.Pattern;
 public class VersionResolver implements IResolver {
 
    private static final Pattern PATTERN = Pattern.compile(
-      "^(?<beginning> \\s*? version \\s*? = \\s*? ([\"']?) )" +
+         "^(?<beginning> \\s*? version \\s*? = \\s*? ([\"']?) )" +
          " (?<version> \\d+?(?:\\.\\d+?)+? )" +
          " (?<suffix> [-\\.][A-Za-z]+ )?" +
          " (?<ending> \\2\\s*? )$",
-      Pattern.MULTILINE | Pattern.COMMENTS);
+         Pattern.MULTILINE | Pattern.COMMENTS);
+   private static final String DEFAULT_VERSION_FILENAME = "../versions.gradle";
 
    private Logger logger;
    private File versionFile;
@@ -49,10 +50,13 @@ public class VersionResolver implements IResolver {
       project = p;
       VersionResolver resolver = project.getExtensions().findByType(VersionResolver.class);
       if (resolver == null) {
-         File versionFileForRootProject = project.getRootProject().file("../versions.gradle");
+         String versionFilename = project.hasProperty("versionsFile")
+                                  ? project.property("versionsFile").toString()
+                                  : DEFAULT_VERSION_FILENAME;
+         File versionFileForRootProject = project.getRootProject().file(versionFilename);
          versionFile = versionFileForRootProject != null && versionFileForRootProject.exists()
-                  ? versionFileForRootProject
-                  : project.getRootProject().getBuildFile();
+                       ? versionFileForRootProject
+                       : project.getRootProject().getBuildFile();
       } else {
          versionFile = resolver.versionFile;
       }
@@ -93,9 +97,9 @@ public class VersionResolver implements IResolver {
             sb.append(version);
             if (suffix == null && enforceVersionSuffix) {
                String message = String.format("Missing project version (%s%s}) suffix: %s",
-                  version,
-                  suffix,
-                  Versions.VERSION_SUFFIX);
+                                              version,
+                                              suffix,
+                                              Versions.VERSION_SUFFIX);
                throw new GradleException(message);
             } else if (suffix != null) {
                sb.append(suffix);
@@ -122,8 +126,8 @@ public class VersionResolver implements IResolver {
    public String getTagName(String tagPrefix, String versionSuffix) {
       String suffixLessProjectVersion = project.getVersion().toString();
       if (suffixLessProjectVersion.endsWith(versionSuffix)) {
-         suffixLessProjectVersion = suffixLessProjectVersion.substring(0,
-            suffixLessProjectVersion.length() - versionSuffix.length());
+         suffixLessProjectVersion =
+               suffixLessProjectVersion.substring(0, suffixLessProjectVersion.length() - versionSuffix.length());
       }
       return tagPrefix + suffixLessProjectVersion;
    }
@@ -138,14 +142,14 @@ public class VersionResolver implements IResolver {
 
    public static IVersionUpgradeStrategy resolveVersionUpgradeStrategy(ReleaseType releaseType) {
       switch (releaseType) {
-      case MAJOR:
-         return VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(Versions.VERSION_SUFFIX);
-      case MINOR:
-         return VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(Versions.VERSION_SUFFIX);
-      case PATCH:
-         return VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(Versions.VERSION_SUFFIX);
-      default:
-         return VersionUpgradeStrategyFactory.createSnapshotVersionUpgradeStrategy();
+         case MAJOR:
+            return VersionUpgradeStrategyFactory.createMajorVersionUpgradeStrategy(Versions.VERSION_SUFFIX);
+         case MINOR:
+            return VersionUpgradeStrategyFactory.createMinorVersionUpgradeStrategy(Versions.VERSION_SUFFIX);
+         case PATCH:
+            return VersionUpgradeStrategyFactory.createPatchVersionUpgradeStrategy(Versions.VERSION_SUFFIX);
+         default:
+            return VersionUpgradeStrategyFactory.createSnapshotVersionUpgradeStrategy();
       }
    }
 
