@@ -106,6 +106,9 @@ subprojects {
    plugins.withId('java') {
       sourceCompatibility = '1.8'
       targetCompatibility = '1.8'
+      tasks.withType(Jar) {
+         from file('LICENSE')
+      }
    }
 
    plugins.withId('com.github.hierynomus.license') {
