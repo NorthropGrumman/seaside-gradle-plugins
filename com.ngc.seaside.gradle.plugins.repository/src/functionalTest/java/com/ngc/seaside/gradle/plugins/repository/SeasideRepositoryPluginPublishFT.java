@@ -53,6 +53,7 @@ public class SeasideRepositoryPluginPublishFT {
 
       try {
          BuildResult result = runner.build();
+         TestingUtilities.assertTaskSuccess(result, null, "publishToMavenLocal");
          TestingUtilities.assertTaskSuccess(result, null, "publish");
       } catch (Exception e) {
          e.printStackTrace(new PasswordHidingWriter(System.err));
