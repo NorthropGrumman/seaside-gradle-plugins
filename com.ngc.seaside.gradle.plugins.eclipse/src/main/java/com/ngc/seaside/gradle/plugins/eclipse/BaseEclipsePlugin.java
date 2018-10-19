@@ -72,9 +72,12 @@ public class BaseEclipsePlugin extends AbstractProjectPlugin {
     */
    public static final String UNZIP_ECLIPSE_TASK_NAME = "unzipEclipse";
 
-   private static final Pattern FILE_NAME_REGEX = Pattern.compile("(?<name>\\w+?(?:\\.\\w+?)*?)[\\.\\-_]"
-                                                                        + "(?<version>\\d+?(?:\\.\\d+?)*?(?:[\\.\\-_]\\w+?)?)\\.(?<extension>jar)");
-   private static final Pattern VERSION_REGEX = Pattern.compile("\\d+?(?:\\.\\d+?)*?(?:[\\-_]\\w+?)?");
+   private static final Pattern FILE_NAME_REGEX =
+            Pattern.compile("(?<name>\\w+?(?:\\.\\w+?)*?)[\\.\\-_]"
+                     + "(?<versionNumber>\\d+?(?:\\.\\d+?){0,2})"
+                     + "([\\._\\-](?<versionQualifier>[\\w\\-\\.]+?))?\\.(?<extension>jar)");
+   private static final Pattern VERSION_REGEX = Pattern.compile("(?<versionNumber>\\d+?(?:\\.\\d+?){0,2})"
+            + "([\\._\\-](?<versionQualifier>[\\w\\-\\.]+?))?");
 
    @Override
    protected void doApply(Project project) {
@@ -141,9 +144,11 @@ public class BaseEclipsePlugin extends AbstractProjectPlugin {
       Matcher m = FILE_NAME_REGEX.matcher(fileName);
       if (m.matches()) {
          String name = m.group("name");
-         String version = m.group("version").replace('-', '.').replace('_', '.');
+         String versionNumber = m.group("versionNumber");
+         String versionQualifier = m.group("versionQualifier");
+         versionQualifier = versionQualifier == null ? "" : ("." + versionQualifier.replace('.', '-'));
          String extension = m.group("extension");
-         return Optional.of(name + "_" + version + "." + extension);
+         return Optional.of(name + "_" + versionNumber + versionQualifier + "." + extension);
       }
       return Optional.empty();
    }
@@ -158,7 +163,10 @@ public class BaseEclipsePlugin extends AbstractProjectPlugin {
    public static Optional<String> getValidEclipseVersion(String version) {
       Matcher m = VERSION_REGEX.matcher(version);
       if (m.matches()) {
-         return Optional.of(version.replace('-', '.').replace('_', '.'));
+         String versionNumber = m.group("versionNumber");
+         String versionQualifier = m.group("versionQualifier");
+         versionQualifier = versionQualifier == null ? "" : ("." + versionQualifier.replace('.', '-'));
+         return Optional.of(versionNumber + versionQualifier);
       }
       return Optional.empty();
    }
