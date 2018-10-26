@@ -91,7 +91,7 @@ subprojects {
    }
 
    group = 'com.ngc.seaside'
-   version = '2.22.2-SNAPSHOT'
+   version = '2.22.3-SNAPSHOT'
 
    // Required in order to use implementation and api dependencies with groovy
    configurations {
@@ -186,9 +186,14 @@ subprojects {
    }
 
    publishing {
-      publications {
-         mavenJava(MavenPublication) {
-            from components.java
+      // Do no do this if the java-gradle-plugin is applied because it will do this automatically.
+      // If this is declared twice, you can get errors during a release because artifacts are being uploaded
+      // multiple times.
+      if (!isPlugin) {
+         publications {
+            mavenJava(MavenPublication) {
+               from components.java
+            }
          }
       }
 
