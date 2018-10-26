@@ -63,7 +63,7 @@ public class SeasideRootParentPluginFT {
             .withNexusProperties()
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments("clean", SeasideRootParentPlugin.LICENSE_FORMAT_GRADLE_SCRIPTS_TASK_NAME)
+            .withArguments("clean", SeasideRootParentPlugin.LICENSE_FORMAT_GRADLE_SCRIPTS_TASK_NAME, "--rerun-tasks")
             .build();
 
       assertEquals(TaskOutcome.valueOf("SUCCESS"),

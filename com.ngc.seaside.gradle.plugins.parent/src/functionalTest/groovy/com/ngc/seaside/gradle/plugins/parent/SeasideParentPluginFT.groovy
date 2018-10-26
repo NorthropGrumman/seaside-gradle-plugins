@@ -95,6 +95,7 @@ class SeasideParentPluginFT {
             .withArguments("clean", "ci")
             .build()
 
-      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"), result.task(":service.helloworld:install").getOutcome())
+      Assert.assertEquals(TaskOutcome.valueOf("SUCCESS"),
+                          result.task(":service.helloworld:publishToMavenLocal").getOutcome())
    }
 }

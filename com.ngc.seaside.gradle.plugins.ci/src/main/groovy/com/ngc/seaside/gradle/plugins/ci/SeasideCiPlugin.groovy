@@ -23,7 +23,9 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.logging.configuration.ShowStacktrace
 import org.gradle.api.plugins.quality.Checkstyle
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.bundling.Zip
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 /**
  * This plugin is applied to projects to make CI easier.
@@ -252,8 +254,8 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             CONTINUOUS_INTEGRATION_TASK_NAME,
             type: Checkstyle, //made it of this type so that it works in conjuction with checksytle plugin
             group: AUDITING_TASK_GROUP_NAME,
-            description: 'does build, install, checkstyleMain, checkstyleTest, -Pfail-on-checkstyle-error=true, ' +
-                         '--refresh-dependencies, -S --continue'
+            description: 'does build, publishToMavenLocal, checkstyleMain, checkstyleTest, ' +
+                         '-Pfail-on-checkstyle-error=true, --refresh-dependencies, -S --continue'
       )
       // We do this after the project has been evaluated so the order the plugins are applied does not manner.
       // Otherwise this plugin could not be applied to all the other tasks where created.
@@ -267,7 +269,10 @@ class SeasideCiPlugin extends AbstractProjectPlugin {
             })
          }
          // do not make clean a dependency it seems to run after all the other task have been run
-         def tasks = getOptionalTasks("build", "checkstyleMain", "checkstyleTest", "install")
+         def tasks = getOptionalTasks(LifecycleBasePlugin.BUILD_TASK_NAME,
+                                      "checkstyleMain",
+                                      "checkstyleTest",
+                                      MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME)
          ci.dependsOn(tasks)
       }
    }

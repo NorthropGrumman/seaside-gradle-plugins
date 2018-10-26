@@ -94,9 +94,7 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
          TaskContainer tasks = project.getTasks();
          ExtensionContainer extensions = project.getExtensions();
          project.getLogger().lifecycle(project.getName() + ": Setting project version to " + project.getVersion());
-         /**
-          * Ensure to add the doclint option to the javadoc task if using Java 8.
-          */
+         // Ensure to add the doclint option to the javadoc task if using Java 8.
          if (JavaVersion.current().isJava8Compatible()) {
             tasks.named(JavaPlugin.JAVADOC_TASK_NAME).configure(task -> {
                CoreJavadocOptions options = (CoreJavadocOptions) ((Javadoc) task).getOptions();
@@ -115,18 +113,14 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
             task.setOutputDir("build/" + DEPENDENCY_UPDATES_TASK_NAME);
          });
          tasks.withType(Jar.class).named(SOURCE_JAR_TASK_NAME).configure(task -> {
-            // TODO: is this necessary?
-            //task.setArchiveName(project.getGroup() + "." + project.getName() + "-" + project.getVersion() + "-"
-            //         + task.getClassifier() + ".jar");
+            task.setArchiveName(project.getGroup() + "." + project.getName() + "-" + project.getVersion() + "-"
+                     + task.getClassifier() + ".jar");
          });
          tasks.withType(Jar.class).named(JAVADOC_JAR_TASK_NAME).configure(task -> {
-            // TODO: is this necessary?
-            System.out.println("------------------------------------HERE_");
             task.setArchiveName(project.getGroup() + "." + project.getName() + "-" + project.getVersion() + "-"
                      + task.getClassifier() + ".jar");
          });
          tasks.withType(Jar.class).named(JavaPlugin.JAR_TASK_NAME).configure(task -> {
-            // TODO: is this necessary?
             task.setArchiveName(project.getGroup() + "." + project.getName() + "-" + project.getVersion() + ".jar");
             // TODO: can we just apply the bnd plugin here?
             task.manifest(manifest -> {

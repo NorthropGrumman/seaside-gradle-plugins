@@ -84,14 +84,14 @@ subprojects {
 
    apply plugin: 'java-library'
    apply plugin: 'groovy'
-   apply plugin: 'maven'
+   apply plugin: 'maven-publish'
    apply plugin: 'com.github.hierynomus.license'
    if (isPlugin) {
       apply plugin: 'java-gradle-plugin'
    }
 
    group = 'com.ngc.seaside'
-   version = '2.23.0-SNAPSHOT'
+   version = '2.22.1-SNAPSHOT'
 
    // Required in order to use implementation and api dependencies with groovy
    configurations {
@@ -185,19 +185,20 @@ subprojects {
       archives javadocJar
    }
 
-   //define the nexus release repositories
-   uploadArchives {
+   publishing {
+      publications {
+         mavenJava(MavenPublication) {
+            from components.java
+         }
+      }
+
       repositories {
-         mavenDeployer {
-            // Use the main repo for full releases.
-            repository(url: nexusReleases) {
-               // Make sure that nexusUsername and nexusPassword are in your
-               // ${gradle.user.home}/gradle.properties file.
-               authentication(userName: nexusUsername, password: nexusPassword)
-            }
-            // If the version has SNAPSHOT in the name, use the snapshot repo.
-            snapshotRepository(url: nexusSnapshots) {
-               authentication(userName: nexusUsername, password: nexusPassword)
+         maven {
+            name = version.endsWith('-SNAPSHOT') ? 'NexusSnapshots' : 'NexusReleases'
+            url = version.endsWith('-SNAPSHOT') ? nexusSnapshots : nexusReleases
+            credentials {
+               username nexusUsername
+               password nexusPassword
             }
          }
       }
