@@ -17,8 +17,11 @@
 package com.ngc.seaside.gradle.plugins.command
 
 import com.ngc.seaside.gradle.api.AbstractProjectPlugin
+import com.ngc.seaside.gradle.plugins.maven.SeasideMavenPlugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.api.tasks.bundling.Zip
@@ -67,6 +70,13 @@ class SeasideCommandPlugin extends AbstractProjectPlugin {
                   commandTemplate taskResolver.findTask("createTemplate")
                }
 
+               project.getPlugins().withType(SeasideMavenPlugin) {
+                  def publishing = project.getExtensions().getByType(PublishingExtension)
+                  def pub = (MavenPublication) publishing.publications
+                        .getByName(SeasideMavenPlugin.MAVEN_JAVA_PUBLICATION_NAME)
+                  pub.artifact(taskResolver.findTask("createTemplate"))
+               }
+
                getOptionalTasks(MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME,
                                 PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME)
                      .forEach({ task -> task.dependsOn(taskResolver.findTask("createTemplate")) })
@@ -80,6 +90,13 @@ class SeasideCommandPlugin extends AbstractProjectPlugin {
                   artifacts {
                      archives project["createTemplate${name}"]
                      commandTemplate project["createTemplate${name}"]
+                  }
+
+                  project.getPlugins().withType(SeasideMavenPlugin) {
+                     def publishing = project.getExtensions().getByType(PublishingExtension)
+                     def pub = (MavenPublication) publishing.publications
+                           .getByName(SeasideMavenPlugin.MAVEN_JAVA_PUBLICATION_NAME)
+                     pub.artifact(project["createTemplate${name}"])
                   }
 
                   getOptionalTasks(MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME,

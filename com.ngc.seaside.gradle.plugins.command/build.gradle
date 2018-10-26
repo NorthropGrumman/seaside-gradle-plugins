@@ -18,6 +18,7 @@ dependencies {
    api gradleApi()
    implementation localGroovy()
    implementation project(':gradle.plugins.base')
+   implementation project(':gradle.plugins.repository')
 
    testRuntime project(':gradle.plugins.repository')
    testImplementation project(':gradle.plugins.testutils')
