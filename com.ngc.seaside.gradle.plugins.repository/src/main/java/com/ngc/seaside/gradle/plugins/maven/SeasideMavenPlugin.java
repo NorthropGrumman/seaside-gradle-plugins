@@ -27,6 +27,7 @@ import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.api.publish.plugins.PublishingPlugin;
 import org.gradle.api.tasks.TaskContainer;
+import org.gradle.plugin.devel.plugins.JavaGradlePluginPlugin;
 
 /**
  * Convenience plugin for configuring the {@link MavenPublishPlugin maven-publish plugin}. This plugin will prevent
@@ -49,14 +50,19 @@ public class SeasideMavenPlugin extends AbstractProjectPlugin {
       project.getPlugins().withType(MavenPlugin.class, plugin -> {
          throw new GradleException("maven plugin cannot be applied with the Seaside Maven Plugin");
       });
-      project.getPlugins().withType(JavaPlugin.class, plugin -> {
-         PublishingExtension extension = project.getExtensions().getByType(PublishingExtension.class);
-         extension.publications(publications -> {
-            publications.create(MAVEN_JAVA_PUBLICATION_NAME, MavenPublication.class, publication -> {
-               publication.from(project.getComponents().getByName("java"));
+      // Do not do this logic if the MavenPublishPluginPlugin is applied.  This plugin is applied by the
+      // java-gradle-plugin.  If we don't do this, multiple publications with the same GAVs are configured which
+      // results in issues during uploads of releases.
+      if (!project.getPlugins().hasPlugin(JavaGradlePluginPlugin.class)) {
+         project.getPlugins().withType(JavaPlugin.class, plugin -> {
+            PublishingExtension extension = project.getExtensions().getByType(PublishingExtension.class);
+            extension.publications(publications -> {
+               publications.create(MAVEN_JAVA_PUBLICATION_NAME, MavenPublication.class, publication -> {
+                  publication.from(project.getComponents().getByName("java"));
+               });
             });
          });
-      });
+      }
    }
 
    private void configureTasks(Project project) {
