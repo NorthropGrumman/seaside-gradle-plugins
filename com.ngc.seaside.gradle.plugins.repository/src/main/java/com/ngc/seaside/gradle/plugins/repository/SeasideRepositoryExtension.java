@@ -18,6 +18,8 @@ package com.ngc.seaside.gradle.plugins.repository;
 
 import com.ngc.seaside.gradle.util.Versions;
 
+import groovy.lang.Closure;
+
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.ProjectConfigurationException;
@@ -34,13 +36,11 @@ import org.gradle.api.tasks.Upload;
 
 import java.util.Objects;
 
-import groovy.lang.Closure;
-
 /**
  * Extension for the {@link SeasideRepositoryPlugin}. This extension allows for the customization of repository
  * configuration using {@link RepositoryConfiguration}. These configuration can be set for the consolidated, releases, and
  * snapshosts repositories.
- * 
+ *
  * <p>
  * By default, the extension will instruct the plugin to generate the maven local and consolidated repositories for the
  * project. If the {@link MavenPlugin maven} plugin or {@link MavenPublishPlugin maven-publish} plugin is applied and
@@ -60,11 +60,13 @@ public class SeasideRepositoryExtension {
    public static final String DEFAULT_REMOTE_MAVEN_USERNAME_PROPERTY = "nexusUsername";
    public static final String DEFAULT_REMOTE_MAVEN_PASSWORD_PROPERTY = "nexusPassword";
 
-   private final static String MISSING_PROPERTY_ERROR_MESSAGE = "the property '%s' is not set!  Please ensure this property is set.  These type of properties"
-      + " can be set in $GRADLE_USER_HOME/gradle.properties.  Note that $GRADLE_USER_HOME is not necessarily"
-      + " the directory where Gradle is installed.  If $GRADLE_USER_HOME is not set, gradle.properties can"
-      + " usually be found in $USER/.gradle/.  You can check which properties are set by running"
-      + " 'gradle properties'.";
+   private final static String
+         MISSING_PROPERTY_ERROR_MESSAGE =
+         "the property '%s' is not set!  Please ensure this property is set.  These type of properties"
+               + " can be set in $GRADLE_USER_HOME/gradle.properties.  Note that $GRADLE_USER_HOME is not necessarily"
+               + " the directory where Gradle is installed.  If $GRADLE_USER_HOME is not set, gradle.properties can"
+               + " usually be found in $USER/.gradle/.  You can check which properties are set by running"
+               + " 'gradle properties'.";
 
    private final Project project;
    private boolean configured = false;
@@ -82,7 +84,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Constructs the extension, setting the default values for the repository configuration.
-    * 
+    *
     * @param project project
     */
    public SeasideRepositoryExtension(Project project) {
@@ -124,9 +126,9 @@ public class SeasideRepositoryExtension {
       project.getGradle().getTaskGraph().whenReady(graph -> {
          if (automaticallyResolveUploadRequirements) {
             boolean mavenUpload = graph.hasTask(BasePlugin.UPLOAD_ARCHIVES_TASK_NAME)
-               && project.getPlugins().hasPlugin(MavenPlugin.class);
+                  && project.getPlugins().hasPlugin(MavenPlugin.class);
             boolean mavenPublish = graph.hasTask(PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME)
-               && project.getPlugins().hasPlugin(MavenPublishPlugin.class);
+                  && project.getPlugins().hasPlugin(MavenPublishPlugin.class);
             if (mavenUpload || mavenPublish) {
                RepositoryConfiguration uploadConfig = getUploadConfiguration();
                if (!uploadConfig.isRequired()) {
@@ -178,7 +180,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Returns whether or not the plugin should generate repositories for the project's build script.
-    * 
+    *
     * @return whether or not the plugin should generate repositories for the project's build script
     */
    public boolean isGenerateBuildScriptRepositories() {
@@ -187,7 +189,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Sets whether or not the plugin should generate repositories for the project's build script
-    * 
+    *
     * @param generateBuildScriptRepositories if the plugin should generate repositories for the project's build script
     * @return this
     */
@@ -199,7 +201,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Returns whether or not the plugin should generate repositories for the project.
-    * 
+    *
     * @return whether or not the plugin should generate repositories for the project
     */
    public boolean isGenerateProjectRepositories() {
@@ -208,7 +210,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Sets whether or not the plugin should generate repositories for the project.
-    * 
+    *
     * @param generateProjectRepositories if the plugin should generate repositories for the project
     * @return this
     */
@@ -220,7 +222,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Returns whether or not the plugin should generate repositories for the project's maven upload repositories.
-    * 
+    *
     * @return whether or not the plugin should generate repositories for the project's maven upload repositories
     */
    public boolean isGenerateMavenUploadRepositories() {
@@ -229,9 +231,9 @@ public class SeasideRepositoryExtension {
 
    /**
     * Sets whether or not the plugin should generate repositories for the project's maven upload repositories.
-    * 
+    *
     * @param generateMavenUploadRepositories if the plugin should generate repositories for the project's maven
-    *           upload repositories
+    *                                        upload repositories
     * @return this
     */
    public SeasideRepositoryExtension setGenerateMavenUploadRepositories(boolean generateMavenUploadRepositories) {
@@ -242,7 +244,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Returns whether or not the plugin should generate repositories for the project's maven publish repositories.
-    * 
+    *
     * @return whether or not the plugin should generate repositories for the project's maven publish repositories
     */
    public boolean isGenerateMavenPublishRepositories() {
@@ -251,9 +253,9 @@ public class SeasideRepositoryExtension {
 
    /**
     * Sets whether or not the plugin should generate repositories for the project's maven publish repositories.
-    * 
+    *
     * @param generateMavenPublishRepositories if the plugin should generate repositories for the project's maven
-    *           publish repositories
+    *                                         publish repositories
     * @return this
     */
    public SeasideRepositoryExtension setGenerateMavenPublishRepositories(boolean generateMavenPublishRepositories) {
@@ -264,7 +266,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Returns whether or not the plugin should include maven local as a repository when creating repositories.
-    * 
+    *
     * @return whether or not the plugin should include maven local as a repository when creating repositories
     */
    public boolean isIncludeMavenLocal() {
@@ -273,7 +275,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Sets whether or not the plugin should include maven local as a repository when creating repositories
-    * 
+    *
     * @param include whether or not the plugin should include maven local as a repository when creating repositories
     */
    public SeasideRepositoryExtension setIncludeMavenLocal(boolean include) {
@@ -288,7 +290,7 @@ public class SeasideRepositoryExtension {
     * {@link MavenPublishPlugin maven-publish} plugin have been applied and their corresponding upload/publish task will
     * be executed. If the check passes, then the plugin will require either the snapshots or releases configuration
     * properties (depending on the version) and will create the corresponding repository.
-    * 
+    *
     * @return whether or not the plugin should automatically resolve the upload repository configurations
     */
    public boolean isAutomaticallyResolveUploadRequirements() {
@@ -298,20 +300,20 @@ public class SeasideRepositoryExtension {
    /**
     * Sets whether or not the plugin should automatically resolve whether upload repository configurations are required
     * or not.
-    * 
-    * @see #isAutomaticallyResolveUploadRequirements()
+    *
     * @param conditional whether or not the plugin should automatically resolve the upload repository configurations
     * @return this
+    * @see #isAutomaticallyResolveUploadRequirements()
     */
    public SeasideRepositoryExtension setAutomaticallyResolveUploadRequirements(
-            boolean conditional) {
+         boolean conditional) {
       this.automaticallyResolveUploadRequirements = conditional;
       return this;
    }
 
    /**
     * Returns the repository configuration for the consolidated repository.
-    * 
+    *
     * @return the repository configuration for the consolidated repository
     */
    public RepositoryConfiguration getConsolidatedConfiguration() {
@@ -320,7 +322,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Returns the repository configuration for the releases repository.
-    * 
+    *
     * @return the repository configuration for the releases repository
     */
    public RepositoryConfiguration getReleasesConfiguration() {
@@ -329,7 +331,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Returns the repository configuration for the snapshots repository.
-    * 
+    *
     * @return the repository configuration for the snapshots repository
     */
    public RepositoryConfiguration getSnapshotsConfiguration() {
@@ -340,7 +342,7 @@ public class SeasideRepositoryExtension {
     * Returns the repository configuration for the uploading repository. This will be either the
     * {@link #getReleasesConfiguration() releases configuration} or
     * {@link #getSnapshotsConfiguration() snapshots configuration} depending on the project version.
-    * 
+    *
     * @return the repository configuration for the uploading repository
     */
    public RepositoryConfiguration getUploadConfiguration() {
@@ -349,7 +351,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Sets the repository configuration for the consolidated repository.
-    * 
+    *
     * @param configuration the repository configuration
     * @return this
     */
@@ -361,7 +363,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Sets the repository configuration for the releases repository.
-    * 
+    *
     * @param configuration the repository configuration
     * @return this
     */
@@ -373,7 +375,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Sets the repository configuration for the snapshots repository.
-    * 
+    *
     * @param configuration the repository configuration
     * @return this
     */
@@ -385,7 +387,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Applies the given action to the consolidated, releases, and snapshots repository configuration.
-    * 
+    *
     * @param action action to execute
     * @return this
     */
@@ -393,15 +395,15 @@ public class SeasideRepositoryExtension {
       checkNotConfigured();
       Objects.requireNonNull(action, "action cannot be null");
       action.execute(
-         new RepositoryConfigurationWrapper(this::checkNotConfigured, consolidatedConfig, releasesConfig,
-            snapshotsConfig));
+            new RepositoryConfigurationWrapper(this::checkNotConfigured, consolidatedConfig, releasesConfig,
+                                               snapshotsConfig));
       return this;
    }
 
    /**
     * Applies the given closure to the consolidated, releases, and snapshots repository configuration. The argument type
     * of the closure is {@link RepositoryConfiguration}.
-    * 
+    *
     * @param c closure to call
     * @return this
     */
@@ -413,7 +415,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Applies the given action to the releases and snapshots repository configuration.
-    * 
+    *
     * @param action action to execute
     * @return this
     */
@@ -427,7 +429,7 @@ public class SeasideRepositoryExtension {
    /**
     * Applies the given closure to the releases and snapshots repository configuration. The argument type of the closure
     * is {@link RepositoryConfiguration}.
-    * 
+    *
     * @param c closure to call
     * @return this
     */
@@ -439,7 +441,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Applies the given action to the consolidated repository configuration.
-    * 
+    *
     * @param action action to execute
     * @return this
     */
@@ -453,7 +455,7 @@ public class SeasideRepositoryExtension {
    /**
     * Applies the given closure to the consolidated repository configuration. The argument type of the closure
     * is {@link RepositoryConfiguration}.
-    * 
+    *
     * @param c closure to call
     * @return this
     */
@@ -466,7 +468,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Applies the given action to the releases repository configuration.
-    * 
+    *
     * @param action action to execute
     * @return this
     */
@@ -480,7 +482,7 @@ public class SeasideRepositoryExtension {
    /**
     * Applies the given closure to the releases repository configuration. The argument type of the closure
     * is {@link RepositoryConfiguration}.
-    * 
+    *
     * @param c closure to call
     * @return this
     */
@@ -493,7 +495,7 @@ public class SeasideRepositoryExtension {
 
    /**
     * Applies the given action to the snapshots repository configuration.
-    * 
+    *
     * @param action action to execute
     * @return this
     */
@@ -507,7 +509,7 @@ public class SeasideRepositoryExtension {
    /**
     * Applies the given closure to the snapshots repository configuration. The argument type of the closure
     * is {@link RepositoryConfiguration}.
-    * 
+    *
     * @param c closure to call
     * @return this
     */
@@ -535,8 +537,8 @@ public class SeasideRepositoryExtension {
       project.getLogger().info("Creating consolidated repositories for maven upload tasks");
       Upload uploadArchives = (Upload) project.getTasks().getByName(BasePlugin.UPLOAD_ARCHIVES_TASK_NAME);
       MavenRepositoryHandlerConvention convention = ((HasConvention) uploadArchives.getRepositories()).getConvention()
-                                                                                                      .getPlugin(
-                                                                                                         MavenRepositoryHandlerConvention.class);
+            .getPlugin(
+                  MavenRepositoryHandlerConvention.class);
       convention.mavenDeployer(deployer -> {
          Object repo = getRemoteRepository(uploadConfig, deployer.getClass().getClassLoader());
          if (repo != null) {
@@ -557,7 +559,8 @@ public class SeasideRepositoryExtension {
       if (url == null) {
          return null;
       }
-      project.getLogger().info("Setting up remote repository {} with url {} and username {}", repositoryName, url, username);
+      project.getLogger()
+            .info("Setting up remote repository {} with url {} and username {}", repositoryName, url, username);
       try {
          Class<?> remoteRepositoryClass = loader.loadClass("org.apache.maven.artifact.ant.RemoteRepository");
          Class<?> authenticationClass = loader.loadClass("org.apache.maven.artifact.ant.Authentication");
@@ -585,13 +588,12 @@ public class SeasideRepositoryExtension {
    private void configureMavenPublishRepositories(RepositoryConfiguration uploadConfig) {
       project.getPlugins().apply(MavenPublishPlugin.class);
       project.getLogger().info("Creating consolidated repositories for maven publish");
-      project.getExtensions().configure(PublishingExtension.class, convention -> {
-         convention.repositories(handler -> createRepositories(project, uploadConfig, handler, false));
-      });
+      PublishingExtension extension = project.getExtensions().getByType(PublishingExtension.class);
+      extension.repositories(handler -> createRepositories(project, uploadConfig, handler, false));
    }
 
    private void createRepositories(Project project, RepositoryConfiguration config, RepositoryHandler handler,
-            boolean includeMavenLocal) {
+                                   boolean includeMavenLocal) {
       if (includeMavenLocal) {
          handler.mavenLocal();
       }
@@ -633,7 +635,7 @@ public class SeasideRepositoryExtension {
       }
       if (!project.hasProperty(property)) {
          throw new ProjectConfigurationException(String.format(MISSING_PROPERTY_ERROR_MESSAGE, property),
-            null);
+                                                 null);
       }
    }
 
@@ -651,8 +653,8 @@ public class SeasideRepositoryExtension {
    private void checkNotConfigured() {
       if (configured) {
          throw new PluginInstantiationException(
-            "The com.ngc.seaside.repository plugin has already configured the repositories; " + NAME
-               + " extension cannot not be modified");
+               "The com.ngc.seaside.repository plugin has already configured the repositories; " + NAME
+                     + " extension cannot not be modified");
       }
    }
 

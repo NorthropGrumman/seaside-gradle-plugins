@@ -50,11 +50,10 @@ public class SeasideMavenPlugin extends AbstractProjectPlugin {
          throw new GradleException("maven plugin cannot be applied with the Seaside Maven Plugin");
       });
       project.getPlugins().withType(JavaPlugin.class, plugin -> {
-         project.getExtensions().configure(PublishingExtension.class, extension -> {
-            extension.publications(publications -> {
-               publications.create(MAVEN_JAVA_PUBLICATION_NAME, MavenPublication.class, publication -> {
-                  publication.from(project.getComponents().getByName("java"));
-               });
+         PublishingExtension extension = project.getExtensions().getByType(PublishingExtension.class);
+         extension.publications(publications -> {
+            publications.create(MAVEN_JAVA_PUBLICATION_NAME, MavenPublication.class, publication -> {
+               publication.from(project.getComponents().getByName("java"));
             });
          });
       });
@@ -66,19 +65,22 @@ public class SeasideMavenPlugin extends AbstractProjectPlugin {
          task.dependsOn(MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME);
          task.setDescription("Alias for " + MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME);
          task.doFirst(__ -> task.getLogger().warn("install task is deprecated; use "
-                  + MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME + " task instead"));
+                                                        + MavenPublishPlugin.PUBLISH_LOCAL_LIFECYCLE_TASK_NAME
+                                                        + " task instead"));
       });
       tasks.register("upload", task -> {
          task.dependsOn(PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME);
          task.setDescription("Alias for " + PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME);
          task.doFirst(__ -> task.getLogger().warn(task.getName() + " task is deprecated; use "
-                  + PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME + " task instead"));
+                                                        + PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME
+                                                        + " task instead"));
       });
       tasks.register("uploadArchives", task -> {
          task.dependsOn(PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME);
          task.setDescription("Alias for " + PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME);
          task.doFirst(__ -> task.getLogger().warn(task.getName() + " task is deprecated; use "
-                  + PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME + " task instead"));
+                                                        + PublishingPlugin.PUBLISH_LIFECYCLE_TASK_NAME
+                                                        + " task instead"));
       });
    }
 

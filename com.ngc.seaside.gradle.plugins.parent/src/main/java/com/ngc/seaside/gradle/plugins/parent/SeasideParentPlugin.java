@@ -108,17 +108,17 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
             });
          }
          extensions.getByType(ExtraPropertiesExtension.class).set("bundleName",
-                  project.getGroup() + "." + project.getName());
+                                                                  project.getGroup() + "." + project.getName());
          tasks.withType(DependencyUpdatesTask.class).named(DEPENDENCY_UPDATES_TASK_NAME).configure(task -> {
             task.setOutputDir("build/" + DEPENDENCY_UPDATES_TASK_NAME);
          });
          tasks.withType(Jar.class).named(SOURCE_JAR_TASK_NAME).configure(task -> {
             task.setArchiveName(project.getGroup() + "." + project.getName() + "-" + project.getVersion() + "-"
-                     + task.getClassifier() + ".jar");
+                                      + task.getClassifier() + ".jar");
          });
          tasks.withType(Jar.class).named(JAVADOC_JAR_TASK_NAME).configure(task -> {
             task.setArchiveName(project.getGroup() + "." + project.getName() + "-" + project.getVersion() + "-"
-                     + task.getClassifier() + ".jar");
+                                      + task.getClassifier() + ".jar");
          });
          tasks.withType(Jar.class).named(JavaPlugin.JAR_TASK_NAME).configure(task -> {
             task.setArchiveName(project.getGroup() + "." + project.getName() + "-" + project.getVersion() + ".jar");
@@ -128,13 +128,13 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
                manifest.getAttributes().put("Bundle-Name", bundleName.toString());
                manifest.getAttributes().put("Bundle-SymbolicName", bundleName.toString());
                manifest.getAttributes().put("Bundle-Version",
-                        Versions.makeOsgiCompliantVersion(project.getVersion().toString()));
+                                            Versions.makeOsgiCompliantVersion(project.getVersion().toString()));
             });
          });
          extensions.getByType(SonarQubeExtension.class).properties(properties -> {
             if (new File(project.getBuildDir().getPath() + "/jacoco/test.exec").exists()) {
                properties.property("sonar.jacoco.reportPaths",
-                        Collections.singletonList(project.getBuildDir().getPath() + "/jacoco/test.exec"));
+                                   Collections.singletonList(project.getBuildDir().getPath() + "/jacoco/test.exec"));
             }
             Object bundleName = extensions.getByType(ExtraPropertiesExtension.class).get("bundleName");
             properties.property("sonar.projectName", bundleName.toString());
@@ -148,7 +148,7 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
 
    /**
     * This will get the current working branch to pass to sonarqube
-    * 
+    *
     * @return String with of the Git Branch you are on otherwise an empty string
     */
    private String getBranchName(Project project) {
@@ -204,12 +204,11 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
          task.from(convention.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME).getAllSource());
          task.setGroup(PARENT_TASK_GROUP_NAME);
          task.dependsOn(JavaPlugin.CLASSES_TASK_NAME);
-         extensions.configure(PublishingExtension.class, extension -> {
-            extension.publications(publications -> {
-               MavenPublication publication =
-                        (MavenPublication) publications.getByName(SeasideMavenPlugin.MAVEN_JAVA_PUBLICATION_NAME);
-               publication.artifact(task);
-            });
+         PublishingExtension extension = extensions.getByType(PublishingExtension.class);
+         extension.publications(publications -> {
+            MavenPublication publication = (MavenPublication) publications
+                  .getByName(SeasideMavenPlugin.MAVEN_JAVA_PUBLICATION_NAME);
+            publication.artifact(task);
          });
       });
       tasks.register(JAVADOC_JAR_TASK_NAME, Jar.class, task -> {
@@ -217,12 +216,11 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
          task.from(tasks.named(JavaPlugin.JAVADOC_TASK_NAME));
          task.setGroup(PARENT_TASK_GROUP_NAME);
          task.dependsOn(JavaPlugin.JAVADOC_TASK_NAME, JavaPlugin.CLASSES_TASK_NAME);
-         extensions.configure(PublishingExtension.class, extension -> {
-            extension.publications(publications -> {
-               MavenPublication publication =
-                        (MavenPublication) publications.getByName(SeasideMavenPlugin.MAVEN_JAVA_PUBLICATION_NAME);
-               publication.artifact(task);
-            });
+         PublishingExtension extension = extensions.getByType(PublishingExtension.class);
+         extension.publications(publications -> {
+            MavenPublication publication = (MavenPublication) publications
+                  .getByName(SeasideMavenPlugin.MAVEN_JAVA_PUBLICATION_NAME);
+            publication.artifact(task);
          });
       });
 
@@ -242,7 +240,7 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
          task.setDescription("Remove unused dependencies from dependencies folder.");
          task.doLast(__ -> {
             DownloadDependenciesTask downloadDependencies =
-                     (DownloadDependenciesTask) tasks.getByName(DOWNLOAD_DEPENDENCIES_TASK_NAME);
+                  (DownloadDependenciesTask) tasks.getByName(DOWNLOAD_DEPENDENCIES_TASK_NAME);
             final File localRepo = task.getLocalRepository();
             File otherRepo = downloadDependencies.getLocalRepository();
             if (otherRepo == null) {
@@ -251,7 +249,7 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
             final File actualRepo = localRepo;
             extensions.getByType(ExtraPropertiesExtension.class).set("actualRepository", actualRepo);
             project.getLogger().info("Moving cleaned up repository from " + localRepo.getAbsolutePath() + " to "
-                     + actualRepo.getAbsolutePath() + ".");
+                                           + actualRepo.getAbsolutePath() + ".");
             project.delete(actualRepo);
             project.copy(spec -> {
                spec.from(localRepo);
@@ -262,7 +260,7 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
       });
       tasks.register(DEPENDENCY_REPORT_TASK_NAME, DependencyReportTask.class, task -> {
          task.setDescription(
-                  "Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies");
+               "Lists all dependencies. Use -DshowTransitive=<bool> to show/hide transitive dependencies");
       });
       tasks.register(ALL_TASK_NAME, task -> {
          task.dependsOn(LifecycleBasePlugin.BUILD_TASK_NAME, JAVADOC_JAR_TASK_NAME, SOURCE_JAR_TASK_NAME);
