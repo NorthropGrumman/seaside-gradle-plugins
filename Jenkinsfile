@@ -24,9 +24,9 @@ pipeline {
    }
 
    environment {
-      // Specific the JDK required here.
-	   JAVA_HOME = "${JAVA_10_HOME}"
-      PATH = "${JAVA_10_HOME}/bin:${PATH}"
+      // Specify the JDK required here.
+      JAVA_HOME = "${JAVA_11_HOME}"
+      PATH = "${JAVA_11_HOME}/bin:${PATH}"
    }
 
    parameters {
