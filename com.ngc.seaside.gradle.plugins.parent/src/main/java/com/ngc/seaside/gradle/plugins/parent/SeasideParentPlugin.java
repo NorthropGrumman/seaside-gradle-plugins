@@ -3,10 +3,10 @@
  * Northrop Grumman Proprietary
  * ____________________________
  *
- * Copyright (C) 2018, Northrop Grumman Systems Corporation
+ * Copyright (C) 2019, Northrop Grumman Systems Corporation
  * All Rights Reserved.
  *
- * NOTICE: All information contained herein is, and remains the property of
+ * NOTICE:  All information contained herein is, and remains the property of
  * Northrop Grumman Systems Corporation. The intellectual and technical concepts
  * contained herein are proprietary to Northrop Grumman Systems Corporation and
  * may be covered by U.S. and Foreign Patents or patents in process, and are
@@ -184,6 +184,7 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
    private static void applyPlugins(Project project) {
       PluginContainer plugins = project.getPlugins();
       plugins.apply(JavaLibraryPlugin.class);
+	  plugins.apply("biz.aQute.bnd.builder");
       plugins.apply(SeasideMavenPlugin.class);
       plugins.apply(SeasideRepositoryPlugin.class);
       plugins.apply(EclipsePlugin.class);
