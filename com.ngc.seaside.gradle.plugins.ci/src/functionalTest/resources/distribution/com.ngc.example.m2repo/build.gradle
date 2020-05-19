@@ -22,8 +22,11 @@
  */
 buildscript {
    repositories {
+      mavenCentral()
+      mavenLocal()
+
       maven {
-         url nexusConsolidated
+         url "https://plugins.gradle.org/m2/"
       }
    }
 
@@ -120,7 +123,7 @@ dependencies {
 afterEvaluate {
    populateM2repo {
       outputDirectory = project.file("${project.buildDir}/dependencies-m2")
-      remoteRepository = project.repositories.getByName('NexusConsolidated')
+      remoteRepository = project.repositories.getByName('mavenCentral')
       localRepository = mavenLocal()
       // Comment out the line below to resolve dependencies for all configurations.
       configurations = [project.configurations.getByName('thirdParty')]

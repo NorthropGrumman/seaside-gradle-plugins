@@ -27,10 +27,11 @@
  */
 buildscript {
     repositories {
+        mavenCentral()
         mavenLocal()
 
         maven {
-            url nexusConsolidated
+            url "https://plugins.gradle.org/m2/"
         }
     }
 

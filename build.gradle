@@ -43,10 +43,11 @@ buildscript {
    }
 
    repositories {
+      mavenCentral()
       mavenLocal()
 
       maven {
-         url nexusConsolidated
+         url "https://plugins.gradle.org/m2/"
       }
 
       // Allows the build to reference its own artifact from a previous build.
@@ -143,10 +144,11 @@ subprojects {
    }
 
    repositories {
+      mavenCentral()
       mavenLocal()
 
       maven {
-         url nexusConsolidated
+         url "https://plugins.gradle.org/m2/"
       }
    }
 
@@ -180,7 +182,7 @@ subprojects {
    if (JavaVersion.current().isJava9Compatible()) {
       allprojects {
          tasks.withType(Javadoc) {
-            options.addBooleanOption('html5', true)
+            //options.addBooleanOption('html5', true)
          }
       }
    }
@@ -269,17 +271,17 @@ subprojects {
    functionalTest.shouldRunAfter(integrationTest)
    check.dependsOn(integrationTest, functionalTest)
 
-   tasks.withType(Test).all { testTask ->
-      testTask.systemProperty 'nexusConsolidated', nexusConsolidated
-      def systemProperties = ['javax.net.ssl.trustStore', 'http.proxyHost', 'http.proxyPort', 'http.nonProxyHosts',
-                              'https.proxyHost', 'https.proxyPort', 'https.nonProxyHosts', 'sonar.host.url']
-      for (String key : systemProperties) {
-         String value = System.properties[key]
-         if (value != null) {
-            testTask.systemProperty(key, value)
-         }
-      }
-   }
+   // tasks.withType(Test).all { testTask ->
+   //    testTask.systemProperty 'nexusConsolidated', nexusConsolidated
+   //    def systemProperties = ['javax.net.ssl.trustStore', 'http.proxyHost', 'http.proxyPort', 'http.nonProxyHosts',
+   //                            'https.proxyHost', 'https.proxyPort', 'https.nonProxyHosts', 'sonar.host.url']
+   //    for (String key : systemProperties) {
+   //       String value = System.properties[key]
+   //       if (value != null) {
+   //          testTask.systemProperty(key, value)
+   //       }
+   //    }
+   // }
 
    task copyPlugin(type: Copy) {
       from jar

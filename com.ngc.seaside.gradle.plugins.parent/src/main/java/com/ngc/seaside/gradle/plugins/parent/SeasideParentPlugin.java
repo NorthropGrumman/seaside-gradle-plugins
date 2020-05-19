@@ -110,7 +110,7 @@ public class SeasideParentPlugin extends AbstractProjectPlugin {
          if (JavaVersion.current().isJava9Compatible()) {
             tasks.named(JavaPlugin.JAVADOC_TASK_NAME).configure(task -> {
                CoreJavadocOptions options = (CoreJavadocOptions) ((Javadoc) task).getOptions();
-               options.addBooleanOption("html5", true);
+               //options.addBooleanOption("html5", true);
             });
          }
          extensions.getByType(ExtraPropertiesExtension.class).set("bundleName",
