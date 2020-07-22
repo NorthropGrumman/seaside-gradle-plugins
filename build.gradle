@@ -187,6 +187,7 @@ subprojects {
       }
    }
 
+   // This is testing the gpr branch
    // Add the additional JAR artifacts, this results in them being included when uploading to Nexus.
    artifacts {
       archives sourcesJar
