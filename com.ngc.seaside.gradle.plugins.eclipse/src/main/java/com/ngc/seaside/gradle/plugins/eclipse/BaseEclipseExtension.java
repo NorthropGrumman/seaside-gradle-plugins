@@ -203,7 +203,7 @@ public class BaseEclipseExtension {
     * @return the provider of the eclipse executable file
     */
    public Provider<RegularFile> getExecutable() {
-      return getDistributionDirectory().map(dir -> dir.file("eclipse" + (isLinux() ? "" : "c.exe")));
+      return getDistributionDirectory().map(dir -> dir.dir("eclipse").file("eclipse" + (isLinux() ? "" : "c.exe")));
    }
 
    /**
