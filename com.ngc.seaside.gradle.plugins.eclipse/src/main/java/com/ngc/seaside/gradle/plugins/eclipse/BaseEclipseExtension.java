@@ -194,7 +194,7 @@ public class BaseEclipseExtension {
     * @return the provider of the directory where eclipse plugins are stored
     */
    public Provider<Directory> getPluginsDirectoryProperty() {
-      return getDistributionDirectory().map(dir -> dir.dir("plugins"));
+      return getDistributionDirectory().map(dir -> dir.dir("eclipse").dir("plugins"));
    }
 
    /**

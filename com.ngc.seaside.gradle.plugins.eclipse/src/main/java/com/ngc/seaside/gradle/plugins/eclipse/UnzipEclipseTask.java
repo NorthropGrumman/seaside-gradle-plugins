@@ -65,7 +65,7 @@ public class UnzipEclipseTask extends DefaultTask {
                   file.setMode(UNIX_EXECUTABLE_PERMISSIONS);
                }
             });
-            spec.into(unzippedDirectory.getParentFile());
+            spec.into(unzippedDirectory);
          });
       }
    }
