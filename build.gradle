@@ -97,7 +97,7 @@ subprojects {
    }
 
    group = 'com.ngc.seaside'
-   version = '2.23.0-SNAPSHOT'
+   version = '2.24.0-SNAPSHOT'
 
    // Required in order to use implementation and api dependencies with groovy
    configurations {
@@ -145,7 +145,6 @@ subprojects {
    repositories {
       mavenCentral()
       mavenLocal()
-
       maven {
          url "https://plugins.gradle.org/m2/"
       }
@@ -204,18 +203,18 @@ subprojects {
          }
       }
 
-/*
+
       repositories {
          maven {
-            name = version.endsWith('-SNAPSHOT') ? 'NexusSnapshots' : 'NexusReleases'
-            url = version.endsWith('-SNAPSHOT') ? nexusSnapshots : nexusReleases
+            name = 'GitHubPackages'
+            url = 'https://maven.pkg.github.com/northropgrumman/seaside-gradle-plugins'
             credentials {
-               username nexusUsername
-               password nexusPassword
+               username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+               password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
             }
          }
       }
-*/
+
    }
 
    sourceSets {
