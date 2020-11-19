@@ -30,6 +30,6 @@ dependencies {
    testImplementation "org.mockito:mockito-core:$mockitoVersion"
 }
 
-functionalTest.systemProperty 'nexusSnapshots', nexusSnapshots
-functionalTest.systemProperty 'nexusUsername', nexusUsername
-functionalTest.systemProperty 'nexusPassword', nexusPassword
+//functionalTest.systemProperty 'nexusSnapshots', nexusSnapshots
+//functionalTest.systemProperty 'nexusUsername', nexusUsername
+//functionalTest.systemProperty 'nexusPassword', nexusPassword

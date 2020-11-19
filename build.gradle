@@ -45,7 +45,6 @@ buildscript {
    repositories {
       mavenCentral()
       mavenLocal()
-
       maven {
          url "https://plugins.gradle.org/m2/"
       }
@@ -205,6 +204,7 @@ subprojects {
          }
       }
 
+/*
       repositories {
          maven {
             name = version.endsWith('-SNAPSHOT') ? 'NexusSnapshots' : 'NexusReleases'
@@ -215,6 +215,7 @@ subprojects {
             }
          }
       }
+*/
    }
 
    sourceSets {
