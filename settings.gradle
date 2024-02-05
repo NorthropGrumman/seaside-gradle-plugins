@@ -22,47 +22,27 @@
  */
 rootProject.name = 'seaside-gradle-plugins'
 
-include('com.ngc.seaside.gradle.plugins')
-project(':com.ngc.seaside.gradle.plugins').name = 'gradle.plugins'
+// Define a list of project paths that follow a consistent naming pattern
+def projectPaths = [
+    'com.ngc.seaside.gradle.plugins',
+    'com.ngc.seaside.gradle.plugins.base',
+    'com.ngc.seaside.gradle.plugins.repository',
+    'com.ngc.seaside.gradle.plugins.distribution',
+    'com.ngc.seaside.gradle.plugins.dependency.lock',
+    'com.ngc.seaside.gradle.plugins.eclipse',
+    'com.ngc.seaside.gradle.plugins.cpp',
+    'com.ngc.seaside.gradle.plugins.parent',
+    'com.ngc.seaside.gradle.plugins.checkstyle',
+    'com.ngc.seaside.gradle.plugins.ci',
+    'com.ngc.seaside.gradle.plugins.release',
+    'com.ngc.seaside.gradle.plugins.application',
+    'com.ngc.seaside.gradle.plugins.bats',
+    'com.ngc.seaside.gradle.plugins.command',
+    'com.ngc.seaside.gradle.plugins.testutils'
+]
 
-include('com.ngc.seaside.gradle.plugins.base')
-project(':com.ngc.seaside.gradle.plugins.base').name = 'gradle.plugins.base'
-
-include('com.ngc.seaside.gradle.plugins.repository')
-project(':com.ngc.seaside.gradle.plugins.repository').name = 'gradle.plugins.repository'
-
-include('com.ngc.seaside.gradle.plugins.distribution')
-project(':com.ngc.seaside.gradle.plugins.distribution').name = 'gradle.plugins.distribution'
-
-include('com.ngc.seaside.gradle.plugins.dependency.lock')
-project(':com.ngc.seaside.gradle.plugins.dependency.lock').name = 'gradle.plugins.dependency.lock'
-
-include('com.ngc.seaside.gradle.plugins.eclipse')
-project(':com.ngc.seaside.gradle.plugins.eclipse').name = 'gradle.plugins.eclipse'
-
-include('com.ngc.seaside.gradle.plugins.cpp')
-project(':com.ngc.seaside.gradle.plugins.cpp').name = 'gradle.plugins.cpp'
-
-include('com.ngc.seaside.gradle.plugins.parent')
-project(':com.ngc.seaside.gradle.plugins.parent').name = 'gradle.plugins.parent'
-
-include('com.ngc.seaside.gradle.plugins.checkstyle')
-project(':com.ngc.seaside.gradle.plugins.checkstyle').name = 'gradle.plugins.checkstyle'
-
-include('com.ngc.seaside.gradle.plugins.ci')
-project(':com.ngc.seaside.gradle.plugins.ci').name = 'gradle.plugins.ci'
-
-include('com.ngc.seaside.gradle.plugins.release')
-project(':com.ngc.seaside.gradle.plugins.release').name = 'gradle.plugins.release'
-
-include('com.ngc.seaside.gradle.plugins.application')
-project(':com.ngc.seaside.gradle.plugins.application').name = 'gradle.plugins.application'
-
-include('com.ngc.seaside.gradle.plugins.bats')
-project(':com.ngc.seaside.gradle.plugins.bats').name = 'gradle.plugins.bats'
-
-include('com.ngc.seaside.gradle.plugins.command')
-project(':com.ngc.seaside.gradle.plugins.command').name = 'gradle.plugins.command'
-
-include('com.ngc.seaside.gradle.plugins.testutils')
-project(':com.ngc.seaside.gradle.plugins.testutils').name = 'gradle.plugins.testutils'
+// Programmatically include and rename projects
+projectPaths.each { path ->
+    include(path)
+    project(":$path").name = path.split('\\.').last() //
+}
